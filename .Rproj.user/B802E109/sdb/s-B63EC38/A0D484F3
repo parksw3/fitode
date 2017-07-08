@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "##' Class representing ode models\n##'\n##' @slot name name of the model\n##' @slot model list of formulas specifying ode model\n##' @slot gradient ode gradients\n##' @slot state state variables\n##' @slot par parameters\n##' @slot js Jacobian with respect to its states\n##' @slot jp Jacobian with repsect to its parameters\nsetClass(\n    \"de-model\",\n    slots = c(\n        name = \"character\",\n        model = \"list\",\n        state = \"character\",\n        par = \"character\",\n        gradient = \"list\",\n        js = \"list\",\n        jp = \"list\"\n    )\n)\n\n##' the initializer for de-model\n##'\n##' @param .Object object\n##' @slot name name of the model\n##' @slot model ode model\n##' @slot state state variables\n##' @slot par parameters\n##' @slot keep_jacobian (logical) maintain the Jacobian as part of the model\n##' @examples\n##' SI_model <- new(\"de-model\",\n##'     name = \"SI\",\n##'     model = list(\n##'         S ~ - beta*S*I,\n##'         I ~ beta*S*I - gamma*I\n##'     ),\n##'     state = c(\"S\", \"I\"),\n##'     par= c(\"beta\", \"gamma\")\n##' )\n##' @docType methods\n##' @exportMethod initialize\nsetMethod(\n    \"initialize\",\n    \"de-model\",\n    definition = function(.Object, name,\n                          model,\n                          state, par,\n                          keep_jacobian=TRUE) {\n        .Object@name <- name\n        if (any(unlist(lapply(model, class)) != \"formula\"))\n            stop(\"model must be a list of formulas\")\n\n        if (length(model) != length(state))\n            stop(\"model must have the same length as the number of states\")\n\n        ## a bit awkward\n        if (!all.equal(as.character(lapply(model, \"[[\", 2)), state))\n            stop(\"model does not match the states provided?\")\n\n        .Object@model <- model\n        .Object@state <- state\n        .Object@par <- par\n\n        gradient <- lapply(model, function(x) as.expression(x[[3]]))\n\n        .Object@gradient <- gradient\n\n        deriv <- function(expr, vars) {\n            d <- lapply(vars,\n                        function(p){\n                            D(expr, p)\n                        })\n            names(d) <- vars\n            d\n        }\n\n        deriv2 <- function(gradlist, vars) {\n            d <- lapply(gradlist,\n                        function(x){\n                            deriv(x, vars)\n                        })\n            names(d) <- vars\n            d\n        }\n\n        if (keep_jacobian) {\n            .Object@js <- deriv2(gradient, state)\n            .Object@jp <- deriv2(gradient, par)\n        } else {\n            .Object@js <- list()\n            .Object@jp <- list()\n        }\n\n        .Object\n    }\n)\n\nsetMethod(\"show\", \"de-model\",\n    function(object){\n        cat(\"Name:\", object@name, \"\\n\\n\")\n        lapply(object@model, function(x){\n            f <- paste(x[2], x[3], sep=\" = \")\n            f <- paste0(\"d\", f)\n            cat(f, \"\\n\")\n        })\n        cat(\"\\nStates:\", object@state, \"\\n\")\n        cat(\"\\nParameters:\", object@par, \"\\n\")\n    }\n)\n\n\n",
+    "created" : 1499493055229.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4059756077",
+    "id" : "A0D484F3",
+    "lastKnownWriteTime" : 1499495798,
+    "last_content_update" : 1499495798931,
+    "path" : "~/Math/Research/fitode/R/de-models.R",
+    "project_path" : "R/de-models.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
