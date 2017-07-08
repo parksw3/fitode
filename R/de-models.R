@@ -2,7 +2,7 @@
 ##'
 ##' @slot name name of the model
 ##' @slot model list of formulas specifying ode model
-##' @slot gradient ode gradients
+##' @slot grad ode gradients
 ##' @slot state state variables
 ##' @slot par parameters
 ##' @slot js Jacobian with respect to its states
@@ -14,7 +14,7 @@ setClass(
         model = "list",
         state = "character",
         par = "character",
-        gradient = "list",
+        grad = "list",
         js = "list",
         jp = "list"
     )
@@ -32,11 +32,11 @@ setClass(
 ##' SI_model <- new("de-model",
 ##'     name = "SI",
 ##'     model = list(
-##'         S ~ - beta*S*I,
-##'         I ~ beta*S*I - gamma*I
+##'         S ~ - beta*S*I/N,
+##'         I ~ beta*S*I/N - gamma*I
 ##'     ),
 ##'     state = c("S", "I"),
-##'     par= c("beta", "gamma")
+##'     par= c("beta", "gamma", "N")
 ##' )
 ##' @docType methods
 ##' @exportMethod initialize
@@ -62,9 +62,9 @@ setMethod(
         .Object@state <- state
         .Object@par <- par
 
-        gradient <- lapply(model, function(x) as.expression(x[[3]]))
+        grad <- lapply(model, function(x) as.expression(x[[3]]))
 
-        .Object@gradient <- gradient
+        .Object@grad <- grad
 
         deriv <- function(expr, vars) {
             d <- lapply(vars,
@@ -80,19 +80,83 @@ setMethod(
                         function(x){
                             deriv(x, vars)
                         })
-            names(d) <- vars
+            names(d) <- state
             d
         }
 
         if (keep_jacobian) {
-            .Object@js <- deriv2(gradient, state)
-            .Object@jp <- deriv2(gradient, par)
+            .Object@js <- deriv2(grad, state)
+            .Object@jp <- deriv2(grad, par)
         } else {
             .Object@js <- list()
             .Object@jp <- list()
         }
 
         .Object
+    }
+)
+
+##' S4 generic for computing a gradient
+##' @param object an \code{R} object
+##' @param ... further arguments passed to methods
+setGeneric(
+    "grad",
+    def = function(object, ...) {
+        standardGeneric("grad")
+    }
+)
+
+##' Evaluate the gradients of a model
+##' @param object object to be evaluated
+##' @param state state
+##' @param par additional parameters
+##' @docType methods
+##' @exportMethod grad
+setMethod(
+    "grad",
+    "de-model",
+    definition <- function(object, state, par) {
+        frame <- as.list(c(state, par))
+        gr <- sapply(object@grad, function(grad) eval(grad, as.list(frame)))
+        gr
+    }
+)
+
+##' S4 generic for computing a jacobian
+##' @param object an \code{R} object
+##' @param ... further arguments passed to methods
+setGeneric(
+    "jacobian",
+    def = function(object, ...) {
+        standardGeneric("jacobian")
+    }
+)
+
+##' Evaluate the jacobian of the gradients
+##' @param object object to be evaluated
+##' @param state state
+##' @param par additional parameters
+##' @param type state of par?
+##' @docType methods
+##' @exportMethod grad
+setMethod(
+    "jacobian",
+    "de-model",
+    definition <- function(object, state, par, type=c("state", "par")) {
+        type <- match.arg(type)
+        frame <- as.list(c(state, par))
+        jc <- switch(type,
+            state=object@js,
+            par=object@jp
+        )
+        var <- switch(type,
+            state=object@state,
+            par=object@par
+        )
+        l <- sapply(jc, function(jj) {
+            sapply(jj, function(e) eval(e, frame))
+        })
+        l
     }
 )
 
