@@ -8,7 +8,7 @@
 ##' @slot js Jacobian with respect to its states
 ##' @slot jp Jacobian with repsect to its parameters
 setClass(
-    "de-model",
+    "model.ode",
     slots = c(
         name = "character",
         model = "list",
@@ -20,7 +20,7 @@ setClass(
     )
 )
 
-##' the initializer for de-model
+##' the initializer for model.ode
 ##'
 ##' @param .Object object
 ##' @slot name name of the model
@@ -29,7 +29,7 @@ setClass(
 ##' @slot par parameters
 ##' @slot keep_jacobian (logical) maintain the Jacobian as part of the model
 ##' @examples
-##' SI_model <- new("de-model",
+##' SI_model <- new("model.ode",
 ##'     name = "SI",
 ##'     model = list(
 ##'         S ~ - beta*S*I/N,
@@ -42,7 +42,7 @@ setClass(
 ##' @exportMethod initialize
 setMethod(
     "initialize",
-    "de-model",
+    "model.ode",
     definition = function(.Object, name,
                           model,
                           state, par,
@@ -114,7 +114,7 @@ setGeneric(
 ##' @exportMethod grad
 setMethod(
     "grad",
-    "de-model",
+    "model.ode",
     definition <- function(object, state, par) {
         frame <- as.list(c(state, par))
         gr <- sapply(object@grad, function(grad) eval(grad, as.list(frame)))
@@ -141,7 +141,7 @@ setGeneric(
 ##' @exportMethod grad
 setMethod(
     "jacobian",
-    "de-model",
+    "model.ode",
     definition <- function(object, state, par, type=c("state", "par")) {
         type <- match.arg(type)
         frame <- as.list(c(state, par))
@@ -160,7 +160,7 @@ setMethod(
     }
 )
 
-setMethod("show", "de-model",
+setMethod("show", "model.ode",
     function(object){
         cat("Name:", object@name, "\n\n")
         lapply(object@model, function(x){
