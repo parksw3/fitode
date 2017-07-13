@@ -1,13 +1,16 @@
 Package: fitode
 Type: Package
-Title: ODE mmodel fitting tools
+Title: ODE model fitting tools
 Version: 0.1.0
 Author: Sang Woo Park [aur, cre]
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: Fit dynamical models using sensitivity equations
 License: GPL (>=2)
 Depends: 
-    deSolve
+    bbmle
+Imports:
+    deSolve,
+    Deriv
 Suggests:
     numDeriv
 Encoding: UTF-8

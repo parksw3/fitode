@@ -137,7 +137,7 @@ setMethod(
 ##' @param par additional parameters
 ##' @param type state of par?
 ##' @docType methods
-##' @exportMethod grad
+##' @exportMethod jacobian
 setMethod(
     "jacobian",
     "model.ode",
@@ -157,6 +157,7 @@ setMethod(
     }
 )
 
+##' @exportMethod Transform
 setMethod(
     "Transform",
     "model.ode",

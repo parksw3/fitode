@@ -1,6 +1,8 @@
+##' fit ode
 ##' @param formula formula specifing observation variable and mean
 ##' @param data data frame
-##' @param
+##' @import bbmle
+##' @export
 fitode <- function(formula, start,
                    model, loglik,
                    data,
