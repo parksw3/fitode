@@ -115,16 +115,6 @@ setMethod(
     }
 )
 
-##' S4 generic for computing a gradient
-##' @param object an \code{R} object
-##' @param ... further arguments passed to methods
-setGeneric(
-    "grad",
-    def = function(object, ...) {
-        standardGeneric("grad")
-    }
-)
-
 ##' Evaluate the gradients of a model
 ##' @param object object to be evaluated
 ##' @param state state
@@ -138,16 +128,6 @@ setMethod(
         frame <- as.list(c(state, par))
         gr <- sapply(object@grad, function(grad) eval(grad, as.list(frame)))
         gr
-    }
-)
-
-##' S4 generic for computing a jacobian
-##' @param object an \code{R} object
-##' @param ... further arguments passed to methods
-setGeneric(
-    "jacobian",
-    def = function(object, ...) {
-        standardGeneric("jacobian")
     }
 )
 
@@ -174,6 +154,77 @@ setMethod(
             sapply(jj, eval, frame)
         })
         l
+    }
+)
+
+setMethod(
+    "Transform",
+    "model.ode",
+    definition <- function(object, transforms=NULL, par) {
+        trans <- function(formulae, allvars) {
+            # extract vars from an expression
+            vars <- function(e) {
+                if (is.numeric(e)) return(c())
+                if (is.name(e)) return(as.character(e))
+                if (!is.call(e))
+                    stop("unknown class: ", class(e))
+                v <- c()
+                for (i in 2:length(e)) {
+                    v <- c(v, vars(e[[i]]))
+                }
+                v
+            }
+
+            l <- list()
+            for (f in formulae) {
+                if (!is(f, "formula"))
+                    stop("transforms must be formula: ", as.character(f))
+                var <- as.character(f[[2]])
+                if (!var %in% allvars) next
+                input <- vars(f[[3]])
+                l[[var]] <- f[[3]]
+            }
+            l
+        }
+        # substitute the transformation expressions
+        subst <- function(e) {
+            if (is.numeric(e)) return(e)
+            if (is.name(e)) {
+                v <- as.character(e)
+                expr <- transforms[[v]]
+                if (is.null(expr)) return(e)
+                return (expr)
+            }
+            if (!is.call(e)) stop("unknown class: ", class(e))
+            l <- list(e[[1]])
+            for (i in 2:length(e))
+                l <- c(l, subst(e[[i]]))
+            as.call(l)
+        }
+        # if no transform, return model
+        if (length(transforms) == 0)
+            return(object)
+
+        allvars <- c(object@par)
+        transforms <- trans(transforms, allvars)
+
+        nstate <- length(object@state)
+
+        newmodel <- newinitial <- vector('list', nstate)
+
+        for(i in 1:nstate) {
+            fixed <- c(as.symbol("~"), as.symbol(object@state[i]))
+            ff <- lapply(list(object@grad[[i]], object@initial[[i]]), function(x){
+                f <- c(fixed, subst(x[[1]]))
+                f <- as.formula(as.call(f))
+            })
+            newmodel[[i]] <- ff[[1]]
+            newinitial[[i]] <- ff[[2]]
+
+        }
+        if (missing(par)) par <- stop("specify the name of the new parameters")
+
+        new("model.ode", object@name, newmodel, newinitial, par)
     }
 )
 

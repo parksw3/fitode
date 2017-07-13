@@ -32,8 +32,8 @@ setMethod(
         if (keep_sensitivity) {
             sensitivity <- vector("list", nstate)
             for (i in 1:nstate) {
-                sensitivity[[i]] <- as.data.frame(result[,(2+nstate):(1+nstate+npar)+(i-1)*npar])
-                names(sensitivity[[i]]) <- model@par
+                sensitivity[[i]] <- result[,(2+nstate):(1+nstate+npar)+(i-1)*npar]
+                colnames(sensitivity[[i]]) <- model@par
             }
             names(sensitivity) <- model@state
             .Object@sensitivity <- sensitivity
@@ -49,7 +49,6 @@ setMethod(
 ##' @export
 solve <- function(model, times, parms,
                  y,
-                 method="lsoda",
                  keep_sensitivity=TRUE,
                  ...) {
     if (missing(y)) {
@@ -86,7 +85,7 @@ solve <- function(model, times, parms,
 
     new("solution.ode",
         model,
-        ode(yini, times, gfun, parms, method),
+        ode(yini, times, gfun, parms, method="rk4", hini=0.1),
         keep_sensitivity)
 }
 
