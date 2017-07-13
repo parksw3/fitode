@@ -45,19 +45,28 @@ setMethod(
     }
 )
 
-
 ##' @import deSolve
 ##' @export
-solve <- function(y, times, model, parms,
+solve <- function(model, times, parms,
+                 y,
                  method="lsoda",
                  keep_sensitivity=TRUE,
                  ...) {
+    if (missing(y)) {
+        frame <- as.list(c(parms))
+        y <- sapply(model@initial, eval, frame)
+    } else if (names(y) != model@state) {
+        stop("y must have same name as the state variables")
+    }
+
     if (keep_sensitivity) {
         nstate <- length(model@state)
         nsens <- nstate * length(model@par)
 
+        jacobian(model, y, parms, "initial")
+
         ## TODO: allow for expressions in y so that it can be affected by the parameters
-        yini <- c(y, rep(0, nsens))
+        yini <- c(y, jacobian(model, y, parms, type="initial"))
 
         gfun <- function(times, y, parms) {
             state <- y[1:nstate]

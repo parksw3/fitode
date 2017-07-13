@@ -1,22 +1,24 @@
 ##' Class representing ode models
 ##'
 ##' @slot name name of the model
-##' @slot model list of formulas specifying ode model
-##' @slot grad ode gradients
+##' @slot grad list of expressions representing the gradients
+##' @slot initial list of expressions representing the initial values
 ##' @slot state state variables
 ##' @slot par parameters
-##' @slot js Jacobian with respect to its states
-##' @slot jp Jacobian with repsect to its parameters
+##' @slot jacobian.initial Jacobian of initial values with respect to its parameters
+##' @slot jacobian.state Jacobian with respect to its states
+##' @slot jacobian.par Jacobian with repsect to its parameters
 setClass(
     "model.ode",
     slots = c(
         name = "character",
-        model = "list",
+        grad = "list",
+        initial= "list",
         state = "character",
         par = "character",
-        grad = "list",
-        js = "list",
-        jp = "list"
+        jacobian.initial = "list",
+        jacobian.state = "list",
+        jacobian.par = "list"
     )
 )
 
@@ -25,7 +27,7 @@ setClass(
 ##' @param .Object object
 ##' @slot name name of the model
 ##' @slot model ode model
-##' @slot state state variables
+##' @slot initial initial values
 ##' @slot par parameters
 ##' @slot keep_jacobian (logical) maintain the Jacobian as part of the model
 ##' @examples
@@ -35,8 +37,11 @@ setClass(
 ##'         S ~ - beta*S*I/N,
 ##'         I ~ beta*S*I/N - gamma*I
 ##'     ),
-##'     state = c("S", "I"),
-##'     par= c("beta", "gamma", "N")
+##'     initial = list(
+##'         S ~ N * (1 - i0),
+##'         I ~ N * i0
+##'     ),
+##'     par= c("beta", "gamma", "N", "i0")
 ##' )
 ##' @docType methods
 ##' @exportMethod initialize
@@ -44,27 +49,39 @@ setMethod(
     "initialize",
     "model.ode",
     definition = function(.Object, name,
-                          model,
-                          state, par,
+                          model, initial,
+                          par,
                           keep_jacobian=TRUE) {
         .Object@name <- name
-        if (any(unlist(lapply(model, class)) != "formula"))
+
+        if (any(sapply(model, class) != "formula"))
             stop("model must be a list of formulas")
 
-        if (length(model) != length(state))
-            stop("model must have the same length as the number of states")
+        if (any(sapply(initial, class) != "formula"))
+            stop("initial must be a list of formulas")
 
-        ## a bit awkward
-        if (!all.equal(as.character(lapply(model, "[[", 2)), state))
-            stop("model does not match the states provided?")
+        mi <- list(model, initial)
 
-        .Object@model <- model
-        .Object@state <- state
-        .Object@par <- par
+        state <- lapply(mi, function(x){
+            sapply(x, function(y) as.character(y[[2]]))
+        })
+
+        if (!do.call(all.equal, state)) {
+            stop("initial values do not have same state variable names as the model provided")
+        } else {
+            state <- state[[1]]
+        }
+
 
         grad <- lapply(model, function(x) as.expression(x[[3]]))
+        initial <- lapply(initial, function(x) as.expression(x[[3]]))
+        names(grad) <- state
+        names(initial) <- state
 
         .Object@grad <- grad
+        .Object@initial <- initial
+        .Object@state <- state
+        .Object@par <- par
 
         deriv <- function(expr, vars) {
             d <- lapply(vars,
@@ -85,11 +102,13 @@ setMethod(
         }
 
         if (keep_jacobian) {
-            .Object@js <- deriv2(grad, state)
-            .Object@jp <- deriv2(grad, par)
+            .Object@jacobian.initial <- deriv2(initial, par)
+            .Object@jacobian.state <- deriv2(grad, state)
+            .Object@jacobian.par <- deriv2(grad, par)
         } else {
-            .Object@js <- list()
-            .Object@jp <- list()
+            .Object@jacobian.initial <- list()
+            .Object@jacobian.state <- list()
+            .Object@jacobian.par <- list()
         }
 
         .Object
@@ -142,19 +161,17 @@ setGeneric(
 setMethod(
     "jacobian",
     "model.ode",
-    definition <- function(object, state, par, type=c("state", "par")) {
+    definition <- function(object, state, par, type=c("initial", "state", "par")) {
         type <- match.arg(type)
         frame <- as.list(c(state, par))
         jc <- switch(type,
-            state=object@js,
-            par=object@jp
+            initial=object@jacobian.initial,
+            state=object@jacobian.state,
+            par=object@jacobian.par
         )
-        var <- switch(type,
-            state=object@state,
-            par=object@par
-        )
+
         l <- sapply(jc, function(jj) {
-            sapply(jj, function(e) eval(e, frame))
+            sapply(jj, eval, frame)
         })
         l
     }
@@ -163,14 +180,17 @@ setMethod(
 setMethod("show", "model.ode",
     function(object){
         cat("Name:", object@name, "\n\n")
-        lapply(object@model, function(x){
-            f <- paste(x[2], x[3], sep=" = ")
-            f <- paste0("d", f)
-            cat(f, "\n")
-        })
-        cat("\nStates:", object@state, "\n")
+
+        cat("Model:\n")
+        f <- paste0("d",object@state, " = ", sapply(object@grad, as.character))
+        for(i in 1:length(f))
+            cat(f[i], "\n")
+
+        cat("\nInitial values:\n")
+        g <- paste0(object@state, "(0) = ", sapply(object@initial, as.character))
+        for(i in 1:length(g))
+            cat(g[i], "\n")
+
         cat("\nParameters:", object@par, "\n")
     }
 )
-
-
