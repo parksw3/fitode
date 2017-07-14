@@ -76,7 +76,15 @@ ode.sensitivity <- function(parms, formula,
 
     mean <- eval(expr, solution@solution)
 
-    sens <- eval(expr, solution@sensitivity)
+    nstate <- length(model@state)
+
+    dm <- lapply(model@state, function(s) Deriv(expr, s))
+    sens <- vector('list', nstate)
+    for(i in 1:nstate) {
+        sens[[i]] <- eval(dm[[i]], solution@solution) * solution@sensitivity[[i]]
+    }
+
+    sens <- do.call("+", sens)
 
     loglik.par <- as.list(parms[-c(1:length(model@par))])
 
