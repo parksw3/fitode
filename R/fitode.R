@@ -74,7 +74,7 @@ ode.sensitivity <- function(parms, formula,
     solution <- solve(model, times, parms)
     expr <- as.expression(formula[[3]])
 
-    mean <- eval(expr, solution@solution)
+    mean <- eval(expr, solution@solution) ## TODO: what happens if mean is affected by the parameters?
 
     nstate <- length(model@state)
 

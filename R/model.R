@@ -72,7 +72,6 @@ setMethod(
             state <- state[[1]]
         }
 
-
         grad <- lapply(model, function(x) as.expression(x[[3]]))
         initial <- lapply(initial, function(x) as.expression(x[[3]]))
         names(grad) <- state
@@ -126,7 +125,7 @@ setMethod(
     "model.ode",
     definition <- function(object, state, par) {
         frame <- as.list(c(state, par))
-        gr <- sapply(object@grad, function(grad) eval(grad, as.list(frame)))
+        gr <- sapply(object@grad, eval, frame)
         gr
     }
 )

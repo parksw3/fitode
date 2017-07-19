@@ -50,6 +50,7 @@ setMethod(
 solve <- function(model, times, parms,
                  y,
                  keep_sensitivity=TRUE,
+                 test=FALSE,
                  ...) {
     if (missing(y)) {
         frame <- as.list(c(parms))
@@ -60,22 +61,31 @@ solve <- function(model, times, parms,
 
     if (keep_sensitivity) {
         nstate <- length(model@state)
-        nsens <- nstate * length(model@par)
 
         jacobian(model, y, parms, "initial")
 
-        ## TODO: allow for expressions in y so that it can be affected by the parameters
-        yini <- c(y, jacobian(model, y, parms, type="initial"))
+        ## jacobian(model, state, parms, type="initial")
+        ji <- sapply(model@jacobian.initial, function(jj) {
+            sapply(jj, eval, frame)
+        })
+        yini <- c(y, ji)
 
         gfun <- function(times, y, parms) {
             state <- y[1:nstate]
-            gr <- grad(model, state, parms)
-            js <- jacobian(model, state, parms, type="state")
-            jp <- jacobian(model, state, parms, type="par")
+            frame <- as.list(c(state, parms))
+            ## equivalent to `grad(model, state, parms)` but faster
+            gr <- sapply(model@grad, eval, frame)
+            ## jacobian(model, state, parms, type="state")
+            js <- sapply(model@jacobian.state, function(jj) {
+                sapply(jj, eval, frame)
+            })
+            ## jacobian(model, state, parms, type="par")
+            jp <- sapply(model@jacobian.par, function(jj) {
+                sapply(jj, eval, frame)
+            })
 
             list(c(gr, matrix(y[-c(1:nstate)], ncol=nstate) %*% js + jp))
         }
-
     } else {
         yini <- y
         gfun <- function(y, times, parms) {
@@ -88,4 +98,3 @@ solve <- function(model, times, parms,
         ode(yini, times, gfun, parms, method="rk4", hini=0.1),
         keep_sensitivity)
 }
-

@@ -5,6 +5,7 @@ harbin <- structure(list(week = 2:18,
                                     126, 229, 250, 212, 161, 101, 108, 46, 40, 14)),
                     .Names = c("week", "Deaths"),
                     row.names = c(NA, -17L), class = "data.frame")
+
 SI_model <- new("model.ode",
     name = "SI",
     model = list(
@@ -26,18 +27,18 @@ SI_model_trans <- Transform(SI_model,
     ),
     par=c("log.beta", "log.gamma", "log.N","logit.i")
 )
-start <- c(log.beta=1.5, log.gamma=1, log.N=10, logit.i=-10)
+start <- c(log.beta=1.5, log.gamma=1, log.N=10, logit.i=-10, ll.k=2)
 
 ff <- fitode(Deaths~I,
     start=start,
-    model=SI_model_trans, loglik=select_model("poisson"),
+    model=SI_model_trans, loglik=select_model("nbinom"),
     data=harbin,
     tcol="week"
 )
 
-ff2 <- fitsir::fitsir(harbin, start, method="BFGS", dist="poisson", tcol="week",icol="Deaths")
+ff2 <- fitsir::fitsir(harbin, start, method="BFGS", dist="nbinom", tcol="week",icol="Deaths")
 
-all.equal(coef(ff), coef(ff2), tolerance = 1e-4) ## returns FALSE if we lower the tolerance
+all.equal(coef(ff), coef(ff2), tolerance = 1e-3) ## returns FALSE if we lower the tolerance
 
 ss <- solve(SI_model_trans, harbin$week, coef(ff))
 
