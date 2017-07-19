@@ -45,3 +45,31 @@ ss <- solve(SI_model_trans, harbin$week, coef(ff))
 plot(harbin)
 lines(ss@solution[,c(1,3)], type="l")
 plot(ff2, add=TRUE, col.traj=2)
+
+## incidence fitting
+
+ff3 <- fitode(Deaths~exp(log.beta)*S*I/exp(log.N),
+    start=start,
+    model=SI_model_trans, loglik=select_model("nbinom"),
+    data=harbin,
+    tcol="week"
+)
+
+ff4 <- fitsir::fitsir(harbin, start, method="BFGS", dist="nbinom", tcol="week",icol="Deaths", type="incidence")
+
+## we need high tolerance because fitode fits based on instantaneous incidence
+## whereas fitsir fits based on actual incidence (difference in number of susceptible in consecutive observations)
+all.equal(coef(ff3), coef(ff4), tolerance = 3e-2)
+
+## difference is much smaller on a constrained scale
+all.equal(
+    fitsir::trans.pars(coef(ff3)),
+    fitsir::trans.pars(coef(ff4)),
+    tolerance=3e-3
+)
+
+ss2 <- solve(SI_model_trans, harbin$week, coef(ff3))
+
+plot(harbin)
+with(as.list(ss2@solution), lines(harbin$week, exp(coef(ff3)[1])*S*I/exp(coef(ff3)[3])))
+plot(ff4, add=TRUE, col.traj=2)

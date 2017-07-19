@@ -67,24 +67,29 @@ fitode <- function(formula, start,
     return(m)
 }
 
+##' @export
 ode.sensitivity <- function(parms, formula,
                         model, loglik,
                         observation, times=NULL) {
-    if (is.null(times)) times <- seq(length(count))
+    if (is.null(times)) times <- seq(length(observation))
     solution <- solve(model, times, parms)
     expr <- as.expression(formula[[3]])
 
-    mean <- eval(expr, solution@solution) ## TODO: what happens if mean is affected by the parameters?
+    frame <- c(solution@solution, parms)
+
+    mean <- eval(expr, frame)
 
     nstate <- length(model@state)
 
-    dm <- lapply(model@state, function(s) Deriv(expr, s))
+    dmds <- lapply(model@state, function(s) Deriv(expr, s))
+    dmdp <- lapply(model@par, function(p) Deriv(expr, p))
+
     sens <- vector('list', nstate)
     for(i in 1:nstate) {
-        sens[[i]] <- eval(dm[[i]], solution@solution) * solution@sensitivity[[i]]
+        sens[[i]] <- eval(dmds[[i]], frame) * solution@sensitivity[[i]]
     }
 
-    sens <- do.call("+", sens)
+    sens <- do.call("+", sens) + do.call("cbind", sapply(dmdp, eval, frame))
 
     loglik.par <- as.list(parms[-c(1:length(model@par))])
 
