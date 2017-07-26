@@ -118,6 +118,7 @@ setMethod("predict", "fitode",
                     frame.tmp <- c(parms, ss.tmp@solution)
                     simtraj[,i] <- eval(expr, frame.tmp)
                 }
+
             }
 
             cmat <- switch(method,
@@ -156,7 +157,7 @@ setMethod("predict", "fitode",
                     observation <- object@data$observation
 
                     for(i in 1:nsim) {
-                        traj.logLik[i] <- sum(Eval(loglik, observation, simtraj[,i], simpars[i,]))
+                        traj.logLik[i] <- sum(Eval(loglik, observation, simtraj2[,i], simpars[i,-c(1:npar)]))
                     }
 
                     ##FIXME: vcov not symmetric for low tolerance?
