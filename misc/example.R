@@ -40,11 +40,9 @@ ff2 <- fitsir::fitsir(harbin, start, method="BFGS", dist="nbinom", tcol="week",i
 
 all.equal(coef(ff), coef(ff2), tolerance = 1e-3) ## returns FALSE if we lower the tolerance
 
-ss <- solve(SI_model_trans, harbin$week, coef(ff))
-
-plot(harbin)
-lines(ss@solution[,c(1,3)], type="l")
-plot(ff2, add=TRUE, col.traj=2)
+matplot(harbin$week, predict(ff, level=0.95, method="wmvrnorm")[,-1], type="l", col=1)
+matlines(harbin$week, predict(ff2,level=0.95)[,-1], col=2)
+points(harbin)
 
 ## incidence fitting
 
@@ -68,8 +66,7 @@ all.equal(
     tolerance=3e-3
 )
 
-ss2 <- solve(SI_model_trans, harbin$week, coef(ff3))
+matplot(harbin$week, predict(ff3, level=0.95)[,-1], type="l", col=1)
+matlines(harbin$week, predict(ff4,level=0.95)[,-1], col=2)
+points(harbin)
 
-plot(harbin)
-with(as.list(ss2@solution), lines(harbin$week, exp(coef(ff3)[1])*S*I/exp(coef(ff3)[3])))
-plot(ff4, add=TRUE, col.traj=2)

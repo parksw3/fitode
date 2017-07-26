@@ -47,7 +47,7 @@ test_that("SEI model", {
 
     expect_equal(
         numDeriv::jacobian(ff,c(beta=2, sigma=1, gamma=1, N=1000, i0=0.001), model=SEI_model, var="I"),
-        unname(as.matrix(ss@sensitivity$I)),
+        unname(ss@sensitivity$I),
         tolerance=1e-5
     )
 
@@ -71,7 +71,7 @@ test_that("Van der Pol oscillator", {
 
     expect_equal(
         numDeriv::jacobian(ff, c(mu=0.1), model=VdP, var="y2"),
-        unname(as.matrix(ss@sensitivity$y2)),
+        unname(ss@sensitivity$y2),
         tolerance=1e-3
     )
 })

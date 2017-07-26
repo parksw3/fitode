@@ -64,7 +64,12 @@ fitode <- function(formula, start,
               control=control,
               gr=gradfun,
               data=dataarg)
-    return(m)
+
+    m <- new("fitode", m)
+
+    ## add quasipoisson code
+
+    m
 }
 
 ##' @export
@@ -89,7 +94,12 @@ ode.sensitivity <- function(parms, formula,
         sens[[i]] <- eval(dmds[[i]], frame) * solution@sensitivity[[i]]
     }
 
-    sens <- do.call("+", sens) + do.call("cbind", sapply(dmdp, eval, frame))
+    sens_p <- sapply(dmdp, eval, frame)
+
+    sens <- do.call("+", sens)
+
+    if(class(sens_p) == "list")
+        sens <- sens + do.call("cbind", sens_p)
 
     loglik.par <- as.list(parms[-c(1:length(model@par))])
 

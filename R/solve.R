@@ -33,6 +33,9 @@ setMethod(
             sensitivity <- vector("list", nstate)
             for (i in 1:nstate) {
                 sensitivity[[i]] <- result[,(2+nstate):(1+nstate+npar)+(i-1)*npar]
+                if(!is.matrix(sensitivity[[i]]))
+                    sensitivity[[i]] <- matrix(sensitivity[[i]], ncol=length(model@par))
+
                 colnames(sensitivity[[i]]) <- model@par
             }
             names(sensitivity) <- model@state
@@ -88,8 +91,11 @@ solve <- function(model, times, parms,
         }
     } else {
         yini <- y
-        gfun <- function(y, times, parms) {
-            gr <- grad(model, y, parms)
+        gfun <- function(times, y, parms) {
+            frame <- as.list(c(y, parms))
+            gr <- sapply(model@grad, eval, frame)
+
+            list(c(gr))
         }
     }
 

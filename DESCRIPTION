@@ -10,7 +10,8 @@ Depends:
     bbmle
 Imports:
     deSolve,
-    Deriv
+    Deriv,
+    MASS
 Suggests:
     numDeriv
 Encoding: UTF-8
