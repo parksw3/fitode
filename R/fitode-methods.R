@@ -25,26 +25,26 @@ setMethod("plot", signature(x="fitode", y="missing"),
              col.conf="red",lty.conf=4,
              ...){
         method <- match.arg(method)
-        count <- x@data$count
+        observation <- x@data$observation
         pred <- predict(x,level,method=method)
         times <- pred[["times"]]
-        i.hat <- pred[["mean"]]
+        mean <- pred[["mean"]]
 
         if (missing(main)) main <- "fitode result"
         if (missing(xlab)) xlab <- "time"
-        if (missing(ylab)) ylab <- "count"
+        if (missing(ylab)) ylab <- "observation"
         if (missing(ylim)) {
-            ymin <- min(i.hat, count)
-            ymax <- 1.1 * max(i.hat, count)
+            ymin <- min(mean, observation)
+            ymax <- 1.1 * max(mean, observation)
             ylim <- c(ymin, ymax)
         }
         if (missing(xlim)) xlim <- c(min(times), max(times))
 
-        if (!add) plot(times, count, xlim=xlim, ylim=ylim,
+        if (!add) plot(times, observation, xlim=xlim, ylim=ylim,
             xlab=xlab, ylab=ylab, main=main, ...)
 
 
-        lines(times, i.hat, col=col.traj, lty=lty.traj)
+        lines(times, mean, col=col.traj, lty=lty.traj)
 
         if (!missing(level)) {
             matlines(times, pred[,3:4], col=col.conf, lty=lty.conf)
