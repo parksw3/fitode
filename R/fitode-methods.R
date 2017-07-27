@@ -13,6 +13,7 @@
 ##' @param lty.traj line type of the estimated trajectory
 ##' @param col.conf colour of the confidence intervals
 ##' @param lty.conf line type of the confidence intervals
+##' @param nsim number of simulations for mvrnorm, wmvrnorm methods
 ##' @param ... additional arguments to be passed on to the plot function
 ##' @importFrom bbmle plot
 ##' @docType methods
@@ -23,10 +24,11 @@ setMethod("plot", signature(x="fitode", y="missing"),
              main, xlim, ylim, xlab, ylab, add=FALSE,
              col.traj="black",lty.traj=1,
              col.conf="red",lty.conf=4,
+             nsim=1000,
              ...){
         method <- match.arg(method)
         observation <- x@data$observation
-        pred <- predict(x,level,method=method)
+        pred <- predict(x,level,method=method, nsim=nsim)
         times <- pred[["times"]]
         mean <- pred[["mean"]]
 
@@ -60,7 +62,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
 ##' @param level the confidence level required
 ##' @param times time vector to predict over. Default is set to the time frame of the data.
 ##' @param method confidence interval method. Default is set to Delta method.
-##' @param debug print debugging output?
+##' @param nsim number of simulations for mvrnorm, wmvrnorm methods
 ##' @details
 ##' See vignette for different methods: \code{vignette("details", package="fitode")}
 ##' @importFrom bbmle predict
@@ -73,8 +75,7 @@ setMethod("predict", "fitode",
     function(object,
              level,times,
              method=c("delta", "mvrnorm", "wmvrnorm"),
-             nsim=1000,
-             debug=FALSE){
+             nsim=1000){
         if(missing(times)) times <- object@data$times
         method <- match.arg(method)
 
@@ -157,7 +158,7 @@ setMethod("predict", "fitode",
                     observation <- object@data$observation
 
                     for(i in 1:nsim) {
-                        traj.logLik[i] <- sum(Eval(loglik, observation, simtraj2[,i], simpars[i,-c(1:npar)]))
+                        traj.logLik[i] <- sum(Eval(loglik, observation, simtraj[,i], simpars[i,-c(1:npar)]))
                     }
 
                     ##FIXME: vcov not symmetric for low tolerance?
@@ -172,14 +173,11 @@ setMethod("predict", "fitode",
 
             cmat <- setNames(as.data.frame(cmat), c(paste(100*ll, "%"), paste(100*(1-ll), "%")))
 
-            if (debug && method != "delta") {
-                matplot(times, simtraj, type="l",col=adjustcolor("black", alpha.f=0.1), lty=1)
-                matlines(times, cmat, col=2, lty=1, lwd=2)
-            }
-
             df <- cbind(df, cmat)
         }
         df
     }
 )
+
+
 

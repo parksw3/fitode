@@ -5,20 +5,23 @@
 \alias{initialize,solution.ode-method}
 \title{the initializer for model.ode}
 \usage{
-\S4method{initialize}{solution.ode}(.Object, model, result,
+\S4method{initialize}{solution.ode}(.Object, y, times, model, parms,
   keep_sensitivity = TRUE)
 }
 \arguments{
 \item{.Object}{object}
+
+\item{y}{initial values}
+
+\item{times}{time vector}
+
+\item{model}{ode model}
+
+\item{parms}{parameters of the solution}
+
+\item{keep_sensitivity}{keep sensitivity equations}
 }
 \description{
 the initializer for model.ode
 }
-\section{Slots}{
-
-\describe{
-\item{\code{model}}{ode model}
-
-\item{\code{result}}{deSolve result}
-}}
 
