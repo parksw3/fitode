@@ -16,33 +16,32 @@ SI_model <- new("model.ode",
         S ~ N * (1 - i0),
         I ~ N * i0
     ),
-    par= c("beta", "gamma", "N", "i0")
+    par=c("beta", "gamma", "N", "i0")
 )
-SI_model_trans <- Transform(SI_model,
-    transforms=list(
-        beta~exp(log.beta),
-        gamma~exp(log.gamma),
-        N~exp(log.N),
-        i0~(1+tanh(logit.i/2))/2
-    ),
-    par=c("log.beta", "log.gamma", "log.N","logit.i")
-)
-start <- c(log.beta=1.5, log.gamma=1, log.N=10, logit.i=-10, ll.k=2)
+
+start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, ll.k=2)
 
 ff <- fitode(Deaths~I,
     start=start,
-    model=SI_model_trans, loglik=select_model("nbinom"),
+    model=SI_model, loglik=select_model("nbinom"),
     data=harbin,
-    tcol="week"
+    tcol="week",
+    links = list(
+        beta="log",
+        gamma="log",
+        N="log",
+        i0="logit"
+    )
 )
 
-ff2 <- fitsir::fitsir(harbin, start, method="BFGS", dist="nbinom", tcol="week",icol="Deaths")
+start2 <- c(log.beta=log(2), log.gamma=log(1), log.N=log(1e5), logit.i=qlogis(1e-4), ll.k=2)
 
-all.equal(coef(ff), coef(ff2), tolerance = 1e-3) ## returns FALSE if we lower the tolerance
+ff2 <- fitsir::fitsir(harbin, start2, method="BFGS", dist="nbinom", tcol="week",icol="Deaths")
 
-matplot(harbin$week, predict(ff, level=0.95, method="wmvrnorm")[,-1], type="l", col=1)
-matlines(harbin$week, predict(ff2,level=0.95)[,-1], col=2)
-points(harbin)
+all.equal(unname(coef(ff)), unname(coef(ff2)), tolerance = 1e-3) ## returns FALSE if we lower the tolerance
+
+plot(ff,level=0.95, method="wmvrnorm")
+plot(ff2, add=TRUE)
 
 ## incidence fitting
 
@@ -66,7 +65,5 @@ all.equal(
     tolerance=3e-3
 )
 
-matplot(harbin$week, predict(ff3, level=0.95)[,-1], type="l", col=1)
-matlines(harbin$week, predict(ff4,level=0.95)[,-1], col=2)
-points(harbin)
+plot(ff3, level=0.95)
 

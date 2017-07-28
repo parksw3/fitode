@@ -33,6 +33,7 @@ setClass(
 ##' @param times time vector
 ##' @param model ode model
 ##' @param parms parameters of the solution
+##' @param ode.opts options for ode integration
 ##' @param keep_sensitivity keep sensitivity equations
 ##' @docType methods
 ##' @exportMethod initialize
@@ -40,10 +41,8 @@ setMethod(
     "initialize",
     "solution.ode",
     definition = function(.Object,
-                          y,
-                          times,
-                          model,
-                          parms,
+                          y, times, model, parms,
+                          ode.opts=list(method="rk4", hini=0.1),
                           keep_sensitivity=TRUE) {
         .Object@name <- model@name
         .Object@y <- y
@@ -80,7 +79,14 @@ setMethod(
             }
         }
 
-        result <- ode(y, times, gfun, parms, method="rk4", hini=0.1)
+        result <- do.call("ode",
+                          c(list(y=y,
+                                 times=times,
+                                 func=gfun,
+                                 parms=parms),
+                            ode.opts))
+
+            ode(y, times, gfun, parms, method="rk4", hini=0.1)
 
         .Object@solution <- as.data.frame(result[,1:(1+nstate)])
 
@@ -108,11 +114,12 @@ setMethod(
 ##' @param times time vector
 ##' @param parms parameters
 ##' @param y initial values
+##' @param ode.opts options for ode integration
 ##' @param keep_sensitivity keep sensitivity equations
 ##' @import deSolve
 ##' @export
-solve <- function(model, times, parms,
-                 y,
+solve <- function(model, times, parms, y,
+                 ode.opts=list(method="rk4", hini=0.1),
                  keep_sensitivity=TRUE) {
     if (missing(y)) {
         frame <- as.list(c(parms))
@@ -133,5 +140,6 @@ solve <- function(model, times, parms,
 
     new("solution.ode",
         y, times, model, parms,
+        ode.opts,
         keep_sensitivity)
 }

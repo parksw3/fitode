@@ -125,53 +125,12 @@ setMethod(
                            observation="X",
                            mean, par,
                            keep_grad=TRUE) {
-        trans <- function(formulae, allvars) {
-            # extract vars from an expression
-            vars <- function(e) {
-                if (is.numeric(e)) return(c())
-                if (is.name(e)) return(as.character(e))
-                if (!is.call(e))
-                    stop("unknown class: ", class(e))
-                v <- c()
-                for (i in 2:length(e)) {
-                    v <- c(v, vars(e[[i]]))
-                }
-                v
-            }
-
-            l <- list()
-            for (f in formulae) {
-                if (!is(f, "formula"))
-                    stop("transforms must be formula: ", as.character(f))
-                var <- as.character(f[[2]])
-                if (!var %in% allvars) next
-                input <- vars(f[[3]])
-                l[[var]] <- f[[3]]
-            }
-            l
-        }
-        # substitute the transformation expressions
-        subst <- function(e) {
-            if (is.numeric(e)) return(e)
-            if (is.name(e)) {
-                v <- as.character(e)
-                expr <- transforms[[v]]
-                if (is.null(expr)) return(e)
-                return (expr)
-            }
-            if (!is.call(e)) stop("unknown class: ", class(e))
-            l <- list(e[[1]])
-            for (i in 2:length(e))
-                l <- c(l, subst(e[[i]]))
-            as.call(l)
-        }
         # if no transform, return model
         if (length(transforms) == 0)
             return(object)
         allvars <- c(object@observation, object@mean, object@par)
         transforms <- trans(transforms, allvars)
-        f <- c(as.symbol("~"), as.symbol("LL"), subst(object@expr[[1]]))
-        f <- as.formula(as.call(f))
+        f <- to.formula("LL", subst(object@expr[[1]], transforms))
 
         if (missing(name)) name <- object@name
         if (missing(mean)) mean <- object@mean
@@ -213,50 +172,50 @@ w_lbeta <- function(a,b) {
 ##' @param dist conditional distribution of reported data
 ##' @export
 select_model <- function(dist = c("gaussian", "poisson", "quasipoisson", "nbinom", "nbinom1")) {
-    dist <- match.arg(dist)
+        dist <- match.arg(dist)
     name <- dist
     if (dist == "quasipoisson") dist <- "poisson"
     model <- switch(dist,
-                    gaussian={
-                        loglik_gaussian <- new("loglik.ode", "gaussian",
-                                               LL ~ -(X-mu)^2/(2*sigma^2) - log(sigma) - 1/2*log(2*pi),
-                                               mean="mu", par="sigma")
+        gaussian={
+            loglik_gaussian <- new("loglik.ode", "gaussian",
+                LL ~ -(X-mu)^2/(2*sigma^2) - log(sigma) - 1/2*log(2*pi),
+                mean="mu", par="sigma")
 
-                        loglik_gaussian
-                    }, poisson={
-                        loglik_poisson <- new("loglik.ode", "poisson",
-                                              LL ~ X*log(lambda) - lambda - lgamma(X+1),
-                                              mean = "lambda", par = c())
-                        loglik_poisson
-                    }, nbinom={
-                        loglik_nbinom <- new ("loglik.ode", "nbinom",
-                                              LL ~ -lbeta(k, X) - log(X) + k * (-log1p(mu/k)) +
-                                                  X * log(mu) - X * log(k + mu),
-                                              mean="mu",
-                                              par = "k")
+            loglik_gaussian
+        }, poisson={
+            loglik_poisson <- new("loglik.ode", "poisson",
+                LL ~ X*log(lambda) - lambda - lgamma(X+1),
+                mean = "lambda", par = c())
+            loglik_poisson
+        }, nbinom={
+            loglik_nbinom <- new ("loglik.ode", "nbinom",
+                LL ~ -lbeta(k, X) - log(X) + k * (-log1p(mu/k)) +
+                    X * log(mu) - X * log(k + mu),
+                mean="mu",
+                par = "k")
 
-                        loglik_nbinom <- Transform(
-                            loglik_nbinom,
-                            transforms = list(k ~ exp(ll.k)),
-                            par="ll.k"
-                        )
+            loglik_nbinom <- Transform(
+                loglik_nbinom,
+                transforms = list(k ~ exp(ll.k)),
+                par="ll.k"
+            )
 
-                        loglik_nbinom
-                    }, nbinom1={
-                        loglik_nbinom1 <- new ("loglik.ode", "nbinom",
-                                               LL ~ -lbeta(mu/phi, X) - log(X) + mu/phi * (-log1p(phi)) +
-                                                   X * log(mu) - X * log(mu/phi + mu),
-                                               mean="mu",
-                                               par = "phi")
+            loglik_nbinom
+        }, nbinom1={
+            loglik_nbinom1 <- new ("loglik.ode", "nbinom",
+                LL ~ -lbeta(mu/phi, X) - log(X) + mu/phi * (-log1p(phi)) +
+                    X * log(mu) - X * log(mu/phi + mu),
+                mean="mu",
+            par = "phi")
 
-                        loglik_nbinom1 <- Transform(
-                            loglik_nbinom1,
-                            transforms = list(phi ~ exp(ll.phi)),
-                            par=c("ll.phi")
-                        )
+            loglik_nbinom1 <- Transform(
+                loglik_nbinom1,
+                    transforms = list(phi ~ exp(ll.phi)),
+                par=c("ll.phi")
+            )
 
-                        loglik_nbinom1
-                    }
+            loglik_nbinom1
+        }
     )
 
     model@name <- name

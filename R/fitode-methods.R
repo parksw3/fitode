@@ -63,8 +63,6 @@ setMethod("plot", signature(x="fitode", y="missing"),
 ##' @param times time vector to predict over. Default is set to the time frame of the data.
 ##' @param method confidence interval method. Default is set to Delta method.
 ##' @param nsim number of simulations for mvrnorm, wmvrnorm methods
-##' @details
-##' See vignette for different methods: \code{vignette("details", package="fitode")}
 ##' @importFrom bbmle predict
 ##' @importFrom bbmle confint
 ##' @importFrom MASS mvrnorm
