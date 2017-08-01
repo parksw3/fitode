@@ -11,23 +11,31 @@
 ##' @param control see optim
 ##' @param ode.opts options for ode integration. See ode
 ##' @param debug print debugging output?
-##' @examples
 ##' @import bbmle
 ##' @importFrom numDeriv jacobian
-##' @importFrom base solve
 ##' @export fitode
 setMethod(
     "initialize",
     "fitode",
     function(.Object,
-                        formula, start,
-                        model, loglik=select_model("gaussian"),
-                        data,
-                        tcol = "times",
-                        links,
-                        control=list(maxit=1e5),
-                        ode.opts=list(method="rk4", hini=0.1),
-                        debug=FALSE) {
+             formula, start,
+             model, loglik=select_model("gaussian"),
+             data,
+             tcol = "times",
+             links,
+             control=list(maxit=1e5),
+             ode.opts=list(method="rk4", hini=0.1),
+             debug=FALSE) {
+        if (any(is.na(match(names(start), c(model@par, loglik@par))))) {
+            stop(
+                paste0("`start` must specify the following parameters:\n",
+                    "\node parameters: ", paste(model@par, collapse = ", "),
+                    "\nlikelihood parameters: ", paste(loglik@par)
+                )
+            )
+        }
+
+
         orig.model <- model
         .Object@model <- orig.model
         orig.formula <- formula
@@ -139,11 +147,12 @@ setMethod(
         if (!missing(links)) {
             coef <- transpar(coef, transform, inverse)
             thess <- numDeriv::jacobian(gradfun, coef, formula=orig.formula,
-                                        model=orig.model,loglik=loglik,
-                                        observation=data[,2],
-                                        times=data[,1],
-                                        ode.opts=ode.opts)
+                model=orig.model,loglik=loglik,
+                observation=data[,2],
+                times=data[,1],
+                ode.opts=ode.opts)
             vcov <- base::solve(thess)
+            colnames(vcov) <- rownames(vcov) <- names(coef)
         } else {
             vcov <- vcov(m)
         }

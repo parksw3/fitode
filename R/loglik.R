@@ -174,8 +174,8 @@ select_model <- function(dist = c("gaussian", "poisson", "nbinom", "nbinom1")) {
 
             loglik_nbinom <- Transform(
                 loglik_nbinom,
-                transforms = list(k ~ exp(ll.k)),
-                par="ll.k"
+                transforms = list(k ~ exp(log.k)),
+                par="log.k"
             )
 
             loglik_nbinom
@@ -188,8 +188,8 @@ select_model <- function(dist = c("gaussian", "poisson", "nbinom", "nbinom1")) {
 
             loglik_nbinom1 <- Transform(
                 loglik_nbinom1,
-                    transforms = list(phi ~ exp(ll.phi)),
-                par=c("ll.phi")
+                    transforms = list(phi ~ exp(log.phi)),
+                par=c("log.phi")
             )
 
             loglik_nbinom1

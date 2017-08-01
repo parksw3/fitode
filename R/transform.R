@@ -1,3 +1,8 @@
+##' create formula from a character and a call
+##' @param left (character) lhs of the formula
+##' @param right (call) rhs of the formula
+##' @examples
+##' to.formula("beta", substitute(exp(log.beta)))
 to.formula <- function(left, right){
     as.formula(as.call(c(as.symbol("~"), as.symbol(left), right)), env = parent.frame())
 }
