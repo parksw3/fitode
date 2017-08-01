@@ -2,6 +2,7 @@
 % Please edit documentation in R/fitode-class.R
 \docType{class}
 \name{fitode-class}
+\alias{fitode}
 \alias{fitode-class}
 \title{Class "fitode".
 Result of ode fitting based on Maximum Likelihood Estimation}

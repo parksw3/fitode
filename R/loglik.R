@@ -1,24 +1,3 @@
-##' Class representing log-likelihood models used to fit ode models
-##'
-##' @slot name name of the distribution
-##' @slot expr an expression specifying the model
-##' @slot observation observation variable name
-##' @slot mean mean variable name
-##' @slot par additional parameter names
-##' @slot grad the gradient with respect to the parameters
-##' @exportClass loglik.ode
-setClass(
-    "loglik.ode",
-    slots = c(
-        name = "character",
-        expr = "expression",
-        observation = "character",
-        mean = "character",
-        par = "character",
-        grad = "list"
-    )
-)
-
 ##' the initializer for loglik.ode
 ##'
 ##' @param .Object object
@@ -171,10 +150,9 @@ w_lbeta <- function(a,b) {
 ##' Select likelihood model
 ##' @param dist conditional distribution of reported data
 ##' @export
-select_model <- function(dist = c("gaussian", "poisson", "quasipoisson", "nbinom", "nbinom1")) {
+select_model <- function(dist = c("gaussian", "poisson", "nbinom", "nbinom1")) {
         dist <- match.arg(dist)
     name <- dist
-    if (dist == "quasipoisson") dist <- "poisson"
     model <- switch(dist,
         gaussian={
             loglik_gaussian <- new("loglik.ode", "gaussian",

@@ -1,5 +1,5 @@
 to.formula <- function(left, right){
-    as.formula(as.call(c(as.symbol("~"), as.symbol(left), right)), env = parent.frame(2))
+    as.formula(as.call(c(as.symbol("~"), as.symbol(left), right)), env = parent.frame())
 }
 
 trans <- function(formulae, allvars) {
@@ -60,4 +60,41 @@ linkfun <- function(link=c("log", "logit")) {
             )
         }
     )
+}
+
+##' transform parameters
+##' @param parms numeric vector containing parameters
+##' @param transform list of transformations specified as a formula
+##' @param inverse list of inverse transformations specified as formula
+##' @examples
+##' par <- c(a=2, b=1)
+##' transform <- list(a~exp(log.a)+1)
+##' inverse <- list(log.a~log(a-1))
+##'
+##' print(newpar <- transpar(par, transform, inverse))
+##'
+##' ## direction of transformation is automatically determined
+##' print(oldpar <- transpar(newpar, transform, inverse))
+##' all.equal(par, oldpar)
+##'
+##' print(oldpar2 <- transpar(newpar, inverse, transform))
+##' all.equal(par, oldpar2)
+transpar <- function(parms, transform, inverse) {
+    before <- sapply(transform, function(x) as.character(x[[2]]))
+    after <- sapply(inverse, function(x) as.character(x[[2]]))
+
+    if (all(before %in% names(parms))) {
+        newname <- names(parms)
+        newname[match(before, newname)] <- after
+
+        parlist <- lapply(newname, function(x) as.name(x))
+        newpar <- lapply(lapply(parlist, subst, trans(inverse,newname)), subst, as.list(parms))
+        newpar <- sapply(newpar, eval)
+        names(newpar) <- newname
+        newpar
+    } else if (all(after %in% names(parms))) {
+        transpar(parms, inverse, transform)
+    } else {
+        stop("Wrong transformation/inverse provided?")
+    }
 }

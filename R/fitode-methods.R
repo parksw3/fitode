@@ -56,7 +56,6 @@ setMethod("plot", signature(x="fitode", y="missing"),
     }
 )
 
-
 ##' Forecast from an ode fit and find confidence interval
 ##' @param object fitode object
 ##' @param level the confidence level required
@@ -74,16 +73,18 @@ setMethod("predict", "fitode",
              level,times,
              method=c("delta", "mvrnorm", "wmvrnorm"),
              nsim=1000){
+        m <- object@mle2
+
         if(missing(times)) times <- object@data$times
         method <- match.arg(method)
 
-        model <- object@data$model
-        loglik <- object@data$loglik
-        parms <- coef(object)
+        model <- m@data$model
+        loglik <- m@data$loglik
+        parms <- coef(m)
 
         ss <- solve(model, times, parms, keep_sensitivity=method=="delta")
 
-        expr <- as.expression(object@data$formula[[3]])
+        expr <- as.expression(m@data$formula[[3]])
 
         frame <- c(parms, ss@solution)
 
@@ -109,8 +110,8 @@ setMethod("predict", "fitode",
 
             if (method != "delta") {
                 simtraj <- matrix(NA,nrow=length(times),ncol=nsim)
-                simpars <- MASS::mvrnorm(nsim,mu=coef(object),
-                                   Sigma=vcov(object))
+                simpars <- MASS::mvrnorm(nsim,mu=coef(m),
+                                   Sigma=vcov(m))
 
                 for (i in 1:nsim) {
                     ss.tmp <- solve(model, times, simpars[i,], keep_sensitivity=method=="delta")
@@ -137,7 +138,7 @@ setMethod("predict", "fitode",
                     if(class(sens_p) == "list")
                         sens <- sens + do.call("cbind", sens_p)
 
-                    xvcov <- object@vcov[1:npar,1:npar]
+                    xvcov <- m@vcov[1:npar,1:npar]
                     if(any(diag(xvcov < 0)))
                         warning("At least one entries in diag(vcov) is negative. Confidence interval may not be accurate.")
 
@@ -153,7 +154,7 @@ setMethod("predict", "fitode",
                 },
                 wmvrnorm={
                     traj.logLik <- rep(NA, nsim)
-                    observation <- object@data$observation
+                    observation <- m@data$observation
 
                     for(i in 1:nsim) {
                         traj.logLik[i] <- sum(Eval(loglik, observation, simtraj[,i], simpars[i,-c(1:npar)]))
@@ -161,9 +162,9 @@ setMethod("predict", "fitode",
 
                     ##FIXME: vcov not symmetric for low tolerance?
                     i <- 10
-                    while(!isSymmetric(round(vcov(object), i))) i <- i - 1
+                    while(!isSymmetric(round(vcov(m), i))) i <- i - 1
 
-                    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(object), round(vcov(object), i), log=TRUE)
+                    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(m), round(vcov(m), i), log=TRUE)
                     ww <- exp(traj.logLik-sample.logLik)
                     cmat <- t(apply(simtraj, 1, wquant, weights=ww, probs=c(ll, 1-ll)))
                     cmat
@@ -177,5 +178,22 @@ setMethod("predict", "fitode",
     }
 )
 
-
-
+##' Extract parameter of a fit
+##' @param object fitode object
+##' @param type type of parameter to be returned
+##' @importFrom bbmle coef
+##' @importFrom bbmle vcov
+##' @docType methods
+##' @exportMethod coef
+setMethod("coef", "fitode",
+    function(object,type=c("original", "fitted")){
+        type <- match.arg(type)
+        cc <- object@mle2@coef
+            switch(type,
+                original=transpar(cc,
+                    object@transforms$transform,
+                    object@transforms$inverse) ,
+                fitted=cc
+            )
+        }
+)

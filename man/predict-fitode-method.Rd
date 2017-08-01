@@ -22,7 +22,4 @@
 \description{
 Forecast from an ode fit and find confidence interval
 }
-\details{
-See vignette for different methods: \code{vignette("details", package="fitode")}
-}
 

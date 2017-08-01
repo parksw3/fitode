@@ -1,122 +1,159 @@
 ##' fit ode
+##' @rdname fitode
+##' @name fitode
 ##' @param formula formula specifing observation variable and mean
 ##' @param start starting values for optimization
 ##' @param model ode model
 ##' @param loglik log liklihood model
 ##' @param data data frame with time column and observation column
 ##' @param tcol time column
+##' @param links named vector or list of link functions for ode parameters
 ##' @param control see optim
 ##' @param ode.opts options for ode integration. See ode
 ##' @param debug print debugging output?
 ##' @examples
 ##' @import bbmle
-##' @export
-fitode <- function(formula, start,
-                   model, loglik=select_model("gaussian"),
-                   data,
-                   tcol = "times",
-                   links,
-                   control=list(maxit=1e5),
-                   ode.opts=list(method="rk4", hini=0.1),
-                   debug=FALSE) {
-    ocol <- as.character(formula[[2]])
-    data <- data.frame(times = data[[tcol]], observation = data[[ocol]])
+##' @importFrom numDeriv jacobian
+##' @importFrom base solve
+##' @export fitode
+setMethod(
+    "initialize",
+    "fitode",
+    definition=function(.Object,
+                        formula, start,
+                        model, loglik=select_model("gaussian"),
+                        data,
+                        tcol = "times",
+                        links,
+                        control=list(maxit=1e5),
+                        ode.opts=list(method="rk4", hini=0.1),
+                        debug=FALSE) {
+        orig.model <- model
+        orig.formula <- formula
+        .Object@model <- orig.model
+        .Object@loglik <- loglik
 
-    if (!missing(links)) {
-        transform <- vector('list', length(links))
-        inverse <- vector('list', length(links))
+        ocol <- as.character(formula[[2]])
+        data <- data.frame(times = data[[tcol]], observation = data[[ocol]])
 
-        newpar <- oldpar <- model@par
+        .Object@data <- data
 
-        for(i in 1:length(links)) {
-            par <- names(links)[i]
-            link <- links[[i]]
+        if (!missing(links)) {
+            .Object@links <- links
 
-            tpar <- paste(link, par, sep=".")
+            if(!is.list(links)) links <- as.list(links)
 
-            newpar[which(newpar==par)] <- tpar
+            transform <- vector('list', length(links))
+            inverse <- vector('list', length(links))
 
-            m <- Map(subst, e=linkfun(link), transforms=list(list(x=as.name(tpar)), list(x=as.name(par))))
+            newpar <- oldpar <- model@par
 
-            transform[[i]] <- to.formula(par, m$transform)
-            inverse[[i]] <- to.formula(tpar, m$inverse)
+            for(i in 1:length(links)) {
+                par <- names(links)[i]
+                link <- links[[i]]
+
+                tpar <- paste(link, par, sep=".")
+
+                newpar[which(newpar==par)] <- tpar
+
+                m <- Map(subst, e=linkfun(link), transforms=list(list(x=as.name(tpar)), list(x=as.name(par))))
+
+                transform[[i]] <- to.formula(par, m$transform)
+                inverse[[i]] <- to.formula(tpar, m$inverse)
+            }
+
+            .Object@transforms <- list(
+                transform=transform,
+                inverse=inverse
+            )
+
+            model <- Transform(model, transforms=transform, par=newpar)
+
+            newformula <- subst(formula[[3]], trans(transform, oldpar))
+            formula <- to.formula(formula[[2]], newformula)
+
+            start <- transpar(start, transform, inverse)
+        } else {
+            .Object@links <- list()
+            .Object@transforms <- list()
         }
 
-        model <- Transform(model, transforms=transform, par=newpar)
+        dataarg <- c(data,list(model=model, loglik=loglik, formula=formula, ode.opts=ode.opts))
 
-        newformula <- subst(formula[[3]], trans(transform, oldpar))
-        formula <- to.formula(formula[[2]], newformula)
+        f.env <- new.env()
+        ## set initial values
+        assign("oldnll",NULL,f.env)
+        assign("oldpar",NULL,f.env)
+        assign("oldgrad",NULL,f.env)
+        assign("data", data, f.env)
 
-        odestart <- start[oldpar]
+        objfun <- function(par, formula, model, loglik, observation, times, ode.opts) {
+            if (identical(par,oldpar)) {
+                if (debug) cat("returning old version of value\n")
+                return(oldnll)
+            }
+            if (debug) cat("computing new version (nll)\n")
 
-        ss <- lapply(inverse, subst, as.list(odestart))
-        ss <- lapply(ss, as.formula)
-        tss <- trans(ss, newpar)
-        newstart <- as.list(odestart)
-        names(newstart) <- newpar
-        newstart[names(tss)] <- tss
-        start <- c(sapply(newstart, eval), start[loglik@par])
-    }
+            v <- ode.sensitivity(par, formula, model, loglik, observation, times, ode.opts)
+            oldnll <<- v[1]
+            oldgrad <<- v[-1]
+            oldpar <<- par
 
-    dataarg <- c(data,list(model=model, loglik=loglik, formula=formula, ode.opts=ode.opts))
-
-    f.env <- new.env()
-    ## set initial values
-    assign("oldnll",NULL,f.env)
-    assign("oldpar",NULL,f.env)
-    assign("oldgrad",NULL,f.env)
-    assign("data", data, f.env)
-
-    objfun <- function(par, formula, model, loglik, observation, times, ode.opts) {
-        if (identical(par,oldpar)) {
-            if (debug) cat("returning old version of value\n")
             return(oldnll)
+
         }
-        if (debug) cat("computing new version (nll)\n")
+        gradfun <- function(par, formula, model, loglik, observation, times, ode.opts) {
+            if (identical(par,oldpar)) {
+                if (debug) cat("returning old version of grad\n")
+                return(oldgrad)
+            }
+            if (debug) cat("computing new version (grad)\n")
 
-        v <- ode.sensitivity(par, formula, model, loglik, observation, times, ode.opts)
-        oldnll <<- v[1]
-        oldgrad <<- v[-1]
-        oldpar <<- par
-
-        return(oldnll)
-
-    }
-    gradfun <- function(par, formula, model, loglik, observation, times, ode.opts) {
-        if (identical(par,oldpar)) {
-            if (debug) cat("returning old version of grad\n")
+            v <- ode.sensitivity(par, formula, model, loglik, observation, times, ode.opts)
+            oldnll <<- v[1]
+            oldgrad <<- v[-1]
+            oldpar <<- par
             return(oldgrad)
         }
-        if (debug) cat("computing new version (grad)\n")
 
-        v <- ode.sensitivity(par, formula, model, loglik, observation, times, ode.opts)
-        oldnll <<- v[1]
-        oldgrad <<- v[-1]
-        oldpar <<- par
-        return(oldgrad)
+        environment(objfun) <- f.env
+
+        environment(gradfun) <- f.env
+
+        parnames <- c(newpar, loglik@par)
+        attr(objfun, "parnames") <- parnames
+
+        m <- mle2(objfun,
+                  vecpar=TRUE,
+                  start=start,
+                  method="BFGS",
+                  control=control,
+                  gr=gradfun,
+                  data=dataarg)
+
+        .Object@mle2 <- m
+
+        coef <- coef(m)
+
+        if (!missing(links)) {
+            coef <- transpar(coef, transform, inverse)
+            thess <- numDeriv::jacobian(gradfun, coef, formula=orig.formula,
+                                        model=orig.model,loglik=loglik,
+                                        observation=data[,2],
+                                        times=data[,1],
+                                        ode.opts=ode.opts)
+            vcov <- base::solve(thess)
+        } else {
+            vcov <- vcov(m)
+        }
+
+        .Object@coef <- coef
+        .Object@vcov <- vcov
+        .Object@min <- m@min
+
+        .Object
     }
-
-    environment(objfun) <- f.env
-
-    environment(gradfun) <- f.env
-
-    parnames <- c(newpar, loglik@par)
-    attr(objfun, "parnames") <- parnames
-
-    m <- mle2(objfun,
-              vecpar=TRUE,
-              start=start,
-              method="BFGS",
-              control=control,
-              gr=gradfun,
-              data=dataarg)
-
-    m <- new("fitode", m)
-
-    ## add quasipoisson code
-
-    m
-}
+)
 
 ##' Calculate sensitivity of the likelihood function with respect to the parameters
 ##'
