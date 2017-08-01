@@ -54,8 +54,9 @@ setClass(
 ##' @export
 fitode <- setClass("fitode",
     slots = c(
+        formula="formula",
         model="model.ode",
-        loglik.model="loglik.ode",
+        loglik="loglik.ode",
         data="data.frame",
         coef="numeric",
         vcov="matrix",

@@ -24,7 +24,7 @@
 setMethod(
     "initialize",
     "model.ode",
-    definition = function(.Object, name,
+    function(.Object, name,
                           model, initial,
                           par,
                           keep_jacobian=TRUE) {
@@ -99,7 +99,7 @@ setMethod(
 setMethod(
     "grad",
     "model.ode",
-    definition <- function(object, state, par) {
+    function(object, state, par) {
         frame <- as.list(c(state, par))
         gr <- sapply(object@grad, eval, frame)
         gr
@@ -136,7 +136,7 @@ setMethod(
 setMethod(
     "Transform",
     "model.ode",
-    definition <- function(object, transforms=NULL, par) {
+    function(object, transforms=NULL, par) {
         # if no transform, return model
         if (length(transforms) == 0)
             return(object)

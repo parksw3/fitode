@@ -73,18 +73,16 @@ setMethod("predict", "fitode",
              level,times,
              method=c("delta", "mvrnorm", "wmvrnorm"),
              nsim=1000){
-        m <- object@mle2
-
         if(missing(times)) times <- object@data$times
         method <- match.arg(method)
 
-        model <- m@data$model
-        loglik <- m@data$loglik
-        parms <- coef(m)
+        model <- object@model
+        loglik <- object@loglik
+        parms <- coef(object)
 
         ss <- solve(model, times, parms, keep_sensitivity=method=="delta")
 
-        expr <- as.expression(m@data$formula[[3]])
+        expr <- as.expression(object@formula[[3]])
 
         frame <- c(parms, ss@solution)
 
@@ -109,12 +107,13 @@ setMethod("predict", "fitode",
             ll <- (1-level)/2
 
             if (method != "delta") {
+                m <- object@mle2
                 simtraj <- matrix(NA,nrow=length(times),ncol=nsim)
                 simpars <- MASS::mvrnorm(nsim,mu=coef(m),
                                    Sigma=vcov(m))
 
                 for (i in 1:nsim) {
-                    ss.tmp <- solve(model, times, simpars[i,], keep_sensitivity=method=="delta")
+                    ss.tmp <- solve(m@data$model, times, simpars[i,], keep_sensitivity=FALSE)
                     frame.tmp <- c(parms, ss.tmp@solution)
                     simtraj[,i] <- eval(expr, frame.tmp)
                 }
@@ -138,7 +137,7 @@ setMethod("predict", "fitode",
                     if(class(sens_p) == "list")
                         sens <- sens + do.call("cbind", sens_p)
 
-                    xvcov <- m@vcov[1:npar,1:npar]
+                    xvcov <- object@vcov[1:npar,1:npar]
                     if(any(diag(xvcov < 0)))
                         warning("At least one entries in diag(vcov) is negative. Confidence interval may not be accurate.")
 
@@ -182,18 +181,60 @@ setMethod("predict", "fitode",
 ##' @param object fitode object
 ##' @param type type of parameter to be returned
 ##' @importFrom bbmle coef
-##' @importFrom bbmle vcov
 ##' @docType methods
 ##' @exportMethod coef
 setMethod("coef", "fitode",
     function(object,type=c("original", "fitted")){
         type <- match.arg(type)
-        cc <- object@mle2@coef
-            switch(type,
-                original=transpar(cc,
-                    object@transforms$transform,
-                    object@transforms$inverse) ,
-                fitted=cc
-            )
+        switch(type,
+            original=object@coef,
+            fitted=object@mle2@coef
+        )
+    }
+)
+
+##' Extract covariance matrix of a fit
+##'
+##' @param object fitode object
+##' @param type type of parameter to be returned
+##' @importFrom bbmle vcov
+##' @docType methods
+##' @exportMethod vcov
+setMethod("vcov", "fitode",
+    function(object,type=c("original", "fitted")){
+        type <- match.arg(type)
+        switch(type,
+            original=object@vcov,
+            fitted=object@mle2@vcov
+        )
+    }
+)
+
+##' Extract log-likelihood of a fit
+##'
+##' @param object fitode object
+##' @docType methods
+##' @exportMethod logLik
+setMethod("logLik", "fitode", function(object){-object@min})
+
+##' show object
+##'
+##' @param object fitode object
+##' @docType methods
+##' @exportMethod show
+setMethod("show", "fitode",
+    function(object){
+        cat("Model:", object@model@name, "\n")
+        cat("Formula:", deparse(object@formula), "\n")
+        cat("\nCoefficients:\n")
+        print(coef(object))
+        cat("\nLog-Likelihood:")
+        cat(round(as.numeric(logLik(object)),2),"\n")
+        cat("\nlinks: ")
+        if (length(object@links)==0) {
+            cat("none")
+        } else {
+            cat(names(object@mle2@coef)[!(names(object@mle2@coef) %in% names(object@coef))])
         }
+    }
 )

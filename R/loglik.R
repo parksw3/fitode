@@ -13,7 +13,7 @@
 setMethod(
     "initialize",
     "loglik.ode",
-    definition = function(.Object, name, model, observation="X", mean, par=NULL,
+    function(.Object, name, model, observation="X", mean, par=NULL,
                           keep_grad=TRUE) {
         .Object@name <- name
         if (!is(model, "formula"))
@@ -54,7 +54,7 @@ setMethod(
 setMethod(
     "Eval",
     "loglik.ode",
-    definition = function(object, observation, mean, par=NULL, ...) {
+    function(object, observation, mean, par=NULL, ...) {
         frame <- list(observation, mean)
         frame <- append(frame, par)
         names(frame) <- c(object@observation, object@mean, object@par)
@@ -75,7 +75,7 @@ setMethod(
 setMethod(
     "grad",
     "loglik.ode",
-    definition <- function(object, observation, mean, par, ...) {
+    function(object, observation, mean, par, ...) {
         frame <- list(observation, mean)
         frame <- append(frame, par)
         names(frame) <- c(object@observation, object@mean, object@par)
@@ -99,7 +99,7 @@ setMethod(
 setMethod(
     "Transform",
     "loglik.ode",
-    definition <- function(object, transforms=NULL,
+    function(object, transforms=NULL,
                            name,
                            observation="X",
                            mean, par,

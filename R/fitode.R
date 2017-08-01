@@ -19,7 +19,7 @@
 setMethod(
     "initialize",
     "fitode",
-    definition=function(.Object,
+    function(.Object,
                         formula, start,
                         model, loglik=select_model("gaussian"),
                         data,
@@ -29,8 +29,9 @@ setMethod(
                         ode.opts=list(method="rk4", hini=0.1),
                         debug=FALSE) {
         orig.model <- model
-        orig.formula <- formula
         .Object@model <- orig.model
+        orig.formula <- formula
+        .Object@formula <- orig.formula
         .Object@loglik <- loglik
 
         ocol <- as.character(formula[[2]])
