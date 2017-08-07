@@ -103,7 +103,7 @@ setMethod(
             }
             if (debug) cat("computing new version (nll)\n")
 
-            v <- ode.sensitivity(par, formula, model, loglik, observation, times, ode.opts)
+            v <- logLik.sensitivity(par, formula, model, loglik, observation, times, ode.opts)
             oldnll <<- v[1]
             oldgrad <<- v[-1]
             oldpar <<- par
@@ -118,7 +118,7 @@ setMethod(
             }
             if (debug) cat("computing new version (grad)\n")
 
-            v <- ode.sensitivity(par, formula, model, loglik, observation, times, ode.opts)
+            v <- logLik.sensitivity(par, formula, model, loglik, observation, times, ode.opts)
             oldnll <<- v[1]
             oldgrad <<- v[-1]
             oldpar <<- par
@@ -165,18 +165,30 @@ setMethod(
     }
 )
 
-##' Calculate sensitivity of the likelihood function with respect to the parameters
+##' Calculate sensitivity of the expression with respect to the parameters
 ##'
-##' @param parms ode/likelihood function parameters
+##' @param expr expression of model states and parameters
 ##' @param formula formula specifing observation variable and mean
+##' @examples
+##' SI_model <- new("model.ode",
+##' name = "SI",
+##' model = list(
+##'     S ~ - beta*S*I/N,
+##'     I ~ beta*S*I/N - gamma*I
+##' ),
+##' initial = list(
+##'     S ~ N * (1 - i0),
+##'     I ~ N * i0
+##' ),
+##' par= c("beta", "gamma", "N", "i0")
+##' )
+##'
+##' ode.sensitivity(expression(gamma*I), SI_model, parms=c(beta=2, gamma=1, N=1e5, i0=1e-4), times=1:10)
 ##' @export
-ode.sensitivity <- function(parms, formula,
-                        model, loglik,
-                        observation, times=NULL,
+ode.sensitivity <- function(expr, model,
+                        parms, times,
                         ode.opts=list(method="rk4", hini=0.1)) {
-    if (is.null(times)) times <- seq(length(observation))
-    solution <- solve(model, times, parms, ode.opts=ode.opts)
-    expr <- as.expression(formula[[3]])
+    solution <- ode.solve(model, times, parms, ode.opts=ode.opts)
 
     frame <- c(solution@solution, parms)
 
@@ -199,6 +211,20 @@ ode.sensitivity <- function(parms, formula,
     if(class(sens_p) == "list")
         sens <- sens + do.call("cbind", sens_p)
 
+    list(mean=mean, sensitivity=sens)
+}
+
+##' Sensitivity of the likelihood function with respect to parameters
+logLik.sensitivity <- function(parms, formula,
+                            model, loglik,
+                            observation, times=NULL,
+                            ode.opts=list(method="rk4", hini=0.1)) {
+    if (is.null(times)) times <- seq(length(observation))
+    expr <- as.expression(formula[[3]])
+    ss <- ode.sensitivity(expr, model, parms, times, ode.opts)
+    mean <- ss$mean
+    sens <- ss$sensitivity
+
     loglik.par <- as.list(parms[-c(1:length(model@par))])
 
     nll <- -sum(Eval(loglik, observation, mean, loglik.par))
@@ -208,4 +234,3 @@ ode.sensitivity <- function(parms, formula,
 
     c(nll, sensitivity)
 }
-

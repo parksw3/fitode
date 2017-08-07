@@ -2,8 +2,9 @@
 
 export(fitode)
 export(ode.sensitivity)
+export(ode.solve)
 export(select_model)
-export(solve)
+export(transpar)
 exportClasses(fitode)
 exportClasses(loglik.ode)
 exportClasses(model.ode)

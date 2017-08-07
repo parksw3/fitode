@@ -118,7 +118,7 @@ setMethod(
 ##' @param keep_sensitivity keep sensitivity equations
 ##' @import deSolve
 ##' @export
-solve <- function(model, times, parms, y,
+ode.solve <- function(model, times, parms, y,
                  ode.opts=list(method="rk4", hini=0.1),
                  keep_sensitivity=TRUE) {
     if (missing(y)) {

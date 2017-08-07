@@ -45,7 +45,6 @@ setMethod("plot", signature(x="fitode", y="missing"),
         if (!add) plot(times, observation, xlim=xlim, ylim=ylim,
             xlab=xlab, ylab=ylab, main=main, ...)
 
-
         lines(times, mean, col=col.traj, lty=lty.traj)
 
         if (!missing(level)) {
@@ -75,14 +74,15 @@ setMethod("predict", "fitode",
              nsim=1000){
         if(missing(times)) times <- object@data$times
         method <- match.arg(method)
+        m <- object@mle2
 
-        model <- object@model
-        loglik <- object@loglik
-        parms <- coef(object)
+        model <- m@data$model
+        loglik <- m@data$loglik
+        parms <- coef(m)
 
-        ss <- solve(model, times, parms, keep_sensitivity=method=="delta")
+        ss <- ode.solve(model, times, parms, keep_sensitivity=method=="delta")
 
-        expr <- as.expression(object@formula[[3]])
+        expr <- as.expression(m@data$formula[[3]])
 
         frame <- c(parms, ss@solution)
 
@@ -107,13 +107,12 @@ setMethod("predict", "fitode",
             ll <- (1-level)/2
 
             if (method != "delta") {
-                m <- object@mle2
                 simtraj <- matrix(NA,nrow=length(times),ncol=nsim)
                 simpars <- MASS::mvrnorm(nsim,mu=coef(m),
                                    Sigma=vcov(m))
 
                 for (i in 1:nsim) {
-                    ss.tmp <- solve(m@data$model, times, simpars[i,], keep_sensitivity=FALSE)
+                    ss.tmp <- ode.solve(m@data$model, times, simpars[i,], keep_sensitivity=FALSE)
                     frame.tmp <- c(parms, ss.tmp@solution)
                     simtraj[,i] <- eval(expr, frame.tmp)
                 }
@@ -122,29 +121,19 @@ setMethod("predict", "fitode",
 
             cmat <- switch(method,
                 delta={
-                    dmds <- lapply(model@state, function(s) Deriv(expr, s))
-                    dmdp <- lapply(model@par, function(p) Deriv(expr, p))
+                    sens <- ode.sensitivity(m@data$formula[[3]],
+                                            model,
+                                            coef(m),
+                                            m@data$times)$sensitivity
 
-                    sens <- vector('list', nstate)
-                    for(i in 1:nstate) {
-                        sens[[i]] <- eval(dmds[[i]], frame) * ss@sensitivity[[i]]
-                    }
-
-                    sens_p <- sapply(dmdp, eval, frame)
-
-                    sens <- do.call("+", sens)
-
-                    if(class(sens_p) == "list")
-                        sens <- sens + do.call("cbind", sens_p)
-
-                    xvcov <- object@vcov[1:npar,1:npar]
-                    if(any(diag(xvcov < 0)))
+                    fitted.vcov <- m@vcov[1:npar,1:npar]
+                    if(any(diag(fitted.vcov < 0)))
                         warning("At least one entries in diag(vcov) is negative. Confidence interval may not be accurate.")
 
-                    mvcov <- sens %*% xvcov %*% t(sens)
-                    merr <- sqrt(diag(mvcov))
-                    z <- -qnorm(ll)
-                    cmat <- data.frame(mean - z * merr, mean + z * merr)
+                    mean.vcov <- sens %*% fitted.vcov %*% t(sens)
+                    mean.err <- sqrt(diag(mean.vcov))
+                    z <- sqrt(diag(mean.vcov))
+                    cmat <- data.frame(mean - z * mean.err, mean + z * mean.err)
                     cmat
                 },
                 mvrnorm={
@@ -179,14 +168,14 @@ setMethod("predict", "fitode",
 
 ##' Extract parameter of a fit
 ##' @param object fitode object
-##' @param type type of parameter to be returned
+##' @param scale scale of parameter to be returned
 ##' @importFrom bbmle coef
 ##' @docType methods
 ##' @exportMethod coef
 setMethod("coef", "fitode",
-    function(object,type=c("original", "fitted")){
-        type <- match.arg(type)
-        switch(type,
+    function(object,scale=c("original", "fitted")){
+        scale <- match.arg(scale)
+        switch(scale,
             original=object@coef,
             fitted=object@mle2@coef
         )
@@ -196,18 +185,35 @@ setMethod("coef", "fitode",
 ##' Extract covariance matrix of a fit
 ##'
 ##' @param object fitode object
-##' @param type type of parameter to be returned
+##' @param scale scale of parameter to be returned
 ##' @importFrom bbmle vcov
 ##' @docType methods
 ##' @exportMethod vcov
 setMethod("vcov", "fitode",
-    function(object,type=c("original", "fitted")){
-        type <- match.arg(type)
-        switch(type,
+    function(object,scale=c("original", "fitted")){
+        scale <- match.arg(scale)
+        switch(scale,
             original=object@vcov,
             fitted=object@mle2@vcov
         )
     }
+)
+
+
+##' Calculate standard error
+##' @importFrom bbmle stdEr
+##' @docType methos
+##' @exportMethod stdEr
+setMethod("stdEr", "fitode",
+          function(x,
+                   scale=c("original", "fitted")) {
+              scale <- match.arg(scale)
+              if (scale=="original" && length(x@links) > 0) {
+                  std <- stdEr(sqrt(x@vcov))
+              } else {
+                  std <- stdEr(x@mle2)
+              }
+          }
 )
 
 ##' Extract log-likelihood of a fit
@@ -217,13 +223,49 @@ setMethod("vcov", "fitode",
 ##' @exportMethod logLik
 setMethod("logLik", "fitode", function(object){-object@min})
 
+##' Profile object
+##'
+##' @param fitted fitted model object
+##' @param scale scale of parameters
+##' @importFrom bbmle profile
+##' @exportMethod profile
+setMethod("profile", "fitode",
+    function(fitted, scale=c("original", "fitted")) {
+        scale <- match.arg(scale)
+        prof <- profile(object@mle2, continuation="naive", trace=TRUE)
+        if (scale=="original" && length(object@links) > 0) {
+            pp <- prof@profile
+            tr <- object@transforms$transform
+            inv <- object@transforms$inverse
+            for (i in 1:length(pp)) {
+                pp[[i]][,-1] <- t(
+                    apply(
+                        pp[[i]][,-1], 1,
+                        transpar,
+                        transform=tr,
+                        inverse=inv
+                    )
+                )
+            }
+            names(pp) <- names(object@coef)
+            prof@profile <- pp
+
+            ss <- prof@summary
+
+            transpar(ss@coef[,1], tr, inv)
+
+        }
+        prof
+    }
+)
+
 ##' show object
 ##'
 ##' @param object fitode object
 ##' @docType methods
 ##' @exportMethod show
 setMethod("show", "fitode",
-    function(object){
+    function(object) {
         cat("Model:", object@model@name, "\n")
         cat("Formula:", deparse(object@formula), "\n")
         cat("\nCoefficients:\n")
@@ -238,3 +280,5 @@ setMethod("show", "fitode",
         }
     }
 )
+
+

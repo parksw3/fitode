@@ -84,6 +84,7 @@ linkfun <- function(link=c("log", "logit")) {
 ##'
 ##' print(oldpar2 <- transpar(newpar, inverse, transform))
 ##' all.equal(par, oldpar2)
+##' @export
 transpar <- function(parms, transform, inverse) {
     before <- sapply(transform, function(x) as.character(x[[2]]))
     after <- sapply(inverse, function(x) as.character(x[[2]]))
