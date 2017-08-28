@@ -1,4 +1,7 @@
 .onLoad <- function(libname, pkgname) {
+    drule[["NBconst"]] <- alist(k=dfun(k,x),
+                                x=dfun(x,k)+1/x)
+
     drule[["lbeta"]] <- drule[["w_lbeta"]] <- alist(a=dfun(a,b),
                                                     b=dfun(b,a))
     drule[["dfun"]] <- alist(x=dfun2(x,y),

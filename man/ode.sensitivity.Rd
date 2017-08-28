@@ -2,17 +2,33 @@
 % Please edit documentation in R/fitode.R
 \name{ode.sensitivity}
 \alias{ode.sensitivity}
-\title{Calculate sensitivity of the likelihood function with respect to the parameters}
+\title{Calculate sensitivity of the expression with respect to the parameters}
 \usage{
-ode.sensitivity(parms, formula, model, loglik, observation, times = NULL,
-  ode.opts = list(method = "rk4", hini = 0.1))
+ode.sensitivity(expr, model, parms, times, ode.opts = list(method = "rk4",
+  hini = 0.1))
 }
 \arguments{
-\item{parms}{ode/likelihood function parameters}
+\item{expr}{expression of model states and parameters}
 
 \item{formula}{formula specifing observation variable and mean}
 }
 \description{
-Calculate sensitivity of the likelihood function with respect to the parameters
+Calculate sensitivity of the expression with respect to the parameters
+}
+\examples{
+SI_model <- new("model.ode",
+    name = "SI",
+    model = list(
+        S ~ - beta*S*I/N,
+        I ~ beta*S*I/N - gamma*I
+    ),
+    initial = list(
+        S ~ N * (1 - i0),
+        I ~ N * i0
+    ),
+    par= c("beta", "gamma", "N", "i0")
+)
+
+ode.sensitivity(expression(gamma*I), SI_model, parms=c(beta=2, gamma=1, N=1e5, i0=1e-4), times=1:10)
 }
 

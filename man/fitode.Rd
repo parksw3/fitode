@@ -23,7 +23,7 @@
 
 \item{tcol}{time column}
 
-\item{links}{named vector or list of link functions for ode parameters}
+\item{links}{named vector or list of links for ode/log-likelihood parameters}
 
 \item{control}{see optim}
 

@@ -204,17 +204,7 @@ setMethod("vcov", "fitode",
 ##' @importFrom bbmle stdEr
 ##' @docType methos
 ##' @exportMethod stdEr
-setMethod("stdEr", "fitode",
-          function(x,
-                   scale=c("original", "fitted")) {
-              scale <- match.arg(scale)
-              if (scale=="original" && length(x@links) > 0) {
-                  std <- stdEr(sqrt(x@vcov))
-              } else {
-                  std <- stdEr(x@mle2)
-              }
-          }
-)
+setMethod("stdEr", "fitode", function(x,scale=c("original", "fitted")){sqrt(diag(vcov(x, scale)))})
 
 ##' Extract log-likelihood of a fit
 ##'

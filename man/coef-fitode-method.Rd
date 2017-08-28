@@ -5,12 +5,12 @@
 \alias{coef,fitode-method}
 \title{Extract parameter of a fit}
 \usage{
-\S4method{coef}{fitode}(object, type = c("original", "fitted"))
+\S4method{coef}{fitode}(object, scale = c("original", "fitted"))
 }
 \arguments{
 \item{object}{fitode object}
 
-\item{type}{type of parameter to be returned}
+\item{scale}{scale of parameter to be returned}
 }
 \description{
 Extract parameter of a fit

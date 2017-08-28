@@ -1,3 +1,33 @@
+set_links <- function(links, model, loglik) {
+    allpar <- c(model@par, loglik@par)
+    links_default <- as.list(rep("identity", length(allpar)))
+    names(links_default) <- allpar
+
+    if (!missing(links)) links_default[names(links)] <- links
+
+    loglik.link <- switch(loglik@name,
+        gaussin=list(sigma="log"),
+        nbinom=list(k="log"),
+        nbinom1=list(phi="log")
+    )
+
+    if (!is.null(loglik.link)) {
+        loglik.link <- loglik.link[!(names(loglik.link) %in% links)]
+        links_default[names(loglik.link)] <- loglik.link
+    }
+
+    links_default
+}
+
+apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
+    type <- match.arg(type)
+    ff <- linklist[[type]]
+    pp <- unlist(Map(function(x, fun) fun(x), x=par, fun=ff))
+    names(pp) <- names(ff)
+
+    pp
+}
+
 ##' fit ode
 ##' @rdname fitode
 ##' @name fitode
@@ -7,7 +37,7 @@
 ##' @param loglik log liklihood model
 ##' @param data data frame with time column and observation column
 ##' @param tcol time column
-##' @param links named vector or list of link functions for ode parameters
+##' @param links named vector or list of links for ode/log-likelihood parameters
 ##' @param control see optim
 ##' @param ode.opts options for ode integration. See ode
 ##' @param debug print debugging output?
@@ -26,7 +56,9 @@ setMethod(
              control=list(maxit=1e5),
              ode.opts=list(method="rk4", hini=0.1),
              debug=FALSE) {
-        if (any(is.na(match(names(start), c(model@par, loglik@par))))) {
+        oldpar <- c(model@par, loglik@par)
+
+        if (any(is.na(match(names(start), oldpar)))) {
             stop(
                 paste0("`start` must specify the following parameters:\n",
                     "\node parameters: ", paste(model@par, collapse = ", "),
@@ -35,11 +67,8 @@ setMethod(
             )
         }
 
-
-        orig.model <- model
-        .Object@model <- orig.model
-        orig.formula <- formula
-        .Object@formula <- orig.formula
+        .Object@model <- model
+        .Object@formula <- formula
         .Object@loglik <- loglik
 
         ocol <- as.character(formula[[2]])
@@ -47,47 +76,24 @@ setMethod(
 
         .Object@data <- data
 
-        if (!missing(links)) {
-            .Object@links <- links
+        links <- set_links(links, model, loglik)
 
-            if(!is.list(links)) links <- as.list(links)
+        links_data <- lapply(links, make.link)
 
-            transform <- vector('list', length(links))
-            inverse <- vector('list', length(links))
+        linklist <- lapply(c("linkfun", "linkinv", "mu.eta"),
+                           function(x) lapply(links_data, "[[", x))
 
-            newpar <- oldpar <- model@par
+        names(linklist) <- c("linkfun", "linkinv", "mu.eta")
 
-            for(i in 1:length(links)) {
-                par <- names(links)[i]
-                link <- links[[i]]
+        .Object@links <- links
 
-                tpar <- paste(link, par, sep=".")
+        newpar <- Map(function(x, y) ifelse(x=="identity", y, paste(x, y, sep=".")), x=links, y=oldpar)
+        newpar <- unname(unlist(newpar))
 
-                newpar[which(newpar==par)] <- tpar
+        names(linklist$linkfun) <- names(linklist$mu.eta) <- newpar
+        start <- apply_link(start, linklist, "linkfun")
 
-                m <- Map(subst, e=linkfun(link), transforms=list(list(x=as.name(tpar)), list(x=as.name(par))))
-
-                transform[[i]] <- to.formula(par, m$transform)
-                inverse[[i]] <- to.formula(tpar, m$inverse)
-            }
-
-            .Object@transforms <- list(
-                transform=transform,
-                inverse=inverse
-            )
-
-            model <- Transform(model, transforms=transform, par=newpar)
-
-            newformula <- subst(formula[[3]], trans(transform, oldpar))
-            formula <- to.formula(formula[[2]], newformula)
-
-            start <- transpar(start, transform, inverse)
-        } else {
-            .Object@links <- list()
-            .Object@transforms <- list()
-        }
-
-        dataarg <- c(data,list(model=model, loglik=loglik, formula=formula, ode.opts=ode.opts))
+        dataarg <- c(data,list(model=model, loglik=loglik, formula=formula, ode.opts=ode.opts, linklist=linklist))
 
         f.env <- new.env()
         ## set initial values
@@ -96,31 +102,39 @@ setMethod(
         assign("oldgrad",NULL,f.env)
         assign("data", data, f.env)
 
-        objfun <- function(par, formula, model, loglik, observation, times, ode.opts) {
+        objfun <- function(par, formula, model, loglik, observation, times, ode.opts, linklist) {
             if (identical(par,oldpar)) {
                 if (debug) cat("returning old version of value\n")
                 return(oldnll)
             }
             if (debug) cat("computing new version (nll)\n")
+            origpar <- apply_link(par, linklist, "linkinv")
+            derivpar <- apply_link(par, linklist, "mu.eta")
 
-            v <- logLik.sensitivity(par, formula, model, loglik, observation, times, ode.opts)
+            v <- logLik.sensitivity(origpar, formula, model, loglik, observation, times, ode.opts)
             oldnll <<- v[1]
-            oldgrad <<- v[-1]
+            grad <- v[-1] * derivpar
+            names(grad) <- names(derivpar)
+            oldgrad <<- grad
             oldpar <<- par
 
             return(oldnll)
 
         }
-        gradfun <- function(par, formula, model, loglik, observation, times, ode.opts) {
+        gradfun <- function(par, formula, model, loglik, observation, times, ode.opts, linklist) {
             if (identical(par,oldpar)) {
                 if (debug) cat("returning old version of grad\n")
                 return(oldgrad)
             }
             if (debug) cat("computing new version (grad)\n")
+            origpar <- apply_link(par, linklist, "linkinv")
+            derivpar <- apply_link(par, linklist, "mu.eta")
 
-            v <- logLik.sensitivity(par, formula, model, loglik, observation, times, ode.opts)
+            v <- logLik.sensitivity(origpar, formula, model, loglik, observation, times, ode.opts)
             oldnll <<- v[1]
-            oldgrad <<- v[-1]
+            grad <- v[-1] * derivpar
+            names(grad) <- names(derivpar)
+            oldgrad <<- grad
             oldpar <<- par
             return(oldgrad)
         }
@@ -129,7 +143,7 @@ setMethod(
 
         environment(gradfun) <- f.env
 
-        parnames <- c(newpar, loglik@par)
+        parnames <- names(start)
         attr(objfun, "parnames") <- parnames
 
         m <- mle2(objfun,
@@ -142,16 +156,16 @@ setMethod(
 
         .Object@mle2 <- m
 
-        coef <- coef(m)
+        coef <- apply_link(coef(m), linklist, "linkinv")
 
         if (!missing(links)) {
-            coef <- transpar(coef, transform, inverse)
-            thess <- numDeriv::jacobian(gradfun, coef, formula=orig.formula,
-                model=orig.model,loglik=loglik,
+            thess <- numDeriv::jacobian(logLik.sensitivity, coef, formula=formula,
+                model=model,loglik=loglik,
                 observation=data[,2],
                 times=data[,1],
-                ode.opts=ode.opts)
-            vcov <- base::solve(thess)
+                ode.opts=ode.opts,
+                returnNLL=FALSE)
+            vcov <- solve(thess)
             colnames(vcov) <- rownames(vcov) <- names(coef)
         } else {
             vcov <- vcov(m)
@@ -171,16 +185,16 @@ setMethod(
 ##' @param formula formula specifing observation variable and mean
 ##' @examples
 ##' SI_model <- new("model.ode",
-##' name = "SI",
-##' model = list(
-##'     S ~ - beta*S*I/N,
-##'     I ~ beta*S*I/N - gamma*I
-##' ),
-##' initial = list(
-##'     S ~ N * (1 - i0),
-##'     I ~ N * i0
-##' ),
-##' par= c("beta", "gamma", "N", "i0")
+##'     name = "SI",
+##'     model = list(
+##'         S ~ - beta*S*I/N,
+##'         I ~ beta*S*I/N - gamma*I
+##'     ),
+##'     initial = list(
+##'         S ~ N * (1 - i0),
+##'         I ~ N * i0
+##'     ),
+##'     par= c("beta", "gamma", "N", "i0")
 ##' )
 ##'
 ##' ode.sensitivity(expression(gamma*I), SI_model, parms=c(beta=2, gamma=1, N=1e5, i0=1e-4), times=1:10)
@@ -208,7 +222,7 @@ ode.sensitivity <- function(expr, model,
 
     sens <- do.call("+", sens)
 
-    if(class(sens_p) == "list")
+    if(is.list(sens_p))
         sens <- sens + do.call("cbind", sens_p)
 
     list(mean=mean, sensitivity=sens)
@@ -218,7 +232,8 @@ ode.sensitivity <- function(expr, model,
 logLik.sensitivity <- function(parms, formula,
                             model, loglik,
                             observation, times=NULL,
-                            ode.opts=list(method="rk4", hini=0.1)) {
+                            ode.opts=list(method="rk4", hini=0.1),
+                            returnNLL=TRUE) {
     if (is.null(times)) times <- seq(length(observation))
     expr <- as.expression(formula[[3]])
     ss <- ode.sensitivity(expr, model, parms, times, ode.opts)
@@ -231,6 +246,8 @@ logLik.sensitivity <- function(parms, formula,
     loglik.gr <- grad(loglik, observation, mean, loglik.par)
     sensitivity <- c(-colSums(loglik.gr[[1]] * sens))
     if(length(loglik.gr) > 1) sensitivity <- c(sensitivity, -sapply(loglik.gr[-1], sum))
+
+    if (!returnNLL) return(sensitivity)
 
     c(nll, sensitivity)
 }

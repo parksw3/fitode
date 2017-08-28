@@ -22,7 +22,7 @@ test_that("SI model", {
         par=c("beta", "gamma", "N", "i0")
     )
 
-    start <- c(beta=2, gamma=1, N=1e4, i0=1e-3, log.k=2)
+    start <- c(beta=2, gamma=1, N=1e4, i0=1e-3, k=10)
 
     ff <- fitode(Deaths~gamma*I,
         start=start,
@@ -39,19 +39,19 @@ test_that("SI model", {
 
     all.equal(
         coef(ff),
-        structure(c(1.85425138592436, 1.0875219132783, 2167.35674255335,
-            0.000479494918160478, 3.58338623078509),
-            .Names = c("beta", "gamma", "N", "i0", "log.k")))
+        structure(c(1.85307052750156, 1.08617307995252, 2165.99479604132,
+            0.000480015158752901, 35.9904749078504),
+            .Names = c("beta", "gamma", "N", "i0", "k")))
 
     all.equal(
         coef(ff, "fitted"),
-        structure(c(0.61748104906548, 0.0839016339186521, 7.68126361306944,
-            -7.6422976519898, 3.58338623078509),
+        structure(c(0.61684400783178, 0.0826605826183551, 7.68063502499171,
+            -7.64121274342288, 3.58325431755404),
             .Names = c("log.beta", "log.gamma", "log.N", "logit.i0", "log.k")))
 
     all.equal(
         logLik(ff),
-        -67.6513223662801
+        -67.6513175110966
     )
 
     all.equal(

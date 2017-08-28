@@ -5,12 +5,12 @@
 \alias{vcov,fitode-method}
 \title{Extract covariance matrix of a fit}
 \usage{
-\S4method{vcov}{fitode}(object, type = c("original", "fitted"))
+\S4method{vcov}{fitode}(object, scale = c("original", "fitted"))
 }
 \arguments{
 \item{object}{fitode object}
 
-\item{type}{type of parameter to be returned}
+\item{scale}{scale of parameter to be returned}
 }
 \description{
 Extract covariance matrix of a fit
