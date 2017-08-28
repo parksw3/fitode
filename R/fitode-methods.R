@@ -74,15 +74,14 @@ setMethod("predict", "fitode",
              nsim=1000){
         if(missing(times)) times <- object@data$times
         method <- match.arg(method)
-        m <- object@mle2
 
-        model <- m@data$model
-        loglik <- m@data$loglik
-        parms <- coef(m)
+        model <- object@model
+        loglik <- object@loglik
+        parms <- coef(object)
 
         ss <- ode.solve(model, times, parms, keep_sensitivity=method=="delta")
 
-        expr <- as.expression(m@data$formula[[3]])
+        expr <- as.expression(object@formula[[3]])
 
         frame <- c(parms, ss@solution)
 
@@ -90,29 +89,21 @@ setMethod("predict", "fitode",
 
         df <- data.frame(times=times,mean=mean)
 
-        ## wquant from King et al.
-        wquant <- function (x, weights, probs = c(0.025, 0.975)) {
-            idx <- order(x)
-            x <- x[idx]
-            weights <- weights[idx]
-            w <- cumsum(weights)/sum(weights)
-            rval <- approx(w,x,probs,rule=1)
-            rval$y
-        }
-
         if (!missing(level)) {
             nstate <- length(model@state)
             npar <- length(model@par)
+            linklist <- object@mle2@data$linklist
 
             ll <- (1-level)/2
 
             if (method != "delta") {
                 simtraj <- matrix(NA,nrow=length(times),ncol=nsim)
-                simpars <- MASS::mvrnorm(nsim,mu=coef(m),
-                                   Sigma=vcov(m))
+                simpars <- MASS::mvrnorm(nsim,mu=coef(object, "fitted"),
+                                   Sigma=vcov(object, "fitted"))
+                simpars_orig <- t(apply(simpars, 1, apply_link, linklist, "linkinv"))
 
                 for (i in 1:nsim) {
-                    ss.tmp <- ode.solve(m@data$model, times, simpars[i,], keep_sensitivity=FALSE)
+                    ss.tmp <- ode.solve(object@model, times, simpars_orig[i,], keep_sensitivity=FALSE)
                     frame.tmp <- c(parms, ss.tmp@solution)
                     simtraj[,i] <- eval(expr, frame.tmp)
                 }
@@ -121,18 +112,24 @@ setMethod("predict", "fitode",
 
             cmat <- switch(method,
                 delta={
-                    sens <- ode.sensitivity(m@data$formula[[3]],
+                    sens <- ode.sensitivity(object@formula[[3]],
                                             model,
-                                            coef(m),
-                                            m@data$times)$sensitivity
+                                            parms,
+                                            object@data$times)$sensitivity
 
-                    fitted.vcov <- m@vcov[1:npar,1:npar]
+                    fitted_parms <- coef(object, "fitted")
+
+                    mu.eta <- apply_link(fitted_parms, linklist, "mu.eta")[1:npar]
+
+                    sens <- t(t(sens) * mu.eta)
+
+                    fitted.vcov <- vcov(object, "fitted")[1:npar,1:npar]
                     if(any(diag(fitted.vcov < 0)))
                         warning("At least one entries in diag(vcov) is negative. Confidence interval may not be accurate.")
 
                     mean.vcov <- sens %*% fitted.vcov %*% t(sens)
                     mean.err <- sqrt(diag(mean.vcov))
-                    z <- sqrt(diag(mean.vcov))
+                    z <- -qnorm(ll)
                     cmat <- data.frame(mean - z * mean.err, mean + z * mean.err)
                     cmat
                 },
@@ -141,18 +138,28 @@ setMethod("predict", "fitode",
                     cmat
                 },
                 wmvrnorm={
+                    ## wquant from King et al.
+                    wquant <- function (x, weights, probs = c(0.025, 0.975)) {
+                        idx <- order(x)
+                        x <- x[idx]
+                        weights <- weights[idx]
+                        w <- cumsum(weights)/sum(weights)
+                        rval <- approx(w,x,probs,rule=1)
+                        rval$y
+                    }
+
                     traj.logLik <- rep(NA, nsim)
-                    observation <- m@data$observation
+                    observation <- object@data$observation
 
                     for(i in 1:nsim) {
-                        traj.logLik[i] <- sum(Eval(loglik, observation, simtraj[,i], simpars[i,-c(1:npar)]))
+                        traj.logLik[i] <- sum(Eval(loglik, observation, simtraj[,i], simpars_orig[i,-c(1:npar)]))
                     }
 
                     ##FIXME: vcov not symmetric for low tolerance?
                     i <- 10
                     while(!isSymmetric(round(vcov(m), i))) i <- i - 1
 
-                    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(m), round(vcov(m), i), log=TRUE)
+                    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(object, "fitted"), round(vcov(object, "fitted"), i), log=TRUE)
                     ww <- exp(traj.logLik-sample.logLik)
                     cmat <- t(apply(simtraj, 1, wquant, weights=ww, probs=c(ll, 1-ll)))
                     cmat

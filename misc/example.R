@@ -19,11 +19,12 @@ SI_model <- new("model.ode",
     par=c("beta", "gamma", "N", "i0")
 )
 
-start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, ll.k=2)
+start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, k=5)
 
 ff <- fitode(Deaths~I,
     start=start,
-    model=SI_model, loglik=select_model("nbinom"),
+    model=SI_model,
+    loglik=select_model("nbinom"),
     data=harbin,
     tcol="week",
     links = list(
