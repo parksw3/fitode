@@ -47,8 +47,8 @@ setClass(
 ##' Class "fitode".
 ##' Result of ode fitting based on Maximum Likelihood Estimation
 ##'
-##' @name fitode-class
-##' @rdname fitode-class
+##' @name fitode
+##' @rdname fitode
 ##' @seealso \code{\link{mle2-class}}
 ##' @exportClass fitode
 ##' @export

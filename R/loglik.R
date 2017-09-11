@@ -109,7 +109,7 @@ setMethod(
             return(object)
         allvars <- c(object@observation, object@mean, object@par)
         transforms <- trans(transforms, allvars)
-        f <- c(as.symbol("~"), as.symbol("LL"), subst(object@expr[[1]]))
+        f <- c(as.symbol("~"), as.symbol("LL"), subst(object@expr[[1]]), transforms)
         f <- as.formula(as.call(f))
 
         if (missing(name)) name <- object@name

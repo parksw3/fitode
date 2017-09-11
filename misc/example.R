@@ -21,7 +21,7 @@ SI_model <- new("model.ode",
 
 start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, k=5)
 
-ff <- fitode(Deaths~I,
+ff <- fitode(Deaths~gamma*I,
     start=start,
     model=SI_model,
     loglik=select_model("nbinom"),
@@ -35,36 +35,31 @@ ff <- fitode(Deaths~I,
     )
 )
 
-start2 <- c(log.beta=log(2), log.gamma=log(1), log.N=log(1e5), logit.i=qlogis(1e-4), ll.k=2)
+SI_model_R0 <- Transform(
+    SI_model,
+    list(beta~R0*gamma),
+    par=c("R0", "gamma", "N", "i0")
+)
 
-ff2 <- fitsir::fitsir(harbin, start2, method="BFGS", dist="nbinom", tcol="week",icol="Deaths")
+SI_model_R0_u <- Transform(
+    SI_model_R0,
+    list(R0~1+RR),
+    par=c("RR", "gamma", "N", "i0")
+)
 
-all.equal(unname(coef(ff)), unname(coef(ff2)), tolerance = 1e-3) ## returns FALSE if we lower the tolerance
-
-plot(ff,level=0.95, method="wmvrnorm")
-plot(ff2, add=TRUE)
-
-## incidence fitting
-
-ff3 <- fitode(Deaths~exp(log.beta)*S*I/exp(log.N),
-    start=start,
-    model=SI_model_trans, loglik=select_model("nbinom"),
+ff2 <- fitode(Deaths~gamma*I,
+    start=c(RR=1, gamma=1, N=1e5, i0=1e-4, k=5),
+    model=SI_model_R0_u,
+    loglik=select_model("nbinom"),
     data=harbin,
-    tcol="week"
+    tcol="week",
+    links = list(
+        RR="log",
+        gamma="log",
+        N="log",
+        i0="logit"
+    )
 )
 
-ff4 <- fitsir::fitsir(harbin, start, method="BFGS", dist="nbinom", tcol="week",icol="Deaths", type="incidence")
 
-## we need high tolerance because fitode fits based on instantaneous incidence
-## whereas fitsir fits based on actual incidence (difference in number of susceptible in consecutive observations)
-all.equal(coef(ff3), coef(ff4), tolerance = 3e-2)
-
-## difference is much smaller on a constrained scale
-all.equal(
-    fitsir::trans.pars(coef(ff3)),
-    fitsir::trans.pars(coef(ff4)),
-    tolerance=3e-3
-)
-
-plot(ff3, level=0.95)
 

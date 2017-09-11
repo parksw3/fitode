@@ -151,7 +151,7 @@ setMethod(
         for(i in 1:nstate) {
             fixed <- c(as.symbol("~"), as.symbol(object@state[i]))
             ff <- lapply(list(object@grad[[i]], object@initial[[i]]), function(x){
-                f <- c(fixed, subst(x[[1]]))
+                f <- c(fixed, subst(x[[1]], transforms))
                 f <- as.formula(as.call(f))
             })
             newmodel[[i]] <- ff[[1]]
