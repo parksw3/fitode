@@ -12,7 +12,7 @@ ode.solve(model, times, parms, y, ode.opts = list(method = "rk4", hini = 0.1),
 
 \item{times}{time vector}
 
-\item{parms}{parameters}
+\item{parms}{named vector of parameter values}
 
 \item{y}{initial values}
 

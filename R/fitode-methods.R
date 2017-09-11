@@ -209,6 +209,8 @@ setMethod("vcov", "fitode",
 
 ##' Calculate standard error
 ##' @importFrom bbmle stdEr
+##' @param x fitode object
+##' @param scale scale of parameter to be returned
 ##' @docType methods
 ##' @exportMethod stdEr
 setMethod("stdEr", "fitode", function(x,scale=c("original", "fitted")){sqrt(diag(vcov(x, scale)))})

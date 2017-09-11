@@ -1,3 +1,10 @@
+##' Set up link functions for ode/loglik parameters
+##'
+##' @param link named list or vector of strings specifying link functions
+##' @param model model.ode object
+##' @param loglik loglik.ode object
+##' @seealso \code{\link{make.link}}
+##' @return list of strings specifying link functions
 set_links <- function(links, model, loglik) {
     allpar <- c(model@par, loglik@par)
     links_default <- as.list(rep("identity", length(allpar)))
@@ -19,6 +26,12 @@ set_links <- function(links, model, loglik) {
     links_default
 }
 
+##' Apply link functions to parameters
+##'
+##' @param par vector of parameter values
+##' @param linklist list containing \code{linkfun}, \code{linkinv}, and \code{mu.eta} for each link
+##' @param type string specifying which function should be applied
+##' @seealso \code{\link{make.link}}
 apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
     type <- match.arg(type)
     ff <- linklist[[type]]
@@ -31,8 +44,8 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' fit ode
 ##' @rdname fitode
 ##' @name fitode
-##' @param formula formula specifing observation variable and mean
-##' @param start starting values for optimization
+##' @param formula formula specifing observation variable and the mean
+##' @param start named vector of starting parameter values
 ##' @param model ode model
 ##' @param loglik log liklihood model
 ##' @param data data frame with time column and observation column
@@ -51,6 +64,8 @@ setMethod(
              formula, start,
              model, loglik=select_model("gaussian"),
              data,
+             method="BFGS",
+             optimizer="optim",
              tcol = "times",
              links,
              control=list(maxit=1e5),
@@ -146,10 +161,13 @@ setMethod(
         parnames <- names(start)
         attr(objfun, "parnames") <- parnames
 
+        message("Fitting ode ...")
+
         m <- mle2(objfun,
                   vecpar=TRUE,
                   start=start,
-                  method="BFGS",
+                  method=method,
+                  optimizer=optimizer,
                   control=control,
                   gr=gradfun,
                   data=dataarg)
@@ -159,6 +177,7 @@ setMethod(
         coef <- apply_link(coef(m), linklist, "linkinv")
 
         if (!missing(links)) {
+            message("Computing vcov on the original scale ...")
             thess <- numDeriv::jacobian(logLik.sensitivity, coef, formula=formula,
                 model=model,loglik=loglik,
                 observation=data[,2],
@@ -182,7 +201,10 @@ setMethod(
 ##' Calculate sensitivity of the expression with respect to the parameters
 ##'
 ##' @param expr expression of model states and parameters
-##' @param formula formula specifing observation variable and mean
+##' @param model model.ode object
+##' @param parms named vector of parameter values
+##' @param times time window for which the model should be solved
+##' @param ode.opts options for the ode solver (see \code{\link(ode)})
 ##' @examples
 ##' SI_model <- new("model.ode",
 ##'     name = "SI",
@@ -229,6 +251,15 @@ ode.sensitivity <- function(expr, model,
 }
 
 ##' Sensitivity of the likelihood function with respect to parameters
+##' @param parms named vector of parameter values
+##' @param formula formula specifing observation variable and the mean
+##' @param model model.ode object
+##' @param loglik loglik.ode object
+##' @param observation observed values
+##' @param times time at which observations were measured
+##' @param ode.opts options for the ode solver (see \code{\link(ode)})
+##' @param returnNLL (logical) return negative log likelihood
+##' @return vector of nll and sensitivity of nll with respect to the parameters
 logLik.sensitivity <- function(parms, formula,
                             model, loglik,
                             observation, times=NULL,

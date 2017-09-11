@@ -10,7 +10,13 @@ ode.sensitivity(expr, model, parms, times, ode.opts = list(method = "rk4",
 \arguments{
 \item{expr}{expression of model states and parameters}
 
-\item{formula}{formula specifing observation variable and mean}
+\item{model}{model.ode object}
+
+\item{parms}{named vector of parameter values}
+
+\item{times}{time window for which the model should be solved}
+
+\item{ode.opts}{options for the ode solver (see \code{\link(ode)})}
 }
 \description{
 Calculate sensitivity of the expression with respect to the parameters

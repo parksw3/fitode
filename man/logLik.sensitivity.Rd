@@ -7,6 +7,26 @@
 logLik.sensitivity(parms, formula, model, loglik, observation, times = NULL,
   ode.opts = list(method = "rk4", hini = 0.1), returnNLL = TRUE)
 }
+\arguments{
+\item{parms}{named vector of parameter values}
+
+\item{formula}{formula specifing observation variable and the mean}
+
+\item{model}{model.ode object}
+
+\item{loglik}{loglik.ode object}
+
+\item{observation}{observed values}
+
+\item{times}{time at which observations were measured}
+
+\item{ode.opts}{options for the ode solver (see \code{\link(ode)})}
+
+\item{returnNLL}{(logical) return negative log likelihood}
+}
+\value{
+vector of nll and sensitivity of nll with respect to the parameters
+}
 \description{
 Sensitivity of the likelihood function with respect to parameters
 }

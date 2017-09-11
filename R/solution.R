@@ -112,7 +112,7 @@ setMethod(
 ##' solve ode models
 ##' @param model model.ode object
 ##' @param times time vector
-##' @param parms parameters
+##' @param parms named vector of parameter values
 ##' @param y initial values
 ##' @param ode.opts options for ode integration
 ##' @param keep_sensitivity keep sensitivity equations

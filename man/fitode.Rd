@@ -7,14 +7,14 @@
 Result of ode fitting based on Maximum Likelihood Estimation}
 \usage{
 \S4method{initialize}{fitode}(.Object, formula, start, model,
-  loglik = select_model("gaussian"), data, tcol = "times", links,
-  control = list(maxit = 1e+05), ode.opts = list(method = "rk4", hini =
-  0.1), debug = FALSE)
+  loglik = select_model("gaussian"), data, method = "BFGS",
+  optimizer = "optim", tcol = "times", links, control = list(maxit =
+  1e+05), ode.opts = list(method = "rk4", hini = 0.1), debug = FALSE)
 }
 \arguments{
-\item{formula}{formula specifing observation variable and mean}
+\item{formula}{formula specifing observation variable and the mean}
 
-\item{start}{starting values for optimization}
+\item{start}{named vector of starting parameter values}
 
 \item{model}{ode model}
 

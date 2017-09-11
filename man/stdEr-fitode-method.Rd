@@ -7,6 +7,11 @@
 \usage{
 \S4method{stdEr}{fitode}(x, scale = c("original", "fitted"))
 }
+\arguments{
+\item{x}{fitode object}
+
+\item{scale}{scale of parameter to be returned}
+}
 \description{
 Calculate standard error
 }
