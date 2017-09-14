@@ -56,7 +56,7 @@ setMethod(
         if (keep_sensitivity) {
             gfun <- function(times, y, parms) {
                 state <- y[1:nstate]
-                frame <- as.list(c(state, parms))
+                frame <- as.list(c(t=times, state, parms))
                 ## equivalent to `grad(model, state, parms)` but faster
                 gr <- sapply(model@grad, eval, frame)
                 ## jacobian(model, state, parms, type="state")
@@ -72,7 +72,7 @@ setMethod(
             }
         } else {
             gfun <- function(times, y, parms) {
-                frame <- as.list(c(y, parms))
+                frame <- as.list(c(t=times, y, parms))
                 gr <- sapply(model@grad, eval, frame)
 
                 list(c(gr))
@@ -122,7 +122,7 @@ ode.solve <- function(model, times, parms, y,
     if (missing(y)) {
         frame <- as.list(c(parms))
         y <- sapply(model@initial, eval, frame)
-    } else if (names(y) != model@state) {
+    } else if (all(names(y) %in% model@state)) {
         stop("y must have same name as the state variables")
     }
 
