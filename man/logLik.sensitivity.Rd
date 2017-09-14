@@ -5,7 +5,7 @@
 \title{Sensitivity of the likelihood function with respect to parameters}
 \usage{
 logLik.sensitivity(parms, formula, model, loglik, observation, times = NULL,
-  ode.opts = list(method = "rk4", hini = 0.1), returnNLL = TRUE)
+  ode.opts = list(method = "lsoda"), returnNLL = TRUE)
 }
 \arguments{
 \item{parms}{named vector of parameter values}
@@ -20,7 +20,7 @@ logLik.sensitivity(parms, formula, model, loglik, observation, times = NULL,
 
 \item{times}{time at which observations were measured}
 
-\item{ode.opts}{options for the ode solver (see \code{\link(ode)})}
+\item{ode.opts}{options for the ode solver (see \code{\link{ode}})}
 
 \item{returnNLL}{(logical) return negative log likelihood}
 }

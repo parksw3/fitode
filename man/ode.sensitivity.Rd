@@ -4,8 +4,7 @@
 \alias{ode.sensitivity}
 \title{Calculate sensitivity of the expression with respect to the parameters}
 \usage{
-ode.sensitivity(expr, model, parms, times, ode.opts = list(method = "rk4",
-  hini = 0.1))
+ode.sensitivity(expr, model, parms, times, ode.opts = list(method = "lsoda"))
 }
 \arguments{
 \item{expr}{expression of model states and parameters}
@@ -16,7 +15,7 @@ ode.sensitivity(expr, model, parms, times, ode.opts = list(method = "rk4",
 
 \item{times}{time window for which the model should be solved}
 
-\item{ode.opts}{options for the ode solver (see \code{\link(ode)})}
+\item{ode.opts}{options for the ode solver (see \code{\link{ode}})}
 }
 \description{
 Calculate sensitivity of the expression with respect to the parameters

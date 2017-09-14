@@ -231,7 +231,7 @@ setMethod("logLik", "fitode", function(object){-object@min})
 setMethod("profile", "fitode",
     function(fitted, scale=c("original", "fitted")) {
         scale <- match.arg(scale)
-        prof <- profile(object@mle2, continuation="naive", trace=TRUE)
+        prof <- profile(object@mle2, continuation="naive")
         if (scale=="original" && length(object@links) > 0) {
             pp <- prof@profile
             tr <- object@transforms$transform

@@ -21,7 +21,7 @@ SI_model <- new("model.ode",
 
 start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, k=5)
 
-ff <- fitode(Deaths~gamma*I,
+system.time(ff <- fitode(Deaths~gamma*I,
     start=start,
     model=SI_model,
     loglik=select_model("nbinom"),
@@ -33,7 +33,9 @@ ff <- fitode(Deaths~gamma*I,
         N="log",
         i0="logit"
     )
-)
+))
+
+system.time(pp <- profile(ff@mle2, continuation="naive", trace=TRUE))
 
 SI_model_R0 <- Transform(
     SI_model,

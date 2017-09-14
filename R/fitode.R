@@ -69,7 +69,7 @@ setMethod(
              tcol = "times",
              links,
              control=list(maxit=1e5),
-             ode.opts=list(method="rk4", hini=0.1),
+             ode.opts=list(method="lsoda"),
              debug=FALSE) {
         oldpar <- c(model@par, loglik@par)
 
@@ -126,15 +126,18 @@ setMethod(
             origpar <- apply_link(par, linklist, "linkinv")
             derivpar <- apply_link(par, linklist, "mu.eta")
 
-            v <- logLik.sensitivity(origpar, formula, model, loglik, observation, times, ode.opts)
-            oldnll <<- v[1]
-            grad <- v[-1] * derivpar
-            names(grad) <- names(derivpar)
-            oldgrad <<- grad
-            oldpar <<- par
+            v <- try(logLik.sensitivity(origpar, formula, model, loglik, observation, times, ode.opts))
+            if (inherits(v, "try-error")) {
+                return(NA)
+            } else {
+                oldnll <<- v[1]
+                grad <- v[-1] * derivpar
+                names(grad) <- names(derivpar)
+                oldgrad <<- grad
+                oldpar <<- par
 
-            return(oldnll)
-
+                return(oldnll)
+            }
         }
         gradfun <- function(par, formula, model, loglik, observation, times, ode.opts, linklist) {
             if (identical(par,oldpar)) {
@@ -145,13 +148,18 @@ setMethod(
             origpar <- apply_link(par, linklist, "linkinv")
             derivpar <- apply_link(par, linklist, "mu.eta")
 
-            v <- logLik.sensitivity(origpar, formula, model, loglik, observation, times, ode.opts)
-            oldnll <<- v[1]
-            grad <- v[-1] * derivpar
-            names(grad) <- names(derivpar)
-            oldgrad <<- grad
-            oldpar <<- par
-            return(oldgrad)
+            v <- try(logLik.sensitivity(origpar, formula, model, loglik, observation, times, ode.opts))
+            if (inherits(v, "try-error")) {
+                return(NA)
+            } else {
+                oldnll <<- v[1]
+                grad <- v[-1] * derivpar
+                names(grad) <- names(derivpar)
+                oldgrad <<- grad
+                oldpar <<- par
+
+                return(grad)
+            }
         }
 
         environment(objfun) <- f.env
@@ -204,7 +212,7 @@ setMethod(
 ##' @param model model.ode object
 ##' @param parms named vector of parameter values
 ##' @param times time window for which the model should be solved
-##' @param ode.opts options for the ode solver (see \code{\link(ode)})
+##' @param ode.opts options for the ode solver (see \code{\link{ode}})
 ##' @examples
 ##' SI_model <- new("model.ode",
 ##'     name = "SI",
@@ -223,8 +231,8 @@ setMethod(
 ##' @export
 ode.sensitivity <- function(expr, model,
                         parms, times,
-                        ode.opts=list(method="rk4", hini=0.1)) {
-    solution <- ode.solve(model, times, parms, ode.opts=ode.opts)
+                        ode.opts=list(method="lsoda")) {
+    capture.output(solution <- ode.solve(model, times, parms, ode.opts=ode.opts))
 
     frame <- c(solution@solution, parms)
 
@@ -257,13 +265,13 @@ ode.sensitivity <- function(expr, model,
 ##' @param loglik loglik.ode object
 ##' @param observation observed values
 ##' @param times time at which observations were measured
-##' @param ode.opts options for the ode solver (see \code{\link(ode)})
+##' @param ode.opts options for the ode solver (see \code{\link{ode}})
 ##' @param returnNLL (logical) return negative log likelihood
 ##' @return vector of nll and sensitivity of nll with respect to the parameters
 logLik.sensitivity <- function(parms, formula,
                             model, loglik,
                             observation, times=NULL,
-                            ode.opts=list(method="rk4", hini=0.1),
+                            ode.opts=list(method="lsoda"),
                             returnNLL=TRUE) {
     if (is.null(times)) times <- seq(length(observation))
     expr <- as.expression(formula[[3]])
