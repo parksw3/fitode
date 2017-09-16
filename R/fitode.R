@@ -5,25 +5,25 @@
 ##' @param loglik loglik.ode object
 ##' @seealso \code{\link{make.link}}
 ##' @return list of strings specifying link functions
-set_links <- function(links, model, loglik) {
+set_link <- function(link, model, loglik) {
     allpar <- c(model@par, loglik@par)
-    links_default <- as.list(rep("identity", length(allpar)))
-    names(links_default) <- allpar
+    link_default <- as.list(rep("identity", length(allpar)))
+    names(link_default) <- allpar
 
-    if (!missing(links)) links_default[names(links)] <- links
+    if (!missing(link)) link_default[names(link)] <- link
 
     loglik.link <- switch(loglik@name,
-        gaussin=list(sigma="log"),
+        gaussian=list(sigma="log"),
         nbinom=list(k="log"),
         nbinom1=list(phi="log")
     )
 
     if (!is.null(loglik.link)) {
-        loglik.link <- loglik.link[!(names(loglik.link) %in% links)]
-        links_default[names(loglik.link)] <- loglik.link
+        loglik.link <- loglik.link[!(names(loglik.link) %in% link)]
+        link_default[names(loglik.link)] <- loglik.link
     }
 
-    links_default
+    link_default
 }
 
 ##' Apply link functions to parameters
@@ -50,7 +50,7 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' @param loglik log liklihood model
 ##' @param data data frame with time column and observation column
 ##' @param tcol time column
-##' @param links named vector or list of links for ode/log-likelihood parameters
+##' @param link named vector or list of link functions for ode/log-likelihood parameters
 ##' @param control see optim
 ##' @param ode.opts options for ode integration. See ode
 ##' @param debug print debugging output?
@@ -67,7 +67,7 @@ setMethod(
              method="BFGS",
              optimizer="optim",
              tcol = "times",
-             links,
+             link,
              control=list(maxit=1e5),
              ode.opts=list(method="lsoda"),
              skip.hessian=FALSE,
@@ -96,18 +96,18 @@ setMethod(
 
         .Object@data <- data
 
-        links <- set_links(links, model, loglik)
+        link <- set_link(link, model, loglik)
 
-        links_data <- lapply(links, make.link)
+        link_data <- lapply(link, make.link)
 
         linklist <- lapply(c("linkfun", "linkinv", "mu.eta"),
-                           function(x) lapply(links_data, "[[", x))
+                           function(x) lapply(link_data, "[[", x))
 
         names(linklist) <- c("linkfun", "linkinv", "mu.eta")
 
-        .Object@links <- links
+        .Object@link <- link
 
-        newpar <- Map(function(x, y) ifelse(x=="identity", y, paste(x, y, sep=".")), x=links, y=oldpar)
+        newpar <- Map(function(x, y) ifelse(x=="identity", y, paste(x, y, sep=".")), x=link, y=oldpar)
         newpar <- unname(unlist(newpar))
 
         names(linklist$linkfun) <- names(linklist$mu.eta) <- newpar
@@ -190,7 +190,7 @@ setMethod(
 
         coef <- apply_link(coef(m), linklist, "linkinv")
 
-        if (!skip.hessian && !missing(links)) {
+        if (!skip.hessian && !missing(link)) {
             message("Computing vcov on the original scale ...")
             thess <- numDeriv::jacobian(logLik.sensitivity, coef, formula=formula,
                 model=model,loglik=loglik,

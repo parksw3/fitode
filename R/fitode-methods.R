@@ -232,7 +232,7 @@ setMethod("profile", "fitode",
     function(fitted, scale=c("original", "fitted")) {
         scale <- match.arg(scale)
         prof <- profile(object@mle2, continuation="naive")
-        if (scale=="original" && length(object@links) > 0) {
+        if (scale=="original" && length(object@link) > 0) {
             pp <- prof@profile
             tr <- object@transforms$transform
             inv <- object@transforms$inverse
@@ -271,8 +271,8 @@ setMethod("show", "fitode",
         print(coef(object))
         cat("\nLog-Likelihood:")
         cat(round(as.numeric(logLik(object)),2),"\n")
-        cat("\nlinks: ")
-        if (length(object@links)==0) {
+        cat("\nlink: ")
+        if (length(object@link)==0) {
             cat("none")
         } else {
             cat(names(object@mle2@coef)[!(names(object@mle2@coef) %in% names(object@coef))])

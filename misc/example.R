@@ -27,7 +27,7 @@ system.time(ff <- fitode(Deaths~gamma*I,
     loglik=select_model("nbinom"),
     data=harbin,
     tcol="week",
-    links = list(
+    link = list(
         beta="log",
         gamma="log",
         N="log",

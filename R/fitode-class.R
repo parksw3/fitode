@@ -62,7 +62,7 @@ fitode <- setClass("fitode",
         vcov="matrix",
         min="numeric",
         mle2="mle2",
-        links="list",
+        link="list",
         transforms="list"
     )
 )
