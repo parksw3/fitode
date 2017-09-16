@@ -122,7 +122,7 @@ ode.solve <- function(model, times, parms, y,
     if (missing(y)) {
         frame <- as.list(c(parms))
         y <- sapply(model@initial, eval, frame)
-    } else if (all(names(y) %in% model@state)) {
+    } else if (!all(names(y) %in% model@state)) {
         stop("y must have same name as the state variables")
     }
 

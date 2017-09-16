@@ -70,6 +70,7 @@ setMethod(
              links,
              control=list(maxit=1e5),
              ode.opts=list(method="lsoda"),
+             skip.hessian=FALSE,
              debug=FALSE) {
         oldpar <- c(model@par, loglik@par)
 
@@ -81,6 +82,10 @@ setMethod(
                 )
             )
         }
+
+        ## order parameters ...
+
+        start <- start[oldpar]
 
         .Object@model <- model
         .Object@formula <- formula
@@ -178,13 +183,14 @@ setMethod(
                   optimizer=optimizer,
                   control=control,
                   gr=gradfun,
-                  data=dataarg)
+                  data=dataarg,
+                  skip.hessian=skip.hessian)
 
         .Object@mle2 <- m
 
         coef <- apply_link(coef(m), linklist, "linkinv")
 
-        if (!missing(links)) {
+        if (!skip.hessian && !missing(links)) {
             message("Computing vcov on the original scale ...")
             thess <- numDeriv::jacobian(logLik.sensitivity, coef, formula=formula,
                 model=model,loglik=loglik,
@@ -243,14 +249,12 @@ ode.sensitivity <- function(expr, model,
     dmds <- lapply(model@state, function(s) Deriv(expr, s))
     dmdp <- lapply(model@par, function(p) Deriv(expr, p))
 
-    sens <- vector('list', nstate)
+    sens <- matrix(0, nrow=length(times),ncol=length(model@par))
     for(i in 1:nstate) {
-        sens[[i]] <- eval(dmds[[i]], frame) * solution@sensitivity[[i]]
+        sens <- sens + eval(dmds[[i]], frame) * solution@sensitivity[[i]]
     }
 
     sens_p <- sapply(dmdp, eval, frame)
-
-    sens <- do.call("+", sens)
 
     if(is.list(sens_p))
         sens <- sens + do.call("cbind", sens_p)

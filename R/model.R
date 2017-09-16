@@ -25,9 +25,9 @@ setMethod(
     "initialize",
     "model.ode",
     function(.Object, name,
-                          model, initial,
-                          par,
-                          keep_jacobian=TRUE) {
+             model, initial,
+             par,
+             keep_jacobian=TRUE) {
         .Object@name <- name
 
         if (any(sapply(model, class) != "formula"))
@@ -41,7 +41,7 @@ setMethod(
         state <- lapply(mi, function(x){
             sapply(x, function(y) as.character(y[[2]]))
         })
-
+        ## TODO: why do I get errors here?
         if (!do.call(all.equal, state)) {
             stop("initial values do not have same state variable names as the model provided")
         } else {
