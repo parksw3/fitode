@@ -8,8 +8,9 @@ Result of ode fitting based on Maximum Likelihood Estimation}
 \usage{
 \S4method{initialize}{fitode}(.Object, formula, start, model,
   loglik = select_model("gaussian"), data, method = "BFGS",
-  optimizer = "optim", tcol = "times", links, control = list(maxit =
-  1e+05), ode.opts = list(method = "lsoda"), debug = FALSE)
+  optimizer = "optim", tcol = "times", link, control = list(maxit =
+  1e+05), ode.opts = list(method = "lsoda"), skip.hessian = FALSE,
+  debug = FALSE, ...)
 }
 \arguments{
 \item{formula}{formula specifing observation variable and the mean}
@@ -24,13 +25,15 @@ Result of ode fitting based on Maximum Likelihood Estimation}
 
 \item{tcol}{time column}
 
-\item{links}{named vector or list of links for ode/log-likelihood parameters}
+\item{link}{named vector or list of link functions for ode/log-likelihood parameters}
 
 \item{control}{see optim}
 
 \item{ode.opts}{options for ode integration. See ode}
 
 \item{debug}{print debugging output?}
+
+\item{...}{mle2 arguments}
 }
 \description{
 Class "fitode".

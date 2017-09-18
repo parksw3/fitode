@@ -53,10 +53,14 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' @param link named vector or list of link functions for ode/log-likelihood parameters
 ##' @param control see optim
 ##' @param ode.opts options for ode integration. See ode
+##' @param skip.hessian skip hessian calculation
+##' @param use.ginv use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
 ##' @param debug print debugging output?
 ##' @param ... mle2 arguments
 ##' @import bbmle
 ##' @importFrom numDeriv jacobian
+##' @importFrom MASS ginv
+##' @seealso \code{\link{mle2}}
 ##' @export fitode
 setMethod(
     "initialize",
@@ -72,6 +76,7 @@ setMethod(
              control=list(maxit=1e5),
              ode.opts=list(method="lsoda"),
              skip.hessian=FALSE,
+             use.ginv=TRUE,
              debug=FALSE,
              ...) {
         oldpar <- c(model@par, loglik@par)
@@ -198,15 +203,39 @@ setMethod(
         coef <- apply_link(coef(m), linklist, "linkinv")
 
         if (!skip.hessian && !missing(link)) {
-            message("Computing vcov on the original scale ...")
-            thess <- numDeriv::jacobian(logLik.sensitivity, coef, formula=formula,
-                model=model,loglik=loglik,
-                observation=data[,2],
-                times=data[,1],
-                ode.opts=ode.opts,
-                returnNLL=FALSE)
-            vcov <- solve(thess)
-            colnames(vcov) <- rownames(vcov) <- names(coef)
+            if (!length(oldpar)) {
+                vcov <- matrix(0, 0, 0)
+            } else {
+                message("Computing vcov on the original scale ...")
+                thess <- try(numDeriv::jacobian(logLik.sensitivity, coef, formula=formula,
+                                            model=model,loglik=loglik,
+                                            observation=data[,2],
+                                            times=data[,1],
+                                            ode.opts=ode.opts,
+                                            returnNLL=FALSE))
+
+                if(!inherits(thess, "try-error")) {
+                    if (use.ginv) {
+                        vcov <- try(MASS::ginv(thess), silent=TRUE)
+                    } else {
+                        vcov <- try(solve(thess), silent=TRUE)
+                    }
+
+                    if (inherits(vcov, "try-error")) {
+                        warning("Couldn't invert Hessian")
+                        vcov <- matrix(NA, length(oldpar), length(oldpar))
+                    }
+
+                } else {
+                    warning("Couldn't compute Hessian")
+                    vcov <- matrix(NA,  length(oldpar), length(oldpar))
+
+                }
+
+                dimnames(vcov) <- names(coef)
+
+            }
+
         } else {
             vcov <- vcov(m)
         }

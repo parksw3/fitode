@@ -42,7 +42,7 @@ setMethod(
             sapply(x, function(y) as.character(y[[2]]))
         })
         ## TODO: why do I get errors here?
-        if (!do.call(all.equal, state)) {
+        if (is.character(do.call(all.equal, state))) {
             stop("initial values do not have same state variable names as the model provided")
         } else {
             state <- state[[1]]

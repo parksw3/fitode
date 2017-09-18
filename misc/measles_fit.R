@@ -5,50 +5,45 @@ if(!require(fitode)) {
 measles_df <- read.csv(url("https://ms.mcmaster.ca/~bolker/measdata/ewmeas.dat"), header=FALSE, sep=" ")
 measles_df <- setNames(measles_df, c("year", "cases"))
 
-SEI_obs <- new("model.ode",
-               name="SEI observe",
-               model=list(
-                   S~mu*(N-S)-beta*(I.obs+I.unobs)*S,
-                   E~beta*(I.obs+I.unobs)*S-(mu+Sigma)*E,
-                   I.unobs~Sigma*E-(mu+gamma+lambda)*I.unobs,
-                   I.obs~lambda*I.unobs-(mu+gamma)*I.obs
-               ),
-               initial=list(
-                   S~N*(1-e0-i0.unobs-i0.obs-r0),
-                   E~N*e0,
-                   I.unobs~N*i0.unobs,
-                   I.obs~N*i0.obs
-               ),
-               par=c("N", "mu", "beta", "Sigma", "gamma", "lambda", "e0", "i0.unobs", "i0.obs", "r0")
+SEI <- new("model.ode",
+    name="SEI",
+    model=list(
+        S~mu*(N-S)-beta*I*S,
+        E~beta*I*S-(mu+Sigma)*E,
+        I~Sigma*E-(mu+gamma)*I
+    ),
+    initial=list(
+        S~N*(1-e0-i0-r0),
+        E~N*e0,
+        I~N*i0
+    ),
+    par=c("N", "mu", "beta", "Sigma", "gamma", "e0", "i0", "r0")
 )
 
-measles_obs <- Transform(
-    SEI_obs,
+measles <- Transform(
+    SEI,
     transforms=list(
-        beta~c0+c1*(1+cos(2*pi*(t-t0)))
+        beta~c0+c1*(1+cos(2*pi*t))
     ),
-    par=c("N", "mu", "c0", "c1", "Sigma", "gamma", "lambda", "t0", "e0", "i0.unobs", "i0.obs", "r0")
+    par=c("N", "mu", "c0", "c1", "Sigma", "gamma", "e0", "i0", "r0")
 )
 
 start <- c(
-    N=5e7,
+    N=2e7,
     mu=0.02,
     c0=1.7e-5,
     c1=2e-5,
     Sigma=35.6,
     gamma=33,
-    lambda=20,
-    t0=0.01,
     e0=1e-10,
-    i0.unobs=1e-7,
-    i0.obs=1e-8,
+    i0=1e-7,
     r0=0.94,
-    sigma=8000
+    sigma=9000
 )
 
-ff2 <- fitode(cases~lambda*I.obs*1/52,
-    start=coef(ff),
-    model=measles_obs,
+ff <- fitode(cases~Sigma*E*1/52*0.67,
+    start=start,
+    model=measles,
     loglik=select_model("gaussian"),
     data=measles_df,
     tcol="year",
@@ -59,11 +54,8 @@ ff2 <- fitode(cases~lambda*I.obs*1/52,
         c1="log",
         Sigma="log",
         gamma="log",
-        lambda="log",
-        t0="logit",
         e0="logit",
-        i0.unobs="logit",
-        i0.obs="logit",
+        i0="logit",
         r0="logit",
         sigma="log"
     ),
@@ -73,16 +65,43 @@ ff2 <- fitode(cases~lambda*I.obs*1/52,
     debug=TRUE
 )
 
-ss <- ode.solve(
-    measles_obs,
-    measles_df$year,
-    coef(ff),
-    ode.opts=list(method="rk4")
+start_nbinom <- coef(ff)[1:(length(coef(ff))-1)]
+start_nbinom[["k"]] <- 10
+
+fitode:::logLik.sensitivity(
+    start_nbinom,
+    cases~Sigma*E*1/52*0.67,
+    measles,
+    select_model("nbinom"),
+    measles_df$cases,
+    measles_df$year
 )
 
-plot(measles_df)
-lines(measles_df$year, ss@solution$I.obs/52*coef(ff)[["lambda"]])
+## FIXME: return an error when link names does not match names of the parameters
 
+ff_nbinom <- fitode(cases~Sigma*E*1/52*0.67,
+    start=start_nbinom,
+    model=measles,
+    loglik=select_model("nbinom"),
+    data=measles_df,
+    tcol="year",
+    link=list(
+        N="log",
+        mu="log",
+        c0="log",
+        c1="log",
+        Sigma="log",
+        gamma="log",
+        e0="logit",
+        i0="logit",
+        r0="logit",
+        k="log"
+        ),
+    control=list(maxit=1e3),
+    skip.hessian=TRUE,
+    ode.opts=list(method="rk4"),
+    debug=TRUE
+)
 
-save("ff", file="measles_fit.rda")
+save("ff", "ff_nbinom", file="measles_fit.rda")
 
