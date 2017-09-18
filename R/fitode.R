@@ -74,7 +74,7 @@ setMethod(
              tcol = "times",
              link,
              control=list(maxit=1e5),
-             ode.opts=list(method="lsoda"),
+             ode.opts=list(method="rk4"),
              skip.hessian=FALSE,
              use.ginv=TRUE,
              debug=FALSE,
@@ -244,7 +244,7 @@ setMethod(
 
                 }
 
-                dimnames(vcov) <- names(coef)
+                rownames(vcov) <- colnames(vcov) <- names(coef)
 
             }
 
@@ -286,7 +286,7 @@ setMethod(
 ode.sensitivity <- function(expr, model,
                         parms, times,
                         ode.opts=list(method="lsoda")) {
-    capture.output(solution <- ode.solve(model, times, parms, ode.opts=ode.opts))
+    solution <- ode.solve(model, times, parms, ode.opts=ode.opts)
 
     frame <- c(solution@solution, parms)
 

@@ -32,7 +32,8 @@ system.time(ff <- fitode(Deaths~gamma*I,
         gamma="log",
         N="log",
         i0="logit"
-    )
+    ),
+    ode.opts=list(method="rk4")
 ))
 
 system.time(pp <- profile(ff@mle2, continuation="naive", trace=TRUE))

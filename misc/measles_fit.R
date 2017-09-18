@@ -41,7 +41,10 @@ start <- c(
     sigma=9000
 )
 
-ff <- fitode(cases~Sigma*E*1/52*0.67,
+tdiff <- diff(measles_df$year)
+tdiff <- c(tdiff, tail(tdiff,1))
+
+ff <- fitode(cases~Sigma*E*tdiff*0.67,
     start=start,
     model=measles,
     loglik=select_model("gaussian"),

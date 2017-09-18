@@ -234,29 +234,25 @@ setMethod("profile", "fitode",
         scale <- match.arg(scale)
         prof <- profile(object@mle2, continuation="naive")
         if (scale=="original" && length(object@link) > 0) {
-            pp <- prof@profile
-            tr <- object@transforms$transform
-            inv <- object@transforms$inverse
-            for (i in 1:length(pp)) {
-                pp[[i]][,-1] <- t(
-                    apply(
-                        pp[[i]][,-1], 1,
-                        transpar,
-                        transform=tr,
-                        inverse=inv
-                    )
-                )
-            }
-            names(pp) <- names(object@coef)
-            prof@profile <- pp
+            ## TODO: re-write this section...
 
-            ss <- prof@summary
 
-            transpar(ss@coef[,1], tr, inv)
 
         }
         prof
     }
+)
+
+##' @importFrom bbmle summary
+setMethod("summary","fitode",
+    function(object, scale=c("original", "fitted")) {
+        scale <- match.arg(scale)
+        ss <- summary(object@mle2)
+
+
+
+    }
+
 )
 
 ##' show object
