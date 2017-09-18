@@ -79,7 +79,9 @@ setMethod("predict", "fitode",
         loglik <- object@loglik
         parms <- coef(object)
 
-        ss <- ode.solve(model, times, parms, keep_sensitivity=method=="delta")
+        ss <- ode.solve(model, times, parms,
+                        ode.opts=object@mle2@data$ode.opts,
+                        keep_sensitivity=method=="delta")
 
         expr <- as.expression(object@formula[[3]])
 
@@ -97,9 +99,12 @@ setMethod("predict", "fitode",
             ll <- (1-level)/2
 
             if (method != "delta") {
+                vv <- vcov(object, "fitted")
+                vv[lower.tri(vv)] <- t(vv)[lower.tri(vv)]
+
                 simtraj <- matrix(NA,nrow=length(times),ncol=nsim)
                 simpars <- MASS::mvrnorm(nsim,mu=coef(object, "fitted"),
-                                   Sigma=vcov(object, "fitted"))
+                                   Sigma=vv)
                 simpars_orig <- t(apply(simpars, 1, apply_link, linklist, "linkinv"))
 
                 for (i in 1:nsim) {
@@ -155,11 +160,7 @@ setMethod("predict", "fitode",
                         traj.logLik[i] <- sum(Eval(loglik, observation, simtraj[,i], simpars_orig[i,-c(1:npar)]))
                     }
 
-                    ##FIXME: vcov not symmetric for low tolerance?
-                    i <- 10
-                    while(!isSymmetric(round(vcov(m), i))) i <- i - 1
-
-                    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(object, "fitted"), round(vcov(object, "fitted"), i), log=TRUE)
+                    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(object, "fitted"), vv, log=TRUE)
                     ww <- exp(traj.logLik-sample.logLik)
                     cmat <- t(apply(simtraj, 1, wquant, weights=ww, probs=c(ll, 1-ll)))
                     cmat

@@ -54,6 +54,7 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' @param control see optim
 ##' @param ode.opts options for ode integration. See ode
 ##' @param debug print debugging output?
+##' @param ... mle2 arguments
 ##' @import bbmle
 ##' @importFrom numDeriv jacobian
 ##' @export fitode
@@ -71,7 +72,8 @@ setMethod(
              control=list(maxit=1e5),
              ode.opts=list(method="lsoda"),
              skip.hessian=FALSE,
-             debug=FALSE) {
+             debug=FALSE,
+             ...) {
         oldpar <- c(model@par, loglik@par)
 
         if (any(is.na(match(names(start), oldpar)))) {
@@ -141,6 +143,8 @@ setMethod(
                 oldgrad <<- grad
                 oldpar <<- par
 
+                if (debug) {print(oldnll); print(par)}
+
                 return(oldnll)
             }
         }
@@ -163,6 +167,8 @@ setMethod(
                 oldgrad <<- grad
                 oldpar <<- par
 
+                if (debug) {print(oldnll); print(par)}
+
                 return(grad)
             }
         }
@@ -184,7 +190,8 @@ setMethod(
                   control=control,
                   gr=gradfun,
                   data=dataarg,
-                  skip.hessian=skip.hessian)
+                  skip.hessian=skip.hessian,
+                  ...)
 
         .Object@mle2 <- m
 
