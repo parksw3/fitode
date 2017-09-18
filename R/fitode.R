@@ -285,7 +285,7 @@ setMethod(
 ##' @export
 ode.sensitivity <- function(expr, model,
                         parms, times,
-                        ode.opts=list(method="lsoda")) {
+                        ode.opts=list(method="rk4")) {
     solution <- ode.solve(model, times, parms, ode.opts=ode.opts)
 
     frame <- c(solution@solution, parms)
@@ -323,7 +323,7 @@ ode.sensitivity <- function(expr, model,
 logLik.sensitivity <- function(parms, formula,
                             model, loglik,
                             observation, times=NULL,
-                            ode.opts=list(method="lsoda"),
+                            ode.opts=list(method="rk4"),
                             returnNLL=TRUE) {
     if (is.null(times)) times <- seq(length(observation))
     expr <- as.expression(formula[[3]])

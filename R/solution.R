@@ -42,7 +42,7 @@ setMethod(
     "solution.ode",
     definition = function(.Object,
                           y, times, model, parms,
-                          ode.opts=list(method="lsoda"),
+                          ode.opts=list(method="rk4"),
                           keep_sensitivity=TRUE) {
         .Object@name <- model@name
         .Object@y <- y
@@ -117,7 +117,7 @@ setMethod(
 ##' @import deSolve
 ##' @export
 ode.solve <- function(model, times, parms, y,
-                 ode.opts=list(method="lsoda"),
+                 ode.opts=list(method="rk4"),
                  keep_sensitivity=TRUE) {
     if (missing(y)) {
         frame <- as.list(c(parms))
