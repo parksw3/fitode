@@ -81,6 +81,18 @@ setMethod(
              ...) {
         oldpar <- c(model@par, loglik@par)
 
+        if ("t" %in% oldpar) {
+            stop("`t` is reserved for time variable. Try a different parameterization?")
+        }
+
+        if (any(is.na(match(names(link), oldpar)))) {
+            stop("Some link functions do not correspond to the model parameters.")
+        }
+
+        if (any(!is.na(match(loglik@par, model@par)))) {
+            stop("Some parameter names in the likeliood model are being used for the model parameters.\nTry a different parameterization?")
+        }
+
         if (any(is.na(match(names(start), oldpar)))) {
             stop(
                 paste0("`start` must specify the following parameters:\n",
