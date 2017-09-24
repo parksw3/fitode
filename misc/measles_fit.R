@@ -62,25 +62,11 @@ ff <- fitode(cases~Sigma*E*tdiff*0.67,
         r0="logit",
         sigma="log"
     ),
-    control=list(maxit=1e3),
-    skip.hessian=TRUE,
-    ode.opts=list(method="rk4"),
     debug=TRUE
 )
 
 start_nbinom <- coef(ff)[1:(length(coef(ff))-1)]
 start_nbinom[["k"]] <- 10
-
-fitode:::logLik.sensitivity(
-    start_nbinom,
-    cases~Sigma*E*1/52*0.67,
-    measles,
-    select_model("nbinom"),
-    measles_df$cases,
-    measles_df$year
-)
-
-## FIXME: return an error when link names does not match names of the parameters
 
 ff_nbinom <- fitode(cases~Sigma*E*1/52*0.67,
     start=start_nbinom,
@@ -99,10 +85,7 @@ ff_nbinom <- fitode(cases~Sigma*E*1/52*0.67,
         i0="logit",
         r0="logit",
         k="log"
-        ),
-    control=list(maxit=1e3),
-    skip.hessian=TRUE,
-    ode.opts=list(method="rk4"),
+    ),
     debug=TRUE
 )
 

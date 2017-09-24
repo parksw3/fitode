@@ -1,10 +1,6 @@
 library(fitode)
 
-harbin <- structure(list(week = 2:18,
-                         Deaths = c(2, 7, 2, 6, 12, 68, 91,
-                                    126, 229, 250, 212, 161, 101, 108, 46, 40, 14)),
-                    .Names = c("week", "Deaths"),
-                    row.names = c(NA, -17L), class = "data.frame")
+harbin <- fitsir::harbin
 
 SI_model <- new("model.ode",
     name = "SI",
@@ -33,7 +29,7 @@ system.time(ff <- fitode(Deaths~gamma*I,
         N="log",
         i0="logit"
     ),
-    ode.opts=list(method="rk4")
+    skip.hessian = TRUE
 ))
 
 system.time(pp <- profile(ff@mle2, continuation="naive", trace=TRUE))

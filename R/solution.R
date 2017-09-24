@@ -119,8 +119,9 @@ setMethod(
 ode.solve <- function(model, times, parms, y,
                  ode.opts=list(method="rk4"),
                  keep_sensitivity=TRUE) {
+    frame <- as.list(c(parms))
+
     if (missing(y)) {
-        frame <- as.list(c(parms))
         y <- sapply(model@initial, eval, frame)
     } else if (!all(names(y) %in% model@state)) {
         stop("y must have same name as the state variables")

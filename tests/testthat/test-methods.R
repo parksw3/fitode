@@ -24,7 +24,7 @@ test_that("SI model", {
 
     start <- c(beta=2, gamma=1, N=1e4, i0=1e-3, k=10)
 
-    ff <- fitode(Deaths~gamma*I,
+    suppressWarnings(ff <- fitode(Deaths~gamma*I,
         start=start,
         model=SI_model, loglik=select_model("nbinom"),
         data=harbin,
@@ -35,7 +35,7 @@ test_that("SI model", {
             N="log",
             i0="logit"
         )
-    )
+    ))
 
     all.equal(
         coef(ff),

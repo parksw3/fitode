@@ -83,7 +83,7 @@ setMethod("predict", "fitode",
                         ode.opts=object@mle2@data$ode.opts,
                         keep_sensitivity=method=="delta")
 
-        expr <- as.expression(object@formula[[3]])
+        expr <- object@mle2@data$expr
 
         frame <- c(parms, ss@solution)
 
@@ -117,7 +117,8 @@ setMethod("predict", "fitode",
 
             cmat <- switch(method,
                 delta={
-                    sens <- ode.sensitivity(object@formula[[3]],
+                    sens <- ode.sensitivity(expr,
+                                            object@mle2@data$expr.sensitivity,
                                             model,
                                             parms,
                                             object@data$times)$sensitivity
@@ -232,7 +233,7 @@ setMethod("logLik", "fitode", function(object){-object@min})
 setMethod("profile", "fitode",
     function(fitted, scale=c("original", "fitted")) {
         scale <- match.arg(scale)
-        prof <- profile(object@mle2, continuation="naive")
+        prof <- profile(fitted@mle2, continuation="naive")
         if (scale=="original" && length(object@link) > 0) {
             ## TODO: re-write this section...
 

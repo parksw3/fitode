@@ -21,12 +21,17 @@ test_that("SI model", {
 
     ff <- function(parms, model) {
         ss <- ode.solve(model, times, parms=parms)@solution
-        -sum(dpois(Deaths, parms[1] * ss$S * ss$I, log=TRUE))
+        -sum(dpois(Deaths, parms[2] * ss$I, log=TRUE))
     }
+
+    expr.sensitivity <- structure(list(state = list(expression(0), expression(gamma)),
+                                       par = list(expression(0), expression(I), expression(0), expression(
+                                           0))), .Names = c("state", "par"))
 
     expect_equal(
         as.vector(numDeriv::jacobian(ff, parms, model=SI_model)),
-        unname(fitode:::logLik.sensitivity(parms, Deaths~beta*S*I, SI_model, select_model("poisson"), Deaths, times)[-1]),
+        unname(fitode:::logLik.sensitivity(parms, expression(gamma*I), expr.sensitivity,
+                                           SI_model, select_model("poisson"), Deaths, times)[-1]),
         tolerance=1e-5
     )
 })
