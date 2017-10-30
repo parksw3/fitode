@@ -41,6 +41,11 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
     pp
 }
 
+##' diff function with derivative rules
+##' @param x numeric vector
+##' @export
+.diff <- function(x) diff(x)
+
 ##' fit ode
 ##' @rdname fitode
 ##' @name fitode
@@ -49,7 +54,6 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' @param model ode model
 ##' @param loglik log liklihood model
 ##' @param data data frame with time column and observation column
-##' @param tcol time column
 ##' @param link named vector or list of link functions for ode/log-likelihood parameters
 ##' @param control see optim
 ##' @param ode.opts options for ode integration. See ode
@@ -67,7 +71,6 @@ fitode <- function(formula, start,
                    data,
                    method="BFGS",
                    optimizer="optim",
-                   tcol = "times",
                    link,
                    control=list(maxit=1e5),
                    ode.opts=list(method="rk4"),
@@ -104,7 +107,8 @@ fitode <- function(formula, start,
 
     start <- start[oldpar]
 
-    ocol <- as.character(formula[[2]])
+    ocol <- as.character(formula[[2]][[2]])
+    tcol <- as.character(formula[[2]][[3]])
     data <- data.frame(times = data[[tcol]], observation = data[[ocol]])
 
     link <- set_link(link, model, loglik)
@@ -132,6 +136,14 @@ fitode <- function(formula, start,
 
     dataarg <- c(data,list(model=model, loglik=loglik, expr=expr, expr.sensitivity=expr.sensitivity,
                            ode.opts=ode.opts, linklist=linklist))
+
+    ## only accepts one state variable inside .diff
+    ## TODO: check that this works...
+    if (as.character(expr[[1]][[1]]) == ".diff") {
+        dataarg$observation <- dataarg$observation[1:(length(dataarg$observation)-1)]
+
+        if(length(expr[[1]][[2]]) > 1) stop("formula too complicated?")
+    }
 
     f.env <- new.env()
     ## set initial values
@@ -214,8 +226,8 @@ fitode <- function(formula, start,
             thess <- try(numDeriv::jacobian(logLik.sensitivity, coef, expr=expr,
                                             expr.sensitivity=expr.sensitivity,
                                             model=model,loglik=loglik,
-                                            observation=data[,2],
-                                            times=data[,1],
+                                            observation=dataarg$observation,
+                                            times=dataarg$times,
                                             ode.opts=ode.opts,
                                             returnNLL=FALSE))
             if(!inherits(thess, "try-error")) {
@@ -266,15 +278,22 @@ ode.sensitivity <- function(expr,
 
     nstate <- length(model@state)
 
-    sens <- matrix(0, nrow=length(times),ncol=length(model@par))
-    for(i in 1:nstate) {
-        sens <- sens + eval(expr.sensitivity$state[[i]], frame) * solution@sensitivity[[i]]
+    sens <- matrix(0, nrow=length(mean),ncol=length(model@par))
+
+    if (expr[[1]][[1]]==".diff") {
+        for(i in 1:nstate) {
+            sens <- sens + diff(eval(expr.sensitivity$state[[i]], frame) * solution@sensitivity[[i]])
+        }
+    } else {
+        for(i in 1:nstate) {
+            sens <- sens + eval(expr.sensitivity$state[[i]], frame) * solution@sensitivity[[i]]
+        }
+
+        sens_p <- sapply(expr.sensitivity$par, eval, frame)
+
+        if(is.list(sens_p))
+            sens <- sens + do.call("cbind", sens_p)
     }
-
-    sens_p <- sapply(expr.sensitivity$par, eval, frame)
-
-    if(is.list(sens_p))
-        sens <- sens + do.call("cbind", sens_p)
 
     list(mean=mean, sensitivity=sens)
 }

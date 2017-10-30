@@ -15,21 +15,29 @@ SI_model <- new("model.ode",
     par=c("beta", "gamma", "N", "i0")
 )
 
-start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, k=5)
+start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, sigma=5)
 
-system.time(ff <- fitode(Deaths~gamma*I,
+system.time(ff <- fitode(Deaths|week~gamma*I,
     start=start,
     model=SI_model,
-    loglik=select_model("nbinom"),
+    loglik=select_model("gaussian"),
     data=harbin,
-    tcol="week",
     link = list(
         beta="log",
         gamma="log",
         N="log",
         i0="logit"
-    ),
-    skip.hessian = TRUE
+    )
+))
+
+system.time(ff2 <- fitsir::fitsir(
+    data=harbin,
+    start=start,
+    type="death",
+    icol="Deaths",
+    tcol="week",
+    optimizer="optim",
+    method="BFGS"
 ))
 
 system.time(pp <- profile(ff@mle2, continuation="naive", trace=TRUE))
@@ -60,5 +68,33 @@ ff2 <- fitode(Deaths~gamma*I,
     )
 )
 
+harbin2 <- rbind(harbin, data.frame(week=19, Deaths=NA))
 
+SI_model_c <- new("model.ode",
+    name = "SI",
+    model = list(
+        S ~ - beta*S*I/N,
+        I ~ beta*S*I/N - gamma*I,
+        cDeath ~ gamma*I
+    ),
+    initial = list(
+        S ~ N * (1 - i0),
+        I ~ N * i0,
+        cDeath ~ 0
+    ),
+    par=c("beta", "gamma", "N", "i0")
+)
+
+system.time(ff4 <- fitode(Deaths|week ~ .diff(cDeath),
+    start=start,
+    model=SI_model_c,
+    loglik=select_model("gaussian"),
+    data=harbin2,
+    link = list(
+        beta="log",
+        gamma="log",
+        N="log",
+        i0="logit"
+    )
+))
 

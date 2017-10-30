@@ -61,7 +61,7 @@ setMethod(
         deriv <- function(expr, vars) {
             d <- lapply(vars,
                         function(p){
-                            D(expr, p)
+                            Deriv(expr, p)
                         })
             names(d) <- vars
             d

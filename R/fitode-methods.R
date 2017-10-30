@@ -27,7 +27,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
              nsim=1000,
              ...){
         method <- match.arg(method)
-        observation <- x@data$observation
+        observation <- x@mle2@data$observation
         pred <- predict(x,level,method=method, nsim=nsim)
         times <- pred[["times"]]
         mean <- pred[["mean"]]
@@ -89,7 +89,7 @@ setMethod("predict", "fitode",
 
         mean <- eval(expr, frame)
 
-        df <- data.frame(times=times,mean=mean)
+        df <- data.frame(times=times[1:length(mean)],mean=mean)
 
         if (!missing(level)) {
             nstate <- length(model@state)
@@ -102,7 +102,7 @@ setMethod("predict", "fitode",
                 vv <- vcov(object, "fitted")
                 vv[lower.tri(vv)] <- t(vv)[lower.tri(vv)]
 
-                simtraj <- matrix(NA,nrow=length(times),ncol=nsim)
+                simtraj <- matrix(NA,nrow=length(mean),ncol=nsim)
                 simpars <- MASS::mvrnorm(nsim,mu=coef(object, "fitted"),
                                    Sigma=vv)
                 simpars_orig <- t(apply(simpars, 1, apply_link, linklist, "linkinv"))
@@ -155,7 +155,7 @@ setMethod("predict", "fitode",
                     }
 
                     traj.logLik <- rep(NA, nsim)
-                    observation <- object@data$observation
+                    observation <- object@mle2@data$observation
 
                     for(i in 1:nsim) {
                         traj.logLik[i] <- sum(Eval(loglik, observation, simtraj[,i], simpars_orig[i,-c(1:npar)]))
