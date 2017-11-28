@@ -5,7 +5,7 @@
 ##' @slot model ode model
 ##' @slot initial initial values
 ##' @slot par parameters
-##' @slot keep_jacobian (logical) maintain the Jacobian as part of the model
+##' @slot keep_sensitivity (logical) maintain the Jacobian as part of the model
 ##' @examples
 ##' SI_model <- new("model.ode",
 ##'     name = "SI",
@@ -27,64 +27,86 @@ setMethod(
     function(.Object, name,
              model, initial,
              par,
-             keep_jacobian=TRUE) {
+             keep_sensitivity=TRUE) {
+        if (any(sapply(initial, class) != "formula"))
+            stop("initial must be a list of formulas or a function")
+
         .Object@name <- name
 
-        if (any(sapply(model, class) != "formula"))
-            stop("model must be a list of formulas")
+        state <- sapply(initial, function(y) as.character(y[[2]]))
+        nstate <- length(state)
 
-        if (any(sapply(initial, class) != "formula"))
-            stop("initial must be a list of formulas")
-
-        mi <- list(model, initial)
-
-        state <- lapply(mi, function(x){
-            sapply(x, function(y) as.character(y[[2]]))
-        })
-        ## TODO: why do I get errors here?
-        if (is.character(do.call(all.equal, state))) {
-            stop("initial values do not have same state variable names as the model provided")
-        } else {
-            state <- state[[1]]
-        }
-
-        grad <- lapply(model, function(x) as.expression(x[[3]]))
         initial <- lapply(initial, function(x) as.expression(x[[3]]))
-        names(grad) <- state
         names(initial) <- state
 
-        .Object@grad <- grad
+        if (is.list(model)) {
+            if (any(sapply(model, class) != "formula"))
+                stop("model must be a list of formulas or a function")
+
+            grad <- lapply(model, function(x) as.expression(x[[3]]))
+            names(grad) <- state
+
+            if (keep_sensitivity) {
+                deriv <- function(expr, vars) {
+                    d <- lapply(vars,
+                                function(p){
+                                    Deriv(expr, p)
+                                })
+                    names(d) <- vars
+                    d
+                }
+
+                deriv2 <- function(gradlist, vars) {
+                    d <- lapply(gradlist,
+                                function(x){
+                                    deriv(x, vars)
+                                })
+                    names(d) <- state
+                    d
+                }
+
+                .Object@jacobian.initial <- deriv2(initial, par)
+                .Object@jacobian.state <- jacobian.state <- deriv2(grad, state)
+                .Object@jacobian.par <- jacobian.par <- deriv2(grad, par)
+
+                if(keep_sensitivity) {
+                    gfun <- function(times, y, parms) {
+                        state <- y[1:nstate]
+                        frame <- as.list(c(t=times, state, parms))
+                        ## equivalent to `grad(model, state, parms)` but faster
+                        gr <- sapply(grad, eval, frame)
+                        ## jacobian(model, state, parms, type="state")
+                        js <- sapply(jacobian.state, function(jj) {
+                            sapply(jj, eval, frame)
+                        })
+                        ## jacobian(model, state, parms, type="par")
+                        jp <- sapply(jacobian.par, function(jj) {
+                            sapply(jj, eval, frame)
+                        })
+
+                        list(c(gr, matrix(y[-c(1:nstate)], ncol=nstate) %*% js + jp))
+                    }
+                } else {
+                    gfun <- function(times, y, parms) {
+                        frame <- as.list(c(t=times, y, parms))
+                        gr <- sapply(grad, eval, frame)
+
+                        list(c(gr))
+                    }
+                }
+                .Object@gfun <- gfun
+            }
+        } else if (is.function(model)) {
+            keep_sensitivity <- FALSE
+            .Object@gfun <- model
+        } else {
+            stop("model must be a list of formulas or a function")
+        }
+
         .Object@initial <- initial
         .Object@state <- state
         .Object@par <- par
-
-        deriv <- function(expr, vars) {
-            d <- lapply(vars,
-                        function(p){
-                            Deriv(expr, p)
-                        })
-            names(d) <- vars
-            d
-        }
-
-        deriv2 <- function(gradlist, vars) {
-            d <- lapply(gradlist,
-                        function(x){
-                            deriv(x, vars)
-                        })
-            names(d) <- state
-            d
-        }
-
-        if (keep_jacobian) {
-            .Object@jacobian.initial <- deriv2(initial, par)
-            .Object@jacobian.state <- deriv2(grad, state)
-            .Object@jacobian.par <- deriv2(grad, par)
-        } else {
-            .Object@jacobian.initial <- list()
-            .Object@jacobian.state <- list()
-            .Object@jacobian.par <- list()
-        }
+        .Object@keep_sensitivity <- keep_sensitivity
 
         .Object
     }
@@ -166,12 +188,7 @@ setMethod(
 
 setMethod("show", "model.ode",
     function(object){
-        cat("Name:", object@name, "\n\n")
-
-        cat("Model:\n")
-        f <- paste0("d",object@state, " = ", sapply(object@grad, as.character))
-        for(i in 1:length(f))
-            cat(f[i], "\n")
+        cat("Name:", object@name, "\n")
 
         cat("\nInitial values:\n")
         g <- paste0(object@state, "(0) = ", sapply(object@initial, as.character))

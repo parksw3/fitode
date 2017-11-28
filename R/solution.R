@@ -53,31 +53,7 @@ setMethod(
         nstate <- length(model@state)
         npar <- length(model@par)
 
-        if (keep_sensitivity) {
-            gfun <- function(times, y, parms) {
-                state <- y[1:nstate]
-                frame <- as.list(c(t=times, state, parms))
-                ## equivalent to `grad(model, state, parms)` but faster
-                gr <- sapply(model@grad, eval, frame)
-                ## jacobian(model, state, parms, type="state")
-                js <- sapply(model@jacobian.state, function(jj) {
-                    sapply(jj, eval, frame)
-                })
-                ## jacobian(model, state, parms, type="par")
-                jp <- sapply(model@jacobian.par, function(jj) {
-                    sapply(jj, eval, frame)
-                })
-
-                list(c(gr, matrix(y[-c(1:nstate)], ncol=nstate) %*% js + jp))
-            }
-        } else {
-            gfun <- function(times, y, parms) {
-                frame <- as.list(c(t=times, y, parms))
-                gr <- sapply(model@grad, eval, frame)
-
-                list(c(gr))
-            }
-        }
+        gfun <- model@gfun
 
         result <- do.call("ode",
                           c(list(y=y,
@@ -119,6 +95,8 @@ setMethod(
 ode.solve <- function(model, times, parms, y,
                  ode.opts=list(method="rk4"),
                  keep_sensitivity=TRUE) {
+    keep_sensitivity <- (keep_sensitivity && model@keep_sensitivity)
+
     frame <- as.list(c(parms))
 
     if (missing(y)) {

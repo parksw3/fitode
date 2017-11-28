@@ -93,7 +93,7 @@ fitode <- function(formula, start,
         stop("Some parameter names in the likeliood model are being used for the model parameters.\nTry a different parameterization?")
     }
 
-    if (any(is.na(match(names(start), oldpar)))) {
+    if (any(is.na(match(oldpar, names(start))))) {
         stop(
             paste0("`start` must specify the following parameters:\n",
                 "\node parameters: ", paste(model@par, collapse = ", "),

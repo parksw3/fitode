@@ -250,7 +250,7 @@ setMethod("summary","fitode",
         scale <- match.arg(scale)
         ss <- summary(object@mle2)
 
-
+        ## TODO: finish this
 
     }
 

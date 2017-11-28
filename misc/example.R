@@ -15,6 +15,8 @@ SI_model <- new("model.ode",
     par=c("beta", "gamma", "N", "i0")
 )
 
+ode.solve(SI_model, 1:10, c(beta=1,gamma=0.5, N=100, i0=1e-3))
+
 start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, sigma=5)
 
 system.time(ff <- fitode(Deaths|week~gamma*I,
@@ -68,7 +70,8 @@ ff2 <- fitode(Deaths~gamma*I,
     )
 )
 
-harbin2 <- rbind(harbin, data.frame(week=19, Deaths=NA))
+bombay <- fitsir::bombay
+bombay2 <- rbind(bombay, data.frame(week=32, mort=NA))
 
 SI_model_c <- new("model.ode",
     name = "SI",
@@ -85,11 +88,13 @@ SI_model_c <- new("model.ode",
     par=c("beta", "gamma", "N", "i0")
 )
 
-system.time(ff4 <- fitode(Deaths|week ~ .diff(cDeath),
+start <- c(beta=2, gamma=1, N=3000, i0=1e-5, sigma=1)
+
+system.time(ff4 <- fitode(mort|week ~ .diff(cDeath),
     start=start,
     model=SI_model_c,
     loglik=select_model("gaussian"),
-    data=harbin2,
+    data=bombay2,
     link = list(
         beta="log",
         gamma="log",
@@ -97,4 +102,5 @@ system.time(ff4 <- fitode(Deaths|week ~ .diff(cDeath),
         i0="logit"
     )
 ))
+
 
