@@ -301,13 +301,12 @@ ode.sensitivity <- function(expr,
         sens <- matrix(0, nrow=length(mean),ncol=length(model@par))
 
         if (expr[[1]][[1]]==".diff") {
+            ## assuming that sensitivity doesn't depend on the parameter. It really shouldn't if .diff is being used!
             for(i in 1:nstate) {
                 sens <- sens + diff(eval(expr.sensitivity$state[[i]], frame) * solution@sensitivity[[i]])
             }
         } else {
-            for(i in 1:nstate) {
-                sens <- sens + eval(expr.sensitivity$state[[i]], frame) * solution@sensitivity[[i]]
-            }
+            sens <- Reduce("+", Map("*", lapply(expr.sensitivity$state, eval, frame), solution@sensitivity))
 
             sens_p <- sapply(expr.sensitivity$par, eval, frame)
 
