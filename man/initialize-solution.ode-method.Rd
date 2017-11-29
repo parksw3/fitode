@@ -6,7 +6,7 @@
 \title{the initializer for model.ode}
 \usage{
 \S4method{initialize}{solution.ode}(.Object, y, times, model, parms,
-  ode.opts = list(method = "lsoda"), keep_sensitivity = TRUE)
+  ode.opts = list(method = "rk4"), keep_sensitivity = TRUE)
 }
 \arguments{
 \item{.Object}{object}

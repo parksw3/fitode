@@ -12,7 +12,7 @@ Class representing ode models
 \describe{
 \item{\code{name}}{name of the model}
 
-\item{\code{grad}}{list of expressions representing the gradients}
+\item{\code{gfun}}{gradient function}
 
 \item{\code{initial}}{list of expressions representing the initial values}
 
@@ -25,5 +25,7 @@ Class representing ode models
 \item{\code{jacobian.state}}{Jacobian with respect to its states}
 
 \item{\code{jacobian.par}}{Jacobian with repsect to its parameters}
+
+\item{\code{keep_sensitivity}}{(logical) keep sensitivity equations?}
 }}
 

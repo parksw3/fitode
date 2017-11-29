@@ -4,7 +4,7 @@
 \alias{ode.solve}
 \title{solve ode models}
 \usage{
-ode.solve(model, times, parms, y, ode.opts = list(method = "lsoda"),
+ode.solve(model, times, parms, y, ode.opts = list(method = "rk4"),
   keep_sensitivity = TRUE)
 }
 \arguments{

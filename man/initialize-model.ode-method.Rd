@@ -6,7 +6,7 @@
 \title{the initializer for model.ode}
 \usage{
 \S4method{initialize}{model.ode}(.Object, name, model, initial, par,
-  keep_jacobian = TRUE)
+  keep_sensitivity = TRUE)
 }
 \arguments{
 \item{.Object}{object}
@@ -25,7 +25,7 @@ the initializer for model.ode
 
 \item{\code{par}}{parameters}
 
-\item{\code{keep_jacobian}}{(logical) maintain the Jacobian as part of the model}
+\item{\code{keep_sensitivity}}{(logical) maintain the Jacobian as part of the model}
 }}
 \examples{
 SI_model <- new("model.ode",

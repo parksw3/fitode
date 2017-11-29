@@ -4,13 +4,16 @@
 \alias{logLik.sensitivity}
 \title{Sensitivity of the likelihood function with respect to parameters}
 \usage{
-logLik.sensitivity(parms, formula, model, loglik, observation, times = NULL,
-  ode.opts = list(method = "lsoda"), returnNLL = TRUE)
+logLik.sensitivity(parms, expr, expr.sensitivity, model, loglik, observation,
+  times = NULL, ode.opts = list(method = "rk4"), keep_sensitivity = TRUE,
+  returnNLL = TRUE)
 }
 \arguments{
 \item{parms}{named vector of parameter values}
 
-\item{formula}{formula specifing observation variable and the mean}
+\item{expr}{expression to be evaluated}
+
+\item{expr.sensitivity}{partial derivative of expr w.r.t states and parameters}
 
 \item{model}{model.ode object}
 

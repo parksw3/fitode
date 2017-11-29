@@ -62,7 +62,7 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' @param debug print debugging output?
 ##' @param ... mle2 arguments
 ##' @import bbmle
-##' @importFrom numDeriv jacobian
+##' @importFrom numDeriv jacobian hessian
 ##' @importFrom MASS ginv
 ##' @seealso \code{\link{mle2}}
 ##' @export fitode
@@ -127,15 +127,21 @@ fitode <- function(formula, start,
 
     start <- apply_link(start, linklist, "linkfun")
 
+    keep_sensitivity <- model@keep_sensitivity
+
     expr <- as.expression(formula[[3]])
 
-    expr.sensitivity <- list(
-        state=lapply(model@state, function(s) Deriv(expr, s)),
-        par=lapply(model@par, function(p) Deriv(expr, p))
-    )
+    if (keep_sensitivity) {
+        expr.sensitivity <- list(
+            state=lapply(model@state, function(s) Deriv(expr, s)),
+            par=lapply(model@par, function(p) Deriv(expr, p))
+        )
+    } else {
+        expr.sensitivity <- list()
+    }
 
     dataarg <- c(data,list(model=model, loglik=loglik, expr=expr, expr.sensitivity=expr.sensitivity,
-                           ode.opts=ode.opts, linklist=linklist))
+                           ode.opts=ode.opts, linklist=linklist, keep_sensitivity=keep_sensitivity))
 
     ## only accepts one state variable inside .diff
     ## TODO: check that this works...
@@ -152,7 +158,7 @@ fitode <- function(formula, start,
     assign("oldgrad",NULL,f.env)
     assign("data", data, f.env)
 
-    objfun <- function(par, expr, expr.sensitivity, model, loglik, observation, times, ode.opts, linklist) {
+    objfun <- function(par, expr, expr.sensitivity, model, loglik, observation, times, ode.opts, linklist, keep_sensitivity) {
         if (identical(par,oldpar)) {
             if (debug) cat("returning old version of value\n")
             return(oldnll)
@@ -162,13 +168,13 @@ fitode <- function(formula, start,
         derivpar <- apply_link(par, linklist, "mu.eta")
 
         v <- try(logLik.sensitivity(origpar, expr, expr.sensitivity,
-                                    model, loglik, observation, times, ode.opts), silent=TRUE)
+                                    model, loglik, observation, times, ode.opts, keep_sensitivity), silent=TRUE)
         if (inherits(v, "try-error")) {
             return(NA)
         } else {
             oldnll <<- v[1]
             grad <- v[-1] * derivpar
-            names(grad) <- names(derivpar)
+            if (length(grad) > 0) names(grad) <- names(derivpar) ## TODO: need a better way of dealing this
             oldgrad <<- grad
             oldpar <<- par
 
@@ -178,7 +184,7 @@ fitode <- function(formula, start,
         }
     }
 
-    gradfun <- function(par, expr, expr.sensitivity, model, loglik, observation, times, ode.opts, linklist) {
+    gradfun <- function(par, expr, expr.sensitivity, model, loglik, observation, times, ode.opts, linklist, keep_sensitivity) {
         if (identical(par,oldpar)) {
             if (debug) cat("returning old version of grad\n")
             return(oldgrad)
@@ -188,7 +194,7 @@ fitode <- function(formula, start,
         derivpar <- apply_link(par, linklist, "mu.eta")
 
         v <- try(logLik.sensitivity(origpar, expr, expr.sensitivity,
-                                    model, loglik, observation, times, ode.opts), silent=TRUE)
+                                    model, loglik, observation, times, ode.opts, keep_sensitivity), silent=TRUE)
         if (inherits(v, "try-error")) {
             return(NA)
         } else {
@@ -201,10 +207,14 @@ fitode <- function(formula, start,
             return(grad)
         }
     }
+
     environment(objfun) <- f.env
     environment(gradfun) <- f.env
     parnames <- names(start)
     attr(objfun, "parnames") <- parnames
+
+    if (!keep_sensitivity) gradfun <- NULL ## TODO: I don't like this
+
     message("Fitting ode ...")
     m <- mle2(objfun,
               vecpar=TRUE,
@@ -223,13 +233,21 @@ fitode <- function(formula, start,
             vcov <- matrix(0, 0, 0)
         } else {
             message("Computing vcov on the original scale ...")
-            thess <- try(numDeriv::jacobian(logLik.sensitivity, coef, expr=expr,
+
+            if (keep_sensitivity) {
+                hessfun <- numDeriv::jacobian
+            } else {
+                hessfun <- numDeriv::hessian
+            }
+
+            thess <- try(hessfun(logLik.sensitivity, coef, expr=expr,
                                             expr.sensitivity=expr.sensitivity,
                                             model=model,loglik=loglik,
                                             observation=dataarg$observation,
                                             times=dataarg$times,
                                             ode.opts=ode.opts,
-                                            returnNLL=FALSE))
+                                            keep_sensitivity=keep_sensitivity,
+                                            returnNLL=!keep_sensitivity))
             if(!inherits(thess, "try-error")) {
                 if (use.ginv) {
                     vcov <- try(MASS::ginv(thess), silent=TRUE)
@@ -269,30 +287,35 @@ ode.sensitivity <- function(expr,
                         expr.sensitivity,
                         model,
                         parms, times,
-                        ode.opts=list(method="rk4")) {
+                        ode.opts=list(method="rk4"),
+                        keep_sensitivity=TRUE) {
     solution <- ode.solve(model, times, parms, ode.opts=ode.opts)
 
     frame <- c(solution@solution, parms)
 
     mean <- eval(expr, frame)
 
-    nstate <- length(model@state)
+    if (keep_sensitivity) {
+        nstate <- length(model@state)
 
-    sens <- matrix(0, nrow=length(mean),ncol=length(model@par))
+        sens <- matrix(0, nrow=length(mean),ncol=length(model@par))
 
-    if (expr[[1]][[1]]==".diff") {
-        for(i in 1:nstate) {
-            sens <- sens + diff(eval(expr.sensitivity$state[[i]], frame) * solution@sensitivity[[i]])
+        if (expr[[1]][[1]]==".diff") {
+            for(i in 1:nstate) {
+                sens <- sens + diff(eval(expr.sensitivity$state[[i]], frame) * solution@sensitivity[[i]])
+            }
+        } else {
+            for(i in 1:nstate) {
+                sens <- sens + eval(expr.sensitivity$state[[i]], frame) * solution@sensitivity[[i]]
+            }
+
+            sens_p <- sapply(expr.sensitivity$par, eval, frame)
+
+            if(is.list(sens_p))
+                sens <- sens + do.call("cbind", sens_p)
         }
     } else {
-        for(i in 1:nstate) {
-            sens <- sens + eval(expr.sensitivity$state[[i]], frame) * solution@sensitivity[[i]]
-        }
-
-        sens_p <- sapply(expr.sensitivity$par, eval, frame)
-
-        if(is.list(sens_p))
-            sens <- sens + do.call("cbind", sens_p)
+        sens=NULL
     }
 
     list(mean=mean, sensitivity=sens)
@@ -314,22 +337,26 @@ logLik.sensitivity <- function(parms, expr,
                             model, loglik,
                             observation, times=NULL,
                             ode.opts=list(method="rk4"),
+                            keep_sensitivity=TRUE,
                             returnNLL=TRUE) {
     if (is.null(times)) times <- seq(length(observation))
 
-    ss <- ode.sensitivity(expr, expr.sensitivity, model, parms, times, ode.opts)
+    ss <- ode.sensitivity(expr, expr.sensitivity, model, parms, times, ode.opts, keep_sensitivity)
     mean <- ss$mean
     sens <- ss$sensitivity
 
     loglik.par <- as.list(parms[-c(1:length(model@par))])
 
     nll <- -sum(Eval(loglik, observation, mean, loglik.par))
-    loglik.gr <- grad(loglik, observation, mean, loglik.par)
-    sensitivity <- c(-colSums(loglik.gr[[1]] * sens))
-    if(length(loglik.gr) > 1) sensitivity <- c(sensitivity, -sapply(loglik.gr[-1], sum))
+    if (keep_sensitivity) {
+        loglik.gr <- grad(loglik, observation, mean, loglik.par)
+        sensitivity <- c(-colSums(loglik.gr[[1]] * sens))
+        if(length(loglik.gr) > 1) sensitivity <- c(sensitivity, -sapply(loglik.gr[-1], sum))
+    } else {
+        sensitivity <- NULL
+    }
 
     if (!returnNLL) return(sensitivity)
 
     c(nll, sensitivity)
 }
-
