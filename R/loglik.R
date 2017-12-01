@@ -161,8 +161,8 @@ select_model <- function(dist = c("gaussian", "poisson", "nbinom", "nbinom1")) {
     model <- switch(dist,
         gaussian={
             loglik_gaussian <- new("loglik.ode", "gaussian",
-                LL ~ -(X-mu)^2/(2*sigma^2) - log(sigma) - 1/2*log(2*pi),
-                mean="mu", par="sigma")
+                LL ~ -(X-mu)^2/(2*ll.sigma^2) - log(ll.sigma) - 1/2*log(2*pi),
+                mean="mu", par="ll.sigma")
 
             loglik_gaussian
         }, poisson={
@@ -172,18 +172,18 @@ select_model <- function(dist = c("gaussian", "poisson", "nbinom", "nbinom1")) {
             loglik_poisson
         }, nbinom={
             loglik_nbinom <- new ("loglik.ode", "nbinom",
-                LL ~ - NBconst(k, X) + k * (-log1p(mu/k)) +
-                    X * log(mu) - X * log(k + mu),
+                LL ~ - NBconst(ll.k, X) + ll.k * (-log1p(mu/ll.k)) +
+                    X * log(mu) - X * log(ll.k + mu),
                 mean="mu",
-                par = "k")
+                par = "ll.k")
 
             loglik_nbinom
         }, nbinom1={
             loglik_nbinom1 <- new ("loglik.ode", "nbinom",
-                LL ~ - NBconst(mu/phi, X) + mu/phi * (-log1p(phi)) +
-                    X * log(mu) - X * log(mu/phi + mu),
+                LL ~ - NBconst(mu/ll.phi, X) + mu/ll.phi * (-log1p(ll.phi)) +
+                    X * log(mu) - X * log(mu/ll.phi + mu),
                 mean="mu",
-            par = "phi")
+            par = "ll.phi")
 
             loglik_nbinom1
         }

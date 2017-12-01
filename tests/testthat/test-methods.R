@@ -22,7 +22,7 @@ test_that("SI model", {
         par=c("beta", "gamma", "N", "i0")
     )
 
-    start <- c(beta=2, gamma=1, N=1e4, i0=1e-3, k=10)
+    start <- c(beta=2, gamma=1, N=1e4, i0=1e-3, ll.k=10)
 
     suppressWarnings(ff <- fitode(Deaths|week~gamma*I,
         start=start,
@@ -40,13 +40,13 @@ test_that("SI model", {
         coef(ff),
         structure(c(1.85082710742599, 1.08315701471954, 2162.03690454815,
             0.000482746970936824, 35.9813684389218),
-            .Names = c("beta", "gamma", "N", "i0", "k")))
+            .Names = c("beta", "gamma", "N", "i0", "ll.k")))
 
     all.equal(
         coef(ff, "fitted"),
         structure(c(0.615632624272599, 0.0798799387838958, 7.67880606768721,
             -7.63553504774462, 3.58300126112103),
-            .Names = c("log.beta", "log.gamma", "log.N", "logit.i0", "log.k")))
+            .Names = c("log.beta", "log.gamma", "log.N", "logit.i0", "log.ll.k")))
 
     all.equal(
         logLik(ff),

@@ -1,0 +1,144 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteDepends{ggplot2}
+%\VignetteDepends{plyr}
+%\VignetteDepends{dplyr}
+%\VignetteDepends{reshape2}
+%\VignetteIndexEntry{Basic ODE model fitting}
+\documentclass{article}
+\title{Basic ODE fitting}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{hyperref}
+\newcommand{\rzero}{{\cal R}_0}
+\newcommand{\code}[1]{{\tt #1}}
+\bibliographystyle{chicago}
+\date{\today}
+\begin{document}
+\maketitle
+
+<<opts,echo=FALSE>>=
+library("knitr")
+opts_chunk$set(fig.width=5,fig.height=5,tidy=FALSE,message=FALSE,error=FALSE,warning=FALSE)
+@
+
+\section{Preliminaries}
+
+Load packages:
+
+<<pkgs,message=FALSE>>=
+library(fitode)
+library(dplyr)
+library(ggplot2); theme_set(theme_bw())
+library(rbenchmark)
+@
+
+\section{Simple fitting}
+
+\subsection{SIR model}
+
+Let's start with a simple SIR model. This is how you define a model in \code{fitode}:
+
+<<sir_model>>===
+sir <- new("model.ode",
+    "sir model",
+    model=list(
+        S ~ -beta*S*I/N,
+        I ~ beta*S*I/N - gamma*I
+    ),
+    initial=list(
+        S ~ N*(1-i0),
+        I ~ N*i0
+    ),
+    par=c("beta", "gamma", "N", "i0")
+
+)
+@
+
+To solve this ode, one can use `ode.solve` function.
+
+<<sir_model_solve>>===
+time <- c(1:10)
+par <- c(beta=2, gamma=1, N=1000, i0=1/1000)
+ss <- ode.solve(sir, time, par)
+plot(ss@solution)
+@
+
+We can try to fit this model to Harbin Plague data (note that all log likelihood parameters start with prefix `ll.`):
+
+<<harbin>>==
+harbin <- fitsir::harbin
+
+start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, ll.sigma=5)
+
+ff <- fitode(Deaths|week~gamma*I,
+    start=start,
+    model=sir,
+    loglik=select_model("gaussian"),
+    data=harbin
+)
+
+
+print(ff)
+@
+
+With this starting parameter, `fitode` fails to find mle. We can improve the fit by using link functions:
+
+<<harbin_link>>==
+ff2 <- fitode(Deaths|week~gamma*I,
+    start=start,
+    model=sir,
+    loglik=select_model("gaussian"),
+    data=harbin,
+    link=list(
+        beta="log",
+        gamma="log",
+        N="log",
+        i0="logit"
+    )
+)
+print(ff2)
+@
+
+We can look at the predicted trajectory:
+
+<<plot>>==
+plot(ff2, level=0.95)
+@
+
+This looks pretty good but we are not dealing with overdispersion properly.
+
+<<>>==
+start2 <- c(coef(ff2)[1:4], ll.phi=2)
+
+ff3 <- fitode(Deaths|week~gamma*I,
+    start=start2,
+    model=sir,
+    loglik=select_model("nbinom1"),
+    data=harbin,
+    link=list(
+        beta="log",
+        gamma="log",
+        N="log",
+        i0="logit"
+    )
+)
+
+print(ff3)
+@
+
+Compare the plots...
+
+<<plot2>>==
+plot(ff3, level=0.95, col.traj=1, col.conf=1)
+plot(ff2, level=0.95, col.traj=2, col.conf=2, add=TRUE)
+legend(2, 250, legend=c("nbinom1", "gaussian"), col=c(1,2), lty=1)
+@
+
+\section{Advanced fitting}
+
+\subsection{Using other functions?}
+
+
+
+
+\end{document}

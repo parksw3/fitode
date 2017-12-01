@@ -79,9 +79,10 @@ setMethod("predict", "fitode",
         loglik <- object@loglik
         parms <- coef(object)
 
+        ## TODO: define a new model without sensitivity if method is not delta
+
         ss <- ode.solve(model, times, parms,
-                        ode.opts=object@mle2@data$ode.opts,
-                        keep_sensitivity=method=="delta")
+                        ode.opts=object@mle2@data$ode.opts)
 
         expr <- object@mle2@data$expr
 
@@ -108,7 +109,7 @@ setMethod("predict", "fitode",
                 simpars_orig <- t(apply(simpars, 1, apply_link, linklist, "linkinv"))
 
                 for (i in 1:nsim) {
-                    ss.tmp <- ode.solve(object@model, times, simpars_orig[i,], keep_sensitivity=FALSE)
+                    ss.tmp <- ode.solve(object@model, times, simpars_orig[i,])
                     frame.tmp <- c(parms, ss.tmp@solution)
                     simtraj[,i] <- eval(expr, frame.tmp)
                 }

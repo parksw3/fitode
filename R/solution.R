@@ -10,7 +10,6 @@
 ##' @slot parms parameters of the solution
 ##' @slot solution solution of the model
 ##' @slot sensitivity partial derivative of each state variable with respect to the parameters
-##' @slot keep_sensitivity keep sensitivity equations
 ##' @exportClass solution.ode
 setClass(
     "solution.ode",
@@ -21,8 +20,7 @@ setClass(
         model = "model.ode",
         parms = "numeric",
         solution = "data.frame",
-        sensitivity = "list",
-        keep_sensitivity ="logical"
+        sensitivity = "list"
     )
 )
 
@@ -34,7 +32,6 @@ setClass(
 ##' @param model ode model
 ##' @param parms parameters of the solution
 ##' @param ode.opts options for ode integration
-##' @param keep_sensitivity keep sensitivity equations
 ##' @docType methods
 ##' @exportMethod initialize
 setMethod(
@@ -42,8 +39,7 @@ setMethod(
     "solution.ode",
     definition = function(.Object,
                           y, times, model, parms,
-                          ode.opts=list(method="rk4"),
-                          keep_sensitivity=TRUE) {
+                          ode.opts=list(method="rk4")) {
         .Object@name <- model@name
         .Object@y <- y
         .Object@times <- times
@@ -64,7 +60,7 @@ setMethod(
 
         .Object@solution <- as.data.frame(result[,1:(1+nstate)])
 
-        if (keep_sensitivity) {
+        if (model@keep_sensitivity) {
             sensitivity <- vector("list", nstate)
             for (i in 1:nstate) {
                 sensitivity[[i]] <- result[,(2+nstate):(1+nstate+npar)+(i-1)*npar]
@@ -78,7 +74,6 @@ setMethod(
         } else {
             .Object@sensitivity <- list()
         }
-        .Object@keep_sensitivity <- keep_sensitivity
         .Object
     }
 )
@@ -89,14 +84,10 @@ setMethod(
 ##' @param parms named vector of parameter values
 ##' @param y initial values
 ##' @param ode.opts options for ode integration
-##' @param keep_sensitivity keep sensitivity equations
 ##' @import deSolve
 ##' @export
 ode.solve <- function(model, times, parms, y,
-                 ode.opts=list(method="rk4"),
-                 keep_sensitivity=TRUE) {
-    keep_sensitivity <- (keep_sensitivity && model@keep_sensitivity)
-
+                 ode.opts=list(method="rk4")) {
     frame <- as.list(c(parms))
 
     if (missing(y)) {
@@ -105,9 +96,7 @@ ode.solve <- function(model, times, parms, y,
         stop("y must have same name as the state variables")
     }
 
-    if (keep_sensitivity) {
-        nstate <- length(model@state)
-
+    if (model@keep_sensitivity) {
         ## jacobian(model, state, parms, type="initial")
         ji <- sapply(model@jacobian.initial, function(jj) {
             sapply(jj, eval, frame)
@@ -117,6 +106,5 @@ ode.solve <- function(model, times, parms, y,
 
     new("solution.ode",
         y, times, model, parms,
-        ode.opts,
-        keep_sensitivity)
+        ode.opts)
 }

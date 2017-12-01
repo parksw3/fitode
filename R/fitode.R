@@ -10,18 +10,15 @@ set_link <- function(link, model, loglik) {
     link_default <- as.list(rep("identity", length(allpar)))
     names(link_default) <- allpar
 
-    if (!missing(link)) link_default[names(link)] <- link
-
     loglik.link <- switch(loglik@name,
-        gaussian=list(sigma="log"),
-        nbinom=list(k="log"),
-        nbinom1=list(phi="log")
+        gaussian=list(ll.sigma="log"),
+        nbinom=list(ll.k="log"),
+        nbinom1=list(ll.phi="log")
     )
 
-    if (!is.null(loglik.link)) {
-        loglik.link <- loglik.link[!(names(loglik.link) %in% link)]
-        link_default[names(loglik.link)] <- loglik.link
-    }
+    link_default[names(loglik.link)] <- loglik.link
+
+    if (!missing(link)) link_default[names(link)] <- link
 
     link_default
 }
@@ -85,8 +82,8 @@ fitode <- function(formula, start,
         stop("`t` is reserved for time variable. Try a different parameterization?")
     }
 
-    if (any(is.na(match(names(link), oldpar)))) {
-        stop("Some link functions do not correspond to the model parameters.")
+    if (!missing(link)) {
+        if (any(is.na(match(names(link), oldpar)))) stop("Some link functions do not correspond to the model parameters.")
     }
 
     if (any(!is.na(match(loglik@par, model@par)))) {
@@ -94,6 +91,7 @@ fitode <- function(formula, start,
     }
 
     if (any(is.na(match(oldpar, names(start))))) {
+
         stop(
             paste0("`start` must specify the following parameters:\n",
                 "\node parameters: ", paste(model@par, collapse = ", "),
@@ -145,7 +143,7 @@ fitode <- function(formula, start,
 
     ## only accepts one state variable inside .diff
     ## TODO: check that this works...
-    if (as.character(expr[[1]][[1]]) == ".diff") {
+    if (try(as.character(expr[[1]][[1]]), silent=TRUE) == ".diff") {
         dataarg$observation <- dataarg$observation[1:(length(dataarg$observation)-1)]
 
         if(length(expr[[1]][[2]]) > 1) stop("formula too complicated?")
@@ -300,7 +298,7 @@ ode.sensitivity <- function(expr,
 
         sens <- matrix(0, nrow=length(mean),ncol=length(model@par))
 
-        if (expr[[1]][[1]]==".diff") {
+        if (try(as.character(expr[[1]][[1]]), silent=TRUE)==".diff") {
             ## assuming that sensitivity doesn't depend on the parameter. It really shouldn't if .diff is being used!
             for(i in 1:nstate) {
                 sens <- sens + diff(eval(expr.sensitivity$state[[i]], frame) * solution@sensitivity[[i]])
