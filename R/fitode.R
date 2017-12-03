@@ -53,7 +53,7 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' @param data data frame with time column and observation column
 ##' @param link named vector or list of link functions for ode/log-likelihood parameters
 ##' @param control see optim
-##' @param ode.opts options for ode integration. See ode
+##' @param solver.opts options for ode integration. See ode
 ##' @param skip.hessian skip hessian calculation
 ##' @param use.ginv use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
 ##' @param debug print debugging output?
@@ -70,7 +70,8 @@ fitode <- function(formula, start,
                    optimizer="optim",
                    link,
                    control=list(maxit=1e5),
-                   ode.opts=list(method="rk4"),
+                   solver.opts=list(method="rk4"),
+                   solver=ode,
                    skip.hessian=FALSE,
                    use.ginv=TRUE,
                    debug=FALSE,
@@ -139,7 +140,7 @@ fitode <- function(formula, start,
     }
 
     dataarg <- c(data,list(model=model, loglik=loglik, expr=expr, expr.sensitivity=expr.sensitivity,
-                           ode.opts=ode.opts, linklist=linklist, keep_sensitivity=keep_sensitivity))
+                           solver.opts=solver.opts, solver=solver, linklist=linklist))
 
     ## only accepts one state variable inside .diff
     ## TODO: check that this works...
@@ -156,7 +157,7 @@ fitode <- function(formula, start,
     assign("oldgrad",NULL,f.env)
     assign("data", data, f.env)
 
-    objfun <- function(par, expr, expr.sensitivity, model, loglik, observation, times, ode.opts, linklist, keep_sensitivity) {
+    objfun <- function(par, expr, expr.sensitivity, model, loglik, observation, times, solver.opts, solver, linklist) {
         if (identical(par,oldpar)) {
             if (debug) cat("returning old version of value\n")
             return(oldnll)
@@ -166,7 +167,7 @@ fitode <- function(formula, start,
         derivpar <- apply_link(par, linklist, "mu.eta")
 
         v <- try(logLik.sensitivity(origpar, expr, expr.sensitivity,
-                                    model, loglik, observation, times, ode.opts, keep_sensitivity), silent=TRUE)
+                                    model, loglik, observation, times, solver.opts, solver), silent=TRUE)
         if (inherits(v, "try-error")) {
             return(NA)
         } else {
@@ -182,7 +183,7 @@ fitode <- function(formula, start,
         }
     }
 
-    gradfun <- function(par, expr, expr.sensitivity, model, loglik, observation, times, ode.opts, linklist, keep_sensitivity) {
+    gradfun <- function(par, expr, expr.sensitivity, model, loglik, observation, times, solver.opts, solver, linklist) {
         if (identical(par,oldpar)) {
             if (debug) cat("returning old version of grad\n")
             return(oldgrad)
@@ -192,7 +193,7 @@ fitode <- function(formula, start,
         derivpar <- apply_link(par, linklist, "mu.eta")
 
         v <- try(logLik.sensitivity(origpar, expr, expr.sensitivity,
-                                    model, loglik, observation, times, ode.opts, keep_sensitivity), silent=TRUE)
+                                    model, loglik, observation, times, solver.opts, solver,), silent=TRUE)
         if (inherits(v, "try-error")) {
             return(NA)
         } else {
@@ -243,8 +244,8 @@ fitode <- function(formula, start,
                                             model=model,loglik=loglik,
                                             observation=dataarg$observation,
                                             times=dataarg$times,
-                                            ode.opts=ode.opts,
-                                            keep_sensitivity=keep_sensitivity,
+                                            solver.opts=solver.opts,
+                                            solver=solver,
                                             returnNLL=!keep_sensitivity))
             if(!inherits(thess, "try-error")) {
                 if (use.ginv) {
@@ -272,7 +273,6 @@ fitode <- function(formula, start,
     )
 }
 
-
 ##' Calculate sensitivity of the expression with respect to the parameters
 ##'
 ##' @param expr expression to be evaluated
@@ -280,20 +280,20 @@ fitode <- function(formula, start,
 ##' @param model model.ode object
 ##' @param parms named vector of parameter values
 ##' @param times time window for which the model should be solved
-##' @param ode.opts options for the ode solver (see \code{\link{ode}})
+##' @param solver.opts options for the ode solver (see \code{\link{ode}})
 ode.sensitivity <- function(expr,
                         expr.sensitivity,
                         model,
                         parms, times,
-                        ode.opts=list(method="rk4"),
-                        keep_sensitivity=TRUE) {
-    solution <- ode.solve(model, times, parms, ode.opts=ode.opts)
+                        solver.opts=list(method="rk4"),
+                        solver=ode) {
+    solution <- ode.solve(model, times, parms, solver.opts=solver.opts, solver=solver)
 
     frame <- c(solution@solution, parms)
 
     mean <- eval(expr, frame)
 
-    if (keep_sensitivity) {
+    if (model@keep_sensitivity) {
         nstate <- length(model@state)
 
         sens <- matrix(0, nrow=length(mean),ncol=length(model@par))
@@ -326,26 +326,26 @@ ode.sensitivity <- function(expr,
 ##' @param loglik loglik.ode object
 ##' @param observation observed values
 ##' @param times time at which observations were measured
-##' @param ode.opts options for the ode solver (see \code{\link{ode}})
+##' @param solver.opts options for the ode solver (see \code{\link{ode}})
 ##' @param returnNLL (logical) return negative log likelihood
 ##' @return vector of nll and sensitivity of nll with respect to the parameters
 logLik.sensitivity <- function(parms, expr,
                             expr.sensitivity,
                             model, loglik,
                             observation, times=NULL,
-                            ode.opts=list(method="rk4"),
-                            keep_sensitivity=TRUE,
+                            solver.opts=list(method="rk4"),
+                            solver=ode,
                             returnNLL=TRUE) {
     if (is.null(times)) times <- seq(length(observation))
 
-    ss <- ode.sensitivity(expr, expr.sensitivity, model, parms, times, ode.opts, keep_sensitivity)
+    ss <- ode.sensitivity(expr, expr.sensitivity, model, parms, times, solver.opts, solver)
     mean <- ss$mean
     sens <- ss$sensitivity
 
     loglik.par <- as.list(parms[-c(1:length(model@par))])
 
     nll <- -sum(Eval(loglik, observation, mean, loglik.par))
-    if (keep_sensitivity) {
+    if (model@keep_sensitivity) {
         loglik.gr <- grad(loglik, observation, mean, loglik.par)
         sensitivity <- c(-colSums(loglik.gr[[1]] * sens))
         if(length(loglik.gr) > 1) sensitivity <- c(sensitivity, -sapply(loglik.gr[-1], sum))

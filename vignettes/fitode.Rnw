@@ -134,11 +134,83 @@ plot(ff2, level=0.95, col.traj=2, col.conf=2, add=TRUE)
 legend(2, 250, legend=c("nbinom1", "gaussian"), col=c(1,2), lty=1)
 @
 
+\subsection{Predator-Prey}
+
+
+
 \section{Advanced fitting}
 
-\subsection{Using other functions?}
+\subsection{Using other packages: EpiDynamics}
+
+Let's try using functions from other packages
+
+<<>>==
+library(EpiDynamics)
+
+SIRIM <- new("model.ode",
+    name="SIR with induced mortality",
+    model=SIRInducedMortality,
+    initial=list(
+        X~1-Y0,
+        Y~Y0,
+        Z~0
+    ),
+    par=c("rho", "mu", "nu", "beta", "gamma", "N", "Y0")
+)
+@
+
+We have to define a custom solver because functions in \code{EpiDynamics} are ... ??
+
+<<>>==
+Epi.solver <- function(y, times, func, parms,...) {
+    ss <- func(parms, y, times,...)$results
+    ss[,-1] <- ss[,-1] * parms[["N"]]
+    ss
+}
+@
+
+Trying out parameters:
+
+<<>>===
+start <- c(rho = 0.9, mu = 1/70, nu = 1/700,
+                      beta = 3, gamma = 0.05, N=1000, Y0=1e-3)
 
 
+ss <- ode.solve(SIRIM, 0:20, start, solver.opts=list(), solver=Epi.solver)
+plot(ss@solution$time, ss@solution$Y, type="l")
+@
+
+We have to let \code{solver.opts=list()} because...
+
+<<>>===
+set.seed(101)
+data <- data.frame(
+    times=ss@times,
+    prevalence=rnbinom(21, mu=ss@solution$Y, size=5)
+)
+
+ff_IM <- fitode(prevalence|times~Y,
+    start=start,
+    model=SIRIM,
+    loglik=select_model("poisson"),
+    data=data,
+    link=list(
+        beta="log",
+        gamma="log",
+        N="log",
+        mu="log",
+        nu="log",
+        rho="logit",
+        Y0="logit"
+    ),
+    solver=Epi.solver
+)
+
+print(ff_IM)
+plot(ff_IM)
+@
+
+\subsection{Nicholson experiment}
 
 
 \end{document}

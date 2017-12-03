@@ -31,7 +31,8 @@ setClass(
 ##' @param times time vector
 ##' @param model ode model
 ##' @param parms parameters of the solution
-##' @param ode.opts options for ode integration
+##' @param solver.opts options for ode solver
+##' @param solver ode solver (must take y, times, func, and parms as arguments)
 ##' @docType methods
 ##' @exportMethod initialize
 setMethod(
@@ -39,7 +40,8 @@ setMethod(
     "solution.ode",
     definition = function(.Object,
                           y, times, model, parms,
-                          ode.opts=list(method="rk4")) {
+                          solver.opts=list(method="rk4"),
+                          solver=ode) {
         .Object@name <- model@name
         .Object@y <- y
         .Object@times <- times
@@ -51,12 +53,12 @@ setMethod(
 
         gfun <- model@gfun
 
-        result <- do.call("ode",
+        result <- do.call(solver,
                           c(list(y=y,
                                  times=times,
                                  func=gfun,
                                  parms=parms),
-                            ode.opts))
+                            solver.opts))
 
         .Object@solution <- as.data.frame(result[,1:(1+nstate)])
 
@@ -83,11 +85,13 @@ setMethod(
 ##' @param times time vector
 ##' @param parms named vector of parameter values
 ##' @param y initial values
-##' @param ode.opts options for ode integration
+##' @param solver.opts options for ode solver
+##' @param solver ode solver (must take y, times, func, and parms as arguments)
 ##' @import deSolve
 ##' @export
 ode.solve <- function(model, times, parms, y,
-                 ode.opts=list(method="rk4")) {
+                 solver.opts=list(method="rk4"),
+                 solver=ode) {
     frame <- as.list(c(parms))
 
     if (missing(y)) {
@@ -106,5 +110,6 @@ ode.solve <- function(model, times, parms, y,
 
     new("solution.ode",
         y, times, model, parms,
-        ode.opts)
+        solver.opts,
+        solver)
 }

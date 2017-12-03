@@ -17,7 +17,7 @@ SI_model <- new("model.ode",
 
 ode.solve(SI_model, 1:10, c(beta=1,gamma=0.5, N=100, i0=1e-3))
 
-start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, sigma=5)
+start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, ll.sigma=5)
 
 system.time(ff <- fitode(Deaths|week~gamma*I,
     start=start,
@@ -30,16 +30,6 @@ system.time(ff <- fitode(Deaths|week~gamma*I,
         N="log",
         i0="logit"
     )
-))
-
-system.time(ff2 <- fitsir::fitsir(
-    data=harbin,
-    start=start,
-    type="death",
-    icol="Deaths",
-    tcol="week",
-    optimizer="optim",
-    method="BFGS"
 ))
 
 system.time(pp <- profile(ff@mle2, continuation="naive", trace=TRUE))
@@ -88,7 +78,7 @@ SI_model_c <- new("model.ode",
     par=c("beta", "gamma", "N", "i0")
 )
 
-start <- c(beta=2, gamma=1, N=3000, i0=1e-5, sigma=1)
+start <- c(beta=2, gamma=1, N=3000, i0=1e-5, ll.sigma=1)
 
 system.time(ff4 <- fitode(mort|week ~ .diff(cDeath),
     start=start,
@@ -102,5 +92,3 @@ system.time(ff4 <- fitode(mort|week ~ .diff(cDeath),
         i0="logit"
     )
 ))
-
-

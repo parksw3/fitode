@@ -82,7 +82,8 @@ setMethod("predict", "fitode",
         ## TODO: define a new model without sensitivity if method is not delta
 
         ss <- ode.solve(model, times, parms,
-                        ode.opts=object@mle2@data$ode.opts)
+                        solver.opts=object@mle2@data$solver.opts,
+                        solver=object@mle2@data$solver)
 
         expr <- object@mle2@data$expr
 
