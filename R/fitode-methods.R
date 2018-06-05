@@ -110,7 +110,9 @@ setMethod("predict", "fitode",
                 simpars_orig <- t(apply(simpars, 1, apply_link, linklist, "linkinv"))
 
                 for (i in 1:nsim) {
-                    ss.tmp <- ode.solve(object@model, times, simpars_orig[i,])
+                    ss.tmp <- ode.solve(object@model, times, simpars_orig[i,],
+                                        solver.opts=object@mle2@data$solver.opts,
+                                        solver=object@mle2@data$solver)
                     frame.tmp <- c(parms, ss.tmp@solution)
                     simtraj[,i] <- eval(expr, frame.tmp)
                 }
@@ -123,7 +125,9 @@ setMethod("predict", "fitode",
                                             object@mle2@data$expr.sensitivity,
                                             model,
                                             parms,
-                                            object@data$times)$sensitivity
+                                            object@data$times,
+                                            solver.opts=object@mle2@data$solver.opts,
+                                            solver=object@mle2@data$solver)$sensitivity
 
                     fitted_parms <- coef(object, "fitted")
 
@@ -165,6 +169,7 @@ setMethod("predict", "fitode",
 
                     sample.logLik <- mvtnorm::dmvnorm(simpars, coef(object, "fitted"), vv, log=TRUE)
                     ww <- exp(traj.logLik-sample.logLik)
+                    ww[is.nan(ww) | is.na(ww)] <- 0
                     cmat <- t(apply(simtraj, 1, wquant, weights=ww, probs=c(ll, 1-ll)))
                     cmat
                 })

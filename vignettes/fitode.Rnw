@@ -70,9 +70,9 @@ harbin <- fitsir::harbin
 
 start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, ll.sigma=5)
 
-ff <- fitode(Deaths|week~gamma*I,
+ff <- fitode(Deaths~gamma*I,
     start=start,
-    model=sir,
+    model=sir, tcol="week",
     loglik=select_model("gaussian"),
     data=harbin
 )
@@ -84,11 +84,11 @@ print(ff)
 With this starting parameter, `fitode` fails to find mle. We can improve the fit by using link functions:
 
 <<harbin_link>>==
-ff2 <- fitode(Deaths|week~gamma*I,
+ff2 <- fitode(Deaths~gamma*I,
     start=start,
     model=sir,
     loglik=select_model("gaussian"),
-    data=harbin,
+    data=harbin, tcol="week",
     link=list(
         beta="log",
         gamma="log",
@@ -110,11 +110,11 @@ This looks pretty good but we are not dealing with overdispersion properly.
 <<>>==
 start2 <- c(coef(ff2)[1:4], ll.phi=2)
 
-ff3 <- fitode(Deaths|week~gamma*I,
+ff3 <- fitode(Deaths~gamma*I,
     start=start2,
     model=sir,
     loglik=select_model("nbinom1"),
-    data=harbin,
+    data=harbin, tcol="week",
     link=list(
         beta="log",
         gamma="log",
@@ -189,10 +189,10 @@ data <- data.frame(
     prevalence=rnbinom(21, mu=ss@solution$Y, size=5)
 )
 
-ff_IM <- fitode(prevalence|times~Y,
-    start=start,
+ff_IM <- fitode(prevalence~Y,
+    start=c(start, ll.k=5),
     model=SIRIM,
-    loglik=select_model("poisson"),
+    loglik=select_model("nbinom"),
     data=data,
     link=list(
         beta="log",
@@ -207,10 +207,14 @@ ff_IM <- fitode(prevalence|times~Y,
 )
 
 print(ff_IM)
-plot(ff_IM)
-@
 
-\subsection{Nicholson experiment}
+## hacking...
+
+ff_IM@mle2@vcov <- as.matrix(Matrix::nearPD(ff_IM@mle2@vcov)[[1]])
+
+set.seed(101)
+plot(ff_IM, level=0.95, method="wmvrnorm", nsim=1000)
+@
 
 
 \end{document}

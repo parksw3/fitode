@@ -24,10 +24,10 @@ test_that("SI model", {
 
     start <- c(beta=2, gamma=1, N=1e4, i0=1e-3, ll.k=10)
 
-    suppressWarnings(ff <- fitode(Deaths|week~gamma*I,
+    suppressWarnings(ff <- fitode(Deaths~gamma*I,
         start=start,
         model=SI_model, loglik=select_model("nbinom"),
-        data=harbin,
+        data=harbin, tcol="week",
         link = list(
             beta="log",
             gamma="log",

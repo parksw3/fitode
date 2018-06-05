@@ -65,7 +65,7 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' @export fitode
 fitode <- function(formula, start,
                    model, loglik=select_model("gaussian"),
-                   data,
+                   data, tcol="times",
                    method="BFGS",
                    optimizer="optim",
                    link,
@@ -106,8 +106,7 @@ fitode <- function(formula, start,
 
     start <- start[oldpar]
 
-    ocol <- as.character(formula[[2]][[2]])
-    tcol <- as.character(formula[[2]][[3]])
+    ocol <- as.character(formula[[2]])
     data <- data.frame(times = data[[tcol]], observation = data[[ocol]])
 
     link <- set_link(link, model, loglik)
@@ -193,7 +192,7 @@ fitode <- function(formula, start,
         derivpar <- apply_link(par, linklist, "mu.eta")
 
         v <- try(logLik.sensitivity(origpar, expr, expr.sensitivity,
-                                    model, loglik, observation, times, solver.opts, solver,), silent=TRUE)
+                                    model, loglik, observation, times, solver.opts, solver), silent=TRUE)
         if (inherits(v, "try-error")) {
             return(NA)
         } else {
@@ -312,7 +311,7 @@ ode.sensitivity <- function(expr,
                 sens <- sens + do.call("cbind", sens_p)
         }
     } else {
-        sens=NULL
+        sens <-NULL
     }
 
     list(mean=mean, sensitivity=sens)
