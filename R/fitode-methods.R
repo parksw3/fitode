@@ -234,19 +234,14 @@ setMethod("logLik", "fitode", function(object){-object@min})
 ##' Profile object
 ##'
 ##' @param fitted fitted model object
-##' @param scale scale of parameters
 ##' @importFrom bbmle profile
 ##' @exportMethod profile
 setMethod("profile", "fitode",
-    function(fitted, scale=c("original", "fitted")) {
-        scale <- match.arg(scale)
-        prof <- profile(fitted@mle2, continuation="naive")
-        if (scale=="original" && length(object@link) > 0) {
-            ## TODO: re-write this section...
+    function(fitted,
+             trace=FALSE) {
+        m <- fitted@mle2
 
-
-
-        }
+        prof <- profile(m, continuation="naive", trace=trace)
         prof
     }
 )

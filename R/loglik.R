@@ -100,16 +100,16 @@ setMethod(
     "Transform",
     "loglik.ode",
     function(object, transforms=NULL,
-                           name,
-                           observation="X",
-                           mean, par,
-                           keep_grad=TRUE) {
+             name,
+             observation="X",
+             mean, par,
+             keep_grad=TRUE) {
         # if no transform, return model
         if (length(transforms) == 0)
             return(object)
         allvars <- c(object@observation, object@mean, object@par)
         transforms <- trans(transforms, allvars)
-        f <- c(as.symbol("~"), as.symbol("LL"), subst(object@expr[[1]]), transforms)
+        f <- c(as.symbol("~"), as.symbol("LL"), subst(object@expr[[1]], transforms))
         f <- as.formula(as.call(f))
 
         if (missing(name)) name <- object@name
@@ -155,35 +155,35 @@ NBconst <- function(k,x) {
 ##' Select likelihood model
 ##' @param dist conditional distribution of reported data
 ##' @export
-select_model <- function(dist = c("gaussian", "poisson", "nbinom", "nbinom1")) {
+select_model <- function(dist = c("dnorm", "dpois", "dnbinom", "dnbinom1")) {
         dist <- match.arg(dist)
     name <- dist
     model <- switch(dist,
-        gaussian={
+        dnorm={
             loglik_gaussian <- new("loglik.ode", "gaussian",
-                LL ~ -(X-mu)^2/(2*ll.sigma^2) - log(ll.sigma) - 1/2*log(2*pi),
-                mean="mu", par="ll.sigma")
+                LL ~ -(X-mean)^2/(2*sd^2) - log(sd) - 1/2*log(2*pi),
+                mean="mean", par="sd")
 
             loglik_gaussian
-        }, poisson={
+        }, dpois={
             loglik_poisson <- new("loglik.ode", "poisson",
                 LL ~ X*log(lambda) - lambda - lgamma(X+1),
                 mean = "lambda", par = c())
             loglik_poisson
-        }, nbinom={
+        }, dnbinom={
             loglik_nbinom <- new ("loglik.ode", "nbinom",
-                LL ~ - NBconst(ll.k, X) + ll.k * (-log1p(mu/ll.k)) +
-                    X * log(mu) - X * log(ll.k + mu),
+                LL ~ - NBconst(size, X) + size * (-log1p(mu/size)) +
+                    X * log(mu) - X * log(size + mu),
                 mean="mu",
-                par = "ll.k")
+                par = "size")
 
             loglik_nbinom
-        }, nbinom1={
+        }, dnbinom1={
             loglik_nbinom1 <- new ("loglik.ode", "nbinom",
-                LL ~ - NBconst(mu/ll.phi, X) + mu/ll.phi * (-log1p(ll.phi)) +
-                    X * log(mu) - X * log(mu/ll.phi + mu),
+                LL ~ - NBconst(mu/phi, X) + mu/phi * (-log1p(phi)) +
+                    X * log(mu) - X * log(mu/phi + mu),
                 mean="mu",
-            par = "ll.phi")
+            par = "phi")
 
             loglik_nbinom1
         }

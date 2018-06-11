@@ -3,6 +3,7 @@
 ##' @param .Object object
 ##' @slot name name of the model
 ##' @slot model ode model
+##' @slot observation observation model
 ##' @slot initial initial values
 ##' @slot par parameters
 ##' @slot keep_sensitivity (logical) maintain the Jacobian as part of the model
@@ -13,11 +14,15 @@
 ##'         S ~ - beta*S*I/N,
 ##'         I ~ beta*S*I/N - gamma*I
 ##'     ),
+##'     observation = list(
+##'         susceptible ~ dnorm(mean=S, sd=sigma1),
+##'         infected ~ dnorm(mean=I, sd=sigma2)
+##'     ),
 ##'     initial = list(
 ##'         S ~ N * (1 - i0),
 ##'         I ~ N * i0
 ##'     ),
-##'     par= c("beta", "gamma", "N", "i0")
+##'     par= c("beta", "gamma", "N", "i0", "sigma1", "sigma2")
 ##' )
 ##' @docType methods
 ##' @exportMethod initialize
@@ -25,9 +30,12 @@ setMethod(
     "initialize",
     "model.ode",
     function(.Object, name,
-             model, initial,
+             model,
+             observation,
+             initial,
              par,
              keep_sensitivity=TRUE) {
+        ## TODO: I can't remember why it's asking for a function...
         if (any(sapply(initial, class) != "formula"))
             stop("initial must be a list of formulas or a function")
 
@@ -39,6 +47,26 @@ setMethod(
         initial <- lapply(initial, function(x) as.expression(x[[3]]))
         names(initial) <- state
 
+        if (keep_sensitivity) {
+            deriv <- function(expr, vars) {
+                d <- lapply(vars,
+                            function(p){
+                                Deriv(expr, p)
+                            })
+                names(d) <- vars
+                d
+            }
+
+            deriv2 <- function(gradlist, vars) {
+                d <- lapply(gradlist,
+                            function(x){
+                                deriv(x, vars)
+                            })
+                names(d) <- state
+                d
+            }
+        }
+
         if (is.list(model)) {
             if (any(sapply(model, class) != "formula"))
                 stop("model must be a list of formulas or a function")
@@ -47,24 +75,6 @@ setMethod(
             names(grad) <- state
 
             if (keep_sensitivity) {
-                deriv <- function(expr, vars) {
-                    d <- lapply(vars,
-                                function(p){
-                                    Deriv(expr, p)
-                                })
-                    names(d) <- vars
-                    d
-                }
-
-                deriv2 <- function(gradlist, vars) {
-                    d <- lapply(gradlist,
-                                function(x){
-                                    deriv(x, vars)
-                                })
-                    names(d) <- state
-                    d
-                }
-
                 .Object@jacobian.initial <- deriv2(initial, par)
                 .Object@jacobian.state <- jacobian.state <- deriv2(grad, state)
                 .Object@jacobian.par <- jacobian.par <- deriv2(grad, par)
@@ -102,6 +112,34 @@ setMethod(
         } else {
             stop("model must be a list of formulas or a function")
         }
+
+        if (is.list(observation)) {
+            if (any(sapply(observation, class) != "formula"))
+                stop("observation must be a list of formulas")
+
+            loglik_list <- lapply(observation, function(ll) {
+                ll_model <- select_model(as.character(ll[[3]][[1]]))
+
+                transpar <- ll_model@par
+
+                call <- as.list(ll[[3]])[[transpar]]
+
+                trans_formula <- as.formula(as.call(c(as.symbol("~"), as.symbol(transpar), call)))
+
+                ll_model <- Transform(ll_model,
+                    transforms=list(
+                        trans_formula
+                    ),
+                    par=call,
+                    keep_grad=keep_sensitivity
+                )
+            })
+            .Object@observation <- observation
+            .Object@loglik <- loglik_list
+        } else {
+            stop("observation must be a list of formulas or a function")
+        }
+
 
         .Object@initial <- initial
         .Object@state <- state
@@ -189,6 +227,11 @@ setMethod(
 setMethod("show", "model.ode",
     function(object){
         cat("Name:", object@name, "\n")
+
+        cat("\nObservations:\n")
+        for(i in 1:length(object@observation)) {
+            cat(deparse(object@observation[[i]]), "\n")
+        }
 
         cat("\nInitial values:\n")
         g <- paste0(object@state, "(0) = ", sapply(object@initial, as.character))

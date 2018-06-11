@@ -281,11 +281,11 @@ fitode <- function(formula, start,
 ##' @param times time window for which the model should be solved
 ##' @param solver.opts options for the ode solver (see \code{\link{ode}})
 ode.sensitivity <- function(expr,
-                        expr.sensitivity,
-                        model,
-                        parms, times,
-                        solver.opts=list(method="rk4"),
-                        solver=ode) {
+                            expr.sensitivity,
+                            model,
+                            parms, times,
+                            solver.opts=list(method="rk4"),
+                            solver=ode) {
     solution <- ode.solve(model, times, parms, solver.opts=solver.opts, solver=solver)
 
     frame <- c(solution@solution, parms)

@@ -2,12 +2,14 @@
 ##'
 ##' @slot name name of the model
 ##' @slot gfun gradient function
+##' @slot observation observation model
 ##' @slot initial list of expressions representing the initial values
 ##' @slot state state variables
 ##' @slot par parameters
 ##' @slot jacobian.initial Jacobian of initial values with respect to its parameters
 ##' @slot jacobian.state Jacobian with respect to its states
 ##' @slot jacobian.par Jacobian with repsect to its parameters
+##' @slot loglik log-likelihood functions
 ##' @slot keep_sensitivity (logical) keep sensitivity equations?
 ##' @exportClass model.ode
 setClass(
@@ -15,12 +17,14 @@ setClass(
     slots = c(
         name = "character",
         gfun = "function",
+        observation = "list",
         initial= "list",
         state = "character",
         par = "character",
         jacobian.initial = "list",
         jacobian.state = "list",
         jacobian.par = "list",
+        loglik = "list",
         keep_sensitivity  = "logical"
     )
 )
