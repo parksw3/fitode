@@ -4,7 +4,7 @@
 \alias{set_link}
 \title{Set up link functions for ode/loglik parameters}
 \usage{
-set_link(link, model, loglik)
+set_link(link, model)
 }
 \arguments{
 \item{link}{named list or vector of strings specifying link functions}

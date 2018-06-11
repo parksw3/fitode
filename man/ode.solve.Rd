@@ -4,8 +4,8 @@
 \alias{ode.solve}
 \title{solve ode models}
 \usage{
-ode.solve(model, times, parms, y, ode.opts = list(method = "rk4"),
-  keep_sensitivity = TRUE)
+ode.solve(model, times, parms, y, solver.opts = list(method = "rk4"),
+  solver = ode)
 }
 \arguments{
 \item{model}{model.ode object}
@@ -16,9 +16,9 @@ ode.solve(model, times, parms, y, ode.opts = list(method = "rk4"),
 
 \item{y}{initial values}
 
-\item{ode.opts}{options for ode integration}
+\item{solver.opts}{options for ode solver}
 
-\item{keep_sensitivity}{keep sensitivity equations}
+\item{solver}{ode solver (must take y, times, func, and parms as arguments)}
 }
 \description{
 solve ode models

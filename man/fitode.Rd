@@ -5,32 +5,34 @@
 \title{Class "fitode".
 Result of ode fitting based on Maximum Likelihood Estimation}
 \usage{
-fitode(formula, start, model, loglik = select_model("gaussian"), data,
-  method = "BFGS", optimizer = "optim", link, control = list(maxit =
-  1e+05), ode.opts = list(method = "rk4"), skip.hessian = FALSE,
+fitode(model, data, start, tcol = "times", method = "BFGS",
+  optimizer = "optim", link, control = list(maxit = 1e+05),
+  solver.opts = list(method = "rk4"), solver = ode, skip.hessian = FALSE,
   use.ginv = TRUE, debug = FALSE, ...)
 
-fitode(formula, start, model, loglik = select_model("gaussian"), data,
-  method = "BFGS", optimizer = "optim", link, control = list(maxit =
-  1e+05), ode.opts = list(method = "rk4"), skip.hessian = FALSE,
+fitode(model, data, start, tcol = "times", method = "BFGS",
+  optimizer = "optim", link, control = list(maxit = 1e+05),
+  solver.opts = list(method = "rk4"), solver = ode, skip.hessian = FALSE,
   use.ginv = TRUE, debug = FALSE, ...)
 }
 \arguments{
-\item{formula}{formula specifing observation variable and the mean}
+\item{model}{ode model}
+
+\item{data}{data frame with time column and observation column}
 
 \item{start}{named vector of starting parameter values}
 
-\item{model}{ode model}
+\item{tcol}{time column}
 
-\item{loglik}{log liklihood model}
+\item{method}{optimization method}
 
-\item{data}{data frame with time column and observation column}
+\item{optimizer}{optimizer}
 
 \item{link}{named vector or list of link functions for ode/log-likelihood parameters}
 
 \item{control}{see optim}
 
-\item{ode.opts}{options for ode integration. See ode}
+\item{solver.opts}{options for ode integration. See ode}
 
 \item{skip.hessian}{skip hessian calculation}
 

@@ -4,21 +4,21 @@
 \alias{ode.sensitivity}
 \title{Calculate sensitivity of the expression with respect to the parameters}
 \usage{
-ode.sensitivity(expr, expr.sensitivity, model, parms, times,
-  ode.opts = list(method = "rk4"), keep_sensitivity = TRUE)
+ode.sensitivity(model, parms, times, solver.opts = list(method = "rk4"),
+  solver = ode)
 }
 \arguments{
-\item{expr}{expression to be evaluated}
-
-\item{expr.sensitivity}{partial derivative of expr w.r.t states and parameters}
-
 \item{model}{model.ode object}
 
 \item{parms}{named vector of parameter values}
 
 \item{times}{time window for which the model should be solved}
 
-\item{ode.opts}{options for the ode solver (see \code{\link{ode}})}
+\item{solver.opts}{options for the ode solver (see \code{\link{ode}})}
+
+\item{expr}{expression to be evaluated}
+
+\item{expr.sensitivity}{partial derivative of expr w.r.t states and parameters}
 }
 \description{
 Calculate sensitivity of the expression with respect to the parameters

@@ -25,7 +25,5 @@ Result of solving ode modeld with/without sensitivity equations
 \item{\code{solution}}{solution of the model}
 
 \item{\code{sensitivity}}{partial derivative of each state variable with respect to the parameters}
-
-\item{\code{keep_sensitivity}}{keep sensitivity equations}
 }}
 

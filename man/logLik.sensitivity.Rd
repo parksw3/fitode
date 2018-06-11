@@ -4,26 +4,17 @@
 \alias{logLik.sensitivity}
 \title{Sensitivity of the likelihood function with respect to parameters}
 \usage{
-logLik.sensitivity(parms, expr, expr.sensitivity, model, loglik, observation,
-  times = NULL, ode.opts = list(method = "rk4"), keep_sensitivity = TRUE,
-  returnNLL = TRUE)
+logLik.sensitivity(parms, model, data, solver.opts = list(method = "rk4"),
+  solver = ode, returnNLL = TRUE)
 }
 \arguments{
 \item{parms}{named vector of parameter values}
 
-\item{expr}{expression to be evaluated}
-
-\item{expr.sensitivity}{partial derivative of expr w.r.t states and parameters}
-
 \item{model}{model.ode object}
 
-\item{loglik}{loglik.ode object}
+\item{data}{data}
 
-\item{observation}{observed values}
-
-\item{times}{time at which observations were measured}
-
-\item{ode.opts}{options for the ode solver (see \code{\link{ode}})}
+\item{solver.opts}{options for the ode solver (see \code{\link{ode}})}
 
 \item{returnNLL}{(logical) return negative log likelihood}
 }

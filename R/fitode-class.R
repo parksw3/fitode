@@ -6,10 +6,13 @@
 ##' @slot initial list of expressions representing the initial values
 ##' @slot state state variables
 ##' @slot par parameters
+##' @slot diffnames state variables that needs to be diff-ed
 ##' @slot jacobian.initial Jacobian of initial values with respect to its parameters
 ##' @slot jacobian.state Jacobian with respect to its states
 ##' @slot jacobian.par Jacobian with repsect to its parameters
 ##' @slot loglik log-likelihood functions
+##' @slot expr expressions for true trajectories
+##' @slot expr.sensitivity sensitivity of the expressions with respect to state variables and parameters
 ##' @slot keep_sensitivity (logical) keep sensitivity equations?
 ##' @exportClass model.ode
 setClass(
@@ -21,10 +24,13 @@ setClass(
         initial= "list",
         state = "character",
         par = "character",
+        diffnames = "character",
         jacobian.initial = "list",
         jacobian.state = "list",
         jacobian.par = "list",
         loglik = "list",
+        expr="list",
+        expr.sensitivity="list",
         keep_sensitivity  = "logical"
     )
 )
@@ -60,9 +66,7 @@ setClass(
 ##' @export
 fitode <- setClass("fitode",
     slots = c(
-        formula="formula",
         model="model.ode",
-        loglik="loglik.ode",
         data="data.frame",
         coef="numeric",
         vcov="matrix",
@@ -71,5 +75,3 @@ fitode <- setClass("fitode",
         link="list"
     )
 )
-
-

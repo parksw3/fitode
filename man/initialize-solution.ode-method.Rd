@@ -6,7 +6,7 @@
 \title{the initializer for model.ode}
 \usage{
 \S4method{initialize}{solution.ode}(.Object, y, times, model, parms,
-  ode.opts = list(method = "rk4"), keep_sensitivity = TRUE)
+  solver.opts = list(method = "rk4"), solver = ode)
 }
 \arguments{
 \item{.Object}{object}
@@ -19,9 +19,9 @@
 
 \item{parms}{parameters of the solution}
 
-\item{ode.opts}{options for ode integration}
+\item{solver.opts}{options for ode solver}
 
-\item{keep_sensitivity}{keep sensitivity equations}
+\item{solver}{ode solver (must take y, times, func, and parms as arguments)}
 }
 \description{
 the initializer for model.ode

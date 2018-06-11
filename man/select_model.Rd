@@ -4,7 +4,7 @@
 \alias{select_model}
 \title{Select likelihood model}
 \usage{
-select_model(dist = c("gaussian", "poisson", "nbinom", "nbinom1"))
+select_model(dist = c("dnorm", "dpois", "dnbinom", "dnbinom1"))
 }
 \arguments{
 \item{dist}{conditional distribution of reported data}

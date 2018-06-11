@@ -14,17 +14,27 @@ Class representing ode models
 
 \item{\code{gfun}}{gradient function}
 
+\item{\code{observation}}{observation model}
+
 \item{\code{initial}}{list of expressions representing the initial values}
 
 \item{\code{state}}{state variables}
 
 \item{\code{par}}{parameters}
 
+\item{\code{diffnames}}{state variables that needs to be diff-ed}
+
 \item{\code{jacobian.initial}}{Jacobian of initial values with respect to its parameters}
 
 \item{\code{jacobian.state}}{Jacobian with respect to its states}
 
 \item{\code{jacobian.par}}{Jacobian with repsect to its parameters}
+
+\item{\code{loglik}}{log-likelihood functions}
+
+\item{\code{expr}}{expressions for true trajectories}
+
+\item{\code{expr.sensitivity}}{sensitivity of the expressions with respect to state variables and parameters}
 
 \item{\code{keep_sensitivity}}{(logical) keep sensitivity equations?}
 }}

@@ -5,12 +5,10 @@
 \alias{profile,fitode-method}
 \title{Profile object}
 \usage{
-\S4method{profile}{fitode}(fitted, scale = c("original", "fitted"))
+\S4method{profile}{fitode}(fitted, trace = FALSE)
 }
 \arguments{
 \item{fitted}{fitted model object}
-
-\item{scale}{scale of parameters}
 }
 \description{
 Profile object

@@ -1,34 +1,47 @@
 library(fitode)
 
-harbin <- fitsir::harbin
-
 SI_model <- new("model.ode",
     name = "SI",
     model = list(
         S ~ - beta*S*I/N,
         I ~ beta*S*I/N - gamma*I
     ),
+    observation = list(
+        susceptible ~ dnorm(mean=S, sd=sigma1),
+        infected ~ dnorm(mean=I, sd=sigma2)
+    ),
     initial = list(
         S ~ N * (1 - i0),
         I ~ N * i0
     ),
-    par=c("beta", "gamma", "N", "i0")
+    par=c("beta", "gamma", "N", "i0", "sigma1", "sigma2")
 )
 
-ode.solve(SI_model, 1:10, c(beta=1,gamma=0.5, N=100, i0=1e-3))
+tvec <- 1:40
 
-start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, ll.sigma=5)
+f <- ode.solve(SI_model, tvec, c(beta=1,gamma=0.5, N=100, i0=1e-3, sigma1=0.1, sigam2=0.1))
 
-system.time(ff <- fitode(Deaths|week~gamma*I,
-    start=start,
+set.seed(101)
+df <- data.frame(
+    day=tvec,
+    susceptible=rnorm(length(tvec), mean=f@solution$S, sd=0.1),
+    infected=rnorm(length(tvec), mean=f@solution$I, sd=0.1)
+)
+
+start <- c(beta=1, gamma=0.5, N=100, i0=1e-3, sigma1=0.1, sigma2=0.1)
+
+system.time(ff <- fitode(
     model=SI_model,
-    loglik=select_model("gaussian"),
-    data=harbin,
+    data=df,
+    start=start,
+    tcol="day",
     link = list(
         beta="log",
         gamma="log",
         N="log",
-        i0="logit"
+        i0="logit",
+        sigma1="log",
+        sigma2="log"
     )
 ))
 

@@ -5,8 +5,8 @@
 \alias{initialize,model.ode-method}
 \title{the initializer for model.ode}
 \usage{
-\S4method{initialize}{model.ode}(.Object, name, model, initial, par,
-  keep_sensitivity = TRUE)
+\S4method{initialize}{model.ode}(.Object, name, model, observation, initial,
+  par, diffnames, keep_sensitivity = TRUE)
 }
 \arguments{
 \item{.Object}{object}
@@ -21,6 +21,8 @@ the initializer for model.ode
 
 \item{\code{model}}{ode model}
 
+\item{\code{observation}}{observation model}
+
 \item{\code{initial}}{initial values}
 
 \item{\code{par}}{parameters}
@@ -34,11 +36,15 @@ SI_model <- new("model.ode",
         S ~ - beta*S*I/N,
         I ~ beta*S*I/N - gamma*I
     ),
+    observation = list(
+        susceptible ~ dnorm(mean=S, sd=sigma1),
+        infected ~ dnorm(mean=I, sd=sigma2)
+    ),
     initial = list(
         S ~ N * (1 - i0),
         I ~ N * i0
     ),
-    par= c("beta", "gamma", "N", "i0")
+    par= c("beta", "gamma", "N", "i0", "sigma1", "sigma2")
 )
 }
 

@@ -266,7 +266,11 @@ setMethod("summary","fitode",
 setMethod("show", "fitode",
     function(object) {
         cat("Model:", object@model@name, "\n")
-        cat("Formula:", deparse(object@formula), "\n")
+        cat("\nObservations:\n")
+        for(i in 1:length(object@model@observation)) {
+            cat(deparse(object@model@observation[[i]]), "\n")
+        }
+
         cat("\nCoefficients:\n")
         print(coef(object))
         cat("\nLog-Likelihood:")
@@ -279,5 +283,3 @@ setMethod("show", "fitode",
         }
     }
 )
-
-
