@@ -7,6 +7,4 @@
     drule[["dfun"]] <- alist(x=dfun2(x,y),
                              y=dfun2(y,x))
 
-    drule[[".diff"]] <- alist(x=1)
-
 }

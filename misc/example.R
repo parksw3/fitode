@@ -1,5 +1,19 @@
 library(fitode)
 
+harbin_1910 <- data.frame(
+    times=1:68,
+    cases=c(8,3,6,10,9,8,5,12,11,
+            13,14,13,9,10,15,22,
+            17,15,20,31,22,50,29,
+            43,29,42,43,82,58,22,
+            42,73,78,63,54,69,83,
+            100,99,70,100,98,100,
+            85,96,98,96,105,64,65,
+            75,74,86,74,76,62,82,
+            60,68,55,36,34,38,28,
+            23,16,13,14)
+)
+
 SI_model <- new("model.ode",
     name = "SI",
     model = list(
@@ -7,28 +21,28 @@ SI_model <- new("model.ode",
         I ~ beta*S*I/N - gamma*I
     ),
     observation = list(
-        susceptible ~ dnorm(mean=S, sd=sigma1),
-        infected ~ dnorm(mean=I, sd=sigma2)
+        susceptible ~ dnbinom(mu=S, size=size1),
+        infected ~ dnbinom(mu=I, size=size2)
     ),
     initial = list(
         S ~ N * (1 - i0),
         I ~ N * i0
     ),
-    par=c("beta", "gamma", "N", "i0", "sigma1", "sigma2")
+    par=c("beta", "gamma", "N", "i0", "size1", "size2")
 )
 
-tvec <- 1:40
+tvec <- 1:20
 
-f <- ode.solve(SI_model, tvec, c(beta=1,gamma=0.5, N=100, i0=1e-3, sigma1=0.1, sigam2=0.1))
+f <- ode.solve(SI_model, tvec, c(beta=1,gamma=0.5, N=1000, i0=1e-2, sigma1=0.1, sigam2=0.1))
 
 set.seed(101)
 df <- data.frame(
     day=tvec,
-    susceptible=rnorm(length(tvec), mean=f@solution$S, sd=0.1),
-    infected=rnorm(length(tvec), mean=f@solution$I, sd=0.1)
+    susceptible=rnbinom(length(tvec), mu=f@solution$S, size=10),
+    infected=rnbinom(length(tvec), mu=f@solution$I, size=10)
 )
 
-start <- c(beta=1, gamma=0.5, N=100, i0=1e-3, sigma1=0.1, sigma2=0.1)
+start <- c(beta=1, gamma=0.5, N=1000, i0=1e-2, size1=10, size2=10)
 
 system.time(ff <- fitode(
     model=SI_model,
@@ -36,72 +50,46 @@ system.time(ff <- fitode(
     start=start,
     tcol="day",
     link = list(
-        beta="log",
-        gamma="log",
-        N="log",
-        i0="logit",
-        sigma1="log",
-        sigma2="log"
-    )
-))
-
-system.time(pp <- profile(ff@mle2, continuation="naive", trace=TRUE))
-
-SI_model_R0 <- Transform(
-    SI_model,
-    list(beta~R0*gamma),
-    par=c("R0", "gamma", "N", "i0")
-)
-
-SI_model_R0_u <- Transform(
-    SI_model_R0,
-    list(R0~1+RR),
-    par=c("RR", "gamma", "N", "i0")
-)
-
-ff2 <- fitode(Deaths~gamma*I,
-    start=c(RR=1, gamma=1, N=1e5, i0=1e-4, k=5),
-    model=SI_model_R0_u,
-    loglik=select_model("nbinom"),
-    data=harbin,
-    tcol="week",
-    links = list(
-        RR="log",
-        gamma="log",
-        N="log",
         i0="logit"
     )
-)
-
-bombay <- fitsir::bombay
-bombay2 <- rbind(bombay, data.frame(week=32, mort=NA))
+))
 
 SI_model_c <- new("model.ode",
     name = "SI",
     model = list(
         S ~ - beta*S*I/N,
         I ~ beta*S*I/N - gamma*I,
-        cDeath ~ gamma*I
+        R ~ gamma*I
+    ),
+    observation <- list(
+        cases ~ dpois(lambda=R)
     ),
     initial = list(
         S ~ N * (1 - i0),
         I ~ N * i0,
-        cDeath ~ 0
+        R ~ 0
     ),
-    par=c("beta", "gamma", "N", "i0")
+    par=c("beta", "gamma", "N", "i0"),
+    diffnames=c("R")
 )
 
-start <- c(beta=2, gamma=1, N=3000, i0=1e-5, ll.sigma=1)
+harbin_1910a <- rbind(
+    c(0, NA),
+    harbin_1910
+)
 
-system.time(ff4 <- fitode(mort|week ~ .diff(cDeath),
-    start=start,
+start <- c(beta=0.429, gamma=0.3, N=6340, i0=1.07e-3)
+
+system.time(ff4 <- fitode(
     model=SI_model_c,
-    loglik=select_model("gaussian"),
-    data=bombay2,
+    start=start,
+    data=harbin_1910a, tcol="day",
     link = list(
-        beta="log",
-        gamma="log",
-        N="log",
         i0="logit"
     )
 ))
+
+plot(harbin_1910a$cases)
+lines((ode.solve(SI_model_c, harbin_1910a$times, coef(ff4))@solution$R))
+
+

@@ -51,6 +51,8 @@ setMethod(
         nstate <- length(model@state)
         npar <- length(model@par)
 
+        diffnames <- model@diffnames
+
         gfun <- model@gfun
 
         result <- do.call(solver,
@@ -60,7 +62,16 @@ setMethod(
                                  parms=parms),
                             solver.opts))
 
-        .Object@solution <- as.data.frame(result[,1:(1+nstate)])
+        solution <- as.data.frame(result[,1:(1+nstate)])
+
+        if (length(diffnames) > 0) {
+            solution[,diffnames] <- rbind(
+                rep(0, length(diffnames)),
+                as.data.frame(diff(as.matrix(solution[,diffnames])))
+            )
+        }
+
+        .Object@solution <- solution
 
         if (model@keep_sensitivity) {
             sensitivity <- vector("list", nstate)
@@ -68,6 +79,9 @@ setMethod(
                 sensitivity[[i]] <- result[,(2+nstate):(1+nstate+npar)+(i-1)*npar]
                 if(!is.matrix(sensitivity[[i]]))
                     sensitivity[[i]] <- matrix(sensitivity[[i]], ncol=length(model@par))
+
+                if (model@state[i] %in% diffnames)
+                    sensitivity[[i]] <- rbind(rep(0, npar), diff(sensitivity[[i]]))
 
                 colnames(sensitivity[[i]]) <- model@par
             }

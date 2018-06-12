@@ -72,11 +72,10 @@ setMethod("predict", "fitode",
              level,times,
              method=c("delta", "mvrnorm", "wmvrnorm"),
              nsim=1000){
-        if(missing(times)) times <- object@data$times
+        if(missing(times)) times <- sort(unique(object@data$times))
         method <- match.arg(method)
 
         model <- object@model
-        loglik <- object@loglik
         parms <- coef(object)
 
         ## TODO: define a new model without sensitivity if method is not delta
@@ -85,13 +84,19 @@ setMethod("predict", "fitode",
                         solver.opts=object@mle2@data$solver.opts,
                         solver=object@mle2@data$solver)
 
-        expr <- object@mle2@data$expr
+        expr <- object@model@expr
 
         frame <- c(parms, ss@solution)
 
-        mean <- eval(expr, frame)
+        mean <- lapply(expr, function(e) {
+            m <- eval(e, frame)
+            data.frame(
+                times=times,
+                mean=m
+            )
+        })
 
-        df <- data.frame(times=times[1:length(mean)],mean=mean)
+        df <- data.frame(times=times,mean=mean)
 
         if (!missing(level)) {
             nstate <- length(model@state)
@@ -137,7 +142,7 @@ setMethod("predict", "fitode",
 
                     fitted.vcov <- vcov(object, "fitted")[1:npar,1:npar]
                     if(any(diag(fitted.vcov < 0)))
-                        warning("At least one entries in diag(vcov) is negative. Confidence interval may not be accurate.")
+                        warning("At least one entries in diag(vcov) is negative. Confidence interval will be accurate.")
 
                     mean.vcov <- sens %*% fitted.vcov %*% t(sens)
                     mean.err <- sqrt(diag(mean.vcov))

@@ -297,20 +297,24 @@ logLik.sensitivity <- function(parms,
     for (i in 1:length(nll_list)) {
         ll_fun <- model@loglik[[i]]
 
+        nn <- !is.na(data[,ll_fun@observation])
+
         frame <- c(list(mean[[i]][oo]), parms, data)
 
         names(frame)[1] <- ll_fun@mean
 
-        nll_list[[i]] <- -sum(eval(ll_fun@expr, frame))
+        conditional_ll <- eval(ll_fun@expr, frame)[nn]
+
+        nll_list[[i]] <- -sum(conditional_ll)
 
         if (model@keep_sensitivity) {
             ll_grad <- ll_fun@grad
 
             loglik.gr <- lapply(ll_grad, eval, frame)
 
-            nll_gr <- -colSums(loglik.gr[[1]] * sens[[i]])
+            nll_gr <- -colSums((loglik.gr[[1]] * sens[[i]][oo,])[nn,])
 
-            if(length(loglik.gr) > 1) nll_gr[[ll_fun@par]] <- -sum(loglik.gr[[ll_fun@par]])
+            if(length(loglik.gr) > 1) nll_gr[[ll_fun@par]] <- -sum(loglik.gr[[ll_fun@par]][nn])
 
             sensitivity_list[[i]] <- nll_gr
         }

@@ -122,12 +122,16 @@ setMethod(
 
 ## use Taylor expansion of digamma(a+b) for a>>b
 ## discontinuity in second derivative, but ... probably OK
+## TODO: not sure why it won't work unless I export it??
 ##' @importFrom Deriv drule
+##' @export
 dfun <- function(x,y,mag=1e8) {
     return(ifelse(x/y>mag,
                   -y*trigamma(x),
                   digamma(x)-digamma(x+y)))
 }
+
+##' @export
 dfun2 <- function(x,y,mag=1e8,focal="x") {
     return(switch(focal,
                   x=ifelse(x/y>mag,
