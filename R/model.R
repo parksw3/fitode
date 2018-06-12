@@ -105,6 +105,7 @@ setMethod(
                         list(c(gr))
                     }
                 }
+                .Object@grad <- grad
                 .Object@gfun <- gfun
             }
         } else if (is.function(model)) {
@@ -239,19 +240,35 @@ setMethod(
 
         newmodel <- newinitial <- vector('list', nstate)
 
-        for(i in 1:nstate) {
-            fixed <- c(as.symbol("~"), as.symbol(object@state[i]))
-            ff <- lapply(list(object@grad[[i]], object@initial[[i]]), function(x){
-                f <- c(fixed, subst(x[[1]], transforms))
-                f <- as.formula(as.call(f))
-            })
-            newmodel[[i]] <- ff[[1]]
-            newinitial[[i]] <- ff[[2]]
-
+        if(length(object@grad) > 0) {
+            for(i in 1:nstate) {
+                fixed <- c(as.symbol("~"), as.symbol(object@state[i]))
+                ff <- lapply(list(object@grad[[i]], object@initial[[i]]), function(x){
+                    f <- c(fixed, subst(x[[1]], transforms))
+                    f <- as.formula(as.call(f))
+                })
+                newmodel[[i]] <- ff[[1]]
+                newinitial[[i]] <- ff[[2]]
+            }
+        } else {
+            ## TODO: write this
         }
+
+        newobservation <- lapply(object@observation, function(x) {
+            x[[3]] <- as.call(lapply(as.list(x[[3]]), subst, transforms))
+            x
+        })
+
         if (missing(par)) par <- stop("specify the name of the new parameters")
 
-        new("model.ode", object@name, newmodel, newinitial, par)
+        new("model.ode",
+            object@name,
+            newmodel,
+            newobservation,
+            newinitial,
+            par,
+            object@diffnames,
+            object@keep_sensitivity)
     }
 )
 

@@ -2,7 +2,8 @@
 ##'
 ##' @slot name name of the model
 ##' @slot gfun gradient function
-##' @slot observation observation model
+##' @slot grad list of gradients
+##' @slot observation list of observation models
 ##' @slot initial list of expressions representing the initial values
 ##' @slot state state variables
 ##' @slot par parameters
@@ -10,7 +11,7 @@
 ##' @slot jacobian.initial Jacobian of initial values with respect to its parameters
 ##' @slot jacobian.state Jacobian with respect to its states
 ##' @slot jacobian.par Jacobian with repsect to its parameters
-##' @slot loglik log-likelihood functions
+##' @slot loglik list of log-likelihood functions
 ##' @slot expr expressions for true trajectories
 ##' @slot expr.sensitivity sensitivity of the expressions with respect to state variables and parameters
 ##' @slot keep_sensitivity (logical) keep sensitivity equations?
@@ -20,6 +21,7 @@ setClass(
     slots = c(
         name = "character",
         gfun = "function",
+        grad = "list",
         observation = "list",
         initial= "list",
         state = "character",
@@ -72,6 +74,7 @@ fitode <- setClass("fitode",
         vcov="matrix",
         min="numeric",
         mle2="mle2",
-        link="list"
+        link="list",
+        fixed="list"
     )
 )

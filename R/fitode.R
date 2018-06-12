@@ -5,10 +5,9 @@
 ##' @param loglik loglik.ode object
 ##' @seealso \code{\link{make.link}}
 ##' @return list of strings specifying link functions
-set_link <- function(link, model) {
-    allpar <- model@par
-    link_default <- as.list(rep("log", length(allpar)))
-    names(link_default) <- allpar
+set_link <- function(link, modelpar) {
+    link_default <- as.list(rep("log", length(modelpar)))
+    names(link_default) <- modelpar
 
     if (!missing(link)) link_default[names(link)] <- link
 
@@ -56,6 +55,7 @@ fitode <- function(model, data,
                    method="BFGS",
                    optimizer="optim",
                    link,
+                   fixed=list(),
                    control=list(maxit=1e5),
                    solver.opts=list(method="rk4"),
                    solver=ode,
@@ -70,7 +70,29 @@ fitode <- function(model, data,
         stop("`t` is reserved for time variable. Try a different parameterization?")
     }
 
+    if (length(fixed) > 0) {
+        fixed <- as.list(fixed)
+        if (any(!(names(fixed) %in% modelpar)))
+            stop("`fixed`` must be a named vector/list whose names correspond to model parameters")
+
+        tlist <- vector('list', length(fixed))
+
+        for (i in 1:length(fixed)) {
+            tlist[[i]] <- as.formula(as.call(c(as.symbol("~"), as.symbol(names(fixed)[i]), unname(fixed[i]))))
+        }
+
+        modelpar <- modelpar[!(modelpar %in% names(fixed))]
+
+        model <- Transform(
+            model,
+            tlist,
+            modelpar
+        )
+    }
+
     if (!missing(link)) {
+        link <- link[!(names(link) %in% names(fixed))]
+
         if (any(is.na(match(names(link), modelpar)))) stop("Some link functions do not correspond to the model parameters.")
     }
 
@@ -78,8 +100,7 @@ fitode <- function(model, data,
 
         stop(
             paste0("`start` must specify the following parameters:\n",
-                "\node parameters: ", paste(model@par, collapse = ", "),
-                "\nlikelihood parameters: ", paste(loglik@par)
+                "\node parameters: ", paste(model@par, collapse = ", ")
             )
         )
     }
@@ -87,7 +108,7 @@ fitode <- function(model, data,
     ## order parameters ...
     start <- start[modelpar]
 
-    link <- set_link(link, model)
+    link <- set_link(link, modelpar)
 
     link_data <- lapply(link, make.link)
 
@@ -222,7 +243,8 @@ fitode <- function(model, data,
     }
 
     new("fitode", model=model, data=data, coef=coef, vcov=vcov,
-        min=m@min, mle2=m, link=link
+        min=m@min, mle2=m, link=link,
+        fixed=fixed
     )
 }
 

@@ -57,19 +57,19 @@ system.time(ff <- fitode(
 SI_model_c <- new("model.ode",
     name = "SI",
     model = list(
-        S ~ - beta*S*I/N,
-        I ~ beta*S*I/N - gamma*I,
+        S ~ - beta*S*I/(S+I),
+        I ~ beta*S*I/(S+I) - gamma*I,
         R ~ gamma*I
     ),
     observation <- list(
-        cases ~ dpois(lambda=R)
+        cases ~ dnbinom(mu=R, size=size)
     ),
     initial = list(
-        S ~ N * (1 - i0),
+        S ~ N * s0,
         I ~ N * i0,
         R ~ 0
     ),
-    par=c("beta", "gamma", "N", "i0"),
+    par=c("beta", "gamma", "N", "i0", "s0", "size"),
     diffnames=c("R")
 )
 
@@ -78,18 +78,19 @@ harbin_1910a <- rbind(
     harbin_1910
 )
 
-start <- c(beta=0.429, gamma=0.3, N=6340, i0=1.07e-3)
+start <- c(beta=0.6, gamma=0.5, i0=2.5e-4, s0=0.13, size=30)
 
 system.time(ff4 <- fitode(
     model=SI_model_c,
     start=start,
     data=harbin_1910a, tcol="day",
     link = list(
-        i0="logit"
-    )
+        i0="logit",
+        s0="logit"
+    ),
+    fixed=c(N=25000)
 ))
 
 plot(harbin_1910a$cases)
-lines((ode.solve(SI_model_c, harbin_1910a$times, coef(ff4))@solution$R))
-
+lines((ode.solve(SI_model_c, harbin_1910a$times, c(coef(ff4), N=25000))@solution$R))
 
