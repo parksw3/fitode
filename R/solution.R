@@ -66,7 +66,7 @@ setMethod(
 
         if (length(diffnames) > 0) {
             solution[,diffnames] <- rbind(
-                rep(0, length(diffnames)),
+                rep(NA, length(diffnames)),
                 as.data.frame(diff(as.matrix(solution[,diffnames])))
             )
         }
@@ -81,7 +81,7 @@ setMethod(
                     sensitivity[[i]] <- matrix(sensitivity[[i]], ncol=length(model@par))
 
                 if (model@state[i] %in% diffnames)
-                    sensitivity[[i]] <- rbind(rep(0, npar), diff(sensitivity[[i]]))
+                    sensitivity[[i]] <- rbind(rep(NA, npar), diff(sensitivity[[i]]))
 
                 colnames(sensitivity[[i]]) <- model@par
             }
