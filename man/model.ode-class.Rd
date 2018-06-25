@@ -14,7 +14,9 @@ Class representing ode models
 
 \item{\code{gfun}}{gradient function}
 
-\item{\code{observation}}{observation model}
+\item{\code{grad}}{list of gradients}
+
+\item{\code{observation}}{list of observation models}
 
 \item{\code{initial}}{list of expressions representing the initial values}
 
@@ -30,7 +32,7 @@ Class representing ode models
 
 \item{\code{jacobian.par}}{Jacobian with repsect to its parameters}
 
-\item{\code{loglik}}{log-likelihood functions}
+\item{\code{loglik}}{list of log-likelihood functions}
 
 \item{\code{expr}}{expressions for true trajectories}
 

@@ -79,35 +79,35 @@ setMethod(
                 .Object@jacobian.initial <- deriv2(initial, par)
                 .Object@jacobian.state <- jacobian.state <- deriv2(grad, state)
                 .Object@jacobian.par <- jacobian.par <- deriv2(grad, par)
-
-                if(keep_sensitivity) {
-                    gfun <- function(times, y, parms) {
-                        state <- y[1:nstate]
-                        frame <- as.list(c(t=times, state, parms))
-                        ## equivalent to `grad(model, state, parms)` but faster
-                        gr <- sapply(grad, eval, frame)
-                        ## jacobian(model, state, parms, type="state")
-                        js <- sapply(jacobian.state, function(jj) {
-                            sapply(jj, eval, frame)
-                        })
-                        ## jacobian(model, state, parms, type="par")
-                        jp <- sapply(jacobian.par, function(jj) {
-                            sapply(jj, eval, frame)
-                        })
-
-                        list(c(gr, matrix(y[-c(1:nstate)], ncol=nstate) %*% js + jp))
-                    }
-                } else {
-                    gfun <- function(times, y, parms) {
-                        frame <- as.list(c(t=times, y, parms))
-                        gr <- sapply(grad, eval, frame)
-
-                        list(c(gr))
-                    }
-                }
-                .Object@grad <- grad
-                .Object@gfun <- gfun
             }
+
+            if(keep_sensitivity) {
+                gfun <- function(times, y, parms) {
+                    state <- y[1:nstate]
+                    frame <- as.list(c(t=times, state, parms))
+                    ## equivalent to `grad(model, state, parms)` but faster
+                    gr <- sapply(grad, eval, frame)
+                    ## jacobian(model, state, parms, type="state")
+                    js <- sapply(jacobian.state, function(jj) {
+                        sapply(jj, eval, frame)
+                    })
+                    ## jacobian(model, state, parms, type="par")
+                    jp <- sapply(jacobian.par, function(jj) {
+                        sapply(jj, eval, frame)
+                    })
+                        list(c(gr, matrix(y[-c(1:nstate)], ncol=nstate) %*% js + jp))
+                }
+            } else {
+                gfun <- function(times, y, parms) {
+                    frame <- as.list(c(t=times, y, parms))
+                    gr <- sapply(grad, eval, frame)
+                        list(c(gr))
+                }
+            }
+
+            .Object@grad <- grad
+            .Object@gfun <- gfun
+
         } else if (is.function(model)) {
             keep_sensitivity <- FALSE
             .Object@gfun <- model
@@ -228,10 +228,11 @@ setMethod(
 setMethod(
     "Transform",
     "model.ode",
-    function(object, transforms=NULL, par) {
-        # if no transform, return model
-        if (length(transforms) == 0)
-            return(object)
+    function(object, transforms=NULL, par, keep_sensitivity) {
+
+        if (missing(keep_sensitivity)) keep_sensitivity <- object@keep_sensitivity
+
+        if (is.null(transforms)) transforms <- list()
 
         allvars <- c(object@par)
         transforms <- trans(transforms, allvars)
@@ -240,7 +241,7 @@ setMethod(
 
         newmodel <- newinitial <- vector('list', nstate)
 
-        if(length(object@grad) > 0) {
+        if (length(object@grad) > 0) {
             for(i in 1:nstate) {
                 fixed <- c(as.symbol("~"), as.symbol(object@state[i]))
                 ff <- lapply(list(object@grad[[i]], object@initial[[i]]), function(x){
@@ -250,8 +251,6 @@ setMethod(
                 newmodel[[i]] <- ff[[1]]
                 newinitial[[i]] <- ff[[2]]
             }
-        } else {
-            ## TODO: write this
         }
 
         newobservation <- lapply(object@observation, function(x) {
@@ -259,7 +258,9 @@ setMethod(
             x
         })
 
-        if (missing(par)) par <- stop("specify the name of the new parameters")
+            ## TODO: what happens when length(object@grad) > 0??
+
+        if (missing(par)) par <- object@par
 
         new("model.ode",
             object@name,
@@ -268,7 +269,7 @@ setMethod(
             newinitial,
             par,
             object@diffnames,
-            object@keep_sensitivity)
+            keep_sensitivity)
     }
 )
 

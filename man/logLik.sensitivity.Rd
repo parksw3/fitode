@@ -5,7 +5,7 @@
 \title{Sensitivity of the likelihood function with respect to parameters}
 \usage{
 logLik.sensitivity(parms, model, data, solver.opts = list(method = "rk4"),
-  solver = ode, returnNLL = TRUE)
+  solver = ode, fixed, returnNLL = TRUE)
 }
 \arguments{
 \item{parms}{named vector of parameter values}

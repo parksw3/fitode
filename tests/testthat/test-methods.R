@@ -15,18 +15,21 @@ test_that("SI model", {
             S ~ - beta*S*I/N,
             I ~ beta*S*I/N - gamma*I
         ),
+        observation = list(
+            Deaths ~ dnbinom(mu=gamma*I, size=size)
+        ),
         initial = list(
             S ~ N * (1 - i0),
             I ~ N * i0
         ),
-        par=c("beta", "gamma", "N", "i0")
+        par=c("beta", "gamma", "N", "i0", "size")
     )
 
-    start <- c(beta=2, gamma=1, N=1e4, i0=1e-3, ll.k=10)
+    start <- c(beta=2, gamma=1, N=1e4, i0=1e-3, size=10)
 
-    suppressWarnings(ff <- fitode(Deaths~gamma*I,
+    suppressWarnings(ff <- fitode(
+        SI_model,
         start=start,
-        model=SI_model, loglik=select_model("nbinom"),
         data=harbin, tcol="week",
         link = list(
             beta="log",
@@ -40,13 +43,13 @@ test_that("SI model", {
         coef(ff),
         structure(c(1.85082710742599, 1.08315701471954, 2162.03690454815,
             0.000482746970936824, 35.9813684389218),
-            .Names = c("beta", "gamma", "N", "i0", "ll.k")))
+            .Names = c("beta", "gamma", "N", "i0", "size")))
 
     all.equal(
         coef(ff, "fitted"),
         structure(c(0.615632624272599, 0.0798799387838958, 7.67880606768721,
             -7.63553504774462, 3.58300126112103),
-            .Names = c("log.beta", "log.gamma", "log.N", "logit.i0", "log.ll.k")))
+            .Names = c("log.beta", "log.gamma", "log.N", "logit.i0", "log.size")))
 
     all.equal(
         logLik(ff),
@@ -54,7 +57,7 @@ test_that("SI model", {
     )
 
     all.equal(
-        predict(ff, level=0.95),
+        predict(ff, level=0.95)[[1]],
         structure(
             list(times = 2:18,
                 mean = c(1.13050913725776, 2.42831844773126,

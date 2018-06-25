@@ -70,15 +70,20 @@ setMethod("plot", signature(x="fitode", y="missing"),
 setMethod("predict", "fitode",
     function(object,
              level,times,
-             method=c("delta", "mvrnorm", "wmvrnorm"),
-             nsim=1000){
+             method=c("delta", "wmvrnorm"),
+             nsim=5000){
         if(missing(times)) times <- sort(unique(object@data$times))
         method <- match.arg(method)
 
         model <- object@model
         parms <- coef(object)
+        fixed <- object@fixed
 
         ## TODO: define a new model without sensitivity if method is not delta
+
+        if (method != "delta" || missing(level)) {
+            model <- Transform(model, keep_sensitivity=FALSE)
+        }
 
         ss <- ode.solve(model, times, parms,
                         solver.opts=object@mle2@data$solver.opts,
@@ -88,7 +93,7 @@ setMethod("predict", "fitode",
 
         frame <- c(parms, ss@solution)
 
-        mean <- lapply(expr, function(e) {
+        df <- lapply(expr, function(e) {
             m <- eval(e, frame)
             data.frame(
                 times=times,
@@ -96,7 +101,7 @@ setMethod("predict", "fitode",
             )
         })
 
-        df <- data.frame(times=times,mean=mean)
+        names(df) <- names(object@data)[-1]
 
         if (!missing(level)) {
             nstate <- length(model@state)
@@ -105,84 +110,48 @@ setMethod("predict", "fitode",
 
             ll <- (1-level)/2
 
-            if (method != "delta") {
-                vv <- vcov(object, "fitted")
-                vv[lower.tri(vv)] <- t(vv)[lower.tri(vv)]
-
-                simtraj <- matrix(NA,nrow=length(mean),ncol=nsim)
-                simpars <- MASS::mvrnorm(nsim,mu=coef(object, "fitted"),
-                                   Sigma=vv)
-                simpars_orig <- t(apply(simpars, 1, apply_link, linklist, "linkinv"))
-
-                for (i in 1:nsim) {
-                    ss.tmp <- ode.solve(object@model, times, simpars_orig[i,],
-                                        solver.opts=object@mle2@data$solver.opts,
-                                        solver=object@mle2@data$solver)
-                    frame.tmp <- c(parms, ss.tmp@solution)
-                    simtraj[,i] <- eval(expr, frame.tmp)
-                }
-
-            }
-
-            cmat <- switch(method,
+            clist <- switch(method,
                 delta={
-                    sens <- ode.sensitivity(expr,
-                                            object@mle2@data$expr.sensitivity,
-                                            model,
+                    sens <- ode.sensitivity(model,
                                             parms,
-                                            object@data$times,
+                                            times,
                                             solver.opts=object@mle2@data$solver.opts,
                                             solver=object@mle2@data$solver)$sensitivity
-
                     fitted_parms <- coef(object, "fitted")
+                    mu.eta <- apply_link(fitted_parms, linklist, "mu.eta")
+                    sens <- lapply(sens, function(s) t(t(s) * mu.eta))
 
-                    mu.eta <- apply_link(fitted_parms, linklist, "mu.eta")[1:npar]
-
-                    sens <- t(t(sens) * mu.eta)
-
-                    fitted.vcov <- vcov(object, "fitted")[1:npar,1:npar]
+                    fitted.vcov <- vcov(object, "fitted")
                     if(any(diag(fitted.vcov < 0)))
                         warning("At least one entries in diag(vcov) is negative. Confidence interval will be accurate.")
 
-                    mean.vcov <- sens %*% fitted.vcov %*% t(sens)
-                    mean.err <- sqrt(diag(mean.vcov))
-                    z <- -qnorm(ll)
-                    cmat <- data.frame(mean - z * mean.err, mean + z * mean.err)
-                    cmat
-                },
-                mvrnorm={
-                    cmat <- t(apply(simtraj,1,quantile,c(ll,1-ll)))
-                    cmat
+                    tmp <- vector('list', length(expr))
+
+                    for (i in 1:length(expr)) {
+                        mean.vcov <- sens[[i]] %*% fitted.vcov %*% t(sens[[i]])
+                        mean.err <- sqrt(diag(mean.vcov))
+                        z <- -qnorm(ll)
+                        tmp[[i]] <- data.frame(df[[i]]$mean - z * mean.err, df[[i]]$mean + z * mean.err)
+                    }
+
+                    tmp
+
                 },
                 wmvrnorm={
-                    ## wquant from King et al.
-                    wquant <- function (x, weights, probs = c(0.025, 0.975)) {
-                        idx <- order(x)
-                        x <- x[idx]
-                        weights <- weights[idx]
-                        w <- cumsum(weights)/sum(weights)
-                        rval <- approx(w,x,probs,rule=1)
-                        rval$y
-                    }
+                    wmv <- wmvrnorm(object, nsim=nsim)
 
-                    traj.logLik <- rep(NA, nsim)
-                    observation <- object@mle2@data$observation
+                    lapply(wmv$simtraj, function(mat) {
+                        t(apply(mat, 1, wquant, weights=wmv$weight, probs=c(ll, 1-ll)))
+                    })
+            })
 
-                    for(i in 1:nsim) {
-                        traj.logLik[i] <- sum(Eval(loglik, observation, simtraj[,i], simpars_orig[i,-c(1:npar)]))
-                    }
+            clist <- lapply(clist, function(cmat){
+                setNames(as.data.frame(cmat), c(paste(100*ll, "%"), paste(100*(1-ll), "%")))
+            })
 
-                    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(object, "fitted"), vv, log=TRUE)
-                    ww <- exp(traj.logLik-sample.logLik)
-                    ww[is.nan(ww) | is.na(ww)] <- 0
-                    cmat <- t(apply(simtraj, 1, wquant, weights=ww, probs=c(ll, 1-ll)))
-                    cmat
-                })
-
-            cmat <- setNames(as.data.frame(cmat), c(paste(100*ll, "%"), paste(100*(1-ll), "%")))
-
-            df <- cbind(df, cmat)
+            df <- Map(cbind, df, clist)
         }
+
         df
     }
 )

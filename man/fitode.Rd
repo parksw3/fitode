@@ -6,12 +6,12 @@
 Result of ode fitting based on Maximum Likelihood Estimation}
 \usage{
 fitode(model, data, start, tcol = "times", method = "BFGS",
-  optimizer = "optim", link, control = list(maxit = 1e+05),
+  optimizer = "optim", link, fixed, control = list(maxit = 1e+05),
   solver.opts = list(method = "rk4"), solver = ode, skip.hessian = FALSE,
   use.ginv = TRUE, debug = FALSE, ...)
 
 fitode(model, data, start, tcol = "times", method = "BFGS",
-  optimizer = "optim", link, control = list(maxit = 1e+05),
+  optimizer = "optim", link, fixed, control = list(maxit = 1e+05),
   solver.opts = list(method = "rk4"), solver = ode, skip.hessian = FALSE,
   use.ginv = TRUE, debug = FALSE, ...)
 }
