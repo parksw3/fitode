@@ -37,6 +37,7 @@ wmvrnorm <- function(object,
 
     ## FIXME: prevent taking exponential causing underflow/overflow (hopefully??)
     ww <- exp(log.ww-median(log.ww))
+    ww <- ww/sum(ww)
 
     list(
         simtraj=simtraj,
@@ -47,6 +48,12 @@ wmvrnorm <- function(object,
 
 ## wquant from King et al.
 wquant <- function (x, weights, probs = c(0.025, 0.975)) {
+    which <- !is.na(weights)
+    x <- x[which]
+    weights <- weights[which]
+
+    if (all(is.na(x)) || length(x) == 0) return(rep(NA, length(probs)))
+
     idx <- order(x)
     x <- x[idx]
     weights <- weights[idx]
