@@ -263,11 +263,13 @@ setMethod("confint", "fitode",
         method <- match.arg(method)
         cc <- coef(object)
 
+        ll <- (1-level)/2
+
         linklist <- object@mle2@data$linklist
 
         if (missing(parm)) parm <- names(object@coef)
 
-        if (is.vector(parm)) {
+        if (all(is.character(parm))) {
             if (!all(parm %in% object@model@par))
                 stop("`parm` does not correspond to model parameters.\n",
                      "`parm` must be a vector of model parameters or list of formulas")
@@ -278,16 +280,20 @@ setMethod("confint", "fitode",
 
                 ci0 <- confint(prof, level=level)
 
-                if (length(parm)==1) {
-                    ci0 <- t(as.matrix(ci0))
-                    rownames(ci0) <- parm
-                }
+                if (length(parm)==1) ci0 <- t(as.matrix(ci0))
+
+                rownames(ci0) <- names(object@mle2@coef)[match(parm, names(object@coef))]
 
                 ci <- apply(ci0, 2, apply_link, linklist, "linkinv")
 
-                estimate <- coef(object)[parm]
+                if (length(parm)==1) ci <- matrix(c(ci), nrow=1)
 
-                res <- cbind(est, ci)
+                estimate <- matrix(coef(object)[parm], ncol=1)
+
+                res <- cbind(estimate, ci)
+
+                colnames(res) <- c("estimate", paste(100*ll, "%"), paste(100*(1-ll), "%"))
+                rownames(res) <- parm
 
                 return(res)
             }
@@ -303,8 +309,6 @@ setMethod("confint", "fitode",
 
             ## TODO: don't allow state variables... it gets complicated
         }
-
-        ll <- (1-level)/2
 
         frame <- as.list(cc)
 
@@ -337,11 +341,9 @@ setMethod("confint", "fitode",
         } else {
             wmv <- wmvrnorm(object, nsim=nsim, seed=seed)
 
-            samp <- matrix(c(apply(wmv$simpars_orig, 1, function(x) sapply(expr, eval, as.list(x)))), ncol=length(parm))
+            samp <- matrix(c(apply(wmv$simpars_orig, 1, function(x) sapply(expr, eval, as.list(x)))), ncol=length(parm), byrow=TRUE)
 
             res <- cbind(estimate, t(apply(samp, 2, wquant, weights=wmv$weight, prob=c(ll, 1-ll))))
-
-
 
         }
 
