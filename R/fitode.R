@@ -22,7 +22,14 @@ set_link <- function(link, modelpar) {
 ##' @seealso \code{\link{make.link}}
 apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
     type <- match.arg(type)
-    ff <- linklist[[type]]
+
+    if (type=="linkinv" || type=="mu.eta") {
+        filter <- match(names(par), names(linklist$linkfun))
+    } else {
+        filter <- match(names(par), names(linklist$linkinv))
+    }
+
+    ff <- linklist[[type]][filter]
     pp <- unlist(Map(function(x, fun) fun(x), x=par, fun=ff))
     names(pp) <- names(ff)
 
@@ -73,7 +80,7 @@ fitode <- function(model, data,
     if (length(fixed) > 0) {
         fixed <- as.list(fixed)
         if (any(!(names(fixed) %in% modelpar)))
-            stop("`fixed`` must be a named vector/list whose names correspond to model parameters")
+            stop("`fixed must be a named vector/list whose names correspond to model parameters")
 
         tlist <- vector('list', length(fixed))
 

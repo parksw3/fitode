@@ -240,11 +240,116 @@ setMethod("logLik", "fitode", function(object){-object@min})
 ##' @exportMethod profile
 setMethod("profile", "fitode",
     function(fitted,
+             which=1:p,
+             alpha=0.05,
              trace=FALSE) {
-        m <- fitted@mle2
+        ## TODO: make this fancier?
 
-        prof <- profile(m, continuation="naive", trace=trace)
+        p <- length(fitted@coef)
+
+        prof <- profile(fitted@mle2, which=which, continuation="naive", trace=trace,
+                        alpha=alpha)
+
         prof
+    }
+)
+
+setMethod("confint", "fitode",
+    function (object, parm, level=0.95,
+              method=c("delta", "profile", "wmvrnorm"),
+              nsim=1000,
+              seed) {
+
+        method <- match.arg(method)
+        cc <- coef(object)
+
+        linklist <- object@mle2@data$linklist
+
+        if (missing(parm)) parm <- names(object@coef)
+
+        if (is.vector(parm)) {
+            if (!all(parm %in% object@model@par))
+                stop("`parm` does not correspond to model parameters.\n",
+                     "`parm` must be a vector of model parameters or list of formulas")
+
+            if (method=="profile") {
+                prof <- profile(object, which=match(parm, names(object@coef)),
+                                alpha=1-level)
+
+                ci0 <- confint(prof, level=level)
+
+                if (length(parm)==1) {
+                    ci0 <- t(as.matrix(ci0))
+                    rownames(ci0) <- parm
+                }
+
+                ci <- apply(ci0, 2, apply_link, linklist, "linkinv")
+
+                estimate <- coef(object)[parm]
+
+                res <- cbind(est, ci)
+
+                return(res)
+            }
+
+            parm <- lapply(parm, function(x) {
+                ee <- as.name(x)
+                as.call(list(as.name('~'), ee, ee))
+            })
+
+        } else if (is.list(parm)) {
+            if (method=="profile")
+                stop("profile is not available for non-model parameter confidence intervals")
+
+            ## TODO: don't allow state variables... it gets complicated
+        }
+
+        ll <- (1-level)/2
+
+        frame <- as.list(cc)
+
+        expr <- lapply(parm, "[[", 3)
+
+        estimate <- try(sapply(expr, eval, frame))
+
+        if (inherits(estimate, "try-error")) {
+            stop("Specified formula(s) cannot be evaluated with estimated parameters")
+        }
+
+        estimate <- matrix(estimate, ncol=1)
+
+        if (method=="delta") {
+            fitted_parms <- coef(object, "fitted")
+            fitted_vcov <- vcov(object, "fitted")
+
+            expr_sens <- lapply(parm, function(x) Deriv(x[[3]], names(object@coef)))
+
+            mu.eta <- apply_link(fitted_parms, linklist, "mu.eta")
+
+            sens <- t(sapply(expr_sens, function(x) eval(x, frame) * mu.eta))
+
+            est_vcov <- sens %*% fitted_vcov %*% t(sens)
+
+            est_err <- sqrt(diag(est_vcov))
+            z <- -qnorm(ll)
+
+            res <- cbind(estimate, estimate - z * est_err, estimate + z*est_err)
+        } else {
+            wmv <- wmvrnorm(object, nsim=nsim, seed=seed)
+
+            samp <- matrix(c(apply(wmv$simpars_orig, 1, function(x) sapply(expr, eval, as.list(x)))), ncol=length(parm))
+
+            res <- cbind(estimate, t(apply(samp, 2, wquant, weights=wmv$weight, prob=c(ll, 1-ll))))
+
+
+
+        }
+
+        colnames(res) <- c("estimate", paste(100*ll, "%"), paste(100*(1-ll), "%"))
+        rownames(res) <- sapply(parm, function(x) as.character(x[[2]]))
+
+        res
+
     }
 )
 

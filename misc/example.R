@@ -54,6 +54,10 @@ system.time(ff <- fitode(
     )
 ))
 
+plot(ff, level=0.95)
+plot(ff, method="wmvrnorm", level=0.95)
+
+
 SI_model_c <- new("model.ode",
     name = "SI",
     model = list(
@@ -78,12 +82,12 @@ harbin_1910a <- rbind(
     harbin_1910
 )
 
-start <- c(beta=0.6, gamma=0.5, i0=2.5e-4, s0=0.13, size=30)
+start <- c(beta=0.6, gamma=0.5, i0=2.5e-4, s0=0.13, size=5)
 
 system.time(ff4 <- fitode(
     model=SI_model_c,
     start=start,
-    data=harbin_1910a, tcol="day",
+    data=harbin_1910a,
     link = list(
         i0="logit",
         s0="logit"
@@ -91,6 +95,5 @@ system.time(ff4 <- fitode(
     fixed=c(N=25000)
 ))
 
-plot(harbin_1910a$cases)
-lines((ode.solve(SI_model_c, harbin_1910a$times, c(coef(ff4), N=25000))@solution$R))
-
+plot(ff4, level=0.95)
+plot(ff4, method="wmvrnorm", level=0.95)
