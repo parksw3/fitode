@@ -24,7 +24,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
              onepage=TRUE,
              xlabs, ylabs=nm,
              col.traj="black",lty.traj=1,
-             col.conf="red",lty.conf=4,
+             col.conf="black",lty.conf=4,
              add=FALSE,
              nsim=1000,
              ...){

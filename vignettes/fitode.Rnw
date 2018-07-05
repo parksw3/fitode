@@ -18,8 +18,10 @@
 
 <<opts,echo=FALSE>>=
 library("knitr")
-opts_chunk$set(fig.width=5,fig.height=5,tidy=FALSE,message=FALSE,error=FALSE,warning=FALSE)
+opts_chunk$set(fig.width=6,fig.height=4)
 @
+
+\tableofcontents
 
 \section{Preliminaries}
 
@@ -28,193 +30,249 @@ Load packages:
 <<pkgs,message=FALSE>>=
 library(fitode)
 library(dplyr)
+library(tidyr)
 library(ggplot2); theme_set(theme_bw())
 library(rbenchmark)
 @
 
-\section{Simple fitting}
+\section{Basic fitting}
 
-\subsection{SIR model}
+\subsection{Exponential decay model}
 
-Let's start with a simple SIR model. This is how you define a model in \code{fitode}:
-
-<<sir_model>>===
-sir <- new("model.ode",
-    "sir model",
-    model=list(
-        S ~ -beta*S*I/N,
-        I ~ beta*S*I/N - gamma*I
-    ),
-    initial=list(
-        S ~ N*(1-i0),
-        I ~ N*i0
-    ),
-    par=c("beta", "gamma", "N", "i0")
-
-)
-@
-
-To solve this ode, one can use `ode.solve` function.
-
-<<sir_model_solve>>===
-time <- c(1:10)
-par <- c(beta=2, gamma=1, N=1000, i0=1/1000)
-ss <- ode.solve(sir, time, par)
-plot(ss@solution)
-@
-
-We can try to fit this model to Harbin Plague data (note that all log likelihood parameters start with prefix `ll.`):
-
-<<harbin>>==
-harbin <- fitsir::harbin
-
-start <- c(beta=2, gamma=1, N=1e5, i0=1e-4, ll.sigma=5)
-
-ff <- fitode(Deaths~gamma*I,
-    start=start,
-    model=sir, tcol="week",
-    loglik=select_model("gaussian"),
-    data=harbin
-)
-
-
-print(ff)
-@
-
-With this starting parameter, `fitode` fails to find mle. We can improve the fit by using link functions:
-
-<<harbin_link>>==
-ff2 <- fitode(Deaths~gamma*I,
-    start=start,
-    model=sir,
-    loglik=select_model("gaussian"),
-    data=harbin, tcol="week",
-    link=list(
-        beta="log",
-        gamma="log",
-        N="log",
-        i0="logit"
-    )
-)
-print(ff2)
-@
-
-We can look at the predicted trajectory:
-
-<<plot>>==
-plot(ff2, level=0.95)
-@
-
-This looks pretty good but we are not dealing with overdispersion properly.
+Suppose we have a quantity that is decreasing exponentially.
 
 <<>>==
-start2 <- c(coef(ff2)[1:4], ll.phi=2)
+set.seed(123)
+true.m <- 0.5
+true.A0 <- 200
+true.sd <- 15
 
-ff3 <- fitode(Deaths~gamma*I,
-    start=start2,
-    model=sir,
-    loglik=select_model("nbinom1"),
-    data=harbin, tcol="week",
-    link=list(
-        beta="log",
-        gamma="log",
-        N="log",
-        i0="logit"
-    )
+exp.data <- data.frame(
+    x=rep(0:4, 3),
+    y=rnorm(15, true.A0 * exp(-true.m * rep(0:4, 3)), sd=true.sd)
 )
 
-print(ff3)
+plot(exp.data)
 @
 
-Compare the plots...
+The true dynamics can be modeled with the following equation:
+$$
+\frac{dA}{dt} = - m A
+$$
 
-<<plot2>>==
-plot(ff3, level=0.95, col.traj=1, col.conf=1)
-plot(ff2, level=0.95, col.traj=2, col.conf=2, add=TRUE)
-legend(2, 250, legend=c("nbinom1", "gaussian"), col=c(1,2), lty=1)
-@
-
-\subsection{Predator-Prey}
-
-
-
-\section{Advanced fitting}
-
-\subsection{Using other packages: EpiDynamics}
-
-Let's try using functions from other packages
+We can translate this into a \code{fitode} model as follows:
 
 <<>>==
-library(EpiDynamics)
-
-SIRIM <- new("model.ode",
-    name="SIR with induced mortality",
-    model=SIRInducedMortality,
-    initial=list(
-        X~1-Y0,
-        Y~Y0,
-        Z~0
+exp.model <- new("model.ode",
+    name = "SI",
+    model = list(
+        A ~ -m * A
     ),
-    par=c("rho", "mu", "nu", "beta", "gamma", "N", "Y0")
+    observation = list(
+        y ~ dnorm(mean=A, sd=sd)
+    ),
+    initial = list(
+        A ~ A0
+    ),
+    par=c("m", "A0", "sd")
 )
 @
 
-We have to define a custom solver because functions in \code{EpiDynamics} are ... ??
-
-<<>>==
-Epi.solver <- function(y, times, func, parms,...) {
-    ss <- func(parms, y, times,...)$results
-    ss[,-1] <- ss[,-1] * parms[["N"]]
-    ss
-}
-@
-
-Trying out parameters:
+Then, we can fit the model:
 
 <<>>===
-start <- c(rho = 0.9, mu = 1/70, nu = 1/700,
-                      beta = 3, gamma = 0.05, N=1000, Y0=1e-3)
-
-
-ss <- ode.solve(SIRIM, 0:20, start, solver.opts=list(), solver=Epi.solver)
-plot(ss@solution$time, ss@solution$Y, type="l")
+exp.fit <- fitode(
+    exp.model,
+    exp.data,
+    start=c(m=0.5, A0=200, sd=15),
+    tcol="x"
+)
 @
 
-We have to let \code{solver.opts=list()} because...
+To diagnose the fit, we can use \code{plot} function.
+Using the \code{level} argument will plot 95\% confidence intervals of the true trajectory, estimated via delta method.
+
+<<>>==
+plot(exp.fit, level=0.95)
+curve(true.A0 * exp(-true.m*x), add=TRUE, lty=1, col="green")
+legend(
+    x="topright",
+    legend=c("estimated", "true"),
+    col=c("black", "green"),
+    lty=1
+)
+@
+
+To obtain the confidence interval, we can use \code{confint} function.
+There are three available methods for obtaining the confidence intervals: \code{delta}, \code{profile} and \code{wmvrnorm}.
+Due to computation speed, default option is \code{delta}.
+We will get into the details later.
+For now,
+
+<<>>==
+confint(exp.fit)
+@
+
+Note that in this particular example, we can use \code{glm} function to fit the model as well.
+We can compare the results.
+
+<<>>==
+glm.fit <- glm(y~x,
+    family=gaussian(link="log"),
+    data=exp.data,
+    start = c(intercept=log(200), x=-0.5))
+
+glm.pred <- predict(glm.fit, data.frame(x=0:4), se.fit=TRUE, type="response")
+
+glm.data <- data.frame(
+    x=0:4,
+    estimate=glm.pred$fit,
+    lwr=glm.pred$fit-1.96 * glm.pred$se.fit,
+    upr=glm.pred$fit+1.96 * glm.pred$se.fit
+)
+
+plot(exp.fit, level=0.95)
+lines(glm.data$x, glm.data$estimate, col=2)
+lines(glm.data$x, glm.data$lwr, col=2)
+lines(glm.data$x, glm.data$upr, col=2)
+legend(
+    x="topright",
+    legend=c("estimated (fitode)", "estimated (glm)"),
+    col=c("black", "red"),
+    lty=1
+)
+@
+
+Predicted trajectories and their confidence intervals are essentially indistinguishable.
+
+\subsection{Chemical reaction - multiple state fitting}
+
+Now, consider the following chemical reaction:
+$$
+A \to 3 B
+$$
+Then, we can write the governing differential equation as follows:
+$$
+\begin{aligned}
+\frac{dA}{dt} &= - k A\\
+\frac{dB}{dt} &= 3 k B
+\end{aligned}
+$$
+Suppose we have measured both quantities and have data:
+<<echo=FALSE>>==
+reaction_model <- new("model.ode",
+    name = "reaction",
+    model = list(
+        A ~ - k * A,
+        B ~ 3 * k * A
+    ),
+    observation = list(
+        y1 ~ dnorm(mean=A, sd=sd1),
+        y2 ~ dnorm(mean=B, sd=sd2)
+    ),
+    initial = list(
+        A~A0,
+        B~B0
+    ),
+    par=c("k", "A0", "B0", "sd1", "sd2")
+)
+
+true.k <- 0.1
+true.A0 <- 300
+true.B0 <- 100
+true.sd1 <- 10
+true.sd2 <- 10
+
+times <- 1:20
+
+reaction_run <- ode.solve(reaction_model, times, c(k=true.k, A0=true.A0, B0=true.B0, sd1=true.sd1, sd2=true.sd2))
+reaction_data <- data.frame(
+    times=times,
+    y1=rnorm(20, reaction_run@solution$A, sd=true.sd1),
+    y2=rnorm(20, reaction_run@solution$B, sd=true.sd2)
+)
+@
+
+<<>>==
+head(reaction_data)
+@
+
+Here, \code{y1} meausres quantity $A$ and \code{y2} measures quantity $B$.
+Then, we can define the model:
 
 <<>>===
-set.seed(101)
-data <- data.frame(
-    times=ss@times,
-    prevalence=rnbinom(21, mu=ss@solution$Y, size=5)
-)
-
-ff_IM <- fitode(prevalence~Y,
-    start=c(start, ll.k=5),
-    model=SIRIM,
-    loglik=select_model("nbinom"),
-    data=data,
-    link=list(
-        beta="log",
-        gamma="log",
-        N="log",
-        mu="log",
-        nu="log",
-        rho="logit",
-        Y0="logit"
+reaction_model <- new("model.ode",
+    name = "reaction",
+    model = list(
+        A ~ - k * A,
+        B ~ 3 * k * A
     ),
-    solver=Epi.solver
+    observation = list(
+        y1 ~ dnorm(mean=A, sd=sd1),
+        y2 ~ dnorm(mean=B, sd=sd2)
+    ),
+    initial = list(
+        A~A0,
+        B~B0
+    ),
+    par=c("k", "A0", "B0", "sd1", "sd2")
+)
+@
+
+We can fit this using arbitrary starting conditions.
+
+<<>>==
+reaction_fit <- fitode(
+    reaction_model,
+    reaction_data,
+    start=c(k=0.2, A0=300, B0=10, sd1=1, sd2=1)
 )
 
-print(ff_IM)
-
-## hacking...
-
-ff_IM@mle2@vcov <- as.matrix(Matrix::nearPD(ff_IM@mle2@vcov)[[1]])
-
-set.seed(101)
-plot(ff_IM, level=0.95, method="wmvrnorm", nsim=1000)
+plot(reaction_fit)
 @
+
+Note that optimizer may go to wrong places if we start with bad starting conditions.
+In that case, we can try starting at different values.
+Here's how you can set up a simple Latin Hypercube Sampling algorithm.
+
+<<>>====
+ranges <- data.frame(
+    k=c(0.01, 0.2),
+    A0=c(300, 350),
+    B0=c(90, 110),
+    sd1=c(10,20),
+    sd2=c(10,20)
+)
+
+startpar <- apply(ranges, 2, function(x) seq(from=x[1], to=x[2], length.out=5))
+startpar[] <- apply(startpar, 2,sample)
+
+reaction_fitlist <- apply(startpar, 1, function(x){
+    suppressMessages(fitode(
+        reaction_model,
+        reaction_data,
+        start=x
+    ))
+})
+@
+
+We obtain a better fit:
+
+<<>>===
+reaction_max <- reaction_fitlist[[which.max(sapply(reaction_fitlist, logLik))]]
+plot(reaction_max, level=0.95)
+@
+
+Note that this is a confidence intervals of trajectories not prediction intervals.
+Prediction intervals would be wider than this.
+We can look at the estimated parameters and their confidence intervals:
+
+<<>>===
+confint(reaction_max)
+@
+
+
+
 
 
 \end{document}
