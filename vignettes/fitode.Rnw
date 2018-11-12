@@ -29,10 +29,6 @@ Load packages:
 
 <<pkgs,message=FALSE>>=
 library(fitode)
-library(dplyr)
-library(tidyr)
-library(ggplot2); theme_set(theme_bw())
-library(rbenchmark)
 @
 
 \section{Basic fitting}
@@ -94,11 +90,11 @@ Using the \code{level} argument will plot 95\% confidence intervals of the true 
 
 <<>>==
 plot(exp.fit, level=0.95)
-curve(true.A0 * exp(-true.m*x), add=TRUE, lty=1, col="green")
+curve(true.A0 * exp(-true.m*x), add=TRUE, lty=1, col="red")
 legend(
     x="topright",
     legend=c("estimated", "true"),
-    col=c("black", "green"),
+    col=c("black", "red"),
     lty=1
 )
 @
@@ -143,7 +139,7 @@ legend(
 )
 @
 
-Predicted trajectories and their confidence intervals are essentially indistinguishable.
+Estimated trajectories and their confidence intervals are essentially indistinguishable.
 
 \subsection{Chemical reaction - multiple state fitting}
 
@@ -167,29 +163,28 @@ reaction_model <- new("model.ode",
         B ~ 3 * k * A
     ),
     observation = list(
-        y1 ~ dnorm(mean=A, sd=sd1),
-        y2 ~ dnorm(mean=B, sd=sd2)
+        y1 ~ dnorm(mean=A, sd=sd),
+        y2 ~ dnorm(mean=B, sd=sd)
     ),
     initial = list(
         A~A0,
         B~B0
     ),
-    par=c("k", "A0", "B0", "sd1", "sd2")
+    par=c("k", "A0", "B0", "sd")
 )
 
 true.k <- 0.1
 true.A0 <- 300
 true.B0 <- 100
-true.sd1 <- 10
-true.sd2 <- 10
+true.sd <- 10
 
 times <- 1:20
 
-reaction_run <- ode.solve(reaction_model, times, c(k=true.k, A0=true.A0, B0=true.B0, sd1=true.sd1, sd2=true.sd2))
+reaction_run <- ode.solve(reaction_model, times, c(k=true.k, A0=true.A0, B0=true.B0, sd1=true.sd))
 reaction_data <- data.frame(
     times=times,
-    y1=rnorm(20, reaction_run@solution$A, sd=true.sd1),
-    y2=rnorm(20, reaction_run@solution$B, sd=true.sd2)
+    y1=rnorm(20, reaction_run@solution$A, sd=true.sd),
+    y2=rnorm(20, reaction_run@solution$B, sd=true.sd)
 )
 @
 
@@ -208,14 +203,14 @@ reaction_model <- new("model.ode",
         B ~ 3 * k * A
     ),
     observation = list(
-        y1 ~ dnorm(mean=A, sd=sd1),
-        y2 ~ dnorm(mean=B, sd=sd2)
+        y1 ~ dnorm(mean=A, sd=sd),
+        y2 ~ dnorm(mean=B, sd=sd)
     ),
     initial = list(
         A~A0,
         B~B0
     ),
-    par=c("k", "A0", "B0", "sd1", "sd2")
+    par=c("k", "A0", "B0", "sd")
 )
 @
 
@@ -225,54 +220,133 @@ We can fit this using arbitrary starting conditions.
 reaction_fit <- fitode(
     reaction_model,
     reaction_data,
-    start=c(k=0.2, A0=300, B0=10, sd1=1, sd2=1)
+    start=c(k=0.1, A0=300, B0=10, sd=10)
 )
 
-plot(reaction_fit)
+plot(reaction_fit, level=0.95)
 @
 
-Note that optimizer may go to wrong places if we start with bad starting conditions.
-In that case, we can try starting at different values.
-Here's how you can set up a simple Latin Hypercube Sampling algorithm.
+Confidence intervals...
 
-<<>>====
-ranges <- data.frame(
-    k=c(0.01, 0.2),
-    A0=c(300, 350),
-    B0=c(90, 110),
-    sd1=c(10,20),
-    sd2=c(10,20)
+<<>>===
+confint(reaction_fit)
+@
+
+\subsection{Fitting SIR model}
+
+<<>>==
+harbin <- fitsir::harbin
+harbin2 <- rbind(data.frame(week=1, Deaths=NA), harbin)
+
+plot(harbin2)
+@
+
+We need to add NA observation to make this work...
+
+<<sirfit, warning=FALSE>>==
+SI_model_c <- new("model.ode",
+    name = "SI",
+    model = list(
+        S ~ - beta*S*I/N,
+        I ~ beta*S*I/N - gamma*I,
+        cDeath ~ gamma*I
+    ),
+    observation = list(
+        Deaths ~ dnbinom(mu=cDeath, size=size)
+    ),
+    initial = list(
+        S ~ N * (1 - i0),
+        I ~ N * i0,
+        cDeath ~ 0
+    ),
+    diffnames="cDeath",
+    par=c("beta", "gamma", "N", "i0", "size")
 )
 
-startpar <- apply(ranges, 2, function(x) seq(from=x[1], to=x[2], length.out=5))
-startpar[] <- apply(startpar, 2,sample)
+start <- c(beta=2, gamma=1, N=20000, i0=1e-5, size=10)
 
-reaction_fitlist <- apply(startpar, 1, function(x){
-    suppressMessages(fitode(
-        reaction_model,
-        reaction_data,
-        start=x
-    ))
-})
+sirfit <- fitode(
+    SI_model_c,
+    harbin2,
+    start=start,
+    link = list(
+        beta="log",
+        gamma="log",
+        N="log",
+        i0="logit",
+        size="log"
+    ),
+    tcol="week"
+)
+
+plot(sirfit, level=0.95)
 @
 
-We obtain a better fit:
+Confidence intervals on various epidemiological quantities:
 
-<<>>===
-reaction_max <- reaction_fitlist[[which.max(sapply(reaction_fitlist, logLik))]]
-plot(reaction_max, level=0.95)
+<<>>==
+confint(sirfit,
+        parm=list(
+            R0~beta/gamma,
+            r~beta-gamma
+        ),
+        method="wmvrnorm")
 @
 
-Note that this is a confidence intervals of trajectories not prediction intervals.
-Prediction intervals would be wider than this.
-We can look at the estimated parameters and their confidence intervals:
+Alternate parameterization:
 
-<<>>===
-confint(reaction_max)
+<<sirfit2, warning=FALSE>>==
+SI_model_c2 <- Transform(
+    SI_model_c,
+    list(
+        beta~(R0_1+1)*gamma
+    ),
+    par=c("R0_1", "gamma", "N", "i0", "size")
+)
+
+cc <- coef(sirfit)
+
+start2 <- c(R0_1=unname(cc[1]/cc[2]-1), cc[-1])
+
+sirfit2 <- fitode(
+    SI_model_c2,
+    harbin2,
+    start=start2,
+    link = list(
+        R0_1="log",
+        gamma="log",
+        N="log",
+        i0="logit",
+        size="log"
+    ),
+    tcol="week"
+)
+
 @
 
+Compare fits:
 
+<<>>==
+plot(sirfit, level=0.95)
+plot(sirfit2, level=0.95, add=TRUE, col.traj="red", col.conf="red")
+@
 
+We get identical fits. The advantage of this parameterization is that we can obtain profile confidence intervals on R0 (it's a little slow...):
 
+<<sirconf, warning=FALSE>>==
+set.seed(101)
+confint(sirfit2, "R0_1", method="profile") + 1
+confint(sirfit2, "R0_1", method="wmvrnorm") + 1
+confint(sirfit, parm=list(R0~beta/gamma))
+confint(sirfit, parm=list(R0~beta/gamma), method="wmvrnorm")
+@
+
+I'm not sure why performing wmvrnorm on beta gamma scale gives narrower confidence intervals. Maybe it's because of the parameterization?
+
+<<>>==
+set.seed(101)
+plot(sirfit, level=0.95, method="wmvrnorm")
+plot(sirfit2, level=0.95, add=TRUE, col.traj="red", col.conf="red", method="wmvrnorm")
+@
 
 \end{document}

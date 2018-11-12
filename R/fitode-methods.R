@@ -269,7 +269,7 @@ setMethod("confint", "fitode",
 
         if (missing(parm)) parm <- names(object@coef)
 
-        if (all(is.character(parm))) {
+        if (skip.transformation <- all(is.character(parm))) {
             if (!all(parm %in% object@model@par))
                 stop("`parm` does not correspond to model parameters.\n",
                      "`parm` must be a vector of model parameters or list of formulas")
@@ -326,18 +326,28 @@ setMethod("confint", "fitode",
             fitted_parms <- coef(object, "fitted")
             fitted_vcov <- vcov(object, "fitted")
 
-            expr_sens <- lapply(parm, function(x) Deriv(x[[3]], names(object@coef)))
-
-            mu.eta <- apply_link(fitted_parms, linklist, "mu.eta")
-
-            sens <- t(sapply(expr_sens, function(x) eval(x, frame) * mu.eta))
-
-            est_vcov <- sens %*% fitted_vcov %*% t(sens)
-
-            est_err <- sqrt(diag(est_vcov))
             z <- -qnorm(ll)
 
-            res <- cbind(estimate, estimate - z * est_err, estimate + z*est_err)
+            if (skip.transformation) {
+                est_err <- sqrt(diag(fitted_vcov))
+
+                lwr <- apply_link(fitted_parms - z * est_err, linklist, "linkinv")
+                upr <- apply_link(fitted_parms + z * est_err, linklist, "linkinv")
+
+                res <- cbind(estimate, lwr, upr)
+            } else {
+                expr_sens <- lapply(parm, function(x) Deriv(x[[3]], names(object@coef)))
+
+                mu.eta <- apply_link(fitted_parms, linklist, "mu.eta")
+
+                sens <- t(sapply(expr_sens, function(x) eval(x, frame) * mu.eta))
+
+                est_vcov <- sens %*% fitted_vcov %*% t(sens)
+
+                est_err <- sqrt(diag(est_vcov))
+
+                res <- cbind(estimate, estimate - z * est_err, estimate + z*est_err)
+            }
         } else {
             wmv <- wmvrnorm(object, nsim=nsim, seed=seed)
 
