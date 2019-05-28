@@ -159,8 +159,8 @@ NBconst <- function(k,x) {
 ##' Select likelihood model
 ##' @param dist conditional distribution of reported data
 ##' @export
-select_model <- function(dist = c("dnorm", "dpois", "dnbinom", "dnbinom1")) {
-        dist <- match.arg(dist)
+select_model <- function(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1")) {
+    dist <- match.arg(dist)
     name <- dist
     model <- switch(dist,
         dnorm={
@@ -169,6 +169,16 @@ select_model <- function(dist = c("dnorm", "dpois", "dnbinom", "dnbinom1")) {
                 mean="mean", par="sd")
 
             loglik_gaussian
+        }, dnorm2={
+            loglik_gaussian2 <- new("loglik.ode", "gaussian",
+                                   LL ~ -(X-mean)^2/(2*sd^2) - log(sd) - 1/2*log(2*pi),
+                                   mean="mean", par="sd")
+
+            loglik_gaussian2 <- Transform(loglik_gaussian2,
+                                         transforms = list(sd ~ sqrt(sum((X-mean)^2)/(length(X)-1))),
+                                         par=NULL)
+
+            loglik_gaussian2
         }, dpois={
             loglik_poisson <- new("loglik.ode", "poisson",
                 LL ~ X*log(lambda) - lambda - lgamma(X+1),

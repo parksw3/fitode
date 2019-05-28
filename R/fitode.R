@@ -139,7 +139,7 @@ fitode <- function(model, data,
 
     names(data)[1] <- "times"
 
-    dataarg <- list(model=model, data=data, solver.opts=solver.opts, solver=solver, linklist=linklist, fixed=fixed)
+    dataarg <- list(model=model, data=data, solver.opts=solver.opts, solver=solver, linklist=linklist)
 
     f.env <- new.env()
     ## set initial values
@@ -147,7 +147,7 @@ fitode <- function(model, data,
     assign("oldpar",NULL,f.env)
     assign("oldgrad",NULL,f.env)
 
-    objfun <- function(par, data, solver.opts, solver, linklist, fixed=fixed) {
+    objfun <- function(par, data, solver.opts, solver, linklist) {
         if (identical(par,oldpar)) {
             if (debug) cat("returning old version of value\n")
             return(oldnll)
@@ -156,7 +156,7 @@ fitode <- function(model, data,
         origpar <- apply_link(par, linklist, "linkinv")
         derivpar <- apply_link(par, linklist, "mu.eta")
 
-        v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver, fixed), silent=TRUE)
+        v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver), silent=TRUE)
         if (inherits(v, "try-error")) {
             return(NA)
         } else {
@@ -172,7 +172,7 @@ fitode <- function(model, data,
         }
     }
 
-    gradfun <- function(par, data, solver.opts, solver, linklist, fixed=fixed) {
+    gradfun <- function(par, data, solver.opts, solver, linklist) {
         if (identical(par,oldpar)) {
             if (debug) cat("returning old version of grad\n")
             return(oldgrad)
@@ -181,7 +181,7 @@ fitode <- function(model, data,
         origpar <- apply_link(par, linklist, "linkinv")
         derivpar <- apply_link(par, linklist, "mu.eta")
 
-        v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver, fixed), silent=TRUE)
+        v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver), silent=TRUE)
         if (inherits(v, "try-error")) {
             return(NA)
         } else {
@@ -232,7 +232,6 @@ fitode <- function(model, data,
                                  data=data,
                                  solver.opts=solver.opts,
                                  solver=solver,
-                                 fixed=fixed,
                                  return.NLL=!keep_sensitivity))
             if(!inherits(thess, "try-error")) {
                 if (use.ginv) {
@@ -312,13 +311,10 @@ logLik.sensitivity <- function(parms,
                                data,
                                solver.opts=list(method="rk4"),
                                solver=ode,
-                               fixed,
                                return.NLL=TRUE,
                                return.traj=FALSE) {
     times <- data$times
     ordered.times <- sort(unique(times))
-
-    if (length(fixed) > 0) parms <- c(parms, unlist(fixed))
 
     ss <- ode.sensitivity(model, parms, ordered.times, solver.opts, solver)
     mean <- ss$mean
@@ -346,7 +342,12 @@ logLik.sensitivity <- function(parms,
 
             loglik.gr <- lapply(ll_grad, eval, frame)
 
-            nll_gr <- -colSums((loglik.gr[[1]] * sens[[i]][oo,])[nn,])
+            if (length(model@par) == 1) {
+                nll_gr <- -colSums((loglik.gr[[1]] * sens[[i]][oo,])[nn])
+
+            } else {
+                nll_gr <- -colSums((loglik.gr[[1]] * sens[[i]][oo,])[nn,])
+            }
 
             if(length(loglik.gr) > 1) nll_gr[[ll_fun@par]] <- -sum(loglik.gr[[ll_fun@par]][nn])
 
@@ -363,4 +364,3 @@ logLik.sensitivity <- function(parms,
 
     res
 }
-

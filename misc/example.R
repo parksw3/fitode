@@ -42,7 +42,7 @@ df <- data.frame(
     infected=rnbinom(length(tvec), mu=f@solution$I, size=10)
 )
 
-start <- c(beta=1, gamma=0.5, N=1000, i0=1e-2, size1=10, size2=10)
+start <- c(beta=1, N=1000, i0=1e-2, size1=10, size2=10)
 
 system.time(ff <- fitode(
     model=SI_model,
@@ -55,8 +55,11 @@ system.time(ff <- fitode(
 ))
 
 plot(ff, level=0.95)
-plot(ff, method="wmvrnorm", level=0.95)
+# plot(ff, method="wmvrnorm", level=0.95)
 
+confint(ff, parm=c("N", "gamma"))
+confint(ff, parm=c("N", "gamma"), method="profile")
+confint(ff, parm=c("N", "gamma"), method="wmvrnorm")
 
 SI_model_c <- new("model.ode",
     name = "SI",
