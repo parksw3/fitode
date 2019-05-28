@@ -11,6 +11,7 @@
 \usepackage{hyperref}
 \newcommand{\rzero}{{\cal R}_0}
 \newcommand{\code}[1]{{\tt #1}}
+\newcommand{\bmb}[1]{{\color{blue} bmb: \emph{#1}}}
 \bibliographystyle{chicago}
 \date{\today}
 \begin{document}
@@ -19,6 +20,11 @@
 <<opts,echo=FALSE>>=
 library("knitr")
 opts_chunk$set(fig.width=6,fig.height=4)
+knit_hooks$set(basefig=function(before, options, envir) {
+                   if (before) {
+                       par(bty="l",las=1)
+                   } else { }
+               })
 @
 
 \tableofcontents
@@ -35,9 +41,12 @@ library(fitode)
 
 \subsection{Exponential decay model}
 
-Suppose we have a quantity that is decreasing exponentially.
+Suppose we have a stock (compartment)
+that is losing a fixed \emph{per capita}
+fraction per unit time, as in radioactive decay,
+financial depreciation, or a pure-death process.
 
-<<>>==
+<<expsim>>=
 set.seed(123)
 true.m <- 0.5
 true.A0 <- 200
@@ -47,7 +56,9 @@ exp.data <- data.frame(
     x=rep(0:4, 3),
     y=rnorm(15, true.A0 * exp(-true.m * rep(0:4, 3)), sd=true.sd)
 )
+@
 
+<<expplot,basefig=TRUE>>=
 plot(exp.data)
 @
 
@@ -58,7 +69,7 @@ $$
 
 We can translate this into a \code{fitode} model as follows:
 
-<<>>==
+<<expmodel>>=
 exp.model <- new("model.ode",
     name = "SI",
     model = list(
@@ -76,7 +87,7 @@ exp.model <- new("model.ode",
 
 Then, we can fit the model:
 
-<<>>===
+<<fitchem>>=
 exp.fit <- fitode(
     exp.model,
     exp.data,
@@ -85,10 +96,12 @@ exp.fit <- fitode(
 )
 @
 
-To diagnose the fit, we can use \code{plot} function.
-Using the \code{level} argument will plot 95\% confidence intervals of the true trajectory, estimated via delta method.
+To diagnose the fit, we can use the \code{plot} method for \code{fitode} objects.
+\bmb{we should be careful here: in base R the convention is that \code{plot} shows diagnostics (although of course that's different in \code{deSolve}, which plots trajectories).  Do we want to set up different methods for plotting predictions vs trajectories, or should there be an option to \code{plot}?}
+By default, this will plot the estimated trajectory along with
+95\% confidence intervals, estimated via the delta method.
 
-<<>>==
+<<plotexp,basefig=TRUE>>=
 plot(exp.fit, level=0.95)
 curve(true.A0 * exp(-true.m*x), add=TRUE, lty=1, col="red")
 legend(
@@ -99,25 +112,28 @@ legend(
 )
 @
 
-To obtain the confidence interval, we can use \code{confint} function.
+To obtain confidence intervals on the parameters, we can use \code{confint} method.
 There are three available methods for obtaining the confidence intervals: \code{delta}, \code{profile} and \code{wmvrnorm}.
 Due to computation speed, default option is \code{delta}.
 We will get into the details later.
 For now,
 
-<<>>==
+<<expconf>>=
 confint(exp.fit)
 @
 
-Note that in this particular example, we can use \code{glm} function to fit the model as well.
-We can compare the results.
+Since this particular differential equation has a simple closed-form solution ($A(t) = A(0) \exp(-m t)$), we can use the \code{glm} function to fit the model as well (we need to use \code{glm} with the \code{gaussian} family and a log link, rather than \code{lm}, in order to fit an exponential curve with constant residual variance).
 
-<<>>==
+<<glmfitexp>>=
 glm.fit <- glm(y~x,
     family=gaussian(link="log"),
     data=exp.data,
     start = c(intercept=log(200), x=-0.5))
+@
 
+Comparing the results:
+
+<<glmfitpred,basefig=TRUE>>=
 glm.pred <- predict(glm.fit, data.frame(x=0:4), se.fit=TRUE, type="response")
 
 glm.data <- data.frame(
@@ -139,7 +155,7 @@ legend(
 )
 @
 
-Estimated trajectories and their confidence intervals are essentially indistinguishable.
+The estimated trajectories and their confidence intervals are essentially indistinguishable.
 
 \subsection{Chemical reaction - multiple state fitting}
 
@@ -147,15 +163,16 @@ Now, consider the following chemical reaction:
 $$
 A \to 3 B
 $$
-Then, we can write the governing differential equation as follows:
+Then, we can write the governing differential equations as follows:
 $$
 \begin{aligned}
 \frac{dA}{dt} &= - k A\\
 \frac{dB}{dt} &= 3 k B
 \end{aligned}
 $$
-Suppose we have measured both quantities and have data:
-<<echo=FALSE>>==
+Suppose we have observed values for both quantities (we assume their
+standard deviation is identical):
+<<chem_model,echo=FALSE>>=
 reaction_model <- new("model.ode",
     name = "reaction",
     model = list(
@@ -188,14 +205,16 @@ reaction_data <- data.frame(
 )
 @
 
-<<>>==
+Taking a quick look at the simulation results:
+<<simhead>>=
 head(reaction_data)
 @
 
-Here, \code{y1} meausres quantity $A$ and \code{y2} measures quantity $B$.
+Here, \code{y1} measures quantity $A$ and \code{y2} measures quantity $B$.
+\bmb{is there a reason not to use names that match the ODE definition?}
 Then, we can define the model:
 
-<<>>===
+<<reactionmodel>>=
 reaction_model <- new("model.ode",
     name = "reaction",
     model = list(
@@ -216,7 +235,7 @@ reaction_model <- new("model.ode",
 
 We can fit this using arbitrary starting conditions.
 
-<<>>==
+<<reactionfit,cache=TRUE, basefig=TRUE>>=
 reaction_fit <- fitode(
     reaction_model,
     reaction_data,
@@ -228,22 +247,22 @@ plot(reaction_fit, level=0.95)
 
 Confidence intervals...
 
-<<>>===
+<<expci>>=
 confint(reaction_fit)
 @
 
 \subsection{Fitting SIR model}
 
-<<>>==
+<<sirsetup,basefig=TRUE>>=
 harbin <- fitsir::harbin
 harbin2 <- rbind(data.frame(week=1, Deaths=NA), harbin)
 
 plot(harbin2)
 @
 
-We need to add NA observation to make this work...
+We need to add an \code{NA} observation to make this work...
 
-<<sirfit, warning=FALSE>>==
+<<sirfit, warning=FALSE,cache=TRUE>>=
 SI_model_c <- new("model.ode",
     name = "SI",
     model = list(
@@ -284,7 +303,7 @@ plot(sirfit, level=0.95)
 
 Confidence intervals on various epidemiological quantities:
 
-<<>>==
+<<sirci1,cache=TRUE>>=
 confint(sirfit,
         parm=list(
             R0~beta/gamma,
@@ -295,7 +314,7 @@ confint(sirfit,
 
 Alternate parameterization:
 
-<<sirfit2, warning=FALSE>>==
+<<sirfit2, warning=FALSE>>=
 SI_model_c2 <- Transform(
     SI_model_c,
     list(
@@ -326,14 +345,14 @@ sirfit2 <- fitode(
 
 Compare fits:
 
-<<>>==
-plot(sirfit, level=0.95)
-plot(sirfit2, level=0.95, add=TRUE, col.traj="red", col.conf="red")
+<<sircompplot,basefig=TRUE>>=
+plot(sirfit)
+plot(sirfit2, add=TRUE, col.traj="red", col.conf="red")
 @
 
 We get identical fits. The advantage of this parameterization is that we can obtain profile confidence intervals on R0 (it's a little slow...):
 
-<<sirconf, warning=FALSE>>==
+<<sirconf, warning=FALSE,cache=TRUE>>=
 set.seed(101)
 confint(sirfit2, "R0_1", method="profile") + 1
 confint(sirfit2, "R0_1", method="wmvrnorm") + 1
@@ -341,12 +360,12 @@ confint(sirfit, parm=list(R0~beta/gamma))
 confint(sirfit, parm=list(R0~beta/gamma), method="wmvrnorm")
 @
 
-I'm not sure why performing wmvrnorm on beta gamma scale gives narrower confidence intervals. Maybe it's because of the parameterization?
+I'm not sure why performing \code{wmvrnorm} on the beta/gamma scale gives narrower confidence intervals. Maybe it's because of the parameterization?
 
-<<>>==
+<<sirconfplot>>=
 set.seed(101)
-plot(sirfit, level=0.95, method="wmvrnorm")
-plot(sirfit2, level=0.95, add=TRUE, col.traj="red", col.conf="red", method="wmvrnorm")
+plot(sirfit, method="wmvrnorm")
+plot(sirfit2, add=TRUE, col.traj="red", col.conf="red", method="wmvrnorm")
 @
 
 \end{document}

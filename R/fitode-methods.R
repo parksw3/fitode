@@ -18,7 +18,7 @@
 ##' @docType methods
 ##' @exportMethod plot
 setMethod("plot", signature(x="fitode", y="missing"),
-    function(x, level,
+    function(x, level=0.95,
              which,
              method=c("delta", "wmvrnorm"),
              onepage=TRUE,
