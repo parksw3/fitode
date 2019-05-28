@@ -15,4 +15,3 @@
 \description{
 Extract parameter of a fit
 }
-

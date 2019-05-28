@@ -15,4 +15,3 @@
 \description{
 Calculate standard error
 }
-

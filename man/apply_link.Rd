@@ -19,4 +19,3 @@ Apply link functions to parameters
 \seealso{
 \code{\link{make.link}}
 }
-

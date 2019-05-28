@@ -5,7 +5,8 @@
 \alias{profile,fitode-method}
 \title{Profile object}
 \usage{
-\S4method{profile}{fitode}(fitted, trace = FALSE)
+\S4method{profile}{fitode}(fitted, which = 1:p, alpha = 0.05,
+  trace = FALSE)
 }
 \arguments{
 \item{fitted}{fitted model object}
@@ -13,4 +14,3 @@
 \description{
 Profile object
 }
-

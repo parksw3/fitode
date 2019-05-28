@@ -4,8 +4,8 @@
 \alias{logLik.sensitivity}
 \title{Sensitivity of the likelihood function with respect to parameters}
 \usage{
-logLik.sensitivity(parms, model, data, solver.opts = list(method = "rk4"),
-  solver = ode, fixed, returnNLL = TRUE)
+logLik.sensitivity(parms, model, data, solver.opts = list(method =
+  "rk4"), solver = ode, return.NLL = TRUE, return.traj = FALSE)
 }
 \arguments{
 \item{parms}{named vector of parameter values}
@@ -16,7 +16,7 @@ logLik.sensitivity(parms, model, data, solver.opts = list(method = "rk4"),
 
 \item{solver.opts}{options for the ode solver (see \code{\link{ode}})}
 
-\item{returnNLL}{(logical) return negative log likelihood}
+\item{return.NLL}{(logical) return negative log likelihood}
 }
 \value{
 vector of nll and sensitivity of nll with respect to the parameters
@@ -24,4 +24,3 @@ vector of nll and sensitivity of nll with respect to the parameters
 \description{
 Sensitivity of the likelihood function with respect to parameters
 }
-

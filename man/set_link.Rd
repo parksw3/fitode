@@ -22,4 +22,3 @@ Set up link functions for ode/loglik parameters
 \seealso{
 \code{\link{make.link}}
 }
-

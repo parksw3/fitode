@@ -14,4 +14,3 @@ hessian(object, ...)
 \description{
 S4 generic for computing a hessian
 }
-

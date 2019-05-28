@@ -23,4 +23,3 @@ ode.sensitivity(model, parms, times, solver.opts = list(method = "rk4"),
 \description{
 Calculate sensitivity of the expression with respect to the parameters
 }
-

@@ -7,12 +7,10 @@
 ## API questions
 
 - make link functions part of the model object, rather than the fit?
-- difference operator as part of formula (`.diff()`) rather than additional argument?
 - change name of `wmvrnorm`/synonymize to `impsamp`?
 
 ## probably doable
 
-- incorporate `dnorm_n` (sd-profiled `dnorm`, from development version of `bbmle`) in examples
 - priors/regularization/MAP estimation
 - allow `predict` to use new predictor variables (e.g. finer time steps) [potentially tricky if diff-variables are being used ...]
 - discussion of similar approaches/packages (nlmeODE, Stan + ODE module, odeintr, PKPD models ...)	

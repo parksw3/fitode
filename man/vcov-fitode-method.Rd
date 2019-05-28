@@ -15,4 +15,3 @@
 \description{
 Extract covariance matrix of a fit
 }
-

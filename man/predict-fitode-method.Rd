@@ -6,7 +6,7 @@
 \title{Forecast from an ode fit and find confidence interval}
 \usage{
 \S4method{predict}{fitode}(object, level, times, method = c("delta",
-  "mvrnorm", "wmvrnorm"), nsim = 1000)
+  "wmvrnorm"), nsim = 1000)
 }
 \arguments{
 \item{object}{fitode object}
@@ -22,4 +22,3 @@
 \description{
 Forecast from an ode fit and find confidence interval
 }
-

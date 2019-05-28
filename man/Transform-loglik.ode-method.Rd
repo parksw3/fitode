@@ -29,4 +29,3 @@ loglik.ode object
 \description{
 Transform the model
 }
-

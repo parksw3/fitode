@@ -14,4 +14,3 @@ Transform(object, ...)
 \description{
 S4 generic for transforming an object
 }
-

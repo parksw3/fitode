@@ -13,4 +13,3 @@
 \description{
 Extract log-likelihood of a fit
 }
-

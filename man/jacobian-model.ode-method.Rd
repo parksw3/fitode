@@ -20,4 +20,3 @@
 \description{
 Evaluate the jacobian of the gradients
 }
-

@@ -6,29 +6,25 @@
 \alias{plot,fitode-method}
 \title{Plot a fitode object}
 \usage{
-\S4method{plot}{fitode,missing}(x, level, method = c("delta", "mvrnorm",
-  "wmvrnorm"), main, xlim, ylim, xlab, ylab, add = FALSE,
-  col.traj = "black", lty.traj = 1, col.conf = "red", lty.conf = 4,
-  nsim = 1000, ...)
+\S4method{plot}{fitode,missing}(x, level = 0.95, which,
+  method = c("delta", "wmvrnorm"), onepage = TRUE, xlabs, ylabs = nm,
+  col.traj = "black", lty.traj = 1, col.conf = "black",
+  lty.conf = 4, add = FALSE, nsim = 1000, ...)
 }
 \arguments{
 \item{x}{fitode object}
 
 \item{level}{the confidence level required}
 
+\item{which}{which to plot}
+
 \item{method}{confidence interval method}
 
-\item{main}{an overall title for the plot}
+\item{onepage}{(logical) print all figures on one page?}
 
-\item{xlim}{the x limit of the plot}
+\item{xlabs}{a label for the x axis}
 
-\item{ylim}{the y limit of the plot}
-
-\item{xlab}{a label for the x axis}
-
-\item{ylab}{a label for the y axis}
-
-\item{add}{(logical) add to an existing plot?}
+\item{ylabs}{a label for the y axis}
 
 \item{col.traj}{colour of the estimated trajectory}
 
@@ -38,6 +34,8 @@
 
 \item{lty.conf}{line type of the confidence intervals}
 
+\item{add}{add to another plot?}
+
 \item{nsim}{number of simulations for mvrnorm, wmvrnorm methods}
 
 \item{...}{additional arguments to be passed on to the plot function}
@@ -45,4 +43,3 @@
 \description{
 Plot a fitode object
 }
-

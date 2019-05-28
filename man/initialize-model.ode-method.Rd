@@ -5,8 +5,8 @@
 \alias{initialize,model.ode-method}
 \title{the initializer for model.ode}
 \usage{
-\S4method{initialize}{model.ode}(.Object, name, model, observation, initial,
-  par, diffnames, keep_sensitivity = TRUE)
+\S4method{initialize}{model.ode}(.Object, name, model, observation,
+  initial, par, diffnames, keep_sensitivity = TRUE)
 }
 \arguments{
 \item{.Object}{object}
@@ -29,6 +29,7 @@ the initializer for model.ode
 
 \item{\code{keep_sensitivity}}{(logical) maintain the Jacobian as part of the model}
 }}
+
 \examples{
 SI_model <- new("model.ode",
     name = "SI",
@@ -47,4 +48,3 @@ SI_model <- new("model.ode",
     par= c("beta", "gamma", "N", "i0", "sigma1", "sigma2")
 )
 }
-

@@ -26,4 +26,3 @@
 \description{
 the initializer for model.ode
 }
-

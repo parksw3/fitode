@@ -24,4 +24,3 @@ numeric
 \description{
 Evaluate log likelihood model
 }
-
