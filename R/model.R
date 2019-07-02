@@ -40,6 +40,16 @@ setMethod(
         if (any(sapply(initial, class) != "formula"))
             stop("initial must be a list of formulas or a function")
 
+        if (any(sapply(observation, class) != "formula"))
+            stop("observation must be a list of formulas")
+
+        ## warning
+        if("dnorm2" %in% sapply(observation, function(ll) as.character(ll[[3]][[1]]))) {
+            warning("Sensitivity equations are unavailable for dnorm2 (changing keep_sensitivity=FALSE).")
+            keep_sensitivity <- FALSE
+        }
+
+
         if (missing(name)) name <- "new ODE model"
 
         .Object@name <- name
@@ -117,61 +127,53 @@ setMethod(
             stop("model must be a list of formulas or a function")
         }
 
-        if (is.list(observation)) {
-            if (any(sapply(observation, class) != "formula"))
-                stop("observation must be a list of formulas")
+        loglik_list <- lapply(observation, function(ll) {
+            ll_model <- select_model(as.character(ll[[3]][[1]]))
 
-            loglik_list <- lapply(observation, function(ll) {
-                ll_model <- select_model(as.character(ll[[3]][[1]]))
+            trans_obs <- as.formula(as.call(c(as.symbol("~"), as.symbol("X"), ll[[2]])))
 
-                trans_obs <- as.formula(as.call(c(as.symbol("~"), as.symbol("X"), ll[[2]])))
+            trans_list <- list(trans_obs)
 
-                trans_list <- list(trans_obs)
+            likpar <- ll_model@par
 
-                likpar <- ll_model@par
+            if (length(likpar) > 0) {
+                call <- as.list(ll[[3]])[[likpar]]
 
-                if (length(likpar) > 0) {
-                    call <- as.list(ll[[3]])[[likpar]]
+                trans_list <- append(trans_list, as.formula(as.call(c(as.symbol("~"), as.symbol(likpar), call))))
+            } else {
+                call <- likpar
+            }
 
-                    trans_list <- append(trans_list, as.formula(as.call(c(as.symbol("~"), as.symbol(likpar), call))))
-                } else {
-                    call <- likpar
-                }
+            ll_model <- Transform(ll_model,
+                                  observation=as.character(ll[[2]]),
+                                  transforms=trans_list,
+                                  par=call,
+                                  keep_grad=keep_sensitivity
+            )
 
-                ll_model <- Transform(ll_model,
-                    observation=as.character(ll[[2]]),
-                    transforms=trans_list,
-                    par=call,
-                    keep_grad=keep_sensitivity
+            expr <- ll[[3]][[ll_model@mean]]
+
+            if (keep_sensitivity) {
+                expr.sensitivity <- list(
+                    state=lapply(state, function(s) Deriv(expr, s)),
+                    par=lapply(par, function(p) Deriv(expr, p))
                 )
 
-                expr <- ll[[3]][[ll_model@mean]]
+                names(expr.sensitivity$state) <- state
+                names(expr.sensitivity$par) <- par
+            } else {
+                expr.sensitivity <- list()
+            }
 
-                if (keep_sensitivity) {
-                    expr.sensitivity <- list(
-                        state=lapply(state, function(s) Deriv(expr, s)),
-                        par=lapply(par, function(p) Deriv(expr, p))
-                    )
+            list(ll_model=ll_model,
+                 expr=expr,
+                 expr.sensitivity=expr.sensitivity)
+        })
 
-                    names(expr.sensitivity$state) <- state
-                    names(expr.sensitivity$par) <- par
-                } else {
-                    expr.sensitivity <- list()
-                }
-
-                list(ll_model=ll_model,
-                     expr=expr,
-                     expr.sensitivity=expr.sensitivity)
-            })
-
-
-            .Object@observation <- observation
-            .Object@loglik <- lapply(loglik_list, "[[", "ll_model")
-            .Object@expr <- lapply(loglik_list, "[[", "expr")
-            .Object@expr.sensitivity <- lapply(loglik_list, "[[", "expr.sensitivity")
-        } else {
-            stop("observation must be a list of formulas or a function")
-        }
+        .Object@observation <- observation
+        .Object@loglik <- lapply(loglik_list, "[[", "ll_model")
+        .Object@expr <- lapply(loglik_list, "[[", "expr")
+        .Object@expr.sensitivity <- lapply(loglik_list, "[[", "expr.sensitivity")
 
         if (!missing(diffnames)) .Object@diffnames <- diffnames
 

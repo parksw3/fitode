@@ -50,6 +50,7 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' @param solver.opts options for ode integration. See \code{\link{ode}}
 ##' @param solver ode solver
 ##' @param skip.hessian skip hessian calculation
+##' @param force.hessian (FALSE) calculate the hessian numerically instead of taking the jacobian of the analytical gradients
 ##' @param use.ginv use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
 ##' @param debug print debugging output?
 ##' @param ... mle2 arguments
@@ -68,6 +69,7 @@ fitode <- function(model, data,
                    solver.opts=list(method="rk4"),
                    solver=ode,
                    skip.hessian=FALSE,
+                   force.hessian=FALSE,
                    use.ginv=TRUE,
                    debug=FALSE,
                    ...) {
@@ -201,7 +203,7 @@ fitode <- function(model, data,
     parnames <- names(start)
     attr(objfun, "parnames") <- parnames
 
-    if (!keep_sensitivity) gradfun <- NULL ## TODO: I don't like this
+    if (!keep_sensitivity) gradfun <- NULL
 
     message("Fitting ode ...")
     m <- mle2(objfun,
@@ -222,7 +224,7 @@ fitode <- function(model, data,
         } else {
             message("Computing vcov on the original scale ...")
 
-            if (keep_sensitivity) {
+            if (keep_sensitivity && !force.hessian) {
                 hessfun <- numDeriv::jacobian
             } else {
                 hessfun <- numDeriv::hessian
@@ -344,8 +346,7 @@ logLik.sensitivity <- function(parms,
             loglik.gr <- lapply(ll_grad, eval, frame)
 
             if (length(model@par) == 1) {
-                nll_gr <- -colSums((loglik.gr[[1]] * sens[[i]][oo,])[nn])
-
+                nll_gr <- -sum((loglik.gr[[1]] * sens[[i]][oo,])[nn])
             } else {
                 nll_gr <- -colSums((loglik.gr[[1]] * sens[[i]][oo,])[nn,])
             }
