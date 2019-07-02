@@ -3,7 +3,7 @@
 \docType{methods}
 \name{initialize,model.ode-method}
 \alias{initialize,model.ode-method}
-\title{the initializer for model.ode}
+\title{Initializer for model.ode objects}
 \usage{
 \S4method{initialize}{model.ode}(.Object, name, model, observation,
   initial, par, diffnames, keep_sensitivity = TRUE)
@@ -12,7 +12,7 @@
 \item{.Object}{object}
 }
 \description{
-the initializer for model.ode
+Initializer for model.ode objects
 }
 \section{Slots}{
 

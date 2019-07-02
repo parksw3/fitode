@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitode.R
 \name{set_link}
 \alias{set_link}
-\title{Set up link functions for ode/loglik parameters}
+\title{Set up link functions for model parameters}
 \usage{
 set_link(link, modelpar)
 }
@@ -17,7 +17,7 @@ set_link(link, modelpar)
 list of strings specifying link functions
 }
 \description{
-Set up link functions for ode/loglik parameters
+Set up link functions for model parameters
 }
 \seealso{
 \code{\link{make.link}}

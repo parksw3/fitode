@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitode.R
 \name{logLik.sensitivity}
 \alias{logLik.sensitivity}
-\title{Sensitivity of the likelihood function with respect to parameters}
+\title{Calculate the derivative of the log-likelihood function with respect to model parameters}
 \usage{
 logLik.sensitivity(parms, model, data, solver.opts = list(method =
   "rk4"), solver = ode, return.NLL = TRUE, return.traj = FALSE)
@@ -16,11 +16,13 @@ logLik.sensitivity(parms, model, data, solver.opts = list(method =
 
 \item{solver.opts}{options for the ode solver (see \code{\link{ode}})}
 
-\item{return.NLL}{(logical) return negative log likelihood}
+\item{solver}{ode solver}
+
+\item{return.NLL}{(logical) return negative log-likelihood}
 }
 \value{
 vector of nll and sensitivity of nll with respect to the parameters
 }
 \description{
-Sensitivity of the likelihood function with respect to parameters
+Calculate the derivative of the log-likelihood function with respect to model parameters
 }

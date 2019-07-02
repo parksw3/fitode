@@ -2,13 +2,13 @@
 % Please edit documentation in R/fitode.R
 \name{ode.sensitivity}
 \alias{ode.sensitivity}
-\title{Calculate sensitivity of the expression with respect to the parameters}
+\title{Calculate the derivative of an expression with respect to model parameters using sensitivity equations}
 \usage{
 ode.sensitivity(model, parms, times, solver.opts = list(method = "rk4"),
   solver = ode)
 }
 \arguments{
-\item{model}{model.ode object}
+\item{model}{ode model}
 
 \item{parms}{named vector of parameter values}
 
@@ -16,10 +16,8 @@ ode.sensitivity(model, parms, times, solver.opts = list(method = "rk4"),
 
 \item{solver.opts}{options for the ode solver (see \code{\link{ode}})}
 
-\item{expr}{expression to be evaluated}
-
-\item{expr.sensitivity}{partial derivative of expr w.r.t states and parameters}
+\item{solver}{ode solver}
 }
 \description{
-Calculate sensitivity of the expression with respect to the parameters
+Calculate the derivative of an expression with respect to model parameters using sensitivity equations
 }

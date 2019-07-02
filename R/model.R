@@ -1,4 +1,4 @@
-##' the initializer for model.ode
+##' Initializer for model.ode objects
 ##'
 ##' @param .Object object
 ##' @slot name name of the model
@@ -39,6 +39,8 @@ setMethod(
         ## TODO: I can't remember why it's asking for a function...
         if (any(sapply(initial, class) != "formula"))
             stop("initial must be a list of formulas or a function")
+
+        if (missing(name)) name <- "new ODE model"
 
         .Object@name <- name
 

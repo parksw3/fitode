@@ -28,11 +28,13 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
 
 \item{optimizer}{optimizer}
 
-\item{link}{named vector or list of link functions for ode/log-likelihood parameters}
+\item{link}{named vector or list of link functions for model parameters}
 
-\item{control}{see optim}
+\item{control}{see \code{\link{optim}}}
 
-\item{solver.opts}{options for ode integration. See ode}
+\item{solver.opts}{options for ode integration. See \code{\link{ode}}}
+
+\item{solver}{ode solver}
 
 \item{skip.hessian}{skip hessian calculation}
 

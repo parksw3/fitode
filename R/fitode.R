@@ -1,4 +1,4 @@
-##' Set up link functions for ode/loglik parameters
+##' Set up link functions for model parameters
 ##'
 ##' @param link named list or vector of strings specifying link functions
 ##' @param model model.ode object
@@ -45,9 +45,10 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' @param tcol time column
 ##' @param method optimization method
 ##' @param optimizer optimizer
-##' @param link named vector or list of link functions for ode/log-likelihood parameters
-##' @param control see optim
-##' @param solver.opts options for ode integration. See ode
+##' @param link named vector or list of link functions for model parameters
+##' @param control see \code{\link{optim}}
+##' @param solver.opts options for ode integration. See \code{\link{ode}}
+##' @param solver ode solver
 ##' @param skip.hessian skip hessian calculation
 ##' @param use.ginv use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
 ##' @param debug print debugging output?
@@ -259,14 +260,13 @@ fitode <- function(model, data,
     )
 }
 
-##' Calculate sensitivity of the expression with respect to the parameters
+##' Calculate the derivative of an expression with respect to model parameters using sensitivity equations
 ##'
-##' @param expr expression to be evaluated
-##' @param expr.sensitivity partial derivative of expr w.r.t states and parameters
-##' @param model model.ode object
+##' @param model ode model
 ##' @param parms named vector of parameter values
 ##' @param times time window for which the model should be solved
 ##' @param solver.opts options for the ode solver (see \code{\link{ode}})
+##' @param solver ode solver
 ode.sensitivity <- function(model,
                             parms, times,
                             solver.opts=list(method="rk4"),
@@ -299,12 +299,13 @@ ode.sensitivity <- function(model,
     list(mean=mean, sensitivity=sens)
 }
 
-##' Sensitivity of the likelihood function with respect to parameters
+##' Calculate the derivative of the log-likelihood function with respect to model parameters
 ##' @param parms named vector of parameter values
 ##' @param model model.ode object
 ##' @param data data
 ##' @param solver.opts options for the ode solver (see \code{\link{ode}})
-##' @param return.NLL (logical) return negative log likelihood
+##' @param solver ode solver
+##' @param return.NLL (logical) return negative log-likelihood
 ##' @return vector of nll and sensitivity of nll with respect to the parameters
 logLik.sensitivity <- function(parms,
                                model,
