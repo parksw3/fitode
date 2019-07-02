@@ -13,7 +13,6 @@ warnings_are_errors: false
 ## "warnings_are_errors: false" here ...)
 r_build_args: "--no-build-vignettes"
 
-
 notifications:
     email:
     on_success: change
