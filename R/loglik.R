@@ -202,9 +202,9 @@ select_model <- function(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbino
             loglik_nbinom1
         }, dgamma={
             loglik_gamma <- new("loglik.ode", "gamma",
-                LL ~ alpha * log(alpha/mu) + (alpha - 1) * log(X) - alpha/mu * X - lgamma(alpha),
-                mean="mu",
-                par="alpha"
+                LL ~ shape * log(shape/mean) + (shape - 1) * log(X) - shape/mean * X - lgamma(shape),
+                mean="mean",
+                par="shape"
             )
 
             loglik_gamma
