@@ -44,7 +44,7 @@ setMethod(
             stop("observation must be a list of formulas")
 
         ## warning
-        if("dnorm2" %in% sapply(observation, function(ll) as.character(ll[[3]][[1]]))) {
+        if("dnorm2" %in% sapply(observation, function(ll) as.character(ll[[3]][[1]])) && keep_sensitivity) {
             warning("Sensitivity equations are unavailable for dnorm2 (changing keep_sensitivity=FALSE).")
             keep_sensitivity <- FALSE
         }

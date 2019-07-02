@@ -30,6 +30,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
              ...){
         method <- match.arg(method)
         data <- x@data
+
         pred <- predict(x,level,method=method, nsim=nsim)
 
         if (missing(which)) which <- 1:length(pred)
@@ -73,7 +74,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
 
             lines(pred.df$times, pred.df$mean, col=col.traj, lty=lty.traj)
 
-            if (!missing(level)) {
+            if (!missing(level) && x@model@keep_sensitivity) {
                 matlines(pred.df$times, pred.df[,3:4], col=col.conf, lty=lty.conf)
             }
         }
@@ -131,7 +132,7 @@ setMethod("predict", "fitode",
 
         names(df) <- names(object@data)[-1]
 
-        if (!missing(level)) {
+        if (!missing(level) && model@keep_sensitivity) {
             nstate <- length(model@state)
             npar <- length(model@par)
             linklist <- object@mle2@data$linklist
