@@ -7,7 +7,8 @@
 ##' @slot initial list of expressions representing the initial values
 ##' @slot state state variables
 ##' @slot par parameters
-##' @slot diffnames state variables that needs to be diff-ed
+##' @slot link link functions for parameters (log links are used as default)
+##' @slot diffnames character vector specifying the names of a variable for which the consecutive difference needs to be calculated
 ##' @slot jacobian.initial Jacobian of initial values with respect to its parameters
 ##' @slot jacobian.state Jacobian with respect to its states
 ##' @slot jacobian.par Jacobian with repsect to its parameters
@@ -26,6 +27,7 @@ setClass(
         initial= "list",
         state = "character",
         par = "character",
+        link = "character",
         diffnames = "character",
         jacobian.initial = "list",
         jacobian.state = "list",

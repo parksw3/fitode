@@ -6,6 +6,8 @@
 ##' @slot observation observation model
 ##' @slot initial initial values
 ##' @slot par parameters
+##' @slot link link functions for parameters (log links are used as default)
+##' @slot diffnames optional character vector specifying the names of a variable for which the consecutive difference needs to be calculated
 ##' @slot keep_sensitivity (logical) maintain the Jacobian as part of the model
 ##' @examples
 ##' SI_model <- new("model.ode",
@@ -22,7 +24,8 @@
 ##'         S ~ N * (1 - i0),
 ##'         I ~ N * i0
 ##'     ),
-##'     par= c("beta", "gamma", "N", "i0", "sigma1", "sigma2")
+##'     par = c("beta", "gamma", "N", "i0", "sigma1", "sigma2"),
+##'     link = c(i0="logit")
 ##' )
 ##' @docType methods
 ##' @exportMethod initialize
@@ -34,6 +37,7 @@ setMethod(
              observation,
              initial,
              par,
+             link,
              diffnames,
              keep_sensitivity=TRUE) {
         ## TODO: I can't remember why it's asking for a function...
@@ -48,7 +52,6 @@ setMethod(
             warning("Sensitivity equations are unavailable for dnorm2 (changing keep_sensitivity=FALSE).")
             keep_sensitivity <- FALSE
         }
-
 
         if (missing(name)) name <- "new ODE model"
 
@@ -169,6 +172,12 @@ setMethod(
                  expr=expr,
                  expr.sensitivity=expr.sensitivity)
         })
+
+        ## set up link functions
+        if (!missing(link)) if (any(is.na(match(names(link), par)))) stop("Some link functions do not correspond to the model parameters.")
+
+        link <- unlist(set_link(link, par))
+        .Object@link <- link
 
         .Object@observation <- observation
         .Object@loglik <- lapply(loglik_list, "[[", "ll_model")

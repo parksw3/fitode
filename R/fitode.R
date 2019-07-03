@@ -101,9 +101,11 @@ fitode <- function(model, data,
     }
 
     if (!missing(link)) {
-        link <- link[names(link) %in% modelpar]
-
         if (any(is.na(match(names(link), modelpar)))) stop("Some link functions do not correspond to the model parameters.")
+
+        link <- set_link(link, modelpar)
+    } else {
+        link <- as.list(model@link)
     }
 
     if (any(is.na(match(modelpar, names(start))))) {
@@ -117,8 +119,6 @@ fitode <- function(model, data,
 
     ## order parameters ...
     start <- start[modelpar]
-
-    link <- set_link(link, modelpar)
 
     link_data <- lapply(link, make.link)
 

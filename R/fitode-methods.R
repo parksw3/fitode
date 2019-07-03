@@ -72,7 +72,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
             if (!add) plot(obs.df, xlim=xlim, ylim=ylim,
                            xlab=xlabs[i], ylab=ylabs[i], ...)
 
-            lines(pred.df$times, pred.df$mean, col=col.traj, lty=lty.traj)
+            lines(pred.df$times, pred.df$estimate, col=col.traj, lty=lty.traj)
 
             if (!missing(level) && x@model@keep_sensitivity) {
                 matlines(pred.df$times, pred.df[,3:4], col=col.conf, lty=lty.conf)
@@ -126,7 +126,7 @@ setMethod("predict", "fitode",
             m <- eval(e, frame)
             data.frame(
                 times=times,
-                mean=m
+                estimate=m
             )
         })
 
@@ -160,7 +160,7 @@ setMethod("predict", "fitode",
                         mean.vcov <- sens[[i]] %*% fitted.vcov %*% t(sens[[i]])
                         mean.err <- sqrt(diag(mean.vcov))
                         z <- -qnorm(ll)
-                        tmp[[i]] <- data.frame(df[[i]]$mean - z * mean.err, df[[i]]$mean + z * mean.err)
+                        tmp[[i]] <- data.frame(df[[i]]$estimate - z * mean.err, df[[i]]$estimate + z * mean.err)
                     }
 
                     tmp

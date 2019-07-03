@@ -22,7 +22,8 @@ test_that("SI model", {
             S ~ N * (1 - i0),
             I ~ N * i0
         ),
-        par=c("beta", "gamma", "N", "i0", "size")
+        par=c("beta", "gamma", "N", "i0", "size"),
+        link=c(i0="logit")
     )
 
     start <- c(beta=2, gamma=1, N=1e4, i0=1e-3, size=10)
@@ -30,13 +31,7 @@ test_that("SI model", {
     suppressWarnings(ff <- fitode(
         SI_model,
         start=start,
-        data=harbin, tcol="week",
-        link = list(
-            beta="log",
-            gamma="log",
-            N="log",
-            i0="logit"
-        )
+        data=harbin, tcol="week"
     ))
 
     all.equal(

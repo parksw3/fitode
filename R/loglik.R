@@ -159,7 +159,7 @@ NBconst <- function(k,x) {
 ##' Select likelihood model
 ##' @param dist conditional distribution of reported data
 ##' @export
-select_model <- function(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1", "gamma")) {
+select_model <- function(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1", "dgamma")) {
     dist <- match.arg(dist)
     name <- dist
     model <- switch(dist,

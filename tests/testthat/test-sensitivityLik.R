@@ -33,37 +33,7 @@ test_that("SI model", {
 
     expect_equal(
         as.vector(numDeriv::jacobian(ff, parms, model=SI_model)),
-        unname(fitode:::logLik.sensitivity(parms, SI_model, data, fixed=NULL))[-1],
-        tolerance=1e-5
-    )
-})
-
-test_that("dnorm2", {
-    model <- new("model.ode",
-                    name = "constant",
-                    model = list(
-                        X ~ k
-                    ),
-                    initial = list(
-                        X ~ 0
-                    ),
-                    observation = list(
-                        Y ~ dnorm2(mean=X)
-                    ),
-                    par= c("k")
-    )
-
-    parms <- c(k=2)
-    data <- data.frame(times=1:3, Y=c(0, 1, 5))
-
-    ff <- function(parms, model) {
-        ss <- ode.solve(model, times, parms=parms)@solution
-        -sum(dpois(Deaths, ss$C, log=TRUE), na.rm=TRUE)
-    }
-
-    expect_equal(
-        as.vector(numDeriv::jacobian(ff, parms, model=SI_model)),
-        unname(fitode:::logLik.sensitivity(parms, model, data, fixed=NULL))[-1],
+        unname(fitode:::logLik.sensitivity(parms, SI_model, data))[-1],
         tolerance=1e-5
     )
 })

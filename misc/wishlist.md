@@ -6,7 +6,6 @@
 
 ## API questions
 
-- make link functions part of the model object, rather than the fit?
 - change name of `wmvrnorm`/synonymize to `impsamp`?
 
 ## probably doable
