@@ -34,24 +34,24 @@ test_that("SI model", {
         data=harbin, tcol="week"
     ))
 
-    all.equal(
+    expect_equal(
         coef(ff),
         structure(c(1.85082710742599, 1.08315701471954, 2162.03690454815,
             0.000482746970936824, 35.9813684389218),
             .Names = c("beta", "gamma", "N", "i0", "size")))
 
-    all.equal(
+    expect_equal(
         coef(ff, "fitted"),
         structure(c(0.615632624272599, 0.0798799387838958, 7.67880606768721,
             -7.63553504774462, 3.58300126112103),
             .Names = c("log.beta", "log.gamma", "log.N", "logit.i0", "log.size")))
 
-    all.equal(
+    expect_equal(
         logLik(ff),
         -67.6503511573217
     )
 
-    all.equal(
+    expect_equal(
         predict(ff, level=0.95)[[1]],
         structure(
             list(times = 2:18,
@@ -69,7 +69,7 @@ test_that("SI model", {
                     177.428673988013, 245.632815023326, 276.711008774134, 260.302085259957,
                     207.299120155678, 145.478751655784, 95.5056465890154, 61.9975625902696,
                     40.5168729005996, 26.4584462031175)),
-            .Names = c("times", "mean", "2.5 %", "97.5 %"), row.names = c(NA, -17L),
+            .Names = c("times", "estimate", "2.5 %", "97.5 %"), row.names = c(NA, -17L),
             class = "data.frame")
     )
 })

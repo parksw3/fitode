@@ -1,19 +1,5 @@
 library(fitode)
 
-harbin_1910 <- data.frame(
-    times=1:68,
-    cases=c(8,3,6,10,9,8,5,12,11,
-            13,14,13,9,10,15,22,
-            17,15,20,31,22,50,29,
-            43,29,42,43,82,58,22,
-            42,73,78,63,54,69,83,
-            100,99,70,100,98,100,
-            85,96,98,96,105,64,65,
-            75,74,86,74,76,62,82,
-            60,68,55,36,34,38,28,
-            23,16,13,14)
-)
-
 SI_model <- new("model.ode",
     name = "SI",
     model = list(
@@ -28,38 +14,26 @@ SI_model <- new("model.ode",
         S ~ N * (1 - i0),
         I ~ N * i0
     ),
-    par=c("beta", "gamma", "N", "i0", "size1", "size2")
+    par=c("beta", "gamma", "N", "i0", "size1", "size2"),
+    link=c(i0="logit")
 )
 
-tvec <- 1:20
+parms <-c(beta=1,gamma=0.5, N=1000, i0=1e-2, size1=10, size2=10)
 
-f <- ode.solve(SI_model, tvec, c(beta=1,gamma=0.5, N=1000, i0=1e-2, sigma1=0.1, sigam2=0.1))
-
-set.seed(101)
-df <- data.frame(
-    day=tvec,
-    susceptible=rnbinom(length(tvec), mu=f@solution$S, size=10),
-    infected=rnbinom(length(tvec), mu=f@solution$I, size=10)
-)
-
-start <- c(beta=1, N=1000, i0=1e-2, size1=10, size2=10)
+df <- simulate(SI_model, times=1:20, parms=parms, seed=101)[,c("time", "susceptible", "infected")]
 
 system.time(ff <- fitode(
     model=SI_model,
     data=df,
-    start=start,
-    tcol="day",
-    link = list(
-        i0="logit"
-    )
+    start=parms,
+    tcol="time"
 ))
 
 plot(ff, level=0.95)
-# plot(ff, method="wmvrnorm", level=0.95)
 
-confint(ff, parm=c("N", "gamma"))
-confint(ff, parm=c("N", "gamma"), method="profile")
-confint(ff, parm=c("N", "gamma"), method="wmvrnorm")
+confint(ff, parms=c("N", "gamma"))
+confint(ff, parms=c("N", "gamma"), method="profile")
+confint(ff, parms=c("N", "gamma"), method="wmvrnorm")
 
 SI_model_c <- new("model.ode",
     name = "SI",
