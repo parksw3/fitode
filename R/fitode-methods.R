@@ -245,7 +245,6 @@ setMethod("profile", "fitode",
              alpha=0.05,
              trace=FALSE) {
         ## TODO: make this fancier?
-
         p <- length(fitted@coef)
 
         prof <- profile(fitted@mle2, which=which, continuation="naive", trace=trace,
@@ -353,7 +352,7 @@ setMethod("confint", "fitode",
         } else {
             wmv <- wmvrnorm(object, nsim=nsim, seed=seed)
 
-            samp <- matrix(c(apply(wmv$simpars_orig, 1, function(x) sapply(expr, eval, as.list(x)))), ncol=length(parm), byrow=TRUE)
+            samp <- matrix(c(apply(wmv$simpars_orig, 1, function(x) sapply(expr, eval, as.list(x)))), ncol=length(parms), byrow=TRUE)
 
             res <- cbind(estimate, t(apply(samp, 2, wquant, weights=wmv$weight, prob=c(ll, 1-ll))))
 

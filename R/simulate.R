@@ -94,6 +94,8 @@ simulate_internal <- function(model,
     out3 <- merge(out, out2, by="time")
     out3 <- out3[order(out3$sim),]
 
+    names(out3)[1] <- "times"
+
     return(out3)
 }
 

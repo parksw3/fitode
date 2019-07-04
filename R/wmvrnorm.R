@@ -22,11 +22,10 @@ wmvrnorm <- function(object,
     simpars_orig <- t(apply(simpars, 1, apply_link, object@mle2@data$linklist, "linkinv"))
 
     for (i in 1:nsim) {
-        ss.tmp <- fitode:::logLik.sensitivity(simpars_orig[i,], model, object@data,
-                                              solver.opts=object@mle2@data$solver.opts,
-                                              solver=object@mle2@data$solver,
-                                              fixed=object@fixed,
-                                              return.traj=TRUE)
+        ss.tmp <- logLik.sensitivity(simpars_orig[i,], model, object@data,
+                                     solver.opts=object@mle2@data$solver.opts,
+                                     solver=object@mle2@data$solver,
+                                     return.traj=TRUE)
         for (k in 1:length(model@expr)) {
             simtraj[[k]][,i] <- ss.tmp$traj[[k]]
         }

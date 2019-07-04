@@ -1,8 +1,7 @@
 ##' Set up link functions for model parameters
 ##'
 ##' @param link named list or vector of strings specifying link functions
-##' @param model model.ode object
-##' @param loglik loglik.ode object
+##' @param modelpar model parameters
 ##' @seealso \code{\link{make.link}}
 ##' @return list of strings specifying link functions
 set_link <- function(link, modelpar) {
@@ -308,6 +307,7 @@ ode.sensitivity <- function(model,
 ##' @param solver.opts options for the ode solver (see \code{\link{ode}})
 ##' @param solver ode solver
 ##' @param return.NLL (logical) return negative log-likelihood
+##' @param return.traj (logical) return estimated trajectory
 ##' @return vector of nll and sensitivity of nll with respect to the parameters
 logLik.sensitivity <- function(parms,
                                model,
