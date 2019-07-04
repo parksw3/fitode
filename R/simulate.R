@@ -1,16 +1,8 @@
-##' S4 generic for simulating an object
-##' @param object an \code{R} object
-##' @param ... further arguments passed to methods
-setGeneric(
-    "simulate",
-    def = function(object, ...) {
-        standardGeneric("simulate")
-    }
-)
+
 
 ##' simulate model objects
 ##'
-##' @aliases simulate,fitode-method
+##' @aliases simulate,model.ode-method
 ##' @param object model.ode object
 ##' @param times time vector
 ##' @param parms named vector of parameter values
@@ -18,17 +10,17 @@ setGeneric(
 ##' @param solver.opts options for ode solver
 ##' @param solver ode solver (must take y, times, func, and parms arguments)
 ##' @param observation (logical) propagate observation error?
-##' @import deSolve
 ##' @docType methods
+##' @importFrom bbmle simulate
 ##' @exportMethod simulate
 setMethod("simulate", "model.ode",
-    function(object,
+    function(object, nsim=1,
+             seed=NULL,
              times, parms, y,
              solver.opts=list(method="rk4"),
              solver=ode,
-             observation=FALSE,
-             nsim=1) {
-        simulate_internal(object, times, parms, y, solver.opts, solver, observation, nsim)
+             observation=TRUE) {
+        simulate_internal(object, times, parms, y, solver.opts, solver, observation, nsim, seed)
     }
 )
 
@@ -40,14 +32,12 @@ setMethod("simulate", "model.ode",
 ##' @param parms named vector of parameter values
 ##' @param y initial values
 ##' @param observation (logical) propagate observation error?
-##' @import deSolve
 ##' @docType methods
-##' @exportMethod simulate
 setMethod("simulate", "fitode",
-    function(object,
+    function(object, nsim=1,
+             seed=NULL,
              times, parms, y,
-             observation=TRUE,
-             nsim=1) {
+             observation=TRUE) {
         model <- object@model
 
         if (missing(parms)) parms <- coef(object)
@@ -58,45 +48,31 @@ setMethod("simulate", "fitode",
 
         solver <- object@mle2@data$solver
 
-        simulate_internal(model, times, parms, y, solver.opts, solver, observation, nsim)
+        simulate_internal(model, times, parms, y, solver.opts, solver, observation, nsim, seed)
     }
 )
 
-simulate_internal <- function(object,
+simulate_internal <- function(model,
                               times, parms, y,
                               solver.opts=list(method="rk4"),
                               solver=ode,
                               observation=TRUE,
-                              nsim=1) {
-    frame <- as.list(c(parms))
+                              nsim=1,
+                              seed=NULL) {
+    if (!is.null(seed)) set.seed(seed)
 
-    if (missing(y)) {
-        y <- sapply(object@initial, eval, frame)
-    } else if (!all(names(y) %in% object@state)) {
-        stop("y must have same name as the state variables")
-    }
+    ss <- ode.solve(model, times, parms, y, solver.opts, solver)
 
-    if (object@keep_sensitivity) {
-        ## jacobian(model, state, parms, type="initial")
-        ji <- sapply(object@jacobian.initial, function(jj) {
-            sapply(jj, eval, frame)
-        })
-        y <- c(y, ji)
-    }
+    out <- as.data.frame(ss@solution)
 
-    ss <- new("solution.ode",
-              y, times, object, parms,
-              solver.opts,
-              solver)
+    if (!observation) return(out)
 
-    if (!observation) return(ss)
-
-    errorframe <- c(ss@solution, as.list(c(parms)))
+    errorframe <- c(out, as.list(c(parms)))
 
     simlist <- vector('list', nsim)
 
     for (i in 1:nsim) {
-        templist <- lapply(object@observation, function(oo) {
+        templist <- lapply(model@observation, function(oo) {
             funcall <- oo[[3]]
 
             erfun <- errorfun(as.character(funcall[[1]]))
@@ -106,14 +82,19 @@ simulate_internal <- function(object,
             eval(funcall, errorframe)
         })
 
-        names(templist) <- sapply(object@observation, function(x) as.character(x[[2]]))
-        templist$times <- ss@times
+        names(templist) <- sapply(model@observation, function(x) as.character(x[[2]]))
+        templist$time <- out$time
         templist$sim <- i
 
         simlist[[i]] <- as.data.frame(templist)
     }
 
-    return(do.call("rbind", simlist))
+    out2 <- do.call("rbind", simlist)
+
+    out3 <- merge(out, out2, by="time")
+    out3 <- out3[order(out3$sim),]
+
+    return(out3)
 }
 
 errorfun <- function(family=c("dnorm", "dpois", "dnbinom", "dnbinom1", "gamma")) {

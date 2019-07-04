@@ -24,7 +24,9 @@ Class representing ode models
 
 \item{\code{par}}{parameters}
 
-\item{\code{diffnames}}{state variables that needs to be diff-ed}
+\item{\code{link}}{link functions for parameters (log links are used as default)}
+
+\item{\code{diffnames}}{character vector specifying the names of a variable for which the consecutive difference needs to be calculated}
 
 \item{\code{jacobian.initial}}{Jacobian of initial values with respect to its parameters}
 

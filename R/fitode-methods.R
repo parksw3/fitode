@@ -256,7 +256,7 @@ setMethod("profile", "fitode",
 )
 
 setMethod("confint", "fitode",
-    function (object, parm, level=0.95,
+    function (object, parms, level=0.95,
               method=c("delta", "profile", "wmvrnorm"),
               nsim=1000,
               seed) {
@@ -268,52 +268,52 @@ setMethod("confint", "fitode",
 
         linklist <- object@mle2@data$linklist
 
-        if (missing(parm)) parm <- names(object@coef)
+        if (missing(parms)) parms <- names(object@coef)
 
-        if (skip.transformation <- all(is.character(parm))) {
-            if (!all(parm %in% object@model@par))
-                stop("`parm` does not correspond to model parameters.\n",
-                     "`parm` must be a vector of model parameters or list of formulas")
+        if (skip.transformation <- all(is.character(parms))) {
+            if (!all(parms %in% object@model@par))
+                stop("`parms` does not correspond to model parameters.\n",
+                     "`parms` must be a vector of model parameters or list of formulas")
 
             if (method=="profile") {
-                prof <- profile(object, which=match(parm, names(object@coef)),
+                prof <- profile(object, which=match(parms, names(object@coef)),
                                 alpha=1-level)
 
                 ci0 <- confint(prof, level=level)
 
-                if (length(parm)==1) ci0 <- t(as.matrix(ci0))
+                if (length(parms)==1) ci0 <- t(as.matrix(ci0))
 
-                rownames(ci0) <- names(object@mle2@coef)[match(parm, names(object@coef))]
+                rownames(ci0) <- names(object@mle2@coef)[match(parms, names(object@coef))]
 
                 ci <- apply(ci0, 2, apply_link, linklist, "linkinv")
 
-                if (length(parm)==1) ci <- matrix(c(ci), nrow=1)
+                if (length(parms)==1) ci <- matrix(c(ci), nrow=1)
 
-                estimate <- matrix(coef(object)[parm], ncol=1)
+                estimate <- matrix(coef(object)[parms], ncol=1)
 
                 res <- cbind(estimate, ci)
 
                 colnames(res) <- c("estimate", paste(100*ll, "%"), paste(100*(1-ll), "%"))
-                rownames(res) <- parm
+                rownames(res) <- parms
 
                 return(res)
             }
 
-            parm <- lapply(parm, function(x) {
+            parms <- lapply(parms, function(x) {
                 ee <- as.name(x)
                 as.call(list(as.name('~'), ee, ee))
             })
 
         } else if (is.list(parm)) {
             if (method=="profile")
-                stop("profile is not available for non-model parameter confidence intervals")
+                stop("profile is only available for model parameters")
 
             ## TODO: don't allow state variables... it gets complicated
         }
 
         frame <- as.list(cc)
 
-        expr <- lapply(parm, "[[", 3)
+        expr <- lapply(parms, "[[", 3)
 
         estimate <- try(sapply(expr, eval, frame))
 
@@ -330,14 +330,15 @@ setMethod("confint", "fitode",
             z <- -qnorm(ll)
 
             if (skip.transformation) {
-                est_err <- sqrt(diag(fitted_vcov))
+                fitted_parms <- fitted_parms[match(sapply(expr, as.character), object@model@par)]
+                est_err <- sqrt(diag(fitted_vcov))[match(sapply(expr, as.character), object@model@par)]
 
                 lwr <- apply_link(fitted_parms - z * est_err, linklist, "linkinv")
                 upr <- apply_link(fitted_parms + z * est_err, linklist, "linkinv")
 
                 res <- cbind(estimate, lwr, upr)
             } else {
-                expr_sens <- lapply(parm, function(x) Deriv(x[[3]], names(object@coef)))
+                expr_sens <- lapply(parms, function(x) Deriv(x[[3]], names(object@coef)))
 
                 mu.eta <- apply_link(fitted_parms, linklist, "mu.eta")
 
@@ -359,7 +360,7 @@ setMethod("confint", "fitode",
         }
 
         colnames(res) <- c("estimate", paste(100*ll, "%"), paste(100*(1-ll), "%"))
-        rownames(res) <- sapply(parm, function(x) as.character(x[[2]]))
+        rownames(res) <- sapply(parms, function(x) as.character(x[[2]]))
 
         res
 

@@ -8,12 +8,14 @@ Result of ode fitting based on Maximum Likelihood Estimation}
 fitode(model, data, start, tcol = "times", method = "BFGS",
   optimizer = "optim", link, fixed = list(), control = list(maxit =
   1e+05), solver.opts = list(method = "rk4"), solver = ode,
-  skip.hessian = FALSE, use.ginv = TRUE, debug = FALSE, ...)
+  skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE,
+  debug = FALSE, ...)
 
 fitode(model, data, start, tcol = "times", method = "BFGS",
   optimizer = "optim", link, fixed = list(), control = list(maxit =
   1e+05), solver.opts = list(method = "rk4"), solver = ode,
-  skip.hessian = FALSE, use.ginv = TRUE, debug = FALSE, ...)
+  skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE,
+  debug = FALSE, ...)
 }
 \arguments{
 \item{model}{ode model}
@@ -37,6 +39,8 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
 \item{solver}{ode solver}
 
 \item{skip.hessian}{skip hessian calculation}
+
+\item{force.hessian}{(FALSE) calculate the hessian numerically instead of taking the jacobian of the analytical gradients}
 
 \item{use.ginv}{use generalized inverse (\code{\link{ginv}}) to compute approximate vcov}
 

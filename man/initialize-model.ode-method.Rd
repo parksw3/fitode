@@ -6,7 +6,7 @@
 \title{Initializer for model.ode objects}
 \usage{
 \S4method{initialize}{model.ode}(.Object, name, model, observation,
-  initial, par, diffnames, keep_sensitivity = TRUE)
+  initial, par, link, diffnames, keep_sensitivity = TRUE)
 }
 \arguments{
 \item{.Object}{object}
@@ -27,6 +27,10 @@ Initializer for model.ode objects
 
 \item{\code{par}}{parameters}
 
+\item{\code{link}}{link functions for parameters (log links are used as default)}
+
+\item{\code{diffnames}}{optional character vector specifying the names of a variable for which the consecutive difference needs to be calculated}
+
 \item{\code{keep_sensitivity}}{(logical) maintain the Jacobian as part of the model}
 }}
 
@@ -45,6 +49,7 @@ SI_model <- new("model.ode",
         S ~ N * (1 - i0),
         I ~ N * i0
     ),
-    par= c("beta", "gamma", "N", "i0", "sigma1", "sigma2")
+    par = c("beta", "gamma", "N", "i0", "sigma1", "sigma2"),
+    link = c(i0="logit")
 )
 }

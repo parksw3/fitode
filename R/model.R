@@ -281,6 +281,7 @@ setMethod(
             newobservation,
             newinitial,
             par,
+            object@link,
             object@diffnames,
             keep_sensitivity)
     }
