@@ -9,9 +9,7 @@ set_link(link, modelpar)
 \arguments{
 \item{link}{named list or vector of strings specifying link functions}
 
-\item{model}{model.ode object}
-
-\item{loglik}{loglik.ode object}
+\item{modelpar}{model parameters}
 }
 \value{
 list of strings specifying link functions

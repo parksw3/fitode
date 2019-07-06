@@ -19,6 +19,8 @@ logLik.sensitivity(parms, model, data, solver.opts = list(method =
 \item{solver}{ode solver}
 
 \item{return.NLL}{(logical) return negative log-likelihood}
+
+\item{return.traj}{(logical) return estimated trajectory}
 }
 \value{
 vector of nll and sensitivity of nll with respect to the parameters
