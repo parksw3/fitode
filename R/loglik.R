@@ -156,7 +156,7 @@ NBconst <- function(k,x) {
     return(ifelse(x==0,0,lbeta(k,x)+log(x)))
 }
 
-##' Select likelihood model
+##' Select a log-likelihood model
 ##' @param dist conditional distribution of reported data
 ##' @export
 select_model <- function(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1", "dgamma")) {

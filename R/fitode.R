@@ -35,23 +35,53 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
     pp
 }
 
-##' fit ode
+##' fix parameters of an ODE model
+##'
+##' @param model model.ode object
+##' @param fixed named vector or list of model parameters to fix
+fixpar <- function(model, fixed) {
+    fixed <- as.list(fixed)
+    if (any(!(names(fixed) %in% model@par)))
+        stop("`fixed must be a named vector/list whose names correspond to model parameters")
+
+    tlist <- vector('list', length(fixed))
+
+    for (i in 1:length(fixed)) {
+        tlist[[i]] <- as.formula(as.call(c(as.symbol("~"), as.symbol(names(fixed)[i]), unname(fixed[i]))))
+    }
+
+    par <- model@par[!(model@par %in% names(fixed))]
+
+    model <- Transform(
+        model,
+        tlist,
+        par
+    )
+
+    model
+}
+
+checklink <- function() {
+
+}
+
+##' Fit ordinary differential equations model
 ##' @rdname fitode
 ##' @name fitode
-##' @param model ode model
+##' @param model model.ode object
 ##' @param data data frame with time column and observation column
 ##' @param start named vector of starting parameter values
 ##' @param tcol time column
 ##' @param method optimization method
 ##' @param optimizer optimizer
 ##' @param link named vector or list of link functions for model parameters
+##' @param fixed named vector or list of model parameters to fix
 ##' @param control see \code{\link{optim}}
 ##' @param solver.opts options for ode integration. See \code{\link{ode}}
 ##' @param solver ode solver
 ##' @param skip.hessian skip hessian calculation
 ##' @param force.hessian (FALSE) calculate the hessian numerically instead of taking the jacobian of the analytical gradients
 ##' @param use.ginv use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
-##' @param debug print debugging output?
 ##' @param ... mle2 arguments
 ##' @import bbmle
 ##' @importFrom numDeriv jacobian hessian
@@ -70,34 +100,12 @@ fitode <- function(model, data,
                    skip.hessian=FALSE,
                    force.hessian=FALSE,
                    use.ginv=TRUE,
-                   debug=FALSE,
                    ...) {
+    if (missing(start)) stop("starting parameters must be specified via `start'")
+
+    if (length(fixed) > 0) model <- fixpar(model, fixed)
 
     modelpar <- model@par
-
-    if ("t" %in% modelpar) {
-        stop("`t` is reserved for time variable. Try a different parameterization?")
-    }
-
-    if (length(fixed) > 0) {
-        fixed <- as.list(fixed)
-        if (any(!(names(fixed) %in% modelpar)))
-            stop("`fixed must be a named vector/list whose names correspond to model parameters")
-
-        tlist <- vector('list', length(fixed))
-
-        for (i in 1:length(fixed)) {
-            tlist[[i]] <- as.formula(as.call(c(as.symbol("~"), as.symbol(names(fixed)[i]), unname(fixed[i]))))
-        }
-
-        modelpar <- modelpar[!(modelpar %in% names(fixed))]
-
-        model <- Transform(
-            model,
-            tlist,
-            modelpar
-        )
-    }
 
     if (!missing(link)) {
         if (any(is.na(match(names(link), modelpar)))) stop("Some link functions do not correspond to the model parameters.")
@@ -151,10 +159,8 @@ fitode <- function(model, data,
 
     objfun <- function(par, data, solver.opts, solver, linklist) {
         if (identical(par,oldpar)) {
-            if (debug) cat("returning old version of value\n")
             return(oldnll)
         }
-        if (debug) cat("computing new version (nll)\n")
         origpar <- apply_link(par, linklist, "linkinv")
         derivpar <- apply_link(par, linklist, "mu.eta")
 
@@ -168,18 +174,14 @@ fitode <- function(model, data,
             oldgrad <<- grad
             oldpar <<- par
 
-            if (debug) {print(oldnll); print(par)}
-
             return(oldnll)
         }
     }
 
     gradfun <- function(par, data, solver.opts, solver, linklist) {
         if (identical(par,oldpar)) {
-            if (debug) cat("returning old version of grad\n")
             return(oldgrad)
         }
-        if (debug) cat("computing new version (grad)\n")
         origpar <- apply_link(par, linklist, "linkinv")
         derivpar <- apply_link(par, linklist, "mu.eta")
 
@@ -192,7 +194,6 @@ fitode <- function(model, data,
             names(grad) <- names(derivpar)
             oldgrad <<- grad
             oldpar <<- par
-            if (debug) {print(oldnll); print(par)}
             return(grad)
         }
     }
@@ -257,7 +258,7 @@ fitode <- function(model, data,
 
     new("fitode", model=model, data=data, coef=coef, vcov=vcov,
         min=m@min, mle2=m, link=link,
-        fixed=fixed
+        fixed=as.list(fixed)
     )
 }
 

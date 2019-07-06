@@ -42,10 +42,10 @@ setMethod(
              keep_sensitivity=TRUE) {
         ## TODO: I can't remember why it's asking for a function...
         if (any(sapply(initial, class) != "formula"))
-            stop("initial must be a list of formulas or a function")
+            stop("'initial' must be a list of formulas or a function")
 
         if (any(sapply(observation, class) != "formula"))
-            stop("observation must be a list of formulas")
+            stop("'observation' must be a list of formulas")
 
         ## warning
         if("dnorm2" %in% sapply(observation, function(ll) as.character(ll[[3]][[1]])) && keep_sensitivity) {
@@ -56,6 +56,10 @@ setMethod(
         if (missing(name)) name <- "new ODE model"
 
         .Object@name <- name
+
+        if ("t" %in% par) {
+            stop("'t' is reserved for time variable. Try a different parameterization?")
+        }
 
         state <- sapply(initial, function(y) as.character(y[[2]]))
         nstate <- length(state)
@@ -174,7 +178,11 @@ setMethod(
         })
 
         ## set up link functions
-        if (!missing(link)) if (any(is.na(match(names(link), par)))) stop("Some link functions do not correspond to the model parameters.")
+        if (!missing(link)) {
+            link <- link[names(link) %in% par]
+
+            if (any(is.na(match(names(link), par)))) stop("Some link functions do not correspond to the model parameters.")
+        }
 
         link <- unlist(set_link(link, par))
         .Object@link <- link

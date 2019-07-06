@@ -60,15 +60,33 @@ setClass(
     )
 )
 
+##' Class representing prior models used to fit ode models
+##'
+##' @slot name name of the distribution
+##' @slot expr an expression specifying the model
+##' @slot observation observation variable name
+##' @slot par additional parameter names
+##' @slot keep_grad keep gradient?
+##' @slot grad the gradient with respect to the parameters
+##' @exportClass prior.ode
+setClass(
+    "prior.ode",
+    slots = c(
+        name = "character",
+        expr = "expression",
+        observation = "character",
+        par = "character",
+        keep_grad = "logical",
+        grad = "list"
+    )
+)
+
 ##' Class "fitode".
 ##' Result of ode fitting based on Maximum Likelihood Estimation
 ##'
-##' @name fitode
-##' @rdname fitode
 ##' @seealso \code{\link{mle2-class}}
 ##' @exportClass fitode
-##' @export
-fitode <- setClass("fitode",
+setClass("fitode",
     slots = c(
         model="model.ode",
         data="data.frame",
