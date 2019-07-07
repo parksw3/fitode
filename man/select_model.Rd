@@ -2,7 +2,7 @@
 % Please edit documentation in R/loglik.R
 \name{select_model}
 \alias{select_model}
-\title{Select likelihood model}
+\title{Select a log-likelihood model}
 \usage{
 select_model(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1",
   "dgamma"))
@@ -11,5 +11,5 @@ select_model(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1",
 \item{dist}{conditional distribution of reported data}
 }
 \description{
-Select likelihood model
+Select a log-likelihood model
 }

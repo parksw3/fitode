@@ -158,7 +158,6 @@ NBconst <- function(k,x) {
 
 ##' Select a log-likelihood model
 ##' @param dist conditional distribution of reported data
-##' @export
 select_model <- function(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1", "dgamma")) {
     dist <- match.arg(dist)
     name <- dist

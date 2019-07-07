@@ -2,16 +2,15 @@
 % Please edit documentation in R/fitode.R
 \name{fitode}
 \alias{fitode}
-\title{fit ode}
+\title{Fit ordinary differential equations model}
 \usage{
 fitode(model, data, start, tcol = "times", method = "BFGS",
   optimizer = "optim", link, fixed = list(), control = list(maxit =
   1e+05), solver.opts = list(method = "rk4"), solver = ode,
-  skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE,
-  debug = FALSE, ...)
+  skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE, ...)
 }
 \arguments{
-\item{model}{ode model}
+\item{model}{model.ode object}
 
 \item{data}{data frame with time column and observation column}
 
@@ -25,6 +24,8 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
 
 \item{link}{named vector or list of link functions for model parameters}
 
+\item{fixed}{named vector or list of model parameters to fix}
+
 \item{control}{see \code{\link{optim}}}
 
 \item{solver.opts}{options for ode integration. See \code{\link{ode}}}
@@ -37,12 +38,10 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
 
 \item{use.ginv}{use generalized inverse (\code{\link{ginv}}) to compute approximate vcov}
 
-\item{debug}{print debugging output?}
-
 \item{...}{mle2 arguments}
 }
 \description{
-fit ode
+Fit ordinary differential equations model
 }
 \seealso{
 \code{\link{mle2}}

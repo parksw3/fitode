@@ -116,7 +116,7 @@ make_prior <- function(model, link, prior, prior.density=TRUE, keep_grad=TRUE) {
     gradlist <- vector('list', length(model@par))
     names(gradlist) <- model@par
 
-    if (!keep_grad)
+    if (keep_grad)
         gradlist[sapply(prior_list, function(x) names(x@observation))] <- sapply(prior_list, function(x) x@grad)
 
     list(

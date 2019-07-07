@@ -61,10 +61,6 @@ fixpar <- function(model, fixed) {
     model
 }
 
-checklink <- function() {
-
-}
-
 ##' Fit ordinary differential equations model
 ##' @rdname fitode
 ##' @name fitode
@@ -226,16 +222,18 @@ fitode <- function(model, data,
 
             if (keep_sensitivity && !force.hessian) {
                 hessfun <- numDeriv::jacobian
+                hmodel <- model
             } else {
                 hessfun <- numDeriv::hessian
+                hmodel <- Transform(model, keep_sensitivity=FALSE)
             }
 
             thess <- try(hessfun(logLik.sensitivity, coef,
-                                 model=model,
+                                 model=hmodel,
                                  data=data,
                                  solver.opts=solver.opts,
                                  solver=solver,
-                                 return.NLL=!keep_sensitivity))
+                                 return.NLL=!keep_sensitivity || force.hessian))
             if(!inherits(thess, "try-error")) {
                 if (use.ginv) {
                     vcov <- try(MASS::ginv(thess), silent=TRUE)
