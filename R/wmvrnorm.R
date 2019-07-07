@@ -1,3 +1,5 @@
+##' @importFrom MASS mvrnorm
+##' @importFrom mvtnorm dmvnorm
 wmvrnorm <- function(object,
                      nsim=1000,
                      seed) {
@@ -30,7 +32,13 @@ wmvrnorm <- function(object,
             simtraj[[k]][,i] <- ss.tmp$traj[[k]]
         }
 
-        traj.logLik[i] <- -ss.tmp$nll[1]
+        if (length(object@prior) > 0) {
+            lprior <- eval(object@mle2@data$priorlist$prior.density, as.list(simpars[i,]))
+        } else {
+            lprior <- 0
+        }
+
+        traj.logLik[i] <- -ss.tmp$nll[1] + lprior
     }
     log.ww <- traj.logLik-sample.logLik
 

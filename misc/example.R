@@ -20,20 +20,20 @@ SI_model <- new("model.ode",
 
 parms <-c(beta=1,gamma=0.5, N=1000, i0=1e-2, size1=10, size2=10)
 
-df <- simulate(SI_model, times=1:20, parms=parms, seed=101)[,c("time", "susceptible", "infected")]
+df <- simulate(SI_model, times=1:20, parms=parms, seed=101)[,c("times", "susceptible", "infected")]
 
 system.time(ff <- fitode(
     model=SI_model,
     data=df,
     start=parms,
-    tcol="time"
+    fixed=c(N=1000)
 ))
 
 plot(ff, level=0.95)
 
-confint(ff, parms=c("N", "gamma"))
-confint(ff, parms=c("N", "gamma"), method="profile")
-confint(ff, parms=c("N", "gamma"), method="wmvrnorm")
+confint(ff, parms=list(inf.period~1/gamma))
+confint(ff, parms=c("gamma"), method="profile")
+confint(ff, parms=c("gamma"), method="wmvrnorm")
 
 SI_model_c <- new("model.ode",
     name = "SI",

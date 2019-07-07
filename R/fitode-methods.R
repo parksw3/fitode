@@ -100,15 +100,12 @@ setMethod("predict", "fitode",
              level,times,
              method=c("delta", "wmvrnorm"),
              nsim=1000){
-        ## TODO: prediction intervals
         if(missing(times)) times <- sort(unique(object@data$times))
         method <- match.arg(method)
 
         model <- object@model
         parms <- coef(object)
         fixed <- object@fixed
-
-        ## TODO: define a new model without sensitivity if method is not delta
 
         if (method != "delta" || missing(level)) {
             model <- Transform(model, keep_sensitivity=FALSE)
@@ -132,7 +129,7 @@ setMethod("predict", "fitode",
 
         names(df) <- names(object@data)[-1]
 
-        if (!missing(level) && model@keep_sensitivity) {
+        if (!missing(level)) {
             nstate <- length(model@state)
             npar <- length(model@par)
             linklist <- object@mle2@data$linklist
@@ -255,7 +252,7 @@ setMethod("profile", "fitode",
 )
 
 setMethod("confint", "fitode",
-    function (object, parms, level=0.95,
+    function (object, parm, level=0.95,
               method=c("delta", "profile", "wmvrnorm"),
               nsim=1000,
               seed) {
@@ -267,43 +264,43 @@ setMethod("confint", "fitode",
 
         linklist <- object@mle2@data$linklist
 
-        if (missing(parms)) parms <- names(object@coef)
+        if (missing(parm)) parm <- names(object@coef)
 
-        if (skip.transformation <- all(is.character(parms))) {
-            if (!all(parms %in% object@model@par))
-                stop("`parms` does not correspond to model parameters.\n",
-                     "`parms` must be a vector of model parameters or list of formulas")
+        if (skip.transformation <- all(is.character(parm))) {
+            if (!all(parm %in% object@model@par))
+                stop("`parm` does not correspond to model parameters.\n",
+                     "`parm` must be a vector of model parameters or list of formulas")
 
             if (method=="profile") {
-                prof <- profile(object, which=match(parms, names(object@coef)),
+                prof <- profile(object, which=match(parm, names(object@coef)),
                                 alpha=1-level)
 
                 ci0 <- confint(prof, level=level)
 
-                if (length(parms)==1) ci0 <- t(as.matrix(ci0))
+                if (length(parm)==1) ci0 <- t(as.matrix(ci0))
 
-                rownames(ci0) <- names(object@mle2@coef)[match(parms, names(object@coef))]
+                rownames(ci0) <- names(object@mle2@coef)[match(parm, names(object@coef))]
 
                 ci <- apply(ci0, 2, apply_link, linklist, "linkinv")
 
-                if (length(parms)==1) ci <- matrix(c(ci), nrow=1)
+                if (length(parm)==1) ci <- matrix(c(ci), nrow=1)
 
-                estimate <- matrix(coef(object)[parms], ncol=1)
+                estimate <- matrix(coef(object)[parm], ncol=1)
 
                 res <- cbind(estimate, ci)
 
                 colnames(res) <- c("estimate", paste(100*ll, "%"), paste(100*(1-ll), "%"))
-                rownames(res) <- parms
+                rownames(res) <- parm
 
                 return(res)
             }
 
-            parms <- lapply(parms, function(x) {
+            parm <- lapply(parm, function(x) {
                 ee <- as.name(x)
                 as.call(list(as.name('~'), ee, ee))
             })
 
-        } else if (is.list(parms)) {
+        } else if (is.list(parm)) {
             if (method=="profile")
                 stop("profile is only available for model parameters")
 
@@ -312,7 +309,7 @@ setMethod("confint", "fitode",
 
         frame <- as.list(cc)
 
-        expr <- lapply(parms, "[[", 3)
+        expr <- lapply(parm, "[[", 3)
 
         estimate <- try(sapply(expr, eval, frame))
 
@@ -337,7 +334,7 @@ setMethod("confint", "fitode",
 
                 res <- cbind(estimate, lwr, upr)
             } else {
-                expr_sens <- lapply(parms, function(x) Deriv(x[[3]], names(object@coef)))
+                expr_sens <- lapply(parm, function(x) Deriv(x[[3]], names(object@coef)))
 
                 mu.eta <- apply_link(fitted_parms, linklist, "mu.eta")
 
@@ -352,14 +349,14 @@ setMethod("confint", "fitode",
         } else {
             wmv <- wmvrnorm(object, nsim=nsim, seed=seed)
 
-            samp <- matrix(c(apply(wmv$simpars_orig, 1, function(x) sapply(expr, eval, as.list(x)))), ncol=length(parms), byrow=TRUE)
+            samp <- matrix(c(apply(wmv$simpars_orig, 1, function(x) sapply(expr, eval, as.list(x)))), ncol=length(parm), byrow=TRUE)
 
             res <- cbind(estimate, t(apply(samp, 2, wquant, weights=wmv$weight, prob=c(ll, 1-ll))))
 
         }
 
         colnames(res) <- c("estimate", paste(100*ll, "%"), paste(100*(1-ll), "%"))
-        rownames(res) <- sapply(parms, function(x) as.character(x[[2]]))
+        rownames(res) <- sapply(parm, function(x) as.character(x[[2]]))
 
         res
 

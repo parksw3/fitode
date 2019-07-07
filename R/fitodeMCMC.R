@@ -19,7 +19,6 @@ propfun <- function(chol) {
 ##' @param solver.opts options for ode integration. See \code{\link{ode}}
 ##' @param solver ode solver
 ##' @param debug print debugging output?
-##' @importFrom mvtnorm dmvnorm
 ##' @export fitodeMCMC
 fitodeMCMC <- function(model, data,
                        start, tcol="times",
