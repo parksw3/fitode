@@ -120,7 +120,7 @@ make_prior <- function(model, link, prior, prior.density=TRUE, keep_grad=TRUE) {
         gradlist[sapply(prior_list, function(x) names(x@observation))] <- sapply(prior_list, function(x) x@grad)
 
     list(
-        prior.density=as.expression(paste(sapply(prior_list, function(x) as.character(x@expr)), collapse="+")),
+        prior.density=parse(text=paste(sapply(prior_list, function(x) as.character(x@expr)), collapse="+")),
         prior.grad=gradlist
     )
 }

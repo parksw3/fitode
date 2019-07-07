@@ -303,7 +303,7 @@ setMethod("confint", "fitode",
                 as.call(list(as.name('~'), ee, ee))
             })
 
-        } else if (is.list(parm)) {
+        } else if (is.list(parms)) {
             if (method=="profile")
                 stop("profile is only available for model parameters")
 

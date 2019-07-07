@@ -95,6 +95,7 @@ setClass("fitode",
         min="numeric",
         mle2="mle2",
         link="list",
-        fixed="list"
+        fixed="list",
+        prior="list"
     )
 )

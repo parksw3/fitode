@@ -72,6 +72,8 @@ fixpar <- function(model, fixed) {
 ##' @param optimizer optimizer
 ##' @param link named vector or list of link functions for model parameters
 ##' @param fixed named vector or list of model parameters to fix
+##' @param prior list of formulas specifying prior distributions
+##' @param prior.distribution (logical) should priors represent a probability distribution?
 ##' @param control see \code{\link{optim}}
 ##' @param solver.opts options for ode integration. See \code{\link{ode}}
 ##' @param solver ode solver
@@ -90,6 +92,8 @@ fitode <- function(model, data,
                    optimizer="optim",
                    link,
                    fixed=list(),
+                   prior=list(),
+                   prior.density=TRUE,
                    control=list(maxit=1e5),
                    solver.opts=list(method="rk4"),
                    solver=ode,
@@ -120,6 +124,12 @@ fitode <- function(model, data,
         )
     }
 
+    if (length(prior) == 0) {
+        priorlist <- list()
+    } else {
+        priorlist <- make_prior(model, unlist(link), prior, prior.density, model@keep_sensitivity)
+    }
+
     ## order parameters ...
     start <- start[modelpar]
 
@@ -145,7 +155,8 @@ fitode <- function(model, data,
 
     names(data)[1] <- "times"
 
-    dataarg <- list(model=model, data=data, solver.opts=solver.opts, solver=solver, linklist=linklist)
+    dataarg <- list(model=model, data=data, solver.opts=solver.opts, solver=solver, linklist=linklist,
+                    priorlist=priorlist)
 
     f.env <- new.env()
     ## set initial values
@@ -153,7 +164,7 @@ fitode <- function(model, data,
     assign("oldpar",NULL,f.env)
     assign("oldgrad",NULL,f.env)
 
-    objfun <- function(par, data, solver.opts, solver, linklist) {
+    objfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
         if (identical(par,oldpar)) {
             return(oldnll)
         }
@@ -161,11 +172,19 @@ fitode <- function(model, data,
         derivpar <- apply_link(par, linklist, "mu.eta")
 
         v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver), silent=TRUE)
+
+        if (length(priorlist) > 0) {
+            logp <- eval(priorlist$prior.density, as.list(par))
+            logpgrad <- unname(sapply(priorlist$prior.grad, function(x, y) ifelse(is.null(x), 0, eval(x, y)), as.list(par)))
+        } else {
+            logp <- logpgrad <- 0
+        }
+
         if (inherits(v, "try-error")) {
             return(NA)
         } else {
-            oldnll <<- v[1]
-            grad <- v[-1] * derivpar
+            oldnll <<- v[1] - logp
+            grad <- v[-1] * derivpar - logpgrad
             if (length(grad) > 0) names(grad) <- names(derivpar) ## TODO: need a better way of dealing this
             oldgrad <<- grad
             oldpar <<- par
@@ -174,7 +193,7 @@ fitode <- function(model, data,
         }
     }
 
-    gradfun <- function(par, data, solver.opts, solver, linklist) {
+    gradfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
         if (identical(par,oldpar)) {
             return(oldgrad)
         }
@@ -182,11 +201,19 @@ fitode <- function(model, data,
         derivpar <- apply_link(par, linklist, "mu.eta")
 
         v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver), silent=TRUE)
+
+        if (length(priorlist) > 0) {
+            logp <- eval(priorlist$prior.density, as.list(par))
+            logpgrad <- unname(sapply(priorlist$prior.grad, function(x, y) ifelse(is.null(x), 0, eval(x, y)), as.list(par)))
+        } else {
+            logp <- logpgrad <- 0
+        }
+
         if (inherits(v, "try-error")) {
             return(NA)
         } else {
-            oldnll <<- v[1]
-            grad <- v[-1] * derivpar
+            oldnll <<- v[1] - logp
+            grad <- v[-1] * derivpar - logpgrad
             names(grad) <- names(derivpar)
             oldgrad <<- grad
             oldpar <<- par
@@ -214,7 +241,8 @@ fitode <- function(model, data,
               ...)
 
     coef <- apply_link(coef(m), linklist, "linkinv")
-    if (!skip.hessian && !missing(link)) {
+    ## FIXME or TODO or ...: calculating hessian in the original scale doesn't make sense when we specify priors
+    if (!skip.hessian && length(prior) == 0) {
         if (!length(modelpar)) {
             vcov <- matrix(0, 0, 0)
         } else {
@@ -256,7 +284,8 @@ fitode <- function(model, data,
 
     new("fitode", model=model, data=data, coef=coef, vcov=vcov,
         min=m@min, mle2=m, link=link,
-        fixed=as.list(fixed)
+        fixed=as.list(fixed),
+        prior=prior
     )
 }
 
