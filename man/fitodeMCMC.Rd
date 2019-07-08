@@ -4,11 +4,11 @@
 \alias{fitodeMCMC}
 \title{Fit ordinary differential equations model using MCMC}
 \usage{
-fitodeMCMC(model, data, start, tcol = "times", vcov, prior,
-  mcmc = 2000, burnin = 1000, thin = 1, link, fixed = list(),
-  control = list(maxit = 1e+05), solver.opts = list(method = "rk4"),
-  solver = ode, skip.hessian = FALSE, force.hessian = FALSE,
-  use.ginv = TRUE, ...)
+fitodeMCMC(model, data, start, tcol = "times", vcov, prior = list(),
+  chains = 1, mcmc = 2000, burnin = 1000, thin = 1,
+  prior.only = FALSE, link, fixed = list(), control = list(maxit =
+  1e+05), solver.opts = list(method = "rk4"), solver = ode,
+  skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE, ...)
 }
 \arguments{
 \item{model}{ode model}
@@ -18,6 +18,8 @@ fitodeMCMC(model, data, start, tcol = "times", vcov, prior,
 \item{start}{named vector of starting parameter values}
 
 \item{tcol}{time column}
+
+\item{prior.only}{(logical) sample from prior distribution only?}
 
 \item{link}{named vector or list of link functions for model parameters}
 

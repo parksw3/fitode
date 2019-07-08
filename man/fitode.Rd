@@ -5,8 +5,9 @@
 \title{Fit ordinary differential equations model}
 \usage{
 fitode(model, data, start, tcol = "times", method = "BFGS",
-  optimizer = "optim", link, fixed = list(), control = list(maxit =
-  1e+05), solver.opts = list(method = "rk4"), solver = ode,
+  optimizer = "optim", link, fixed = list(), prior = list(),
+  prior.density = TRUE, control = list(maxit = 1e+05),
+  solver.opts = list(method = "rk4"), solver = ode,
   skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE, ...)
 }
 \arguments{
@@ -26,6 +27,8 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
 
 \item{fixed}{named vector or list of model parameters to fix}
 
+\item{prior}{list of formulas specifying prior distributions}
+
 \item{control}{see \code{\link{optim}}}
 
 \item{solver.opts}{options for ode integration. See \code{\link{ode}}}
@@ -39,6 +42,8 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
 \item{use.ginv}{use generalized inverse (\code{\link{ginv}}) to compute approximate vcov}
 
 \item{...}{mle2 arguments}
+
+\item{prior.distribution}{(logical) should priors represent a probability distribution?}
 }
 \description{
 Fit ordinary differential equations model

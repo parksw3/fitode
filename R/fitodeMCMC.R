@@ -11,21 +11,25 @@ propfun <- function(chol) {
 ##' @param tcol time column
 ##' @param vcov
 ##' @param prior
-##' @param mcmc
+##' @param chains
+##' @param iter
 ##' @param burnin
 ##' @param thin
+##' @param refresh
 ##' @param prior.only (logical) sample from prior distribution only?
 ##' @param link named vector or list of link functions for model parameters
 ##' @param fixed named vector or list of model parameters to fix
 ##' @param solver.opts options for ode integration. See \code{\link{ode}}
 ##' @param solver ode solver
 ##' @param debug print debugging output?
+##' @import coda
 ##' @export fitodeMCMC
 fitodeMCMC <- function(model, data,
                        start, tcol="times",
                        vcov,
                        prior=list(),
-                       mcmc=2000, burnin=1000, thin=1,
+                       chains=1, iter=2000, burnin=1000, thin=1,
+                       refresh=max(iter/10, 1),
                        prior.only=FALSE,
                        link,
                        fixed=list(),
@@ -118,38 +122,61 @@ fitodeMCMC <- function(model, data,
         }
     }
 
-    mcmcmat <- matrix(NA, nrow=mcmc, ncol=length(modelpar))
-    lpvec <- rep(NA, mcmc)
-    colnames(mcmcmat) <- names(start)
+    reslist <- lplist <- vector('list', chains)
 
-    mcmcmat[1,] <- start
-    lpvec[1] <- objfun(model, start, data, solver.opts, solver, linklist, priorlist, prior.only)
+    for (nchain in 1:chains) {
+        if (refresh > 0)
+            message(paste0("MCMC iterations: ", 1, "/", iter, " (Chain ", nchain, ")"))
+        mcmcmat <- matrix(NA, nrow=iter, ncol=length(modelpar))
+        lpvec <- rep(NA, iter)
+        colnames(mcmcmat) <- names(start)
 
-    if (mcmc > 1) {
-        cc <- chol(vcov)
+        mcmcmat[1,] <- start
+        lpvec[1] <- objfun(model, start, data, solver.opts, solver, linklist, priorlist, prior.only)
 
-        for (i in 2:mcmc) {
-            old.theta <- mcmcmat[i-1,]
-            new.theta <- old.theta + propfun(cc)
-            new.lp <- objfun(model, new.theta, data, solver.opts, solver, linklist, priorlist, prior.only)
+        if (iter > 1) {
+            cc <- chol(vcov)
 
-            ## this is OK because the proposal distribution is symmetric
-            alpha <- exp(new.lp -lpvec[i-1])
+            for (i in 2:iter) {
+                if (refresh > 0) {
+                    if(((i-1) %% refresh)==0) {
+                        message(paste0("MCMC iterations: ", i, "/", iter, " (Chain ", nchain, ")"))
+                    } else if (i==iter) {
+                        message(paste0("MCMC iterations: ", iter, "/", iter, " (Chain ", nchain, ")"))
+                    }
+                }
 
-            if (runif(1) < alpha) {
-                mcmcmat[i,] <- new.theta
-                lpvec[i] <- new.lp
-            } else {
-                mcmcmat[i,] <- mcmcmat[i-1,]
-                lpvec[i] <- lpvec[i-1]
+                old.theta <- mcmcmat[i-1,]
+                new.theta <- old.theta + propfun(cc)
+                new.lp <- objfun(model, new.theta, data, solver.opts, solver, linklist, priorlist, prior.only)
+
+                ## this is OK because the proposal distribution is symmetric
+                alpha <- exp(new.lp -lpvec[i-1])
+
+                if (!is.finite(alpha)) alpha <- 0
+
+                if (runif(1) < alpha) {
+                    mcmcmat[i,] <- new.theta
+                    lpvec[i] <- new.lp
+                } else {
+                    mcmcmat[i,] <- mcmcmat[i-1,]
+                    lpvec[i] <- lpvec[i-1]
+                }
             }
-
-
         }
+
+        ## somewhat based on
+        ## https://github.com/LaplacesDemonR/LaplacesDemon/blob/master/R/Thin.R
+        keeprows <- burnin + which(rep(1:thin, len=iter-burnin) == 1)
+
+        ## TODO: create a smaller matrix and store only what you need
+        ## don't store everything and thin after
+
+        reslist[[nchain]] <- coda::mcmc(mcmcmat[keeprows,], start=burnin+1, end=iter, thin=thin)
+        lplist[[nchain]] <- coda::mcmc(lpvec[keeprows], start=burnin+1, end=iter, thin=thin)
     }
 
     list(
-        mcmc=mcmcmat,
-        lpvec=lpvec
+        reslist, lplist
     )
 }
