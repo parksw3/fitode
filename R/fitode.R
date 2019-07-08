@@ -122,7 +122,7 @@ fitode <- function(model, data,
     if (any(is.na(match(modelpar, names(start))))) {
 
         stop(
-            paste0("`start` must specify the following parameters:\n",
+            paste0("'start' must be a named vector specifying initial values for following parameters:\n",
                 "\node parameters: ", paste(model@par, collapse = ", ")
             )
         )

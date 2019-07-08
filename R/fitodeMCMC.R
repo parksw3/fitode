@@ -9,7 +9,7 @@ propfun <- function(chol) {
 ##' @param data data frame with time column and observation column
 ##' @param start named vector of starting parameter values
 ##' @param tcol time column
-##' @param vcov
+##' @param proposal.vcov
 ##' @param prior
 ##' @param chains
 ##' @param iter
@@ -21,47 +21,32 @@ propfun <- function(chol) {
 ##' @param fixed named vector or list of model parameters to fix
 ##' @param solver.opts options for ode integration. See \code{\link{ode}}
 ##' @param solver ode solver
-##' @param debug print debugging output?
 ##' @import coda
 ##' @export fitodeMCMC
 fitodeMCMC <- function(model, data,
                        start, tcol="times",
-                       vcov,
+                       proposal.vcov,
                        prior=list(),
-                       chains=1, iter=2000, burnin=1000, thin=1,
+                       chains=1, iter=2000, burnin=iter/2, thin=1,
                        refresh=max(iter/10, 1),
                        prior.only=FALSE,
                        link,
                        fixed=list(),
-                       control=list(maxit=1e5),
                        solver.opts=list(method="rk4"),
                        solver=ode,
-                       skip.hessian=FALSE,
-                       force.hessian=FALSE,
-                       use.ginv=TRUE,
                        ...) {
-    if (missing(start)) stop("starting parameters must be specified via 'start'")
+    if (missing(start))
+        stop("starting parameters must be specified via 'start'")
 
-    if (missing(vcov)) stop("variance covariance matrix of the proposal distribution must be specified via 'vcov'")
-
-    ## TODO: check vcov structure
+    if (missing(proposal.vcov))
+        stop("variance covariance matrix of the proposal distribution must be specified via 'proposal.vcov'")
 
     if (length(fixed) > 0) model <- fixpar(model, fixed)
 
     ## turn off sensitivity equations for faster computation
     model <- Transform(model, keep_sensitivity=FALSE)
 
-    modelpar <- model@par
-
     link <- check_link(model, link)
-
-    if (any(is.na(match(modelpar, names(start))))) {
-        stop(
-            paste0("`start` must specify the following parameters:\n",
-                   "\node parameters: ", paste(model@par, collapse = ", ")
-            )
-        )
-    }
 
     ## check prior
     if (class(prior)=="list") {
@@ -69,16 +54,26 @@ fitodeMCMC <- function(model, data,
             warning("prior distributions must be specified via 'prior'")
             priorlist <- list()
         } else {
-            priorlist <- make_prior(model, unlist(link), prior, prior.density=TRUE, model@keep_sensitivity)
+            priorlist <- make_prior(model, unlist(link), prior, prior.density=TRUE, keep_grad=FALSE)
         }
-    } else if (class(prior)=="function") {
-        stop("Not supported yet")
+    # }  else if (class(prior)=="function") {
+    #     stop("Not supported yet")
     } else {
-        stop("'prior' must be a list of formulas or a function returning log-prior density")
+        stop("'prior' must be a list of formulas")
     }
+
+    modelpar <- model@par
 
     ## order parameters ...
     start <- start[modelpar]
+
+    if (any(is.na(match(modelpar, names(start))))) {
+        stop(
+            paste0("'start' must be a named vector specifying initial values for following parameters:\n",
+                   "\node parameters: ", paste(model@par, collapse = ", ")
+            )
+        )
+    }
 
     link_data <- lapply(link, make.link)
 
@@ -99,6 +94,28 @@ fitodeMCMC <- function(model, data,
     data <- data[,c(tcol, dataname)]
 
     names(data)[1] <- "times"
+
+    ## check vcov structure
+    ## need to check this after parameters have been transformed
+    ## and after fixed parameters have been incorporated
+    proposal.msg <- paste0(
+        "'proposal.vcov' must be a symmetric (named or unnamed) matrix with following names:\n",
+        "\n", paste(newpar, collapse=", ")
+    )
+
+    if (!isSymmetric(proposal.vcov)) stop(proposal.msg)
+
+    if (ncol(proposal.vcov) > length(newpar) || nrow(proposal.vcov) > length(newpar)) stop(proposal.msg)
+
+    if (length(colnames(proposal.vcov)) == 0 || length(colnames(proposal.vcov)) == 0) {
+        colnames(proposal.vcov) <- rownames(proposal.vcov) <- newpar
+    } else {
+        if (any(is.na(match(newpar, colnames(proposal.vcov)))) || any(is.na(match(newpar, colnames(proposal.vcov))))) {
+            stop(proposal.msg)
+        } else {
+            proposal.vcov <- proposal.vcov[newpar, newpar]
+        }
+    }
 
     ## returns log-likelihood (instead of negative log-likelihood)
     objfun <- function(model, par, data, solver.opts, solver, linklist, priorlist, prior.only) {
@@ -124,18 +141,25 @@ fitodeMCMC <- function(model, data,
 
     reslist <- lplist <- vector('list', chains)
 
+    proposal.chol <- chol(proposal.vcov)
+
     for (nchain in 1:chains) {
         if (refresh > 0)
             message(paste0("MCMC iterations: ", 1, "/", iter, " (Chain ", nchain, ")"))
-        mcmcmat <- matrix(NA, nrow=iter, ncol=length(modelpar))
-        lpvec <- rep(NA, iter)
+
+        ## somewhat based on
+        ## https://github.com/LaplacesDemonR/LaplacesDemon/blob/master/R/Thin.R
+        keeprows <- burnin + which(rep(1:thin, len=iter-burnin) == thin)
+
+        mcmcmat <- matrix(NA, nrow=length(keeprows), ncol=length(modelpar))
+        lpvec <- rep(NA, length(keeprows))
         colnames(mcmcmat) <- names(start)
 
-        mcmcmat[1,] <- start
-        lpvec[1] <- objfun(model, start, data, solver.opts, solver, linklist, priorlist, prior.only)
+        old.theta <- start
+        old.lp <- objfun(model, start, data, solver.opts, solver, linklist, priorlist, prior.only)
 
         if (iter > 1) {
-            cc <- chol(vcov)
+            count <- 1
 
             for (i in 2:iter) {
                 if (refresh > 0) {
@@ -146,37 +170,59 @@ fitodeMCMC <- function(model, data,
                     }
                 }
 
-                old.theta <- mcmcmat[i-1,]
-                new.theta <- old.theta + propfun(cc)
+                new.theta <- old.theta + propfun(proposal.chol)
                 new.lp <- objfun(model, new.theta, data, solver.opts, solver, linklist, priorlist, prior.only)
 
                 ## this is OK because the proposal distribution is symmetric
-                alpha <- exp(new.lp -lpvec[i-1])
+                alpha <- exp(new.lp - old.lp)
 
                 if (!is.finite(alpha)) alpha <- 0
 
                 if (runif(1) < alpha) {
-                    mcmcmat[i,] <- new.theta
-                    lpvec[i] <- new.lp
-                } else {
-                    mcmcmat[i,] <- mcmcmat[i-1,]
-                    lpvec[i] <- lpvec[i-1]
+                    old.theta <- new.theta
+                    old.lp <- new.lp
+                }
+
+                if (i %in% keeprows) {
+                    mcmcmat[count,] <- old.theta
+                    lpvec[count] <- old.lp
+                    count <- count + 1
                 }
             }
         }
 
-        ## somewhat based on
-        ## https://github.com/LaplacesDemonR/LaplacesDemon/blob/master/R/Thin.R
-        keeprows <- burnin + which(rep(1:thin, len=iter-burnin) == 1)
+        ## TODO (maybe): if (scale=="link")
+        mcmcmat <- t(apply(mcmcmat, 1, apply_link, linklist, "linkinv"))
 
-        ## TODO: create a smaller matrix and store only what you need
-        ## don't store everything and thin after
-
-        reslist[[nchain]] <- coda::mcmc(mcmcmat[keeprows,], start=burnin+1, end=iter, thin=thin)
-        lplist[[nchain]] <- coda::mcmc(lpvec[keeprows], start=burnin+1, end=iter, thin=thin)
+        reslist[[nchain]] <- coda::mcmc(mcmcmat, start=head(keeprows,1), end=tail(keeprows,1), thin=thin)
+        lplist[[nchain]] <- coda::mcmc(lpvec, start=head(keeprows,1), end=tail(keeprows,1), thin=thin)
     }
 
-    list(
-        reslist, lplist
+    ## return median estimate
+    coef <- apply(do.call("rbind", reslist), 2, median)
+
+    ## covariance on the response scale
+    vcov <- cov(do.call("rbind", reslist))
+
+    reslist <- coda::as.mcmc.list(reslist)
+    lplist <- coda::as.mcmc.list(lplist)
+
+    new("fitodeMCMC", model=model, data=data, coef=coef, vcov=vcov,
+        mcmc=reslist,
+        lp=lplist,
+        link=link,
+        fixed=as.list(fixed),
+        prior=prior,
+        details=list(
+            chains=chains,
+            iter=iter,
+            burnin=burnin,
+            thin=thin,
+            prior.only=prior.only,
+            proposal.vcov=proposal.vcov,
+            solver.opts=solver.opts,
+            solver=solver,
+            linklist=linklist
+        )
     )
 }

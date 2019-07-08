@@ -4,11 +4,11 @@
 \alias{fitodeMCMC}
 \title{Fit ordinary differential equations model using MCMC}
 \usage{
-fitodeMCMC(model, data, start, tcol = "times", vcov, prior = list(),
-  chains = 1, mcmc = 2000, burnin = 1000, thin = 1,
-  prior.only = FALSE, link, fixed = list(), control = list(maxit =
-  1e+05), solver.opts = list(method = "rk4"), solver = ode,
-  skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE, ...)
+fitodeMCMC(model, data, start, tcol = "times", proposal.vcov,
+  prior = list(), chains = 1, iter = 2000, burnin = iter/2,
+  thin = 1, refresh = max(iter/10, 1), prior.only = FALSE, link,
+  fixed = list(), solver.opts = list(method = "rk4"), solver = ode,
+  ...)
 }
 \arguments{
 \item{model}{ode model}
@@ -28,8 +28,6 @@ fitodeMCMC(model, data, start, tcol = "times", vcov, prior = list(),
 \item{solver.opts}{options for ode integration. See \code{\link{ode}}}
 
 \item{solver}{ode solver}
-
-\item{debug}{print debugging output?}
 }
 \description{
 Fit ordinary differential equations model using MCMC

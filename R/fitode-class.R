@@ -99,3 +99,25 @@ setClass("fitode",
         prior="list"
     )
 )
+
+## need this to use mcmc.list in S4?
+setOldClass("mcmc.list")
+
+##' Class "fitodeMCMC".
+##' Result of ode fitting based on Markov Chain Monte Carlo (MCMC)
+##'
+##' @exportClass fitodeMCMC
+setClass("fitodeMCMC",
+         slots = c(
+             model="model.ode",
+             data="data.frame",
+             coef="numeric",
+             vcov="matrix",
+             mcmc="mcmc.list",
+             lp="mcmc.list",
+             link="list",
+             fixed="list",
+             prior="list",
+             details="list"
+         )
+)
