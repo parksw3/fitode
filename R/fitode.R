@@ -61,6 +61,16 @@ fixpar <- function(model, fixed) {
     model
 }
 
+check_link <- function(model, link) {
+    if (missing(link)) return(as.list(model@link))
+
+    if (any(is.na(match(names(link), model@par)))) stop("Some link functions do not correspond to the model parameters.")
+
+    link <- set_link(link, model@par)
+
+    link
+}
+
 ##' Fit ordinary differential equations model
 ##' @rdname fitode
 ##' @name fitode
@@ -107,13 +117,7 @@ fitode <- function(model, data,
 
     modelpar <- model@par
 
-    if (!missing(link)) {
-        if (any(is.na(match(names(link), modelpar)))) stop("Some link functions do not correspond to the model parameters.")
-
-        link <- set_link(link, modelpar)
-    } else {
-        link <- as.list(model@link)
-    }
+    link <- check_link(model, link)
 
     if (any(is.na(match(modelpar, names(start))))) {
 
