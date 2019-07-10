@@ -42,6 +42,20 @@ setMethod("plot", signature(x="fitode", y="missing"),
     }
 )
 
+##' Plot a fitodeMCMC object
+##' @aliases plot,fitodeMCMC-method
+##' @param x fitodeMCMC object
+##' @param level the confidence level required
+##' @param which which to plot
+##' @param onepage (logical) print all figures on one page?
+##' @param xlabs a label for the x axis
+##' @param ylabs a label for the y axis
+##' @param col.traj colour of the estimated trajectory
+##' @param lty.traj line type of the estimated trajectory
+##' @param col.conf colour of the confidence intervals
+##' @param lty.conf line type of the confidence intervals
+##' @param add add to another plot?
+##' @param ... additional arguments to be passed on to the plot function
 setMethod("plot", signature(x="fitodeMCMC", y="missing"),
     function(x, level,
              which,
@@ -51,7 +65,6 @@ setMethod("plot", signature(x="fitodeMCMC", y="missing"),
              col.conf="black",lty.conf=4,
              add=FALSE,
              ...){
-        method <- match.arg(method)
         data <- x@data
 
         pred <- predict(x,level,simplify=TRUE)
@@ -65,10 +78,22 @@ setMethod("plot", signature(x="fitodeMCMC", y="missing"),
     }
 )
 
+##' Internal function for plotting methods
+##' @param pred prediction objects
+##' @param data observed data
+##' @param onepage (logical) print all figures on one page?
+##' @param xlabs a label for the x axis
+##' @param ylabs a label for the y axis
+##' @param col.traj colour of the estimated trajectory
+##' @param lty.traj line type of the estimated trajectory
+##' @param col.conf colour of the confidence intervals
+##' @param lty.conf line type of the confidence intervals
+##' @param add add to another plot?
+##' @param ... additional arguments to be passed on to the plot function
 plot_internal <- function(pred,
                           data,
                           onepage=TRUE,
-                          xlabs, ylabs=nm,
+                          xlabs, ylabs,
                           col.traj="black",lty.traj=1,
                           col.conf="black",lty.conf=4,
                           add=FALSE,
@@ -86,12 +111,13 @@ plot_internal <- function(pred,
         }
     }
 
+    nm <- names(pred)
 
-    if (missing(ylabs)) ylabs <- names(pred)
+    if (missing(ylabs)) ylabs <- nm
 
     if (missing(xlabs)) xlabs <- rep("times", length(pred))
 
-    for (i in 1:length(which)) {
+    for (i in 1:length(pred)) {
         obs.df <- data.frame(
             x=data$times,
             y=data[[nm[i]]]
@@ -115,5 +141,4 @@ plot_internal <- function(pred,
     }
 
     invisible()
-
 }

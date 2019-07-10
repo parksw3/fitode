@@ -132,7 +132,7 @@ make_prior <- function(model, link, prior, prior.density=TRUE, keep_grad=TRUE) {
 ##' @param link link
 ##' @param prior.density
 ##' @param keep_grad
-select_prior <- function(family = c("dnorm", "dgamma", "dlnorm", "dbeta"),
+select_prior <- function(family = c("dnorm", "dgamma", "dbeta"),
                          link = c("identity", "log", "logit"),
                          prior.density=TRUE,
                          keep_grad=TRUE) {
@@ -160,6 +160,12 @@ select_prior <- function(family = c("dnorm", "dgamma", "dlnorm", "dbeta"),
                                 keep_grad=keep_grad)
 
             loglik_gamma
+        }, dbeta={
+            loglik_beta <- new("prior.ode", "beta",
+                               LL ~ (shape1-1) * log(X) + (shape2-1) * log(1-X) -
+                                   lgamma(shape1) - lgamma(shape2) + lgamma(shape1 + shape2) + constant,
+                               par=c("shape1", "shape2", "constant"),
+                               keep_grad=keep_grad)
         }
     )
 
