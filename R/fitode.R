@@ -362,6 +362,8 @@ logLik.sensitivity <- function(parms,
     for (i in 1:length(nll_list)) {
         ll_fun <- model@loglik[[i]]
 
+        ## skip na observations
+        ## this trick allows us to model the difference
         nn <- !is.na(data[,ll_fun@observation])
 
         frame <- c(list(mean[[i]][oo]), parms, data)
