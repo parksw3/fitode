@@ -94,8 +94,19 @@ setMethod("confint","fitodeMCMC",
 
 setMethod("summary","fitodeMCMC",
     function(object) {
-        ## TODO
+        mm <- matrix(NA, nrow=length(object@coef), ncol=4)
 
+        rownames(mm) <- names(object@coef)
+        colnames(mm) <- c("Estimate", "Std. Error", "l-95% CI", "u-95% CI")
+
+        mm[,1] <- object@coef
+
+        if (all(colnames(object@vcov)==names(object@coef)))
+            mm[,2] <- stdEr(object)
+
+        mm[,3:4] <- confint(object)[,-1]
+
+        mm
     }
 )
 

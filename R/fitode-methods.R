@@ -281,12 +281,20 @@ setMethod("confint", "fitode",
 ##' @importFrom bbmle summary
 setMethod("summary","fitode",
     function(object) {
-        ss <- summary(object@mle2)
+        mm <- matrix(NA, nrow=length(object@coef), ncol=4)
 
-        ## TODO: finish this
+        rownames(mm) <- names(object@coef)
+        colnames(mm) <- c("Estimate", "Std. Error", "l-95% CI", "u-95% CI")
 
+        mm[,1] <- object@coef
+
+        if (all(colnames(object@vcov)==names(object@coef)))
+            mm[,2] <- stdEr(object)
+
+        mm[,3:4] <- confint(object)[,-1]
+
+        mm
     }
-
 )
 
 ##' show object
