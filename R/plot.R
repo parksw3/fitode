@@ -19,6 +19,7 @@
 ##' @exportMethod plot
 setMethod("plot", signature(x="fitode", y="missing"),
     function(x, level,
+             data,
              which,
              method=c("delta", "wmvrnorm"),
              onepage=TRUE,
@@ -29,7 +30,8 @@ setMethod("plot", signature(x="fitode", y="missing"),
              nsim=1000,
              ...){
         method <- match.arg(method)
-        data <- x@data
+
+        if (missing(data)) data <- x@data
 
         pred <- predict(x,level,method=method, nsim=nsim)
 
@@ -58,6 +60,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
 ##' @param ... additional arguments to be passed on to the plot function
 setMethod("plot", signature(x="fitodeMCMC", y="missing"),
     function(x, level,
+             data,
              which,
              onepage=TRUE,
              xlabs, ylabs,
@@ -65,7 +68,7 @@ setMethod("plot", signature(x="fitodeMCMC", y="missing"),
              col.conf="black",lty.conf=4,
              add=FALSE,
              ...){
-        data <- x@data
+        if (missing(data)) data <- x@data
 
         pred <- predict(x,level,simplify=TRUE)
 

@@ -33,7 +33,7 @@ test_that("SI model", {
 
     expect_equal(
         as.vector(numDeriv::jacobian(ff, parms, model=SI_model)),
-        unname(fitode:::logLik.sensitivity(parms, SI_model, data))[-1],
+        unname(logLik.sensitivity(parms, SI_model, data))[-1],
         tolerance=1e-5
     )
 })
