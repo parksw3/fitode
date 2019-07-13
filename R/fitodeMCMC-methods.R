@@ -94,10 +94,10 @@ setMethod("confint","fitodeMCMC",
 
 setMethod("summary","fitodeMCMC",
     function(object) {
-        mm <- matrix(NA, nrow=length(object@coef), ncol=4)
+        mm <- matrix(NA, nrow=length(object@coef), ncol=6)
 
         rownames(mm) <- names(object@coef)
-        colnames(mm) <- c("Estimate", "Std. Error", "l-95% CI", "u-95% CI")
+        colnames(mm) <- c("Estimate", "Std. Error", "l-95% CI", "u-95% CI", "Eff. Sample", "Rhat")
 
         mm[,1] <- object@coef
 
@@ -106,10 +106,12 @@ setMethod("summary","fitodeMCMC",
 
         mm[,3:4] <- confint(object)[,-1]
 
+        mm[,5] <- round(coda::effectiveSize(object@mcmc), 0)
+        mm[,6] <- round(coda::gelman.diag(object@mcmc)[[1]][,1], 2)
+
         mm
     }
 )
-
 
 ##' show object
 ##'
