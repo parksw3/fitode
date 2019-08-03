@@ -25,7 +25,7 @@ Initializer for model.ode objects
 
 \item{\code{initial}}{initial values}
 
-\item{\code{par}}{parameters}
+\item{\code{par}}{model parameters}
 
 \item{\code{link}}{link functions for parameters (log links are used as default)}
 

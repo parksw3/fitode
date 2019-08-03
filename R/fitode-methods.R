@@ -1,5 +1,6 @@
 ##' Computes estimated trajectories and their confidence intervals (using either
 ##' the delta method or importance sampling).
+##'
 ##' @title Prediction function for fitode objects
 ##' @param object fitode object
 ##' @param level the confidence level required
@@ -188,6 +189,8 @@ setMethod("profile", "fitode",
 ##' @param method method for calculating confidence intervals
 ##' @param nsim number of simulations to be used for importance sampling
 ##' @param seed seed
+##' @docType methods
+##' @exportMethod confint
 setMethod("confint", "fitode",
     function (object, parm, level=0.95,
               method=c("delta", "profile", "wmvrnorm"),
@@ -300,11 +303,14 @@ setMethod("confint", "fitode",
     }
 )
 
-##' Summarize \code{fitode} object
+##' Summarize \code{fitode} object;
+##' returns estimate, standard error, and confidence intervals
 ##'
 ##' @title Summarize \code{fitode} object
 ##' @param object fitode object
 ##' @importFrom bbmle summary
+##' @docType methods
+##' @exportMethod summary
 setMethod("summary","fitode",
     function(object) {
         mm <- matrix(NA, nrow=length(object@coef), ncol=4)

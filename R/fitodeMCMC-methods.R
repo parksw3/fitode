@@ -1,3 +1,14 @@
+##' Computes estimated trajectories and their credible intervals.
+##' The estimated trajectories are obtained by taking the median trajectories
+##' from the posterior samples.
+##'
+##' @title Prediction function for fitodeMCMC objects
+##' @param object fitodeMCMC object
+##' @param level the credible level required
+##' @param times time vector to predict over. Default is set to the time frame of the data.
+##' @param simplify (logical) simplify output to return estimated trajectories and their
+##' credible intervals? If \code{simplify=FALSE}, all posterior trajectories will be returned
+##' @docType methods
 setMethod("predict", "fitodeMCMC",
     function(object,
              level, times,
@@ -48,12 +59,35 @@ setMethod("predict", "fitodeMCMC",
     }
 )
 
+##' Extracts estimated parameters
+##'
+##' @title Extract model coefficients
+##' @param object fitodeMCMC object
+##' @docType methods
 setMethod("coef", "fitodeMCMC", function(object) object@coef)
 
+##' Calculates variance-covariance matrix from posterior samples
+##'
+##' @title Extract variance-covariance matrix
+##' @param object fitodeMCMC object
+##' @docType methods
 setMethod("vcov", "fitodeMCMC", function(object) object@vcov)
 
+##' Calculates standard error by taking the square root of the diagonal matrix
+##' @title Extract standard error
+##' @param x fitodeMCMC object
+##' @docType methods
 setMethod("stdEr", "fitodeMCMC", function(x) sqrt(diag(vcov(x))))
 
+
+##' Calculate confidence intervals for model parameters and their transformations
+##' from posterior samples.
+##'
+##' @title Calculate confidence intervals for model parameters and their transformations
+##' @param object fitodeMCMC object
+##' @param parm character vector specifying model parameters or list of formuals specifying transformations
+##' @param level the credible level required
+##' @docType methods
 setMethod("confint","fitodeMCMC",
     function(object, parm, level=0.95) {
         ll <- (1-level)/2
@@ -92,6 +126,13 @@ setMethod("confint","fitodeMCMC",
     }
 )
 
+##' Summarize \code{fitodeMCMC} object;
+##' returns estimate, standard error, confidence intervals, effective sample sizes, and gelman-rubin diagnostic
+##'
+##' @title Summarize \code{fitodeMCMC} object
+##' @param object fitodeMCMC object
+##' @seealso \link{\code{effectiveSize}} \link{\code{gelman.diag}}
+##' @docType methods
 setMethod("summary","fitodeMCMC",
     function(object) {
         mm <- matrix(NA, nrow=length(object@coef), ncol=6)
@@ -113,8 +154,9 @@ setMethod("summary","fitodeMCMC",
     }
 )
 
-##' show object
+##' Show \code{fitodeMCMC} object
 ##'
+##' @title Show \code{fitodeMCMC} object
 ##' @param object fitodeMCMC object
 ##' @docType methods
 ##' @exportMethod show

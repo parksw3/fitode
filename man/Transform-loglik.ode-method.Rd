@@ -9,7 +9,7 @@
   observation = "X", mean, par, keep_grad = TRUE)
 }
 \arguments{
-\item{object}{object}
+\item{object}{loglik.ode object}
 
 \item{transforms}{list of formulas specifying transformations}
 

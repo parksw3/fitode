@@ -8,11 +8,11 @@
 \S4method{grad}{model.ode}(object, state, par)
 }
 \arguments{
-\item{object}{object to be evaluated}
+\item{object}{model.ode object}
 
 \item{state}{state}
 
-\item{par}{additional parameters}
+\item{par}{parameter values}
 }
 \description{
 Evaluate the gradients of a model

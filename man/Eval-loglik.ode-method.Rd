@@ -3,12 +3,12 @@
 \docType{methods}
 \name{Eval,loglik.ode-method}
 \alias{Eval,loglik.ode-method}
-\title{Evaluate log likelihood model}
+\title{Evaluate the log-likelihood model}
 \usage{
 \S4method{Eval}{loglik.ode}(object, observation, mean, par = NULL, ...)
 }
 \arguments{
-\item{object}{object to be evaluated}
+\item{object}{loglik.ode object}
 
 \item{observation}{observations}
 
@@ -22,5 +22,5 @@
 numeric
 }
 \description{
-Evaluate log likelihood model
+Evaluate the log-likelihood model
 }

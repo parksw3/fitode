@@ -9,11 +9,11 @@
   "state", "par"))
 }
 \arguments{
-\item{object}{object to be evaluated}
+\item{object}{model.ode object}
 
 \item{state}{state}
 
-\item{par}{additional parameters}
+\item{par}{parameter values}
 
 \item{type}{state of par?}
 }

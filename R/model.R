@@ -5,7 +5,7 @@
 ##' @slot model ode model
 ##' @slot observation observation model
 ##' @slot initial initial values
-##' @slot par parameters
+##' @slot par model parameters
 ##' @slot link link functions for parameters (log links are used as default)
 ##' @slot diffnames optional character vector specifying the names of a variable for which the consecutive difference needs to be calculated
 ##' @slot keep_sensitivity (logical) maintain the Jacobian as part of the model
@@ -204,9 +204,9 @@ setMethod(
 )
 
 ##' Evaluate the gradients of a model
-##' @param object object to be evaluated
+##' @param object model.ode object
 ##' @param state state
-##' @param par additional parameters
+##' @param par parameter values
 ##' @docType methods
 ##' @exportMethod grad
 setMethod(
@@ -220,9 +220,9 @@ setMethod(
 )
 
 ##' Evaluate the jacobian of the gradients
-##' @param object object to be evaluated
+##' @param object model.ode object
 ##' @param state state
-##' @param par additional parameters
+##' @param par parameter values
 ##' @param type state of par?
 ##' @docType methods
 ##' @exportMethod jacobian
@@ -245,6 +245,11 @@ setMethod(
     }
 )
 
+##' Transform the model
+##' @param object model.ode object
+##' @param transforms list of formulas specifying transformations
+##' @param par model parameters
+##' @param keep_sensitivity (logical) maintain the Jacobian as part of the model
 ##' @exportMethod Transform
 setMethod(
     "Transform",
@@ -295,6 +300,9 @@ setMethod(
     }
 )
 
+##' Show the model
+##' @param object model.ode object
+##' @exportMethod show
 setMethod("show", "model.ode",
     function(object){
         cat("Name:", object@name, "\n")

@@ -11,5 +11,6 @@
 \item{object}{fitode object}
 }
 \description{
-Summarize \code{fitode} object
+Summarize \code{fitode} object;
+returns estimate, standard error, and confidence intervals
 }

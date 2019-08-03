@@ -1,8 +1,8 @@
-##' the initializer for loglik.ode
+##' The initializer for loglik.ode
 ##'
 ##' @param .Object object
 ##' @param name name of the distribution
-##' @param model the formula specifying the model
+##' @param model formula specifying the disstribution
 ##' @param observation observation variable name
 ##' @param mean mean variable name
 ##' @param par additional parameter names
@@ -42,8 +42,8 @@ setMethod(
     }
 )
 
-##' Evaluate log likelihood model
-##' @param object object to be evaluated
+##' Evaluate the log-likelihood model
+##' @param object loglik.ode object
 ##' @param observation observations
 ##' @param mean mean values
 ##' @param par additional parameters
@@ -64,7 +64,7 @@ setMethod(
 )
 
 ##' Evaluate the gradient of a likelihood model
-##' @param object object to be evaluated
+##' @param object loglik.ode object
 ##' @param observation observations
 ##' @param mean mean values
 ##' @param par additional parameters
@@ -86,7 +86,7 @@ setMethod(
 )
 
 ##' Transform the model
-##' @param object object
+##' @param object loglik.ode object
 ##' @param name name of the log-likelihood model
 ##' @param transforms list of formulas specifying transformations
 ##' @param observation observation variable name
@@ -155,6 +155,9 @@ w_lbeta <- function(a,b) {
 NBconst <- function(k,x) {
     return(ifelse(x==0,0,lbeta(k,x)+log(x)))
 }
+
+## TODO: call this family instead of dist... but probably doesn't matter
+## for internal usage
 
 ##' Select a log-likelihood model
 ##' @param dist conditional distribution of reported data

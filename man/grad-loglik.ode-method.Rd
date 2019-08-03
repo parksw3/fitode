@@ -8,7 +8,7 @@
 \S4method{grad}{loglik.ode}(object, observation, mean, par, ...)
 }
 \arguments{
-\item{object}{object to be evaluated}
+\item{object}{loglik.ode object}
 
 \item{observation}{observations}
 

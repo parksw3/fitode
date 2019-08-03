@@ -1,6 +1,7 @@
 ##' S4 generic for evaluate an object
 ##' @param object an \code{R} object
 ##' @param ... further arguments passed to methods
+##' @export
 setGeneric(
     "Eval",
     def = function(object, ...) {
@@ -11,6 +12,7 @@ setGeneric(
 ##' S4 generic for computing a gradient
 ##' @param object an \code{R} object
 ##' @param ... further arguments passed to methods
+##' @export
 setGeneric(
     "grad",
     def = function(object, ...) {
@@ -21,6 +23,7 @@ setGeneric(
 ##' S4 generic for computing a hessian
 ##' @param object an \code{R} object
 ##' @param ... further arguments passed to methods
+##' @export
 setGeneric(
     "hessian",
     def = function(object, ...) {
@@ -31,6 +34,7 @@ setGeneric(
 ##' S4 generic for computing a jacobian
 ##' @param object an \code{R} object
 ##' @param ... further arguments passed to methods
+##' @export
 setGeneric(
     "jacobian",
     def = function(object, ...) {
@@ -41,6 +45,7 @@ setGeneric(
 ##' S4 generic for transforming an object
 ##' @param object an \code{R} object
 ##' @param ... further arguments passed to methods
+##' @export
 setGeneric(
     "Transform",
     def = function(object, ...) {

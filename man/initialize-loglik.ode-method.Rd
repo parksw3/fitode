@@ -3,7 +3,7 @@
 \docType{methods}
 \name{initialize,loglik.ode-method}
 \alias{initialize,loglik.ode-method}
-\title{the initializer for loglik.ode}
+\title{The initializer for loglik.ode}
 \usage{
 \S4method{initialize}{loglik.ode}(.Object, name, model,
   observation = "X", mean, par = NULL, keep_grad = TRUE)
@@ -13,7 +13,7 @@
 
 \item{name}{name of the distribution}
 
-\item{model}{the formula specifying the model}
+\item{model}{formula specifying the disstribution}
 
 \item{observation}{observation variable name}
 
@@ -24,5 +24,5 @@
 \item{keep_grad}{maintain the gradient as part of the model}
 }
 \description{
-the initializer for loglik.ode
+The initializer for loglik.ode
 }
