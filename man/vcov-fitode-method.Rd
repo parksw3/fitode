@@ -3,15 +3,17 @@
 \docType{methods}
 \name{vcov,fitode-method}
 \alias{vcov,fitode-method}
-\title{Extract covariance matrix of a fit}
+\title{Extract variance-covariance matrix}
 \usage{
-\S4method{vcov}{fitode}(object, scale = c("original", "fitted"))
+\S4method{vcov}{fitode}(object, type = c("response", "links"))
 }
 \arguments{
 \item{object}{fitode object}
 
-\item{scale}{scale of parameter to be returned}
+\item{type}{type of covariance matrix. The default (\code{type=response}) is on the
+response scale; this is the scale on which the model parameters are defined.
+Alternatively, \code{type=link} can be used to obtain the covariance matrix on the estimated scale.}
 }
 \description{
-Extract covariance matrix of a fit
+Extracts variance-covariance matrix (either on response scales or link scales)
 }

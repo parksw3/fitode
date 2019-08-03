@@ -3,15 +3,17 @@
 \docType{methods}
 \name{coef,fitode-method}
 \alias{coef,fitode-method}
-\title{Extract parameter of a fit}
+\title{Extract model coefficients}
 \usage{
-\S4method{coef}{fitode}(object, scale = c("original", "fitted"))
+\S4method{coef}{fitode}(object, type = c("response", "links"))
 }
 \arguments{
 \item{object}{fitode object}
 
-\item{scale}{scale of parameter to be returned}
+\item{type}{type of coefficients. The default (\code{type=response}) is on the
+response scale; this is the scale on which the model parameters are defined.
+Alternatively, \code{type=link} can be used to obtain parameters on the estimated scale.}
 }
 \description{
-Extract parameter of a fit
+Extracts estimated parameters (either on response scales or link scales)
 }

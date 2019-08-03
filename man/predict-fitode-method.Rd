@@ -3,7 +3,7 @@
 \docType{methods}
 \name{predict,fitode-method}
 \alias{predict,fitode-method}
-\title{Forecast from an ode fit and find confidence interval}
+\title{Prediction function for fitode objects}
 \usage{
 \S4method{predict}{fitode}(object, level, times, method = c("delta",
   "wmvrnorm"), nsim = 1000)
@@ -20,5 +20,6 @@
 \item{nsim}{number of simulations for mvrnorm, wmvrnorm methods}
 }
 \description{
-Forecast from an ode fit and find confidence interval
+Computes estimated trajectories and their confidence intervals (using either
+the delta method or importance sampling).
 }

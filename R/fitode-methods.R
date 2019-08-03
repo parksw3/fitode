@@ -1,4 +1,6 @@
-##' Forecast from an ode fit and find confidence interval
+##' Computes estimated trajectories and their confidence intervals (using either
+##' the delta method or importance sampling).
+##' @title Prediction function for fitode objects
 ##' @param object fitode object
 ##' @param level the confidence level required
 ##' @param times time vector to predict over. Default is set to the time frame of the data.
@@ -58,11 +60,11 @@ setMethod("predict", "fitode",
                                             times,
                                             solver.opts=object@mle2@data$solver.opts,
                                             solver=object@mle2@data$solver)$sensitivity
-                    fitted_parms <- coef(object, "fitted")
+                    fitted_parms <- coef(object, "links")
                     mu.eta <- apply_link(fitted_parms, linklist, "mu.eta")
                     sens <- lapply(sens, function(s) t(t(s) * mu.eta))
 
-                    fitted.vcov <- vcov(object, "fitted")
+                    fitted.vcov <- vcov(object, "links")
                     if(any(diag(fitted.vcov < 0)))
                         warning("At least one entries in diag(vcov) is negative. Confidence interval will be accurate.")
 
@@ -97,50 +99,60 @@ setMethod("predict", "fitode",
     }
 )
 
-##' Extract parameter of a fit
+##' Extracts estimated parameters (either on response scales or link scales)
+##'
+##' @title Extract model coefficients
 ##' @param object fitode object
-##' @param scale scale of parameter to be returned
+##' @param type type of coefficients. The default (\code{type=response}) is on the
+##' response scale; this is the scale on which the model parameters are defined.
+##' Alternatively, \code{type=link} can be used to obtain parameters on the estimated scale.
 ##' @importFrom bbmle coef
 ##' @docType methods
 ##' @exportMethod coef
 setMethod("coef", "fitode",
-    function(object,scale=c("original", "fitted")){
+    function(object,type=c("response", "links")){
         scale <- match.arg(scale)
         switch(scale,
-            original=object@coef,
-            fitted=object@mle2@coef
+            response=object@coef,
+            links=object@mle2@coef
         )
     }
 )
 
-##' Extract covariance matrix of a fit
+##' Extracts variance-covariance matrix (either on response scales or link scales)
 ##'
+##' @title Extract variance-covariance matrix
 ##' @param object fitode object
-##' @param scale scale of parameter to be returned
+##' @param type type of covariance matrix. The default (\code{type=response}) is on the
+##' response scale; this is the scale on which the model parameters are defined.
+##' Alternatively, \code{type=link} can be used to obtain the covariance matrix on the estimated scale.
 ##' @importFrom bbmle vcov
 ##' @docType methods
 ##' @exportMethod vcov
 setMethod("vcov", "fitode",
-    function(object,scale=c("original", "fitted")){
+    function(object,type=c("response", "links")){
         scale <- match.arg(scale)
         switch(scale,
-            original=object@vcov,
-            fitted=object@mle2@vcov
+            response=object@vcov,
+            links=object@mle2@vcov
         )
     }
 )
 
 
-##' Calculate standard error
+##' Calculates standard error by taking the square root of the diagonal matrix
+##' @title Extract standard error
 ##' @importFrom bbmle stdEr
 ##' @param x fitode object
-##' @param scale scale of parameter to be returned
+##' @param type type of standard error. The default (\code{type=response}) is on the
+##' response scale; this is the scale on which the model parameters are defined.
+##' Alternatively, \code{type=link} can be used to obtain standard errors on the estimated scale.
 ##' @docType methods
 ##' @exportMethod stdEr
-setMethod("stdEr", "fitode", function(x,scale=c("original", "fitted")){sqrt(diag(vcov(x, scale)))})
+setMethod("stdEr", "fitode", function(x,type=c("response", "links")){sqrt(diag(vcov(x, type)))})
 
 ##' Extract log-likelihood of a fit
-##'
+##' @title Extract log-likelihood
 ##' @param object fitode object
 ##' @docType methods
 ##' @exportMethod logLik
@@ -166,6 +178,16 @@ setMethod("profile", "fitode",
     }
 )
 
+##' Calculate confidence intervals for model parameters and their transformations using
+##' (1) delta method, (2) profile likelihood, and (3) importance sampling.
+##'
+##' @title Calculate confidence intervals for model parameters and their transformations
+##' @param object fitode object
+##' @param parm character vector specifying model parameters or list of formuals specifying transformations
+##' @param level the confidence level required
+##' @param method method for calculating confidence intervals
+##' @param nsim number of simulations to be used for importance sampling
+##' @param seed seed
 setMethod("confint", "fitode",
     function (object, parm, level=0.95,
               method=c("delta", "profile", "wmvrnorm"),
@@ -235,8 +257,8 @@ setMethod("confint", "fitode",
         estimate <- matrix(estimate, ncol=1)
 
         if (method=="delta") {
-            fitted_parms <- coef(object, "fitted")
-            fitted_vcov <- vcov(object, "fitted")
+            fitted_parms <- coef(object, "links")
+            fitted_vcov <- vcov(object, "links")
 
             z <- -qnorm(ll)
 
@@ -278,6 +300,10 @@ setMethod("confint", "fitode",
     }
 )
 
+##' Summarize \code{fitode} object
+##'
+##' @title Summarize \code{fitode} object
+##' @param object fitode object
 ##' @importFrom bbmle summary
 setMethod("summary","fitode",
     function(object) {
@@ -297,8 +323,9 @@ setMethod("summary","fitode",
     }
 )
 
-##' show object
+##' Show \code{fitode} object
 ##'
+##' @title Show \code{fitode} object
 ##' @param object fitode object
 ##' @docType methods
 ##' @exportMethod show

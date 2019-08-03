@@ -84,6 +84,15 @@ setClass(
 ##' Class "fitode".
 ##' Result of ode fitting based on Maximum Likelihood Estimation
 ##'
+##' @slot model model.ode object
+##' @slot data the time series data
+##' @slot coef estimated parameters
+##' @slot vcov estimated variance-covariance matrix
+##' @slot min minimum negative log-likelihood
+##' @slot mle2 mle2 object
+##' @slot link list of link functions for model parameters
+##' @slot fixed list of fixed parameters
+##' @slot prior list of priors
 ##' @seealso \code{\link{mle2-class}}
 ##' @exportClass fitode
 setClass("fitode",
@@ -106,6 +115,16 @@ setOldClass("mcmc.list")
 ##' Class "fitodeMCMC".
 ##' Result of ode fitting based on Markov Chain Monte Carlo (MCMC)
 ##'
+##' @slot model model.ode object
+##' @slot data the time series data
+##' @slot coef estimated parameters (posterior median)
+##' @slot vcov estimated variance-covariance matrix
+##' @slot mcmc mcmc.list object containing posterior samples
+##' @slot lp mcmc.list object containing log-posterior values of posterior samples
+##' @slot link list of link functions for model parameters
+##' @slot fixed list of fixed parameters
+##' @slot prior list of priors
+##' @slot details a list containing miscellaneous objects for internal uses
 ##' @exportClass fitodeMCMC
 setClass("fitodeMCMC",
          slots = c(

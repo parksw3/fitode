@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitode.R
 \name{logLik.sensitivity}
 \alias{logLik.sensitivity}
-\title{Calculate the derivative of the log-likelihood function with respect to model parameters}
+\title{Calculate the derivative of the log-likelihood function}
 \usage{
 logLik.sensitivity(parms, model, data, solver.opts = list(method =
   "rk4"), solver = ode, return.NLL = TRUE, return.traj = FALSE)
@@ -23,8 +23,10 @@ logLik.sensitivity(parms, model, data, solver.opts = list(method =
 \item{return.traj}{(logical) return estimated trajectory}
 }
 \value{
-vector of nll and sensitivity of nll with respect to the parameters
+a vector of nll and derivative of nll with respect to model parameters
+(or a list containing (1) the estimated traejctory and (2) a vector of nll and its derivatives)
 }
 \description{
 Calculate the derivative of the log-likelihood function with respect to model parameters
+using sensitivity equations and chain rule
 }

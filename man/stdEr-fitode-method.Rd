@@ -3,15 +3,17 @@
 \docType{methods}
 \name{stdEr,fitode-method}
 \alias{stdEr,fitode-method}
-\title{Calculate standard error}
+\title{Extract standard error}
 \usage{
-\S4method{stdEr}{fitode}(x, scale = c("original", "fitted"))
+\S4method{stdEr}{fitode}(x, type = c("response", "links"))
 }
 \arguments{
 \item{x}{fitode object}
 
-\item{scale}{scale of parameter to be returned}
+\item{type}{type of standard error. The default (\code{type=response}) is on the
+response scale; this is the scale on which the model parameters are defined.
+Alternatively, \code{type=link} can be used to obtain standard errors on the estimated scale.}
 }
 \description{
-Calculate standard error
+Calculates standard error by taking the square root of the diagonal matrix
 }

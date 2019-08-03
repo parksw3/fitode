@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitode.R
 \name{fixpar}
 \alias{fixpar}
-\title{fix parameters of an ODE model}
+\title{Fix parameters of an ODE model}
 \usage{
 fixpar(model, fixed)
 }
@@ -12,5 +12,6 @@ fixpar(model, fixed)
 \item{fixed}{named vector or list of model parameters to fix}
 }
 \description{
-fix parameters of an ODE model
+Fix parameters of an ODE model to a constant value by transforming
+the model (using Transform() function)
 }

@@ -9,3 +9,27 @@ Result of ode fitting based on Markov Chain Monte Carlo (MCMC)}
 Class "fitodeMCMC".
 Result of ode fitting based on Markov Chain Monte Carlo (MCMC)
 }
+\section{Slots}{
+
+\describe{
+\item{\code{model}}{model.ode object}
+
+\item{\code{data}}{the time series data}
+
+\item{\code{coef}}{estimated parameters (posterior median)}
+
+\item{\code{vcov}}{estimated variance-covariance matrix}
+
+\item{\code{mcmc}}{mcmc.list object containing posterior samples}
+
+\item{\code{lp}}{mcmc.list object containing log-posterior values of posterior samples}
+
+\item{\code{link}}{list of link functions for model parameters}
+
+\item{\code{fixed}}{list of fixed parameters}
+
+\item{\code{prior}}{list of priors}
+
+\item{\code{details}}{a list containing miscellaneous objects for internal uses}
+}}
+

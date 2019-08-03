@@ -13,11 +13,11 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
 \arguments{
 \item{model}{model.ode object}
 
-\item{data}{data frame with time column and observation column}
+\item{data}{data frame with a time column and observation columns}
 
 \item{start}{named vector of starting parameter values}
 
-\item{tcol}{time column}
+\item{tcol}{(character) time column}
 
 \item{method}{optimization method}
 
@@ -25,9 +25,11 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
 
 \item{link}{named vector or list of link functions for model parameters}
 
-\item{fixed}{named vector or list of model parameters to fix}
+\item{fixed}{named vector or list of model parameters to fix and their values}
 
 \item{prior}{list of formulas specifying prior distributions}
+
+\item{prior.density}{(logical) should priors represent probability distributions?}
 
 \item{control}{see \code{\link{optim}}}
 
@@ -37,16 +39,19 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
 
 \item{skip.hessian}{skip hessian calculation}
 
-\item{force.hessian}{(FALSE) calculate the hessian numerically instead of taking the jacobian of the analytical gradients}
+\item{force.hessian}{(logical) calculate the hessian numerically instead of taking the jacobian of the gradients based on sensitivity equations}
 
-\item{use.ginv}{use generalized inverse (\code{\link{ginv}}) to compute approximate vcov}
+\item{use.ginv}{(logical) use generalized inverse (\code{\link{ginv}}) to compute approximate vcov}
 
 \item{...}{mle2 arguments}
-
-\item{prior.distribution}{(logical) should priors represent a probability distribution?}
 }
 \description{
-Fit ordinary differential equations model
+This function fits ordinary differential equations models to a uni- or
+multi-variate time series by maximum likelihood.
+It relies on sensitivity equations to compute
+gradients of the estimated trajectory with respect to model parameters.
+This allows one to use gradient-based optimization algorithms, which can
+provide more robust estimation.
 }
 \seealso{
 \code{\link{mle2}}

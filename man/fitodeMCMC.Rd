@@ -19,16 +19,33 @@ fitodeMCMC(model, data, start, tcol = "times", proposal.vcov,
 
 \item{tcol}{time column}
 
+\item{proposal.vcov}{variance-covariance matrix of a multivariate normal proposal distribution}
+
+\item{prior}{list of formulas specifying prior distributions}
+
+\item{chains}{(numeric) number of chains}
+
+\item{iter}{(numeric) number of iterations per chain}
+
+\item{burnin}{(numeric) number of burnin interations}
+
+\item{thin}{(numeric) thining interval between consecutive observations}
+
+\item{refresh}{(numeric) refresh interval}
+
 \item{prior.only}{(logical) sample from prior distribution only?}
 
 \item{link}{named vector or list of link functions for model parameters}
 
-\item{fixed}{named vector or list of model parameters to fix}
+\item{fixed}{named vector or list of model parameters to fix and their values}
 
 \item{solver.opts}{options for ode integration. See \code{\link{ode}}}
 
 \item{solver}{ode solver}
 }
 \description{
-Fit ordinary differential equations model using MCMC
+This function fits ordinary differential equations models to a uni- or
+multi-variate time series by MCMC using the Metropolis-Hastings update
+rule. It searches through the parameter space
+on link scales, which can provide more efficient posterior sampling.
 }

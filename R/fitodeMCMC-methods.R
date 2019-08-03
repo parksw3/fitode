@@ -134,7 +134,6 @@ setMethod("show", "fitodeMCMC",
             }
         }
 
-
         cat("\nCoefficients:\n")
         print(coef(object))
         cat("\nSamples: ")

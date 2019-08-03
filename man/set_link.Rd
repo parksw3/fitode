@@ -4,18 +4,20 @@
 \alias{set_link}
 \title{Set up link functions for model parameters}
 \usage{
-set_link(link, modelpar)
+set_link(link, par)
 }
 \arguments{
 \item{link}{named list or vector of strings specifying link functions}
 
-\item{modelpar}{model parameters}
+\item{par}{(character) model parameters}
 }
 \value{
-list of strings specifying link functions
+list of strings specifying link functions for each model parameter
 }
 \description{
-Set up link functions for model parameters
+Set up link functions for model parameters -- for \code{\link{fitode}}
+internal usage; assumes log-link by default if link functions are
+not specified
 }
 \seealso{
 \code{\link{make.link}}

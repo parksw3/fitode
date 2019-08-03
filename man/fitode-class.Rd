@@ -9,6 +9,28 @@ Result of ode fitting based on Maximum Likelihood Estimation}
 Class "fitode".
 Result of ode fitting based on Maximum Likelihood Estimation
 }
+\section{Slots}{
+
+\describe{
+\item{\code{model}}{model.ode object}
+
+\item{\code{data}}{the time series data}
+
+\item{\code{coef}}{estimated parameters}
+
+\item{\code{vcov}}{estimated variance-covariance matrix}
+
+\item{\code{min}}{minimum negative log-likelihood}
+
+\item{\code{mle2}}{mle2 object}
+
+\item{\code{link}}{list of link functions for model parameters}
+
+\item{\code{fixed}}{list of fixed parameters}
+
+\item{\code{prior}}{list of priors}
+}}
+
 \seealso{
 \code{\link{mle2-class}}
 }

@@ -1,21 +1,28 @@
-##' Set up link functions for model parameters
+##' Set up link functions for model parameters -- for \code{\link{fitode}}
+##' internal usage; assumes log-link by default if link functions are
+##' not specified
 ##'
+##' @title Set up link functions for model parameters
 ##' @param link named list or vector of strings specifying link functions
-##' @param modelpar model parameters
+##' @param par (character) model parameters
 ##' @seealso \code{\link{make.link}}
-##' @return list of strings specifying link functions
-set_link <- function(link, modelpar) {
-    link_default <- as.list(rep("log", length(modelpar)))
-    names(link_default) <- modelpar
+##' @return list of strings specifying link functions for each model parameter
+set_link <- function(link, par) {
+    link_default <- as.list(rep("log", length(par)))
+    names(link_default) <- par
 
     if (!missing(link)) link_default[names(link)] <- link
 
     link_default
 }
 
-##' Apply link functions to parameters
+##' Apply link functions to model parameters -- for \code{\link{fitode}}
+##' internal usage. \code{type=linkfun} applies link functions;
+##' \code{type=linkinv} applies inverse link functions; \code{type=mu.eta}
+##' returns derivative of inverse link functions
 ##'
-##' @param par vector of parameter values
+##' @title Apply link functions to model parameters
+##' @param par named vector of parameter values
 ##' @param linklist list containing \code{linkfun}, \code{linkinv}, and \code{mu.eta} for each link
 ##' @param type string specifying which function should be applied
 ##' @seealso \code{\link{make.link}}
@@ -35,8 +42,26 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
     pp
 }
 
-##' fix parameters of an ODE model
+##' Check link functions for model parameters -- for \code{\link{fitode}}
+##' internal usage
 ##'
+##' @title Check link functions
+##' @param model model.ode object
+##' @param link named vector specifying link functions
+check_link <- function(model, link) {
+    if (missing(link)) return(as.list(model@link))
+
+    if (any(is.na(match(names(link), model@par)))) stop("Some link functions do not correspond to the model parameters.")
+
+    link <- set_link(link, model@par)
+
+    link
+}
+
+##' Fix parameters of an ODE model to a constant value by transforming
+##' the model (using Transform() function)
+##'
+##' @title Fix parameters of an ODE model
 ##' @param model model.ode object
 ##' @param fixed named vector or list of model parameters to fix
 fixpar <- function(model, fixed) {
@@ -61,35 +86,32 @@ fixpar <- function(model, fixed) {
     model
 }
 
-check_link <- function(model, link) {
-    if (missing(link)) return(as.list(model@link))
-
-    if (any(is.na(match(names(link), model@par)))) stop("Some link functions do not correspond to the model parameters.")
-
-    link <- set_link(link, model@par)
-
-    link
-}
-
-##' Fit ordinary differential equations model
+##' This function fits ordinary differential equations models to a uni- or
+##' multi-variate time series by maximum likelihood.
+##' It relies on sensitivity equations to compute
+##' gradients of the estimated trajectory with respect to model parameters.
+##' This allows one to use gradient-based optimization algorithms, which can
+##' provide more robust estimation.
+##'
+##' @title Fit ordinary differential equations model
 ##' @rdname fitode
 ##' @name fitode
 ##' @param model model.ode object
-##' @param data data frame with time column and observation column
+##' @param data data frame with a time column and observation columns
 ##' @param start named vector of starting parameter values
-##' @param tcol time column
+##' @param tcol (character) time column
 ##' @param method optimization method
 ##' @param optimizer optimizer
 ##' @param link named vector or list of link functions for model parameters
-##' @param fixed named vector or list of model parameters to fix
+##' @param fixed named vector or list of model parameters to fix and their values
 ##' @param prior list of formulas specifying prior distributions
-##' @param prior.distribution (logical) should priors represent a probability distribution?
+##' @param prior.density (logical) should priors represent probability distributions?
 ##' @param control see \code{\link{optim}}
 ##' @param solver.opts options for ode integration. See \code{\link{ode}}
 ##' @param solver ode solver
 ##' @param skip.hessian skip hessian calculation
-##' @param force.hessian (FALSE) calculate the hessian numerically instead of taking the jacobian of the analytical gradients
-##' @param use.ginv use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
+##' @param force.hessian (logical) calculate the hessian numerically instead of taking the jacobian of the gradients based on sensitivity equations
+##' @param use.ginv (logical) use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
 ##' @param ... mle2 arguments
 ##' @import bbmle
 ##' @importFrom numDeriv jacobian hessian
@@ -245,7 +267,7 @@ fitode <- function(model, data,
               ...)
 
     coef <- apply_link(coef(m), linklist, "linkinv")
-    ## FIXME or TODO or ...: calculating hessian in the original scale doesn't make sense when we specify priors
+    ## calculating hessian in the original scale doesn't make sense when we specify priors
     if (!skip.hessian && length(prior) == 0) {
         if (!length(modelpar)) {
             vcov <- matrix(0, 0, 0)
@@ -283,7 +305,7 @@ fitode <- function(model, data,
             rownames(vcov) <- colnames(vcov) <- names(coef)
         }
     } else {
-        vcov <- vcov(m)
+        vcov <- matrix(NA, length(modelpar), length(modelpar))
     }
 
     new("fitode", model=model, data=data, coef=coef, vcov=vcov,
@@ -293,9 +315,11 @@ fitode <- function(model, data,
     )
 }
 
-##' Calculate the derivative of an expression with respect to model parameters using sensitivity equations
+##' Calculate the derivative of an expression with respect to model parameters
+##' using sensitivity equations and chain rule
 ##'
-##' @param model ode model
+##' @title Calculate the derivative of the mean expression
+##' @param model model.ode object
 ##' @param parms named vector of parameter values
 ##' @param times time window for which the model should be solved
 ##' @param solver.opts options for the ode solver (see \code{\link{ode}})
@@ -333,6 +357,9 @@ ode.sensitivity <- function(model,
 }
 
 ##' Calculate the derivative of the log-likelihood function with respect to model parameters
+##' using sensitivity equations and chain rule
+##'
+##' @title Calculate the derivative of the log-likelihood function
 ##' @param parms named vector of parameter values
 ##' @param model model.ode object
 ##' @param data data
@@ -340,7 +367,8 @@ ode.sensitivity <- function(model,
 ##' @param solver ode solver
 ##' @param return.NLL (logical) return negative log-likelihood
 ##' @param return.traj (logical) return estimated trajectory
-##' @return vector of nll and sensitivity of nll with respect to the parameters
+##' @return a vector of nll and derivative of nll with respect to model parameters
+##' (or a list containing (1) the estimated traejctory and (2) a vector of nll and its derivatives)
 logLik.sensitivity <- function(parms,
                                model,
                                data,

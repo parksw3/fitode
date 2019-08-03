@@ -2,23 +2,28 @@ propfun <- function(chol) {
     c(rnorm(ncol(chol), mean=0, sd=1) %*% chol)
 }
 
-##' Fit ordinary differential equations model using MCMC
+##' This function fits ordinary differential equations models to a uni- or
+##' multi-variate time series by MCMC using the Metropolis-Hastings update
+##' rule. It searches through the parameter space
+##' on link scales, which can provide more efficient posterior sampling.
+##'
+##' @title Fit ordinary differential equations model using MCMC
 ##' @rdname fitodeMCMC
 ##' @name fitodeMCMC
 ##' @param model ode model
 ##' @param data data frame with time column and observation column
 ##' @param start named vector of starting parameter values
 ##' @param tcol time column
-##' @param proposal.vcov
-##' @param prior
-##' @param chains
-##' @param iter
-##' @param burnin
-##' @param thin
-##' @param refresh
+##' @param proposal.vcov variance-covariance matrix of a multivariate normal proposal distribution
+##' @param prior list of formulas specifying prior distributions
+##' @param chains (numeric) number of chains
+##' @param iter (numeric) number of iterations per chain
+##' @param burnin (numeric) number of burnin interations
+##' @param thin (numeric) thining interval between consecutive observations
+##' @param refresh (numeric) refresh interval
 ##' @param prior.only (logical) sample from prior distribution only?
 ##' @param link named vector or list of link functions for model parameters
-##' @param fixed named vector or list of model parameters to fix
+##' @param fixed named vector or list of model parameters to fix and their values
 ##' @param solver.opts options for ode integration. See \code{\link{ode}}
 ##' @param solver ode solver
 ##' @import coda

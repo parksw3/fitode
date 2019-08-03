@@ -2,19 +2,22 @@
 % Please edit documentation in R/fitode.R
 \name{apply_link}
 \alias{apply_link}
-\title{Apply link functions to parameters}
+\title{Apply link functions to model parameters}
 \usage{
 apply_link(par, linklist, type = c("linkfun", "linkinv", "mu.eta"))
 }
 \arguments{
-\item{par}{vector of parameter values}
+\item{par}{named vector of parameter values}
 
 \item{linklist}{list containing \code{linkfun}, \code{linkinv}, and \code{mu.eta} for each link}
 
 \item{type}{string specifying which function should be applied}
 }
 \description{
-Apply link functions to parameters
+Apply link functions to model parameters -- for \code{\link{fitode}}
+internal usage. \code{type=linkfun} applies link functions;
+\code{type=linkinv} applies inverse link functions; \code{type=mu.eta}
+returns derivative of inverse link functions
 }
 \seealso{
 \code{\link{make.link}}
