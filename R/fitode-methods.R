@@ -16,10 +16,12 @@
 setMethod("predict", "fitode",
     function(object,
              level,times,
-             method=c("delta", "wmvrnorm"),
+             method=c("delta", "impsamp", "wmvrnorm"),
              nsim=1000){
         if(missing(times)) times <- sort(unique(object@data$times))
         method <- match.arg(method)
+
+        if (method=="impsamp") method <- "wmvrnorm"
 
         model <- object@model
         parms <- coef(object)
@@ -112,8 +114,8 @@ setMethod("predict", "fitode",
 ##' @exportMethod coef
 setMethod("coef", "fitode",
     function(object,type=c("response", "links")){
-        scale <- match.arg(scale)
-        switch(scale,
+        type <- match.arg(type)
+        switch(type,
             response=object@coef,
             links=object@mle2@coef
         )
@@ -132,8 +134,8 @@ setMethod("coef", "fitode",
 ##' @exportMethod vcov
 setMethod("vcov", "fitode",
     function(object,type=c("response", "links")){
-        scale <- match.arg(scale)
-        switch(scale,
+        type <- match.arg(type)
+        switch(type,
             response=object@vcov,
             links=object@mle2@vcov
         )
@@ -193,11 +195,14 @@ setMethod("profile", "fitode",
 ##' @exportMethod confint
 setMethod("confint", "fitode",
     function (object, parm, level=0.95,
-              method=c("delta", "profile", "wmvrnorm"),
+              method=c("delta", "profile", "impsamp", "wmvrnorm"),
               nsim=1000,
               seed) {
 
         method <- match.arg(method)
+
+        if (method=="impsamp") method <- "wmvrnorm"
+
         cc <- coef(object)
 
         ll <- (1-level)/2

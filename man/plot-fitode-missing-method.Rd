@@ -7,8 +7,8 @@
 \title{Plot a fitode object}
 \usage{
 \S4method{plot}{fitode,missing}(x, level, data, which,
-  method = c("delta", "wmvrnorm"), onepage = TRUE, xlabs, ylabs,
-  col.traj = "black", lty.traj = 1, col.conf = "black",
+  method = c("delta", "impsamp", "wmvrnorm"), onepage = TRUE, xlabs,
+  ylabs, col.traj = "black", lty.traj = 1, col.conf = "black",
   lty.conf = 4, add = FALSE, nsim = 1000, ...)
 }
 \arguments{

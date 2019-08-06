@@ -12,6 +12,10 @@ select_prior(family = c("dnorm", "dgamma", "dbeta"),
 \item{family}{prior distribution type}
 
 \item{link}{link}
+
+\item{prior.density}{(logical) keep the Jacobian of transformations?}
+
+\item{keep_grad}{(logical) keep gradients?}
 }
 \description{
 Select a prior model

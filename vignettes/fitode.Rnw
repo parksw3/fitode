@@ -17,7 +17,7 @@
 
 <<opts,echo=FALSE>>=
 library("knitr")
-opts_chunk$set(fig.width=6,fig.height=4,warning=FALSE)
+opts_chunk$set(fig.width=6,fig.height=4,warning=FALSE,cache=TRUE)
 knit_hooks$set(basefig=function(before, options, envir) {
                    if (before) {
                        par(bty="l",las=1)
@@ -38,9 +38,9 @@ sensitivity equations and use gradient-based optimization algorithms.
 \begin{itemize}
     \item response distributions: Gamma, Gaussian, Poisson, and negative
             binomial (NB1 and NB2 parameterization)
-    \item link functions on parameters: log, logit, and identity
-    \item multiple state fitting
-    \item prior/penalization: Beta, Gamma, and Gaussian
+    \item link functions on model parameters: log, logit, and identity
+    \item fitting multiple state to multivariate time series
+    \item prior/penalization: Beta, Gamma, and Gaussian distributions
     \item confidence intervals on parameters and their transformations via
             delta method, profiling, and importance sampling
 \end{itemize}
@@ -55,7 +55,7 @@ In order to construct a model in \texttt{fitode} you need to:
     \item specify the parameters of the model
     \item specify the link functions (log-link is the default)
 \end{itemize}
-Then, to fit a model you need to:
+To fit a model, you need to:
 \begin{itemize}
     \item specify the data (as well as the time column)
     \item specify the starting values for optimization or MCMC
@@ -65,7 +65,7 @@ Then, to fit a model you need to:
 \end{itemize}
 This document was generated using \Sexpr{R.version$version.string} and package versions:
 <<pkgversions, echo=FALSE>>=
-used.pkgs <- c("bbmle", "Deriv", "deSolve", "fitode")
+used.pkgs <- c("bbmle", "Deriv", "deSolve", "fitode", "ggplot2")
 pkgver <- vapply(sort(used.pkgs),function(x) as.character(packageVersion(x)),"")
 print(pkgver,quote=FALSE)
 @
@@ -79,14 +79,15 @@ Sierra Leone to characterize epidemic growth patterns. Once you load \texttt{fit
 the data set (\texttt{SierraLeone2014}) will be automatically loaded to the global
 environment.
 <<SierraLeonedata, message=FALSE, warning=FALSE>>=
+library(ggplot2); theme_set(theme_bw())
 library(fitode)
 plot(SierraLeone2014)
 @
 
 \subsection{Exponential growth model}
 
-Exponential growth model is the simplest model we can use to characterize the initial
-spread of disease:
+Exponential growth model is one of the simplest differential models we can use to
+characterize the initial spread of a disease:
 \begin{equation}
 \frac{dX}{dt} = rX.
 \end{equation}
@@ -95,14 +96,14 @@ Variable $X$ describes the dynamics of \emph{mean} confirmed cases;
 for simplicity, we can assume that the observed number of confirmed cases at time $t$ follows a
 Poisson error distribution with mean $X(t)$. This model can be constructed in \texttt{fitode} as
 follows:
-<<>>=
+<<expmodel>>=
 exp_model <- new("model.ode",
     name="exponential",
     model=list(
         X ~ r * X
     ),
     observation=list(
-        confirmed ~ dpois(lambda= X)
+        confirmed ~ dpois(lambda=X)
     ),
     initial=list(
         X ~ X0
@@ -110,11 +111,15 @@ exp_model <- new("model.ode",
     par=c("r", "X0")
 )
 @
+Note that the name of the observed variable (\texttt{confirmed}) must be different
+from the name of the state variables (e.g., \texttt{X}) because \texttt{fitode}
+relies on expression evalulations.
 
-In order to fit this model to the data, we have to specify the initial conditions.
+In order to fit this model to the data, we have to specify starting parameter for
+the optimization.
 To do so, we can simulate the model for various parameters and try to find a reasonable
 parameter set by eyes. For example, here is a parameter set that I found by trial and error:
-<<>>=
+<<expsetup>>=
 start <- c(r=7, X0=30)
 ss <- simulate(exp_model, parms=start, times=SierraLeone2014$times)
 plot(SierraLeone2014)
@@ -122,14 +127,15 @@ lines(X ~ times, data=ss)
 abline(v=2014.8, col="red", lty=2)
 @
 Here, I used the \texttt{simulate} function to simulate the model. It requires a
-parameter set (\texttt{parms}) and a time vector (\texttt{times}) to run. It also
-returns a numerical solution for each state variable as well as simulated observations;
+parameter set (\texttt{parms} argument) and a time vector (\texttt{times} argument)
+to run. Then, it returns a numerical solution for each state variable as well
+as simulated observations;
 we will ignore the simulated observations for now.
 
 The data does not exhibit exponential growth forever. In order to fit the exponential
 model, we have to determine a fitting window. For brevity, we will fit the model from the
-beginning of an epidemic to 2014.8.
-<<>>=
+beginning of an epidemic to 2014.8 (red dashed line in the previous figure).
+<<expfit>>=
 exp_fit <- fitode(
     model=exp_model,
     data=SierraLeone2014[SierraLeone2014$times <+ 2014.8,],
@@ -137,21 +143,22 @@ exp_fit <- fitode(
 )
 @
 We can see that the estimated parameters are very close to our initial guess:
-<<>>=
+<<printexp>>=
 exp_fit
 @
-We can further quantify the uncertainty in the parameters by using \texttt{confint}:
-<<>>=
+We can quantify the uncertainty in the parameters by using \texttt{confint}:
+<<ciexp>>=
 confint(exp_fit)
 @
-and diagnose the fit by using the \texttt{plot} function:
+By default, \texttt{confint} will calculate the confidence intervals using the delta method.
+We diagnose the fit by using the \texttt{plot} function:
 <<>>=
 plot(exp_fit, level=0.95)
 @
 
-We can see that the uncertainty of our fit is rather narrow. This is likely to be
+We can see that the uncertainty of our fit is too narrow. This is likely to be
 driven by our choice of the error function. Poisson distribution assumes that variance
-is equal to the mean. Instead, we should use a negative binomial distribution, which
+is equal to the mean. Instead, we can use a negative binomial distribution, which
 assumes that variance is a quadratic function of the mean. Then, we have to estimate an
 extra parameter (\texttt{size} argument of the \texttt{dnbinom}) to account for overdispersion:
 <<>>=
@@ -177,7 +184,10 @@ exp_fit_nbinom <- fitode(
     start=c(start, phi=10)
 )
 @
-Plot:
+Note that we need to specify a starting value for the overdispersion parameter as
+well.
+
+We can plot this fit:
 <<>>=
 plot(exp_fit_nbinom, level=0.95)
 @
@@ -195,13 +205,13 @@ time series. Note that the cumulative number of cases saturate over time:
 <<>>=
 plot(cumsum(confirmed) ~ times, data=SierraLeone2014)
 @
-We can use a logistic model to describe the cumulative number of cases:
+We can use a logistic model to describe this saturating patrern:
 \begin{equation}
 \frac{dX}{dt} = r X \left(1 - \frac{X}{K}\right).
 \end{equation}
 While we can fit $X$ directly to cumulative number of cases, it can lead to
-overly confident results due to accumulation of observation error.
-Instead, we can use \emph{interval counts} to model the number of cases:
+overly confident results due to accumulation of observation error \citep{king2015avoidable}.
+Instead, we can use \emph{interval counts} to model the true number of cases:
 $X(t) - X(t - \Delta t)$, where $\Delta t$ is the reporting time step.
 This is done by using the \texttt{diffnames} argument
 <<>>=
@@ -221,23 +231,34 @@ logistic_model <- new("model.ode",
 )
 @
 
-In this case, you need to modify the data set by adding an extra \texttt{NA}
+In this case, we need to modify the data set by adding an extra \texttt{NA}
 observation before the first observation; this allows \texttt{fitode} to take
-the interval difference and still end up with the same number? TODO: need to explain this part
+the interval difference and still end up with the same number of observations
+as the time series.
 <<>>=
 SierraLeone2014b <- rbind(
-    c(times=SierraLeone2014$times[1] - diff(SierraLeone2014$times)[1], confirmed=NA),
+    c(times=SierraLeone2014$times[1] -
+          diff(SierraLeone2014$times)[1], confirmed=NA),
     SierraLeone2014
 )
+@
 
-start_logistic <- c(coef(exp_fit_nbinom), K=sum(SierraLeone2014$confirmed))
-start_logistic[["X0"]] <- 300 ## need to use a different value for X0
-ss_logistic <- simulate(logistic_model, parms=start_logistic, times=SierraLeone2014b$times)
+Again, we can try to find a reasonable parameter set by trial and error:
+<<>>=
+start_logistic <-
+    c(coef(exp_fit_nbinom), K=sum(SierraLeone2014$confirmed))
+## need to use a different value for X0
+start_logistic[["X0"]] <- 300
+ss_logistic <- simulate(
+    logistic_model,
+    parms=start_logistic,
+    times=SierraLeone2014b$times
+)
 
 plot(SierraLeone2014)
 lines(X~times, data=ss_logistic)
 @
-Using this to fit:
+and fit the model:
 <<>>=
 logistic_fit <- fitode(
     logistic_model,
@@ -245,7 +266,7 @@ logistic_fit <- fitode(
     start=start_logistic
 )
 @
-Inference:
+In this case, we get a much higer growth rate estimate:
 <<>>=
 confint(logistic_fit)
 @
@@ -253,9 +274,13 @@ Plot:
 <<>>=
 plot(logistic_fit, level=0.95)
 @
-Clear bias... likely to be driven by the bias in the fit.
+There's a clear bias in our fit; the estimated trajectory underestimates
+the peak epidemic. This is likely to affect our parameter estimates.
 
-We might want to be smarter about our choices of fitting window:
+We can be smarter about our choices of fitting window. Instead of using
+the entire time series, we can fit the logistic model from the
+beginning of an epidemic to the next observation after the peak
+\citep{ma2014estimating}.
 <<>>=
 ma_begin <- 1
 ma_end <- which.max(SierraLeone2014b$confirmed) + 1
@@ -267,20 +292,21 @@ logistic_fit_ma <- fitode(
 )
 @
 
-Much better fit
+We get a much better fit:
 <<>>=
 plot(logistic_fit, level=0.95)
 plot(logistic_fit_ma, level=0.95, add=TRUE, col.traj="red", col.conf="red")
 @
 
-Inference:
+We get slightly wider confidence intervals because we're using less data:
 <<>>=
 confint(logistic_fit_ma)
 @
 
 \subsection{SIR model}
 
-SIR model:
+The Susceptible-Infected-Recovered (SIR) model describes how disease spreads in
+a homogeneous population:
 \begin{equation}
 \begin{aligned}
 \frac{dS}{dt} &= - \beta S \frac{I}{N}\\
@@ -288,8 +314,12 @@ SIR model:
 \frac{dR}{dt} &= \gamma I
 \end{aligned}
 \end{equation}
-We might assume that confirmed cases are quarantined and are no longer infectious.
-So we use interval cases again:
+We can assume that confirmed cases are put into control and are no longer infectious,
+thus effectively recovering from infection \citep{he2009plug};
+in other words, we model cumulative number of confirmed cases with
+cumulative number of recovered cases (state variable $R$).
+
+Again, we use interval counts by using \texttt{diffnames=``R''}:
 <<>>=
 SIR_model <- new("model.ode",
     name="SIR (nbinom)",
@@ -311,39 +341,93 @@ SIR_model <- new("model.ode",
     link=c(i0="logit")
 )
 @
+For brevity, we assumed that the initial conditions are given by
+\begin{equation}
+\begin{aligned}
+S(0) &= N (1 - i_0)\\
+I(0) &= N i_0\\
+R(0) &= 0
+\end{aligned}
+\end{equation}
+where $i_0$ is the initial proportion of infected individuals.
+Moreover, setting \texttt{link=c(i0=``logit'')} tells \texttt{fitode} that the
+parameter \texttt{i0} needs to be between 0 and 1.
 
 Searching for starting values:
 <<>>=
 SIR_start <- c(beta=70, gamma=60, N=40000, i0=0.0004, phi=6)
 
-ss_SIR <- simulate(SIR_model, parms=SIR_start, times=SierraLeone2014b$times)
+ss_SIR <- simulate(SIR_model,
+    parms=SIR_start, times=SierraLeone2014b$times)
 
 plot(SierraLeone2014)
 lines(ss_SIR$times, ss_SIR$R)
 @
-
 Fit:
-
-<<>>=
+<<sirfit>>=
 SIR_fit <- fitode(
     SIR_model,
     data=SierraLeone2014b,
     start=SIR_start
 )
 @
-Plot and compare:
-<<>>=
+Plot:
+<<sirfitplot>>=
 plot(SIR_fit, level=0.95)
-plot(logistic_fit_ma, level=0.95, add=TRUE, col.traj="red", col.conf="red")
+@
+Again, the SIR model underestimates the peak.
+
+This could be a problem with fitting window.
+When we get rid of the long tail in the time series, we get a much better fit:
+<<sirbfit>>=
+SIR_fit_b <- fitode(
+    SIR_model,
+    data=SierraLeone2014b[SierraLeone2014b$times < 2015.4,],
+    start=SIR_start
+)
+plot(SIR_fit_b, level=0.95)
 @
 
-Doesn't seem good enough? Profiling tells me that that is the best fit...
-<<>>=
-pp <- profile(SIR_fit, which=1)
+There are several ways we can get the confidence intervals on the growth rate
+($r = \beta - \gamma$). By default, we can use the delta method (this is the default
+option).
+<<cisirb>>=
+confint(SIR_fit_b, parm=list(r~beta-gamma))
+@
+We discuss other methods later
 
+\subsection{Summary}
+
+Here, we summarize the estimates from different fits:
+<<fitsummary>>=
+fit_summ <- data.frame(
+    fits=c("exponential\n(poisson)", "exponential\n(nbinom)",
+           "logistic\n(full)",
+           "logistic\n(window)", "SIR\n(full)", "SIR\n(window)"),
+    estimate=c(coef(exp_fit)[1], coef(exp_fit_nbinom)[1],
+               coef(logistic_fit)[1], coef(logistic_fit_ma)[1],
+               -diff(coef(SIR_fit)[1:2]),
+               -diff(coef(SIR_fit_b)[1:2])),
+    lwr=c(confint(exp_fit)[1,2], confint(exp_fit_nbinom)[1,2],
+          confint(logistic_fit)[1,2],
+          confint(logistic_fit_ma)[1,2],
+          confint(SIR_fit, parm=list(r~beta-gamma))[2],
+          confint(SIR_fit_b, parm=list(r~beta-gamma))[2]),
+    upr=c(confint(exp_fit)[1,3], confint(exp_fit_nbinom)[1,3],
+          confint(logistic_fit)[1,3],
+          confint(logistic_fit_ma)[1,3],
+          confint(SIR_fit, parm=list(r~beta-gamma))[3],
+          confint(SIR_fit_b, parm=list(r~beta-gamma))[3])
+)
+
+fit_summ$fits <- factor(fit_summ$fits, level=fit_summ$fits)
+
+ggplot(fit_summ) +
+    geom_point(aes(fits, estimate)) +
+    geom_errorbar(aes(fits, ymin=lwr, ymax=upr), width=0.2) +
+    scale_x_discrete("Models") +
+    scale_y_continuous("Initial epidemic growth rate")
 @
 
-
-
-
+\bibliography{fitode}
 \end{document}

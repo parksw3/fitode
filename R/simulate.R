@@ -1,9 +1,9 @@
-
-
 ##' simulate model objects
 ##'
 ##' @aliases simulate,model.ode-method
 ##' @param object model.ode object
+##' @param nsim number of simulations
+##' @param seed seed
 ##' @param times time vector
 ##' @param parms named vector of parameter values
 ##' @param y initial values
@@ -27,7 +27,8 @@ setMethod("simulate", "model.ode",
 ##' simulate fitode objects
 ##'
 ##' @aliases simulate,fitode-method
-##' @param object model.ode object
+##' @param object fitode object
+##' @param nsim number of simulations
 ##' @param times time vector
 ##' @param parms named vector of parameter values
 ##' @param y initial values
@@ -52,6 +53,18 @@ setMethod("simulate", "fitode",
     }
 )
 
+##' Simulates deterministic trajectories and propagates observation error
+##'
+##' @title Internal function for simulation models
+##' @param model model.ode object
+##' @param times time vector
+##' @param parms named vector of parameter values
+##' @param y initial values
+##' @param solver.opts options for ode solver
+##' @param solver ode solver (must take y, times, func, and parms arguments)
+##' @param observation (logical) propagate observation error?
+##' @param nsim number of simulations
+##' @param seed seed
 simulate_internal <- function(model,
                               times, parms, y,
                               solver.opts=list(method="rk4"),

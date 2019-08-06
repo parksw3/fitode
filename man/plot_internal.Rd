@@ -4,7 +4,7 @@
 \alias{plot_internal}
 \title{Internal function for plotting methods}
 \usage{
-plot_internal(pred, data, onepage = TRUE, xlabs, ylabs,
+plot_internal(pred, data, onepage = TRUE, xlim, ylim, xlabs, ylabs,
   col.traj = "black", lty.traj = 1, col.conf = "black",
   lty.conf = 4, add = FALSE, ...)
 }

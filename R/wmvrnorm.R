@@ -2,12 +2,13 @@
 ##' @importFrom mvtnorm dmvnorm
 wmvrnorm <- function(object,
                      nsim=1000,
+                     sample.vcov,
                      seed) {
     if(!missing(seed)) set.seed(seed)
 
     model <- Transform(object@model, keep_sensitivity=FALSE)
 
-    vv <- vcov(object, "fitted")
+    vv <- vcov(object, "links")
     vv[lower.tri(vv)] <- t(vv)[lower.tri(vv)]
 
     simtraj <- vector('list', length(model@expr))
@@ -16,10 +17,10 @@ wmvrnorm <- function(object,
 
     traj.logLik <- rep(NA, nsim)
 
-    simpars <- MASS::mvrnorm(nsim,mu=coef(object, "fitted"),
+    simpars <- MASS::mvrnorm(nsim,mu=coef(object, "links"),
                              Sigma=vv)
 
-    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(object, "fitted"), vv, log=TRUE)
+    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(object, "links"), vv)
 
     simpars_orig <- t(apply(simpars, 1, apply_link, object@mle2@data$linklist, "linkinv"))
 

@@ -15,5 +15,5 @@ Summarize \code{fitodeMCMC} object;
 returns estimate, standard error, confidence intervals, effective sample sizes, and gelman-rubin diagnostic
 }
 \seealso{
-\link{\code{effectiveSize}} \link{\code{gelman.diag}}
+\code{\link{effectiveSize}} \code{\link{gelman.diag}}
 }

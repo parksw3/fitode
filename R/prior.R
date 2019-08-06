@@ -130,8 +130,8 @@ make_prior <- function(model, link, prior, prior.density=TRUE, keep_grad=TRUE) {
 ##' Select a prior model
 ##' @param family prior distribution type
 ##' @param link link
-##' @param prior.density
-##' @param keep_grad
+##' @param prior.density (logical) keep the Jacobian of transformations?
+##' @param keep_grad (logical) keep gradients?
 select_prior <- function(family = c("dnorm", "dgamma", "dbeta"),
                          link = c("identity", "log", "logit"),
                          prior.density=TRUE,

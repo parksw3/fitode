@@ -1,0 +1,684 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteDepends{fitode}
+%\VignetteIndexEntry{Getting started with \texttt{fitode} package}
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\title{Getting started with the \texttt{fitode} package}
+\author{Sang Woo Park}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{hyperref}
+\newcommand{\rzero}{{\cal R}_0}
+\newcommand{\code}[1]{{\tt #1}}
+\newcommand{\bmb}[1]{{\color{blue} bmb: \emph{#1}}}
+\bibliographystyle{chicago}
+\date{\today}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+\maketitle
+
+
+
+\tableofcontents
+
+\pagebreak
+
+\section{Introduction}
+
+\texttt{fitode} is an R package for fitting ordinary differential equations (ODE)
+using Maximum Likelihood or Bayesian Markov Chain Monte Carlo (MCMC). It relies on
+automatic differentiation features of the \texttt{Deriv} package to solve the
+sensitivity equations and use gradient-based optimization algorithms.
+\begin{itemize}
+    \item response distributions: Gamma, Gaussian, Poisson, and negative
+            binomial (NB1 and NB2 parameterization)
+    \item link functions on model parameters: log, logit, and identity
+    \item fitting multiple state to multivariate time series
+    \item prior/penalization: Beta, Gamma, and Gaussian distributions
+    \item confidence intervals on parameters and their transformations via
+            delta method, profiling, and importance sampling
+\end{itemize}
+
+In order to construct a model in \texttt{fitode} you need to:
+\begin{itemize}
+    \item specify the gradients using formula notation (e.g., $dX/dt=f(X)$ is
+            expressed as \texttt{X$\sim$f(X)})
+    \item specify the observation process using formula notation (e.g.,
+            \texttt{Xobs$\sim$dnorm(mean=X, sd=sigma)})
+    \item specify the initial conditions using formula notation
+    \item specify the parameters of the model
+    \item specify the link functions (log-link is the default)
+\end{itemize}
+To fit a model, you need to:
+\begin{itemize}
+    \item specify the data (as well as the time column)
+    \item specify the starting values for optimization or MCMC
+    \item optionally specify fixed parameters
+    \item optionally specify prior distributions (or penalizations); not
+            specifying prior distribution in MCMC will result in improper priors on link scales
+\end{itemize}
+This document was generated using R version 3.5.1 (2018-07-02) and package versions:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+##   bbmle   Deriv deSolve  fitode ggplot2 
+##  1.0.20   3.8.5    1.21   0.1.0   3.1.0
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\section{Basic fitting - estimating epidemic growth rates}
+
+\subsection{Data}
+
+Here, we study a time series of confirmed cases of Ebola during the 2014 outbreak in
+Sierra Leone to characterize epidemic growth patterns. Once you load \texttt{fitode},
+the data set (\texttt{SierraLeone2014}) will be automatically loaded to the global
+environment.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(ggplot2);} \hlkwd{theme_set}\hlstd{(}\hlkwd{theme_bw}\hlstd{())}
+\hlkwd{library}\hlstd{(fitode)}
+\hlkwd{plot}\hlstd{(SierraLeone2014)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/SierraLeonedata-1} 
+
+\end{knitrout}
+
+\subsection{Exponential growth model}
+
+Exponential growth model is one of the simplest differential models we can use to
+characterize the initial spread of a disease:
+\begin{equation}
+\frac{dX}{dt} = rX.
+\end{equation}
+This model is parameterized by the initial growth rate $r$ and the initial value $X(0)$.
+Variable $X$ describes the dynamics of \emph{mean} confirmed cases;
+for simplicity, we can assume that the observed number of confirmed cases at time $t$ follows a
+Poisson error distribution with mean $X(t)$. This model can be constructed in \texttt{fitode} as
+follows:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{exp_model} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+    \hlkwc{name}\hlstd{=}\hlstr{"exponential"}\hlstd{,}
+    \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{X} \hlopt{~} \hlstd{r} \hlopt{*} \hlstd{X}
+    \hlstd{),}
+    \hlkwc{observation}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{confirmed} \hlopt{~} \hlkwd{dpois}\hlstd{(}\hlkwc{lambda}\hlstd{=X)}
+    \hlstd{),}
+    \hlkwc{initial}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{X} \hlopt{~} \hlstd{X0}
+    \hlstd{),}
+    \hlkwc{par}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"r"}\hlstd{,} \hlstr{"X0"}\hlstd{)}
+\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+Note that the name of the observed variable (\texttt{confirmed}) must be different
+from the name of the state variables (e.g., \texttt{X}) because \texttt{fitode}
+relies on expression evalulations.
+
+In order to fit this model to the data, we have to specify starting parameter for
+the optimization.
+To do so, we can simulate the model for various parameters and try to find a reasonable
+parameter set by eyes. For example, here is a parameter set that I found by trial and error:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{start} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlkwc{r}\hlstd{=}\hlnum{7}\hlstd{,} \hlkwc{X0}\hlstd{=}\hlnum{30}\hlstd{)}
+\hlstd{ss} \hlkwb{<-} \hlkwd{simulate}\hlstd{(exp_model,} \hlkwc{parms}\hlstd{=start,} \hlkwc{times}\hlstd{=SierraLeone2014}\hlopt{$}\hlstd{times)}
+\hlkwd{plot}\hlstd{(SierraLeone2014)}
+\hlkwd{lines}\hlstd{(X} \hlopt{~} \hlstd{times,} \hlkwc{data}\hlstd{=ss)}
+\hlkwd{abline}\hlstd{(}\hlkwc{v}\hlstd{=}\hlnum{2014.8}\hlstd{,} \hlkwc{col}\hlstd{=}\hlstr{"red"}\hlstd{,} \hlkwc{lty}\hlstd{=}\hlnum{2}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/expsetup-1} 
+
+\end{knitrout}
+Here, I used the \texttt{simulate} function to simulate the model. It requires a
+parameter set (\texttt{parms} argument) and a time vector (\texttt{times} argument)
+to run. Then, it returns a numerical solution for each state variable as well
+as simulated observations;
+we will ignore the simulated observations for now.
+
+The data does not exhibit exponential growth forever. In order to fit the exponential
+model, we have to determine a fitting window. For brevity, we will fit the model from the
+beginning of an epidemic to 2014.8 (red dashed line in the previous figure).
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{exp_fit} \hlkwb{<-} \hlkwd{fitode}\hlstd{(}
+    \hlkwc{model}\hlstd{=exp_model,}
+    \hlkwc{data}\hlstd{=SierraLeone2014[SierraLeone2014}\hlopt{$}\hlstd{times} \hlopt{<+} \hlnum{2014.8}\hlstd{,],}
+    \hlkwc{start}\hlstd{=start}
+\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Fitting ode ...}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Computing vcov on the original scale ...}}\end{kframe}
+\end{knitrout}
+We can see that the estimated parameters are very close to our initial guess:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{exp_fit}
+\end{alltt}
+\begin{verbatim}
+## Model: exponential 
+## 
+## Observations:
+## confirmed ~ dpois(lambda = X) 
+## 
+## Coefficients:
+##         r        X0 
+##  6.993036 30.249604 
+## 
+## Log-Likelihood:-140.07 
+## 
+## link: r = log; X0 = log
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+We can quantify the uncertainty in the parameters by using \texttt{confint}:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{confint}\hlstd{(exp_fit)}
+\end{alltt}
+\begin{verbatim}
+##     estimate     2.5 %    97.5 %
+## r   6.993036  6.652687  7.350797
+## X0 30.249604 27.308713 33.507203
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+By default, \texttt{confint} will calculate the confidence intervals using the delta method.
+We diagnose the fit by using the \texttt{plot} function:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{plot}\hlstd{(exp_fit,} \hlkwc{level}\hlstd{=}\hlnum{0.95}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-1-1} 
+
+\end{knitrout}
+
+We can see that the uncertainty of our fit is too narrow. This is likely to be
+driven by our choice of the error function. Poisson distribution assumes that variance
+is equal to the mean. Instead, we can use a negative binomial distribution, which
+assumes that variance is a quadratic function of the mean. Then, we have to estimate an
+extra parameter (\texttt{size} argument of the \texttt{dnbinom}) to account for overdispersion:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{exp_model_nbinom} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+    \hlkwc{name}\hlstd{=}\hlstr{"exponential (nbinom)"}\hlstd{,}
+    \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{X} \hlopt{~} \hlstd{r} \hlopt{*} \hlstd{X}
+    \hlstd{),}
+    \hlkwc{observation}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{confirmed} \hlopt{~} \hlkwd{dnbinom}\hlstd{(}\hlkwc{mu}\hlstd{=X,} \hlkwc{size}\hlstd{=phi)}
+    \hlstd{),}
+    \hlkwc{initial}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{X} \hlopt{~} \hlstd{X0}
+    \hlstd{),}
+    \hlkwc{par}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"r"}\hlstd{,} \hlstr{"X0"}\hlstd{,} \hlstr{"phi"}\hlstd{)}
+\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+We can fit the model again:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{exp_fit_nbinom} \hlkwb{<-} \hlkwd{fitode}\hlstd{(}
+    \hlkwc{model}\hlstd{=exp_model_nbinom,}
+    \hlkwc{data}\hlstd{=SierraLeone2014[SierraLeone2014}\hlopt{$}\hlstd{times} \hlopt{<+} \hlnum{2014.8}\hlstd{,],}
+    \hlkwc{start}\hlstd{=}\hlkwd{c}\hlstd{(start,} \hlkwc{phi}\hlstd{=}\hlnum{10}\hlstd{)}
+\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Fitting ode ...}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Computing vcov on the original scale ...}}\end{kframe}
+\end{knitrout}
+Note that we need to specify a starting value for the overdispersion parameter as
+well.
+
+We can plot this fit:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{plot}\hlstd{(exp_fit_nbinom,} \hlkwc{level}\hlstd{=}\hlnum{0.95}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-4-1} 
+
+\end{knitrout}
+We can see that our uncertainty is more reasonable. This
+increases confidence intervals on parameters as well:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{confint}\hlstd{(exp_fit_nbinom)}
+\end{alltt}
+\begin{verbatim}
+##      estimate     2.5 %    97.5 %
+## r    7.589514  6.500229  8.861336
+## X0  26.326482 20.089257 34.500213
+## phi 12.903678  5.266959 31.613098
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\subsection{Logistic growth model}
+
+Exponential growth model accounts for only the initial portion of
+the observed data. Instead, we might want to try to model the entire
+time series. Note that the cumulative number of cases saturate over time:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{plot}\hlstd{(}\hlkwd{cumsum}\hlstd{(confirmed)} \hlopt{~} \hlstd{times,} \hlkwc{data}\hlstd{=SierraLeone2014)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-6-1} 
+
+\end{knitrout}
+We can use a logistic model to describe this saturating patrern:
+\begin{equation}
+\frac{dX}{dt} = r X \left(1 - \frac{X}{K}\right).
+\end{equation}
+While we can fit $X$ directly to cumulative number of cases, it can lead to
+overly confident results due to accumulation of observation error \citep{king2015avoidable}.
+Instead, we can use \emph{interval counts} to model the true number of cases:
+$X(t) - X(t - \Delta t)$, where $\Delta t$ is the reporting time step.
+This is done by using the \texttt{diffnames} argument
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{logistic_model} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+    \hlkwc{name}\hlstd{=}\hlstr{"logistic (nbinom)"}\hlstd{,}
+    \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{X} \hlopt{~} \hlstd{r} \hlopt{*} \hlstd{X} \hlopt{*} \hlstd{(}\hlnum{1} \hlopt{-} \hlstd{X}\hlopt{/}\hlstd{K)}
+    \hlstd{),}
+    \hlkwc{observation}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{confirmed} \hlopt{~} \hlkwd{dnbinom}\hlstd{(}\hlkwc{mu}\hlstd{=X,} \hlkwc{size}\hlstd{=phi)}
+    \hlstd{),}
+    \hlkwc{initial}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{X} \hlopt{~} \hlstd{X0}
+    \hlstd{),}
+    \hlkwc{diffnames}\hlstd{=}\hlstr{"X"}\hlstd{,}
+    \hlkwc{par}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"r"}\hlstd{,} \hlstr{"X0"}\hlstd{,} \hlstr{"K"}\hlstd{,} \hlstr{"phi"}\hlstd{)}
+\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+In this case, we need to modify the data set by adding an extra \texttt{NA}
+observation before the first observation; this allows \texttt{fitode} to take
+the interval difference and still end up with the same number of observations
+as the time series.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{SierraLeone2014b} \hlkwb{<-} \hlkwd{rbind}\hlstd{(}
+    \hlkwd{c}\hlstd{(}\hlkwc{times}\hlstd{=SierraLeone2014}\hlopt{$}\hlstd{times[}\hlnum{1}\hlstd{]} \hlopt{-}
+          \hlkwd{diff}\hlstd{(SierraLeone2014}\hlopt{$}\hlstd{times)[}\hlnum{1}\hlstd{],} \hlkwc{confirmed}\hlstd{=}\hlnum{NA}\hlstd{),}
+    \hlstd{SierraLeone2014}
+\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Again, we can try to find a reasonable parameter set by trial and error:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{start_logistic} \hlkwb{<-}
+    \hlkwd{c}\hlstd{(}\hlkwd{coef}\hlstd{(exp_fit_nbinom),} \hlkwc{K}\hlstd{=}\hlkwd{sum}\hlstd{(SierraLeone2014}\hlopt{$}\hlstd{confirmed))}
+\hlcom{## need to use a different value for X0}
+\hlstd{start_logistic[[}\hlstr{"X0"}\hlstd{]]} \hlkwb{<-} \hlnum{300}
+\hlstd{ss_logistic} \hlkwb{<-} \hlkwd{simulate}\hlstd{(}
+    \hlstd{logistic_model,}
+    \hlkwc{parms}\hlstd{=start_logistic,}
+    \hlkwc{times}\hlstd{=SierraLeone2014b}\hlopt{$}\hlstd{times}
+\hlstd{)}
+
+\hlkwd{plot}\hlstd{(SierraLeone2014)}
+\hlkwd{lines}\hlstd{(X}\hlopt{~}\hlstd{times,} \hlkwc{data}\hlstd{=ss_logistic)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-9-1} 
+
+\end{knitrout}
+and fit the model:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{logistic_fit} \hlkwb{<-} \hlkwd{fitode}\hlstd{(}
+    \hlstd{logistic_model,}
+    \hlkwc{data}\hlstd{=SierraLeone2014b,}
+    \hlkwc{start}\hlstd{=start_logistic}
+\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Fitting ode ...}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Computing vcov on the original scale ...}}\end{kframe}
+\end{knitrout}
+In this case, we get a much higer growth rate estimate:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{confint}\hlstd{(logistic_fit)}
+\end{alltt}
+\begin{verbatim}
+##        estimate       2.5 %       97.5 %
+## r      9.404301    8.879291     9.960355
+## X0   123.985064   93.098091   165.119348
+## K   9574.456216 8526.119846 10751.691682
+## phi    7.814186    4.669271    13.077309
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+Plot:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{plot}\hlstd{(logistic_fit,} \hlkwc{level}\hlstd{=}\hlnum{0.95}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-12-1} 
+
+\end{knitrout}
+There's a clear bias in our fit; the estimated trajectory underestimates
+the peak epidemic. This is likely to affect our parameter estimates.
+
+We can be smarter about our choices of fitting window. Instead of using
+the entire time series, we can fit the logistic model from the
+beginning of an epidemic to the next observation after the peak
+\citep{ma2014estimating}.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{ma_begin} \hlkwb{<-} \hlnum{1}
+\hlstd{ma_end} \hlkwb{<-} \hlkwd{which.max}\hlstd{(SierraLeone2014b}\hlopt{$}\hlstd{confirmed)} \hlopt{+} \hlnum{1}
+
+\hlstd{logistic_fit_ma} \hlkwb{<-} \hlkwd{fitode}\hlstd{(}
+    \hlstd{logistic_model,}
+    \hlkwc{data}\hlstd{=SierraLeone2014b[ma_begin}\hlopt{:}\hlstd{ma_end,],}
+    \hlkwc{start}\hlstd{=start_logistic}
+\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Fitting ode ...}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Computing vcov on the original scale ...}}\end{kframe}
+\end{knitrout}
+
+We get a much better fit:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{plot}\hlstd{(logistic_fit,} \hlkwc{level}\hlstd{=}\hlnum{0.95}\hlstd{)}
+\hlkwd{plot}\hlstd{(logistic_fit_ma,} \hlkwc{level}\hlstd{=}\hlnum{0.95}\hlstd{,} \hlkwc{add}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{col.traj}\hlstd{=}\hlstr{"red"}\hlstd{,} \hlkwc{col.conf}\hlstd{=}\hlstr{"red"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-14-1} 
+
+\end{knitrout}
+
+We get slightly wider confidence intervals because we're using less data:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{confint}\hlstd{(logistic_fit_ma)}
+\end{alltt}
+\begin{verbatim}
+##        estimate       2.5 %      97.5 %
+## r       9.29878    8.324641    10.38691
+## X0    119.49151   86.681357   164.72078
+## K   10943.72524 9183.475211 13041.37263
+## phi    29.19584   12.515092    68.10952
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\subsection{SIR model}
+
+The Susceptible-Infected-Recovered (SIR) model describes how disease spreads in
+a homogeneous population:
+\begin{equation}
+\begin{aligned}
+\frac{dS}{dt} &= - \beta S \frac{I}{N}\\
+\frac{dI}{dt} &= \beta S \frac{I}{N} - \gamma I\\
+\frac{dR}{dt} &= \gamma I
+\end{aligned}
+\end{equation}
+We can assume that confirmed cases are put into control and are no longer infectious,
+thus effectively recovering from infection \citep{he2009plug};
+in other words, we model cumulative number of confirmed cases with
+cumulative number of recovered cases (state variable $R$).
+
+Again, we use interval counts by using \texttt{diffnames=``R''}:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{SIR_model} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+    \hlkwc{name}\hlstd{=}\hlstr{"SIR (nbinom)"}\hlstd{,}
+    \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{S} \hlopt{~ -} \hlstd{beta} \hlopt{*} \hlstd{S} \hlopt{*} \hlstd{I}\hlopt{/}\hlstd{N,}
+        \hlstd{I} \hlopt{~} \hlstd{beta} \hlopt{*} \hlstd{S} \hlopt{*} \hlstd{I}\hlopt{/}\hlstd{N} \hlopt{-} \hlstd{gamma} \hlopt{*} \hlstd{I,}
+        \hlstd{R} \hlopt{~} \hlstd{gamma} \hlopt{*} \hlstd{I}
+    \hlstd{),}
+    \hlkwc{observation}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{confirmed} \hlopt{~} \hlkwd{dnbinom}\hlstd{(}\hlkwc{mu}\hlstd{=R,} \hlkwc{size}\hlstd{=phi)}
+    \hlstd{),}
+    \hlkwc{initial}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{S} \hlopt{~} \hlstd{N} \hlopt{*} \hlstd{(}\hlnum{1} \hlopt{-} \hlstd{i0),}
+        \hlstd{I} \hlopt{~} \hlstd{N} \hlopt{*} \hlstd{i0,}
+        \hlstd{R} \hlopt{~} \hlnum{0}
+    \hlstd{),}
+    \hlkwc{diffnames}\hlstd{=}\hlstr{"R"}\hlstd{,}
+    \hlkwc{par}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"beta"}\hlstd{,} \hlstr{"gamma"}\hlstd{,} \hlstr{"N"}\hlstd{,} \hlstr{"i0"}\hlstd{,} \hlstr{"phi"}\hlstd{),}
+    \hlkwc{link}\hlstd{=}\hlkwd{c}\hlstd{(}\hlkwc{i0}\hlstd{=}\hlstr{"logit"}\hlstd{)}
+\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+For brevity, we assumed that the initial conditions are given by
+\begin{equation}
+\begin{aligned}
+S(0) &= N (1 - i_0)\\
+I(0) &= N i_0\\
+R(0) &= 0
+\end{aligned}
+\end{equation}
+where $i_0$ is the initial proportion of infected individuals.
+Moreover, setting \texttt{link=c(i0=``logit'')} tells \texttt{fitode} that the
+parameter \texttt{i0} needs to be between 0 and 1.
+
+Searching for starting values:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{SIR_start} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlkwc{beta}\hlstd{=}\hlnum{70}\hlstd{,} \hlkwc{gamma}\hlstd{=}\hlnum{60}\hlstd{,} \hlkwc{N}\hlstd{=}\hlnum{40000}\hlstd{,} \hlkwc{i0}\hlstd{=}\hlnum{0.0004}\hlstd{,} \hlkwc{phi}\hlstd{=}\hlnum{6}\hlstd{)}
+
+\hlstd{ss_SIR} \hlkwb{<-} \hlkwd{simulate}\hlstd{(SIR_model,}
+    \hlkwc{parms}\hlstd{=SIR_start,} \hlkwc{times}\hlstd{=SierraLeone2014b}\hlopt{$}\hlstd{times)}
+
+\hlkwd{plot}\hlstd{(SierraLeone2014)}
+\hlkwd{lines}\hlstd{(ss_SIR}\hlopt{$}\hlstd{times, ss_SIR}\hlopt{$}\hlstd{R)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-17-1} 
+
+\end{knitrout}
+Fit:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{SIR_fit} \hlkwb{<-} \hlkwd{fitode}\hlstd{(}
+    \hlstd{SIR_model,}
+    \hlkwc{data}\hlstd{=SierraLeone2014b,}
+    \hlkwc{start}\hlstd{=SIR_start}
+\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Fitting ode ...}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Computing vcov on the original scale ...}}\end{kframe}
+\end{knitrout}
+Plot:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{plot}\hlstd{(SIR_fit,} \hlkwc{level}\hlstd{=}\hlnum{0.95}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/sirfitplot-1} 
+
+\end{knitrout}
+Again, the SIR model underestimates the peak.
+
+This could be a problem with fitting window.
+When we get rid of the long tail in the time series, we get a much better fit:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{SIR_fit_b} \hlkwb{<-} \hlkwd{fitode}\hlstd{(}
+    \hlstd{SIR_model,}
+    \hlkwc{data}\hlstd{=SierraLeone2014b[SierraLeone2014b}\hlopt{$}\hlstd{times} \hlopt{<} \hlnum{2015.4}\hlstd{,],}
+    \hlkwc{start}\hlstd{=SIR_start}
+\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Fitting ode ...}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Computing vcov on the original scale ...}}\begin{alltt}
+\hlkwd{plot}\hlstd{(SIR_fit_b,} \hlkwc{level}\hlstd{=}\hlnum{0.95}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/sirbfit-1} 
+
+\end{knitrout}
+
+There are several ways we can get the confidence intervals on the growth rate
+($r = \beta - \gamma$). By default, we can use the delta method (this is the default
+option).
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{confint}\hlstd{(SIR_fit_b,} \hlkwc{parm}\hlstd{=}\hlkwd{list}\hlstd{(r}\hlopt{~}\hlstd{beta}\hlopt{-}\hlstd{gamma))}
+\end{alltt}
+\begin{verbatim}
+##   estimate    2.5 %  97.5 %
+## r  10.4978 9.920495 11.0751
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+We discuss other methods later
+
+\subsection{Summary}
+
+Here, we summarize the estimates from different fits:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{fit_summ} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}
+    \hlkwc{fits}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"exponential\textbackslash{}n(poisson)"}\hlstd{,} \hlstr{"exponential\textbackslash{}n(nbinom)"}\hlstd{,}
+           \hlstr{"logistic\textbackslash{}n(full)"}\hlstd{,}
+           \hlstr{"logistic\textbackslash{}n(window)"}\hlstd{,} \hlstr{"SIR\textbackslash{}n(full)"}\hlstd{,} \hlstr{"SIR\textbackslash{}n(window)"}\hlstd{),}
+    \hlkwc{estimate}\hlstd{=}\hlkwd{c}\hlstd{(}\hlkwd{coef}\hlstd{(exp_fit)[}\hlnum{1}\hlstd{],} \hlkwd{coef}\hlstd{(exp_fit_nbinom)[}\hlnum{1}\hlstd{],}
+               \hlkwd{coef}\hlstd{(logistic_fit)[}\hlnum{1}\hlstd{],} \hlkwd{coef}\hlstd{(logistic_fit_ma)[}\hlnum{1}\hlstd{],}
+               \hlopt{-}\hlkwd{diff}\hlstd{(}\hlkwd{coef}\hlstd{(SIR_fit)[}\hlnum{1}\hlopt{:}\hlnum{2}\hlstd{]),}
+               \hlopt{-}\hlkwd{diff}\hlstd{(}\hlkwd{coef}\hlstd{(SIR_fit_b)[}\hlnum{1}\hlopt{:}\hlnum{2}\hlstd{])),}
+    \hlkwc{lwr}\hlstd{=}\hlkwd{c}\hlstd{(}\hlkwd{confint}\hlstd{(exp_fit)[}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{],} \hlkwd{confint}\hlstd{(exp_fit_nbinom)[}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{],}
+          \hlkwd{confint}\hlstd{(logistic_fit)[}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{],}
+          \hlkwd{confint}\hlstd{(logistic_fit_ma)[}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{],}
+          \hlkwd{confint}\hlstd{(SIR_fit,} \hlkwc{parm}\hlstd{=}\hlkwd{list}\hlstd{(r}\hlopt{~}\hlstd{beta}\hlopt{-}\hlstd{gamma))[}\hlnum{2}\hlstd{],}
+          \hlkwd{confint}\hlstd{(SIR_fit_b,} \hlkwc{parm}\hlstd{=}\hlkwd{list}\hlstd{(r}\hlopt{~}\hlstd{beta}\hlopt{-}\hlstd{gamma))[}\hlnum{2}\hlstd{]),}
+    \hlkwc{upr}\hlstd{=}\hlkwd{c}\hlstd{(}\hlkwd{confint}\hlstd{(exp_fit)[}\hlnum{1}\hlstd{,}\hlnum{3}\hlstd{],} \hlkwd{confint}\hlstd{(exp_fit_nbinom)[}\hlnum{1}\hlstd{,}\hlnum{3}\hlstd{],}
+          \hlkwd{confint}\hlstd{(logistic_fit)[}\hlnum{1}\hlstd{,}\hlnum{3}\hlstd{],}
+          \hlkwd{confint}\hlstd{(logistic_fit_ma)[}\hlnum{1}\hlstd{,}\hlnum{3}\hlstd{],}
+          \hlkwd{confint}\hlstd{(SIR_fit,} \hlkwc{parm}\hlstd{=}\hlkwd{list}\hlstd{(r}\hlopt{~}\hlstd{beta}\hlopt{-}\hlstd{gamma))[}\hlnum{3}\hlstd{],}
+          \hlkwd{confint}\hlstd{(SIR_fit_b,} \hlkwc{parm}\hlstd{=}\hlkwd{list}\hlstd{(r}\hlopt{~}\hlstd{beta}\hlopt{-}\hlstd{gamma))[}\hlnum{3}\hlstd{])}
+\hlstd{)}
+
+\hlstd{fit_summ}\hlopt{$}\hlstd{fits} \hlkwb{<-} \hlkwd{factor}\hlstd{(fit_summ}\hlopt{$}\hlstd{fits,} \hlkwc{level}\hlstd{=fit_summ}\hlopt{$}\hlstd{fits)}
+
+\hlkwd{ggplot}\hlstd{(fit_summ)} \hlopt{+}
+    \hlkwd{geom_point}\hlstd{(}\hlkwd{aes}\hlstd{(fits, estimate))} \hlopt{+}
+    \hlkwd{geom_errorbar}\hlstd{(}\hlkwd{aes}\hlstd{(fits,} \hlkwc{ymin}\hlstd{=lwr,} \hlkwc{ymax}\hlstd{=upr),} \hlkwc{width}\hlstd{=}\hlnum{0.2}\hlstd{)} \hlopt{+}
+    \hlkwd{scale_x_discrete}\hlstd{(}\hlstr{"Models"}\hlstd{)} \hlopt{+}
+    \hlkwd{scale_y_continuous}\hlstd{(}\hlstr{"Initial epidemic growth rate"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/fitsummary-1} 
+
+\end{knitrout}
+
+\bibliography{fitode}
+\end{document}

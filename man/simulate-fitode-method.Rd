@@ -9,7 +9,9 @@
   parms, y, observation = TRUE)
 }
 \arguments{
-\item{object}{model.ode object}
+\item{object}{fitode object}
+
+\item{nsim}{number of simulations}
 
 \item{times}{time vector}
 

@@ -5,6 +5,8 @@
 ##' @param which which to plot
 ##' @param method confidence interval method
 ##' @param onepage (logical) print all figures on one page?
+##' @param xlim x coordinates range
+##' @param ylim y coordinates range
 ##' @param xlabs a label for the x axis
 ##' @param ylabs a label for the y axis
 ##' @param col.traj colour of the estimated trajectory
@@ -21,8 +23,9 @@ setMethod("plot", signature(x="fitode", y="missing"),
     function(x, level,
              data,
              which,
-             method=c("delta", "wmvrnorm"),
+             method=c("delta", "impsamp", "wmvrnorm"),
              onepage=TRUE,
+             xlim, ylim,
              xlabs, ylabs,
              col.traj="black",lty.traj=1,
              col.conf="black",lty.conf=4,
@@ -30,6 +33,8 @@ setMethod("plot", signature(x="fitode", y="missing"),
              nsim=1000,
              ...){
         method <- match.arg(method)
+
+        if (method=="impsamp") method <- "wmvrnorm"
 
         if (missing(data)) data <- x@data
 
@@ -40,7 +45,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
 
         pred <- pred[which]
 
-        plot_internal(pred, data, onepage, xlabs, ylabs, col.traj, lty.traj, col.conf, lty.conf, add, ...)
+        plot_internal(pred, data, onepage, xlim, ylim, xlabs, ylabs, col.traj, lty.traj, col.conf, lty.conf, add, ...)
     }
 )
 
@@ -50,6 +55,8 @@ setMethod("plot", signature(x="fitode", y="missing"),
 ##' @param level the confidence level required
 ##' @param which which to plot
 ##' @param onepage (logical) print all figures on one page?
+##' @param xlim x coordinates range
+##' @param ylim y coordinates range
 ##' @param xlabs a label for the x axis
 ##' @param ylabs a label for the y axis
 ##' @param col.traj colour of the estimated trajectory
@@ -63,6 +70,7 @@ setMethod("plot", signature(x="fitodeMCMC", y="missing"),
              data,
              which,
              onepage=TRUE,
+             xlim, ylim,
              xlabs, ylabs,
              col.traj="black",lty.traj=1,
              col.conf="black",lty.conf=4,
@@ -77,7 +85,7 @@ setMethod("plot", signature(x="fitodeMCMC", y="missing"),
 
         pred <- pred[which]
 
-        plot_internal(pred, data, onepage, xlabs, ylabs, col.traj, lty.traj, col.conf, lty.conf, add, ...)
+        plot_internal(pred, data, onepage, xlim, ylim, xlabs, ylabs, col.traj, lty.traj, col.conf, lty.conf, add, ...)
     }
 )
 
@@ -85,6 +93,8 @@ setMethod("plot", signature(x="fitodeMCMC", y="missing"),
 ##' @param pred prediction objects
 ##' @param data observed data
 ##' @param onepage (logical) print all figures on one page?
+##' @param xlim x coordinates range
+##' @param ylim y coordinates range
 ##' @param xlabs a label for the x axis
 ##' @param ylabs a label for the y axis
 ##' @param col.traj colour of the estimated trajectory
@@ -96,6 +106,7 @@ setMethod("plot", signature(x="fitodeMCMC", y="missing"),
 plot_internal <- function(pred,
                           data,
                           onepage=TRUE,
+                          xlim, ylim,
                           xlabs, ylabs,
                           col.traj="black",lty.traj=1,
                           col.conf="black",lty.conf=4,
@@ -128,10 +139,15 @@ plot_internal <- function(pred,
 
         pred.df <- pred[[i]]
 
-        ymin <- 0.95 * min(min(unlist(pred.df[,-1])), obs.df$y, na.rm=TRUE)
-        ymax <- 1.05 * max(max(unlist(pred.df[,-1])), obs.df$y, na.rm=TRUE)
-        ylim <- c(ymin, ymax)
-        xlim <- c(min(obs.df$x), max(obs.df$x))
+        if (missing(ylim)) {
+            ymin <- 0.95 * min(min(unlist(pred.df[,-1])), obs.df$y, na.rm=TRUE)
+            ymax <- 1.05 * max(max(unlist(pred.df[,-1])), obs.df$y, na.rm=TRUE)
+            ylim <- c(ymin, ymax)
+        }
+
+        if (missing(xlim)) {
+            xlim <- c(min(obs.df$x), max(obs.df$x))
+        }
 
         if (!add) plot(obs.df, xlim=xlim, ylim=ylim,
                        xlab=xlabs[i], ylab=ylabs[i], ...)

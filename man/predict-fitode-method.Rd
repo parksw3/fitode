@@ -6,7 +6,7 @@
 \title{Prediction function for fitode objects}
 \usage{
 \S4method{predict}{fitode}(object, level, times, method = c("delta",
-  "wmvrnorm"), nsim = 1000)
+  "impsamp", "wmvrnorm"), nsim = 1000)
 }
 \arguments{
 \item{object}{fitode object}

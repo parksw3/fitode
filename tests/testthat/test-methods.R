@@ -41,7 +41,7 @@ test_that("SI model", {
             .Names = c("beta", "gamma", "N", "i0", "size")))
 
     expect_equal(
-        coef(ff, "fitted"),
+        coef(ff, "links"),
         structure(c(0.615632624272599, 0.0798799387838958, 7.67880606768721,
             -7.63553504774462, 3.58300126112103),
             .Names = c("log.beta", "log.gamma", "log.N", "logit.i0", "log.size")))
