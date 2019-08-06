@@ -137,6 +137,24 @@ setMethod(
         loglik_list <- lapply(observation, function(ll) {
             ll_model <- select_model(as.character(ll[[3]][[1]]))
 
+            ll_check <- match(c(ll_model@mean, ll_model@par), names(as.list(ll[[3]])[-1]))
+
+            if (any(is.na(ll_check))) {
+                ll_check_msg <- paste0(
+                    "'", ll_model@name, "' requires following arguments:\n",
+                    "'", ll_model@mean, "' for specifying the mean trajectory"
+                )
+
+                if (length(ll_model@par) > 0) {
+                    ll_check_msg <- paste0(
+                        ll_check_msg,
+                        " and '", ll_model@par, "' for specifying the amount of dispersion"
+                    )
+                }
+
+                stop(ll_check_msg)
+            }
+
             trans_obs <- as.formula(as.call(c(as.symbol("~"), as.symbol("X"), ll[[2]])))
 
             trans_list <- list(trans_obs)
