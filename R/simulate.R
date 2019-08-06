@@ -112,7 +112,7 @@ simulate_internal <- function(model,
     return(out3)
 }
 
-errorfun <- function(family=c("dnorm", "dpois", "dnbinom", "dnbinom1", "gamma")) {
+errorfun <- function(family=c("dnorm", "dpois", "dnbinom", "dnbinom1", "dgamma")) {
     family <- match.arg(family)
 
     switch(family,

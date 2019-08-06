@@ -680,5 +680,163 @@ Here, we summarize the estimates from different fits:
 
 \end{knitrout}
 
+\section{Advanced fitting - multivariate time series}
+
+Data:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{hare} \hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlstr{"https://raw.githubusercontent.com/stan-dev/example-models/master/knitr/lotka-volterra/hudson-bay-lynx-hare.csv"}\hlstd{,} \hlkwc{skip}\hlstd{=}\hlnum{2}\hlstd{)}
+\hlkwd{plot}\hlstd{(Hare}\hlopt{~}\hlstd{Year,} \hlkwc{data}\hlstd{=hare,} \hlkwc{type}\hlstd{=}\hlstr{"l"}\hlstd{)}
+\hlkwd{lines}\hlstd{(Lynx}\hlopt{~}\hlstd{Year,} \hlkwc{data}\hlstd{=hare,} \hlkwc{type}\hlstd{=}\hlstr{"l"}\hlstd{,} \hlkwc{col}\hlstd{=}\hlnum{2}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/haredata-1} 
+
+\end{knitrout}
+
+Lotka-Volterra model:
+\begin{equation}
+\begin{aligned}
+\frac{du}{dt} &= \alpha u - \beta uv\\
+\frac{dv}{dt} &= \delta uv - \gamma v
+\end{aligned}
+\end{equation}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{lotka_model} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+    \hlkwc{name}\hlstd{=}\hlstr{"Lotka Volterra model"}\hlstd{,}
+    \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{u} \hlopt{~} \hlstd{alpha} \hlopt{*} \hlstd{u} \hlopt{-} \hlstd{beta} \hlopt{*} \hlstd{u} \hlopt{*} \hlstd{v,}
+        \hlstd{v} \hlopt{~} \hlstd{delta} \hlopt{*} \hlstd{u} \hlopt{*} \hlstd{v} \hlopt{-} \hlstd{gamma} \hlopt{*} \hlstd{v}
+    \hlstd{),}
+    \hlkwc{observation}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{Hare} \hlopt{~} \hlkwd{dnbinom}\hlstd{(}\hlkwc{mu}\hlstd{=u,} \hlkwc{size}\hlstd{=size1),}
+        \hlstd{Lynx} \hlopt{~} \hlkwd{dnbinom}\hlstd{(}\hlkwc{mu}\hlstd{=v,} \hlkwc{size}\hlstd{=size2)}
+    \hlstd{),}
+    \hlkwc{initial}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{u} \hlopt{~} \hlstd{u0,}
+        \hlstd{v} \hlopt{~} \hlstd{v0}
+    \hlstd{),}
+    \hlkwc{par}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"alpha"}\hlstd{,} \hlstr{"beta"}\hlstd{,} \hlstr{"delta"}\hlstd{,} \hlstr{"gamma"}\hlstd{,} \hlstr{"u0"}\hlstd{,} \hlstr{"v0"}\hlstd{,} \hlstr{"size1"}\hlstd{,} \hlstr{"size2"}\hlstd{)}
+\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Fit with random starting values?
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{harestart} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlkwc{alpha}\hlstd{=}\hlnum{0.55}\hlstd{,} \hlkwc{beta}\hlstd{=}\hlnum{0.028}\hlstd{,} \hlkwc{delta}\hlstd{=}\hlnum{0.026}\hlstd{,} \hlkwc{gamma}\hlstd{=}\hlnum{0.84}\hlstd{,} \hlkwc{u0}\hlstd{=}\hlnum{30}\hlstd{,} \hlkwc{v0}\hlstd{=}\hlnum{10}\hlstd{,}
+               \hlkwc{size1}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{size2}\hlstd{=}\hlnum{1}\hlstd{)}
+
+\hlstd{harefit} \hlkwb{<-} \hlkwd{fitode}\hlstd{(lotka_model,} \hlkwc{data}\hlstd{=hare,}
+                  \hlkwc{start}\hlstd{=harestart,}
+                  \hlkwc{tcol}\hlstd{=}\hlstr{"Year"}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Fitting ode ...}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Computing vcov on the original scale ...}}\begin{alltt}
+\hlkwd{plot}\hlstd{(harefit,} \hlkwc{level}\hlstd{=}\hlnum{0.95}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-19-1} 
+
+\end{knitrout}
+
+Esimates of size parameters are too high
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{coef}\hlstd{(harefit)}
+\end{alltt}
+\begin{verbatim}
+##        alpha         beta        delta        gamma           u0 
+## 5.047130e-01 2.479401e-02 2.518393e-02 8.582659e-01 3.560082e+01 
+##           v0        size1        size2 
+## 5.174676e+00 1.832266e+05 5.374228e+07
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+This suggests that poisson is actually enough:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{lotka_model2} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+    \hlkwc{name}\hlstd{=}\hlstr{"Lotka Volterra model (posson)"}\hlstd{,}
+    \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{u} \hlopt{~} \hlstd{alpha} \hlopt{*} \hlstd{u} \hlopt{-} \hlstd{beta} \hlopt{*} \hlstd{u} \hlopt{*} \hlstd{v,}
+        \hlstd{v} \hlopt{~} \hlstd{delta} \hlopt{*} \hlstd{u} \hlopt{*} \hlstd{v} \hlopt{-} \hlstd{gamma} \hlopt{*} \hlstd{v}
+    \hlstd{),}
+    \hlkwc{observation}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{Hare} \hlopt{~} \hlkwd{dpois}\hlstd{(}\hlkwc{lambda}\hlstd{=u),}
+        \hlstd{Lynx} \hlopt{~} \hlkwd{dpois}\hlstd{(}\hlkwc{lambda}\hlstd{=v)}
+    \hlstd{),}
+    \hlkwc{initial}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{u} \hlopt{~} \hlstd{u0,}
+        \hlstd{v} \hlopt{~} \hlstd{v0}
+    \hlstd{),}
+    \hlkwc{par}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"alpha"}\hlstd{,} \hlstr{"beta"}\hlstd{,} \hlstr{"delta"}\hlstd{,} \hlstr{"gamma"}\hlstd{,} \hlstr{"u0"}\hlstd{,} \hlstr{"v0"}\hlstd{)}
+\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Fit again:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{harefit_poisson} \hlkwb{<-} \hlkwd{fitode}\hlstd{(lotka_model2,} \hlkwc{data}\hlstd{=hare,}
+                  \hlkwc{start}\hlstd{=harestart,}
+                  \hlkwc{tcol}\hlstd{=}\hlstr{"Year"}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Fitting ode ...}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Computing vcov on the original scale ...}}\begin{alltt}
+\hlkwd{plot}\hlstd{(harefit_poisson,} \hlkwc{level}\hlstd{=}\hlnum{0.95}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-22-1} 
+
+\end{knitrout}
+
+Very similar confidence intervals:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{confint}\hlstd{(harefit)}
+\end{alltt}
+\begin{verbatim}
+##           estimate        2.5 %       97.5 %
+## alpha 5.047130e-01 4.218926e-01 6.037916e-01
+## beta  2.479401e-02 2.032132e-02 3.025114e-02
+## delta 2.518393e-02 2.077712e-02 3.052543e-02
+## gamma 8.582659e-01 7.188887e-01 1.024665e+00
+## u0    3.560082e+01 3.153682e+01 4.018853e+01
+## v0    5.174676e+00 4.091291e+00 6.544944e+00
+## size1 1.832266e+05 2.220446e-16 8.669685e+37
+## size2 5.374228e+07 3.967614e+00 7.279522e+14
+\end{verbatim}
+\begin{alltt}
+\hlkwd{confint}\hlstd{(harefit_poisson)}
+\end{alltt}
+\begin{verbatim}
+##          estimate       2.5 %      97.5 %
+## alpha  0.50472935  0.42191054  0.60380506
+## beta   0.02479656  0.02032355  0.03025403
+## delta  0.02518285  0.02077653  0.03052367
+## gamma  0.85822814  0.71886183  1.02461352
+## u0    35.60107252 31.53729641 40.18849138
+## v0     5.17463143  4.09127745  6.54485323
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
 \bibliography{fitode}
 \end{document}
