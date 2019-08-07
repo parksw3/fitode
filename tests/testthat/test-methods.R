@@ -9,7 +9,7 @@ test_that("SI model", {
         row.names = c(NA, -17L),
         class = "data.frame")
 
-    SI_model <- new("model.ode",
+    SI_model <- odemodel(
         name = "SI",
         model = list(
             S ~ - beta*S*I/N,
