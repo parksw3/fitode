@@ -27,3 +27,4 @@ loglik.ode object
 \description{
 Transform the prior model
 }
+\keyword{internal}

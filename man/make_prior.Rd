@@ -20,3 +20,4 @@ make_prior(model, link, prior, prior.density = TRUE, keep_grad = TRUE)
 \description{
 Make a list containing log prior density and its gradient
 }
+\keyword{internal}

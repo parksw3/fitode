@@ -226,6 +226,7 @@ setMethod(
 ##' Wrapper function odemodel
 ##' @name odemodel
 ##' @rdname odemodel-class
+##' @keywords internal
 ##' @export
 odemodel <- function(...) new("odemodel", ...)
 
@@ -234,6 +235,7 @@ odemodel <- function(...) new("odemodel", ...)
 ##' @param state state
 ##' @param par parameter values
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod grad
 setMethod(
     "grad",
@@ -251,6 +253,7 @@ setMethod(
 ##' @param par parameter values
 ##' @param type state of par?
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod jacobian
 setMethod(
     "jacobian",
@@ -276,6 +279,7 @@ setMethod(
 ##' @param transforms list of formulas specifying transformations
 ##' @param par model parameters
 ##' @param keep_sensitivity (logical) maintain the Jacobian as part of the model
+##' @keywords internal
 ##' @exportMethod Transform
 setMethod(
     "Transform",
@@ -328,6 +332,7 @@ setMethod(
 
 ##' Show the model
 ##' @param object odemodel object
+##' @keywords internal
 ##' @exportMethod show
 setMethod("show", "odemodel",
     function(object){

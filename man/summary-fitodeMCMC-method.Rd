@@ -3,7 +3,7 @@
 \docType{methods}
 \name{summary,fitodeMCMC-method}
 \alias{summary,fitodeMCMC-method}
-\title{Summarize \code{fitodeMCMC} object}
+\title{Summarize fitodeMCMC object}
 \usage{
 \S4method{summary}{fitodeMCMC}(object)
 }
@@ -11,7 +11,7 @@
 \item{object}{fitodeMCMC object}
 }
 \description{
-Summarize \code{fitodeMCMC} object;
+Summarize fitodeMCMC object;
 returns estimate, standard error, confidence intervals, effective sample sizes, and gelman-rubin diagnostic
 }
 \seealso{

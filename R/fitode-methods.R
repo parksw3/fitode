@@ -104,7 +104,7 @@ setMethod("predict", "fitode",
 
 ##' Extracts estimated parameters (either on response scales or link scales)
 ##'
-##' @title Extract model coefficients
+##' @title Extract model coefficients from fitode objects
 ##' @param object fitode object
 ##' @param type type of coefficients. The default (\code{type=response}) is on the
 ##' response scale; this is the scale on which the model parameters are defined.
@@ -124,7 +124,7 @@ setMethod("coef", "fitode",
 
 ##' Extracts variance-covariance matrix (either on response scales or link scales)
 ##'
-##' @title Extract variance-covariance matrix
+##' @title Extract variance-covariance matrix from fitode objects
 ##' @param object fitode object
 ##' @param type type of covariance matrix. The default (\code{type=response}) is on the
 ##' response scale; this is the scale on which the model parameters are defined.
@@ -144,7 +144,7 @@ setMethod("vcov", "fitode",
 
 
 ##' Calculates standard error by taking the square root of the diagonal matrix
-##' @title Extract standard error
+##' @title Extract standard error from fitode objects
 ##' @importFrom bbmle stdEr
 ##' @param x fitode object
 ##' @param type type of standard error. The default (\code{type=response}) is on the
@@ -161,7 +161,7 @@ setMethod("stdEr", "fitode", function(x,type=c("response", "links")){sqrt(diag(v
 ##' @exportMethod logLik
 setMethod("logLik", "fitode", function(object){-object@min})
 
-##' Profile object
+##' Profile fitode objects
 ##'
 ##' @param fitted fitted model object
 ##' @importFrom bbmle profile
@@ -184,7 +184,7 @@ setMethod("profile", "fitode",
 ##' Calculate confidence intervals for model parameters and their transformations using
 ##' (1) delta method, (2) profile likelihood, and (3) importance sampling.
 ##'
-##' @title Calculate confidence intervals for model parameters and their transformations
+##' @title Calculate confidence intervals from fitode objects for model parameters and their transformations
 ##' @param object fitode object
 ##' @param parm character vector specifying model parameters or list of formuals specifying transformations
 ##' @param level the confidence level required
@@ -308,10 +308,10 @@ setMethod("confint", "fitode",
     }
 )
 
-##' Summarize \code{fitode} object;
+##' Summarize fitode objects;
 ##' returns estimate, standard error, and confidence intervals
 ##'
-##' @title Summarize \code{fitode} object
+##' @title Summarize fitode object
 ##' @param object fitode object
 ##' @importFrom bbmle summary
 ##' @docType methods
@@ -334,12 +334,13 @@ setMethod("summary","fitode",
     }
 )
 
-##' Show \code{fitode} object
+##' Show fitode objects
 ##'
-##' @title Show \code{fitode} object
+##' @title Show fitode objects
 ##' @param object fitode object
 ##' @docType methods
 ##' @exportMethod show
+##' @keywords internal
 setMethod("show", "fitode",
     function(object) {
         cat("Model:", object@model@name, "\n")

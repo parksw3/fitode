@@ -3,7 +3,7 @@
 \docType{methods}
 \name{summary,fitode-method}
 \alias{summary,fitode-method}
-\title{Summarize \code{fitode} object}
+\title{Summarize fitode object}
 \usage{
 \S4method{summary}{fitode}(object)
 }
@@ -11,6 +11,6 @@
 \item{object}{fitode object}
 }
 \description{
-Summarize \code{fitode} object;
+Summarize fitode objects;
 returns estimate, standard error, and confidence intervals
 }

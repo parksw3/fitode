@@ -3,7 +3,7 @@
 \docType{methods}
 \name{show,fitodeMCMC-method}
 \alias{show,fitodeMCMC-method}
-\title{Show \code{fitodeMCMC} object}
+\title{Show fitodeMCMC object}
 \usage{
 \S4method{show}{fitodeMCMC}(object)
 }
@@ -11,5 +11,6 @@
 \item{object}{fitodeMCMC object}
 }
 \description{
-Show \code{fitodeMCMC} object
+Show fitodeMCMC object
 }
+\keyword{internal}

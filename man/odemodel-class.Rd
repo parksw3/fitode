@@ -92,3 +92,4 @@ SI_model <- odemodel(
     link = c(i0="logit")
 )
 }
+\keyword{internal}

@@ -9,6 +9,7 @@
 ##' @param keep_grad maintain the gradient as part of the model
 ##' @importFrom Deriv Deriv
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod initialize
 setMethod(
     "initialize",
@@ -50,6 +51,7 @@ setMethod(
 ##' @param ... other values if required
 ##' @return numeric
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod Eval
 setMethod(
     "Eval",
@@ -71,6 +73,7 @@ setMethod(
 ##' @param ... other values if required
 ##' @return a list with each element as a partial derivative values
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod grad
 setMethod(
     "grad",
@@ -95,6 +98,7 @@ setMethod(
 ##' @param keep_grad maintain the gradient as part of the model
 ##' @return loglik.ode object
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod Transform
 setMethod(
     "Transform",
@@ -124,6 +128,7 @@ setMethod(
 ## discontinuity in second derivative, but ... probably OK
 ## TODO: not sure why it won't work unless I export it??
 ##' @importFrom Deriv drule
+##' @keywords internal
 ##' @export
 dfun <- function(x,y,mag=1e8) {
     return(ifelse(x/y>mag,
@@ -131,6 +136,7 @@ dfun <- function(x,y,mag=1e8) {
                   digamma(x)-digamma(x+y)))
 }
 
+##' @keywords internal
 ##' @export
 dfun2 <- function(x,y,mag=1e8,focal="x") {
     return(switch(focal,
@@ -160,6 +166,7 @@ NBconst <- function(k,x) {
 ## for internal usage
 
 ##' Select a log-likelihood model
+##' @keywords internal
 ##' @param dist conditional distribution of reported data (dnorm, dnorm2, dpois, dnbinom, dnbinom1, dgamma)
 select_model <- function(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1", "dgamma")) {
     dist <- match.arg(dist)

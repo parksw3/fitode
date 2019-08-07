@@ -13,3 +13,4 @@ select_model(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1",
 \description{
 Select a log-likelihood model
 }
+\keyword{internal}

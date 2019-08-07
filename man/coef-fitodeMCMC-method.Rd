@@ -3,7 +3,7 @@
 \docType{methods}
 \name{coef,fitodeMCMC-method}
 \alias{coef,fitodeMCMC-method}
-\title{Extract model coefficients}
+\title{Extract model coefficients from fitodeMCMC objects}
 \usage{
 \S4method{coef}{fitodeMCMC}(object)
 }
@@ -11,5 +11,5 @@
 \item{object}{fitodeMCMC object}
 }
 \description{
-Extracts estimated parameters
+Extracts estimated parameters (median of the marginal posterior distributions)
 }

@@ -3,7 +3,7 @@
 \docType{methods}
 \name{confint,fitodeMCMC-method}
 \alias{confint,fitodeMCMC-method}
-\title{Calculate confidence intervals for model parameters and their transformations}
+\title{Calculate confidence intervals from fitodeMCMC objects for model parameters and their transformations}
 \usage{
 \S4method{confint}{fitodeMCMC}(object, parm, level = 0.95)
 }

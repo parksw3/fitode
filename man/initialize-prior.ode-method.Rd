@@ -24,3 +24,4 @@
 \description{
 the initializer for prior.ode
 }
+\keyword{internal}

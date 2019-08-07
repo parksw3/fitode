@@ -3,7 +3,7 @@
 \docType{methods}
 \name{stdEr,fitode-method}
 \alias{stdEr,fitode-method}
-\title{Extract standard error}
+\title{Extract standard error from fitode objects}
 \usage{
 \S4method{stdEr}{fitode}(x, type = c("response", "links"))
 }
