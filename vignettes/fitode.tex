@@ -151,7 +151,7 @@ follows:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{exp_model} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+\hlstd{exp_model} \hlkwb{<-} \hlkwd{odemodel}\hlstd{(}
     \hlkwc{name}\hlstd{=}\hlstr{"exponential"}\hlstd{,}
     \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
         \hlstd{X} \hlopt{~} \hlstd{r} \hlopt{*} \hlstd{X}
@@ -267,7 +267,7 @@ extra parameter (\texttt{size} argument of the \texttt{dnbinom}) to account for 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{exp_model_nbinom} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+\hlstd{exp_model_nbinom} \hlkwb{<-} \hlkwd{odemodel}\hlstd{(}
     \hlkwc{name}\hlstd{=}\hlstr{"exponential (nbinom)"}\hlstd{,}
     \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
         \hlstd{X} \hlopt{~} \hlstd{r} \hlopt{*} \hlstd{X}
@@ -354,7 +354,7 @@ This is done by using the \texttt{diffnames} argument
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{logistic_model} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+\hlstd{logistic_model} \hlkwb{<-} \hlkwd{odemodel}\hlstd{(}
     \hlkwc{name}\hlstd{=}\hlstr{"logistic (nbinom)"}\hlstd{,}
     \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
         \hlstd{X} \hlopt{~} \hlstd{r} \hlopt{*} \hlstd{X} \hlopt{*} \hlstd{(}\hlnum{1} \hlopt{-} \hlstd{X}\hlopt{/}\hlstd{K)}
@@ -524,7 +524,7 @@ Again, we use interval counts by using \texttt{diffnames=``R''}:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{SIR_model} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+\hlstd{SIR_model} \hlkwb{<-} \hlkwd{odemodel}\hlstd{(}
     \hlkwc{name}\hlstd{=}\hlstr{"SIR (nbinom)"}\hlstd{,}
     \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
         \hlstd{S} \hlopt{~ -} \hlstd{beta} \hlopt{*} \hlstd{S} \hlopt{*} \hlstd{I}\hlopt{/}\hlstd{N,}
@@ -705,7 +705,7 @@ Lotka-Volterra model:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{lotka_model} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+\hlstd{lotka_model} \hlkwb{<-} \hlkwd{odemodel}\hlstd{(}
     \hlkwc{name}\hlstd{=}\hlstr{"Lotka Volterra model"}\hlstd{,}
     \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
         \hlstd{u} \hlopt{~} \hlstd{alpha} \hlopt{*} \hlstd{u} \hlopt{-} \hlstd{beta} \hlopt{*} \hlstd{u} \hlopt{*} \hlstd{v,}
@@ -766,7 +766,7 @@ This suggests that poisson is actually enough:
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{lotka_model2} \hlkwb{<-} \hlkwd{new}\hlstd{(}\hlstr{"model.ode"}\hlstd{,}
+\hlstd{lotka_model2} \hlkwb{<-} \hlkwd{odemodel}\hlstd{(}
     \hlkwc{name}\hlstd{=}\hlstr{"Lotka Volterra model (posson)"}\hlstd{,}
     \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
         \hlstd{u} \hlopt{~} \hlstd{alpha} \hlopt{*} \hlstd{u} \hlopt{-} \hlstd{beta} \hlopt{*} \hlstd{u} \hlopt{*} \hlstd{v,}
