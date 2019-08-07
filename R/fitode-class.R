@@ -1,4 +1,4 @@
-##' Class representing ode models
+##' Class "odemodel" representing ode models
 ##'
 ##' @slot name name of the model
 ##' @slot gfun gradient function
@@ -16,9 +16,9 @@
 ##' @slot expr expressions for true trajectories
 ##' @slot expr.sensitivity sensitivity of the expressions with respect to state variables and parameters
 ##' @slot keep_sensitivity (logical) keep sensitivity equations?
-##' @exportClass model.ode
+##' @exportClass odemodel
 setClass(
-    "model.ode",
+    "odemodel",
     slots = c(
         name = "character",
         gfun = "function",
@@ -84,7 +84,7 @@ setClass(
 ##' Class "fitode".
 ##' Result of ode fitting based on Maximum Likelihood Estimation
 ##'
-##' @slot model model.ode object
+##' @slot model odemodel object
 ##' @slot data the time series data
 ##' @slot coef estimated parameters
 ##' @slot vcov estimated variance-covariance matrix
@@ -97,7 +97,7 @@ setClass(
 ##' @exportClass fitode
 setClass("fitode",
     slots = c(
-        model="model.ode",
+        model="odemodel",
         data="data.frame",
         coef="numeric",
         vcov="matrix",
@@ -115,7 +115,7 @@ setOldClass("mcmc.list")
 ##' Class "fitodeMCMC".
 ##' Result of ode fitting based on Markov Chain Monte Carlo (MCMC)
 ##'
-##' @slot model model.ode object
+##' @slot model odemodel object
 ##' @slot data the time series data
 ##' @slot coef estimated parameters (posterior median)
 ##' @slot vcov estimated variance-covariance matrix
@@ -128,7 +128,7 @@ setOldClass("mcmc.list")
 ##' @exportClass fitodeMCMC
 setClass("fitodeMCMC",
          slots = c(
-             model="model.ode",
+             model="odemodel",
              data="data.frame",
              coef="numeric",
              vcov="matrix",

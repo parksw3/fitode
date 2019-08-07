@@ -8,7 +8,7 @@ ode.solve(model, times, parms, y, solver.opts = list(method = "rk4"),
   solver = ode)
 }
 \arguments{
-\item{model}{model.ode object}
+\item{model}{odemodel object}
 
 \item{times}{time vector}
 

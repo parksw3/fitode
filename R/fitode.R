@@ -6,6 +6,7 @@
 ##' @param link named list or vector of strings specifying link functions
 ##' @param par (character) model parameters
 ##' @seealso \code{\link{make.link}}
+##' @keywords internal
 ##' @return list of strings specifying link functions for each model parameter
 set_link <- function(link, par) {
     link_default <- as.list(rep("log", length(par)))
@@ -25,6 +26,7 @@ set_link <- function(link, par) {
 ##' @param par named vector of parameter values
 ##' @param linklist list containing \code{linkfun}, \code{linkinv}, and \code{mu.eta} for each link
 ##' @param type string specifying which function should be applied
+##' @keywords internal
 ##' @seealso \code{\link{make.link}}
 apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
     type <- match.arg(type)
@@ -46,8 +48,9 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
 ##' internal usage
 ##'
 ##' @title Check link functions
-##' @param model model.ode object
+##' @param model odemodel object
 ##' @param link named vector specifying link functions
+##' @keywords internal
 check_link <- function(model, link) {
     if (missing(link)) return(as.list(model@link))
 
@@ -62,8 +65,9 @@ check_link <- function(model, link) {
 ##' the model (using Transform() function)
 ##'
 ##' @title Fix parameters of an ODE model
-##' @param model model.ode object
+##' @param model odemodel object
 ##' @param fixed named vector or list of model parameters to fix
+##' @keywords internal
 fixpar <- function(model, fixed) {
     fixed <- as.list(fixed)
     if (any(!(names(fixed) %in% model@par)))
@@ -96,7 +100,7 @@ fixpar <- function(model, fixed) {
 ##' @title Fit ordinary differential equations model
 ##' @rdname fitode
 ##' @name fitode
-##' @param model model.ode object
+##' @param model odemodel object
 ##' @param data data frame with a time column and observation columns
 ##' @param start named vector of starting parameter values
 ##' @param tcol (character) time column
@@ -319,7 +323,7 @@ fitode <- function(model, data,
 ##' using sensitivity equations and chain rule
 ##'
 ##' @title Calculate the derivative of the mean expression
-##' @param model model.ode object
+##' @param model odemodel object
 ##' @param parms named vector of parameter values
 ##' @param times time window for which the model should be solved
 ##' @param solver.opts options for the ode solver (see \code{\link{ode}})
@@ -361,7 +365,7 @@ ode.sensitivity <- function(model,
 ##'
 ##' @title Calculate the derivative of the log-likelihood function
 ##' @param parms named vector of parameter values
-##' @param model model.ode object
+##' @param model odemodel object
 ##' @param data data
 ##' @param solver.opts options for the ode solver (see \code{\link{ode}})
 ##' @param solver ode solver

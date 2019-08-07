@@ -8,7 +8,7 @@ ode.sensitivity(model, parms, times, solver.opts = list(method = "rk4"),
   solver = ode)
 }
 \arguments{
-\item{model}{model.ode object}
+\item{model}{odemodel object}
 
 \item{parms}{named vector of parameter values}
 

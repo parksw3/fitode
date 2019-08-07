@@ -11,7 +11,7 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
   skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE, ...)
 }
 \arguments{
-\item{model}{model.ode object}
+\item{model}{odemodel object}
 
 \item{data}{data frame with a time column and observation columns}
 

@@ -10,7 +10,7 @@ logLik.sensitivity(parms, model, data, solver.opts = list(method =
 \arguments{
 \item{parms}{named vector of parameter values}
 
-\item{model}{model.ode object}
+\item{model}{odemodel object}
 
 \item{data}{data}
 

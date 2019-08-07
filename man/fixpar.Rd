@@ -7,7 +7,7 @@
 fixpar(model, fixed)
 }
 \arguments{
-\item{model}{model.ode object}
+\item{model}{odemodel object}
 
 \item{fixed}{named vector or list of model parameters to fix}
 }
@@ -15,3 +15,4 @@ fixpar(model, fixed)
 Fix parameters of an ODE model to a constant value by transforming
 the model (using Transform() function)
 }
+\keyword{internal}

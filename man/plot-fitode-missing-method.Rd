@@ -7,9 +7,9 @@
 \title{Plot a fitode object}
 \usage{
 \S4method{plot}{fitode,missing}(x, level, data, which,
-  method = c("delta", "impsamp", "wmvrnorm"), onepage = TRUE, xlabs,
-  ylabs, col.traj = "black", lty.traj = 1, col.conf = "black",
-  lty.conf = 4, add = FALSE, nsim = 1000, ...)
+  method = c("delta", "impsamp", "wmvrnorm"), onepage = TRUE, xlim,
+  ylim, xlabs, ylabs, col.traj = "black", lty.traj = 1,
+  col.conf = "black", lty.conf = 4, add = FALSE, nsim = 1000, ...)
 }
 \arguments{
 \item{x}{fitode object}
@@ -21,6 +21,10 @@
 \item{method}{confidence interval method}
 
 \item{onepage}{(logical) print all figures on one page?}
+
+\item{xlim}{x coordinates range}
+
+\item{ylim}{y coordinates range}
 
 \item{xlabs}{a label for the x axis}
 

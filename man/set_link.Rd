@@ -22,3 +22,4 @@ not specified
 \seealso{
 \code{\link{make.link}}
 }
+\keyword{internal}

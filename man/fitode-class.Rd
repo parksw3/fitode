@@ -12,7 +12,7 @@ Result of ode fitting based on Maximum Likelihood Estimation
 \section{Slots}{
 
 \describe{
-\item{\code{model}}{model.ode object}
+\item{\code{model}}{odemodel object}
 
 \item{\code{data}}{the time series data}
 

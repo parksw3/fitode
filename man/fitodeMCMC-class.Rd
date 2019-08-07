@@ -12,7 +12,7 @@ Result of ode fitting based on Markov Chain Monte Carlo (MCMC)
 \section{Slots}{
 
 \describe{
-\item{\code{model}}{model.ode object}
+\item{\code{model}}{odemodel object}
 
 \item{\code{data}}{the time series data}
 

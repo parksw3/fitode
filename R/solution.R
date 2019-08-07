@@ -17,14 +17,14 @@ setClass(
         name = "character",
         y = "numeric",
         times = "numeric",
-        model = "model.ode",
+        model = "odemodel",
         parms = "numeric",
         solution = "data.frame",
         sensitivity = "list"
     )
 )
 
-##' the initializer for model.ode
+##' Constructor for solution.ode class
 ##'
 ##' @param .Object object
 ##' @param y initial values
@@ -95,7 +95,7 @@ setMethod(
 )
 
 ##' solve ode models
-##' @param model model.ode object
+##' @param model odemodel object
 ##' @param times time vector
 ##' @param parms named vector of parameter values
 ##' @param y initial values
