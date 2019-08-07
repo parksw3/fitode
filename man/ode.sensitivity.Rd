@@ -22,3 +22,4 @@ ode.sensitivity(model, parms, times, solver.opts = list(method = "rk4"),
 Calculate the derivative of an expression with respect to model parameters
 using sensitivity equations and chain rule
 }
+\keyword{internal}

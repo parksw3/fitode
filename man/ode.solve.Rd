@@ -23,3 +23,4 @@ ode.solve(model, times, parms, y, solver.opts = list(method = "rk4"),
 \description{
 solve ode models
 }
+\keyword{internal}

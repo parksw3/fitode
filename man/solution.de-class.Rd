@@ -27,3 +27,4 @@ Result of solving ode modeld with/without sensitivity equations
 \item{\code{sensitivity}}{partial derivative of each state variable with respect to the parameters}
 }}
 
+\keyword{internal}

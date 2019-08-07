@@ -30,3 +30,4 @@ a vector of nll and derivative of nll with respect to model parameters
 Calculate the derivative of the log-likelihood function with respect to model parameters
 using sensitivity equations and chain rule
 }
+\keyword{internal}

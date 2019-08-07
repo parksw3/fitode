@@ -328,6 +328,7 @@ fitode <- function(model, data,
 ##' @param times time window for which the model should be solved
 ##' @param solver.opts options for the ode solver (see \code{\link{ode}})
 ##' @param solver ode solver
+##' @keywords internal
 ode.sensitivity <- function(model,
                             parms, times,
                             solver.opts=list(method="rk4"),
@@ -373,6 +374,7 @@ ode.sensitivity <- function(model,
 ##' @param return.traj (logical) return estimated trajectory
 ##' @return a vector of nll and derivative of nll with respect to model parameters
 ##' (or a list containing (1) the estimated traejctory and (2) a vector of nll and its derivatives)
+##' @keywords internal
 logLik.sensitivity <- function(parms,
                                model,
                                data,

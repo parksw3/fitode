@@ -10,6 +10,7 @@
 ##' @slot parms parameters of the solution
 ##' @slot solution solution of the model
 ##' @slot sensitivity partial derivative of each state variable with respect to the parameters
+##' @keywords internal
 ##' @exportClass solution.ode
 setClass(
     "solution.ode",
@@ -34,6 +35,7 @@ setClass(
 ##' @param solver.opts options for ode solver
 ##' @param solver ode solver (must take y, times, func, and parms as arguments)
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod initialize
 setMethod(
     "initialize",
@@ -102,6 +104,7 @@ setMethod(
 ##' @param solver.opts options for ode solver
 ##' @param solver ode solver (must take y, times, func, and parms as arguments)
 ##' @import deSolve
+##' @keywords internal
 ##' @export
 ode.solve <- function(model, times, parms, y,
                  solver.opts=list(method="rk4"),

@@ -26,3 +26,4 @@
 \description{
 Constructor for solution.ode class
 }
+\keyword{internal}
