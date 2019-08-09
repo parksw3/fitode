@@ -4,3 +4,6 @@
 .Ruserdata
 vignettes/figure
 *~
+*/#*
+*/.#*
+*/cache

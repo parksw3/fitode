@@ -1,0 +1,169 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{Outline of paper}
+%\documentclass[nojss]{jss}
+\documentclass{article}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage[utf8]{inputenc}
+\bibliographystyle{chicago}
+\usepackage{amsmath}
+%% https://tex.stackexchange.com/questions/59702/suggest-a-nice-font-family-for-my-basic-latex-template-text-and-math/59706
+\usepackage{mathpazo}
+\usepackage{sober}
+%% https://tex.stackexchange.com/questions/5223/command-for-argmin-or-argmax
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\code}[1]{{\tt #1}}
+\newcommand{\pkg}[1]{\href{https://CRAN.R-project.org/package=#1}{#1}}
+\newcommand{\bmb}[1]{{\color{red} \emph{#1}}}
+\newcommand{\swp}[1]{{\color{blue} \emph{#1}}}
+\newcommand{\djde}[1]{{\color{magenta} \emph{#1}}}
+
+\title{So you want to fit ODEs to data \ldots \bmb{title???}}
+\author{Sang Woo Park \and Ben Bolker \and David J. D. Earn}
+\date{\today}
+\begin{document}
+\maketitle
+
+\textbf{Target audience:} students and researchers with some degree
+of mathematical sophistication who aren't necessarily great with statistics. They know a reasonable amount about ODEs, probably a little bit about numerical integration, maybe next to nothing about maximum likelihood/process vs observation error/state space models/MCMC/etc..
+
+\textbf{Target journal:} R Journal? JSS? Bull Math Biol?  MEE?
+
+\section{Introduction}
+
+
+\section{Trajectory matching: from simple to complex}
+
+\subsection{Least-squares fitting}
+
+% \newcommand{\traj}{\ensuremath{{\cal T}}}
+\newcommand{\params}{\ensuremath{\boldsymbol{\beta}}}
+\newcommand{\state}{\ensuremath{\boldsymbol{y}}}
+\newcommand{\traj}{\ensuremath{\hat \state}}
+
+The natural (``intuitive''?) approach. Suppose we have (1) a set of gradient functions; (2) a method for numerical integration; (3) a set of observations (for simplicity, from a single time series); (4) a method for numerical minimization of an objective function. Define a trajectory ( a solution of the ODE for specified parameters $\params$ [and ICs] and time points $t_i$) as $\traj(\params,t_i)$ \bmb{notation???}
+\begin{equation}
+\hat \params =  \argmin_{\params} \sum_i \left( \state(t_i) - \traj(\params,t_i) \right)^2
+\end{equation}
+
+\begin{description}
+\item[gradient functions]{should be straightforward (you know what you
+  want to model, right? \ldots)}
+\item[observations]{as noted above, we're assuming a single time series for now.  Regularity of sampling isn't much of a problem. It's OK to measure a subset of the state variables (e.g. just prevalence of infected in an SIR model, or just predators in a pred-prey model). May need some care to make sure you're comparing observations with ODE properly (e.g. do observations represent measurements of state variables, rates, or integrals of rates? Measuring cumulative properties may have tricky statistical consequences later \ldots)}
+\item[integrator]{for simple problems, anything should do. Open question as to whether
+  simple/stable (e.g. RK4) is better than something more sophisticated (e.g. LSODA)
+  \bmb{in general, the easier the problem, the less the details matter!}}
+\item[minimizer]{similar to integrator, i.e. details don't matter if the problem is easy. Derivative-free methods such as Nelder-Mead are robust but slower; derivative-based methods are effective \emph{if sensitivity equations are used} (see below). Some minimizers such as Levenberg-Marquardt are particularly tuned to least-squares (although derivs still matter)}
+\item[initial conditions]{if all variables are observed, we can pretend the initial observations as known without error and set $\hat \state(0) = \state(0)$. Otherwise we have to treat ICs as auxiliary parameters.}
+\end{description}
+
+Least-squares fits provide solutions that are in some sense ``optimal'' (although the Gauss-Markov theorem only applies to \emph{linear} models), but don't provide any scope for inference. That said, by avoiding inference, one also avoids having to think much about the characteristics of the observations (independence, distribution, \ldots)
+
+EXAMPLE? (this would look a bit funny with \code{fitode} as we'd have to use a fake-Gaussian)
+
+\subsection{Gaussian errors}
+
+If we're willing to assume that the residuals (observed-expected) are \emph{independent}, \emph{identically distributed} Gaussian random variables, then we can start making statistical inferences: confidence intervals on parameters, confidence and prediction intervals on predictions, etc.. Assuming independence of successive residuals typically means we are assuming that the noise in the data is \emph{observation error}; that is, the underlying process is deterministic (and smooth), and all the noise in the data comes from (independent) imperfect observations of the process.
+
+\begin{itemize}
+\item Gaussian errors are equivalent to \emph{scaled} least-squares errors
+\item we can fit via explicit Gaussian (with or without normalization terms),
+  profiled Gaussian (set $\hat \sigma = \textrm{RSS}/n$), or quasi-likelihood (fit
+  with $\sigma=1$, then estimate $\hat \sigma$ from final value of RSS)
+\item once we have a Gaussian fit, we can use standard methods (Fisher information/Wald)
+  to estimate parameter CIs [still assuming iid Gaussian]
+\item for CIs on predictions or forecasts, use delta method or [whatever it's called when we sample from a MVN sampling distribution of parameters; par. bootstrap? PPI?] or importance sampling or \ldots
+\item now we are assuming independence, so measuring cumulative variables will result in incorrect inference (cf. ODE papers in epidemiology that do this carelessly??)
+\end{itemize}
+
+EXAMPLE?
+
+\subsection{non-Gaussian errors}
+
+Once we've gotten this far, it's fairly easy to extend the model to cover conditional distributions other than Gaussian. For example, we often have count data that would naturally be modeled by a Poisson or negative binomial distribution.
+
+EXAMPLE? (does \code{fitode} have an \code{update} method? that would be
+a cute way to make compact examples)
+
+This doesn't raise very many additional problems.
+
+\section{Increasing robustness and efficiency}
+
+So far we've assumed that the numerical methods should Just Work.
+People often have really crappy data (e.g., very short time series, complex models).
+In R, we're typically depending on derivatives computed by finite differences.
+
+\subsection{Sensitivity equations}
+
+Don't forget to cite \cite{raue2013lessons}.
+
+\subsection{Link functions}
+
+aka, transforming parameters to unconstrained scales.
+Don't know if this deserves its own section, but it's a good idea.
+Generally improves scaling, applicability of Wald approximations, robustness.
+
+The only caveat (besides increased complexity) is that if a parameter ever
+ends up on the boundary of its feasible space, then transforming to an
+unconstrained space will push the optimum to infinity, leading to problems \ldots
+box constraints may be better in this case, although Wald-based inference will
+break in any case.
+
+\subsection{Self-starting models}
+
+\code{fitode} doesn't do this at present; demote to an ``other'' paragraph?
+
+\subsection{Compiled models}
+
+\code{fitode} doesn't do this at present; demote to an ``other'' paragraph?
+See \href{https://cran.r-project.org/package=deSolve/vignettes/compiledCode.pdf}{deSolve vignette on compiled gradient functions}: also cf. \pkg{nimble}, \pkg{odeintr}, \pkg{cOde}, \pkg{dMod}, \pkg{rodeo}, others?
+
+\subsection{Multi-start methods}
+
+Slow (hence faster integration would be nice) but deals with multi-modality.
+Again cf. \cite{raue2013lessons}: Latin hypercube, Sobol, etc..  They discuss diagnosis of
+multi-modality as well.
+
+\subsection{Other}
+
+Should we include regularization here?  Box constraints are a cheaper/easier possibility.
+Regularization would make a nice lead-up to Bayesian methods.
+
+\section{Beyond frequentist models}
+
+\bmb{hard to decide on the best order: beyond-freq (i.e. Bayesian) then beyond-trajectories or vice versa? Reasons you would need these do overlap, although not completely}
+
+Discuss advantages of Bayesian approach (priors, integration over uncertainty). Need to think about sampling (Gibbs, Metrop-Hastings, HMC \ldots)
+
+Stan, boms (??), \pkg{deBInfer}
+
+\section{Beyond trajectory-matching}
+
+\subsection{gradient matching etc. (process error only?)}
+
+\pkg{CollocInfer}, papers by Hooker/Ellner/etc.; Kim McAuley
+
+\subsection{state-space models}
+
+Huge range here. Sequential Monte Carlo (pomp etc.). Kalman/extended Kalman filters?
+\cite{heydari2014fast} (SDEs + Bayesian + Kalman filter)
+
+Mention ABC/synthetic likelihood?
+
+\subsection{random effects/mixed models}
+
+What do we want to say here? Easier in Bayesian-toolbox contexts such as Stan. \pkg{nlmeODE}; \cite{tornoe2004nonlinear} \ldots
+
+\section{Package comparison}
+
+\section{Miscellaneous}
+
+\begin{itemize}
+\item Appropriate citations to PKPD literature, e.g. \pkg{RxODE}, \cite{wang2016tutorial} (although this looks like it is a simulation rather than fitting tool?). In many cases they use particular models with nonlinear but known solutions, e.g. two-compartment linear models.
+\item cite that mixed-ODE paper we reviewed.
+\item Discuss identifiability/estimability?
+\end{itemize}
+
+\bibliography{fitode}
+\end{document}
