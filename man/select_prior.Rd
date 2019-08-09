@@ -20,3 +20,4 @@ select_prior(family = c("dnorm", "dgamma", "dbeta"),
 \description{
 Select a prior model
 }
+\keyword{internal}

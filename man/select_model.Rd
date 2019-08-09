@@ -8,8 +8,9 @@ select_model(dist = c("dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1",
   "dgamma"))
 }
 \arguments{
-\item{dist}{conditional distribution of reported data}
+\item{dist}{conditional distribution of reported data (dnorm, dnorm2, dpois, dnbinom, dnbinom1, dgamma)}
 }
 \description{
 Select a log-likelihood model
 }
+\keyword{internal}

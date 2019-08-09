@@ -3,7 +3,7 @@
 \docType{methods}
 \name{vcov,fitode-method}
 \alias{vcov,fitode-method}
-\title{Extract variance-covariance matrix}
+\title{Extract variance-covariance matrix from fitode objects}
 \usage{
 \S4method{vcov}{fitode}(object, type = c("response", "links"))
 }

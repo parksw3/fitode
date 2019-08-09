@@ -3,7 +3,7 @@
 \docType{methods}
 \name{profile,fitode-method}
 \alias{profile,fitode-method}
-\title{Profile object}
+\title{Profile fitode objects}
 \usage{
 \S4method{profile}{fitode}(fitted, which = 1:p, alpha = 0.05,
   trace = FALSE)
@@ -12,5 +12,5 @@
 \item{fitted}{fitted model object}
 }
 \description{
-Profile object
+Profile fitode objects
 }

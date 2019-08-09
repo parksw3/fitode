@@ -3,7 +3,7 @@
 \docType{methods}
 \name{initialize,solution.ode-method}
 \alias{initialize,solution.ode-method}
-\title{the initializer for model.ode}
+\title{Constructor for solution.ode class}
 \usage{
 \S4method{initialize}{solution.ode}(.Object, y, times, model, parms,
   solver.opts = list(method = "rk4"), solver = ode)
@@ -24,5 +24,6 @@
 \item{solver}{ode solver (must take y, times, func, and parms as arguments)}
 }
 \description{
-the initializer for model.ode
+Constructor for solution.ode class
 }
+\keyword{internal}

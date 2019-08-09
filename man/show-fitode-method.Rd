@@ -3,7 +3,7 @@
 \docType{methods}
 \name{show,fitode-method}
 \alias{show,fitode-method}
-\title{Show \code{fitode} object}
+\title{Show fitode objects}
 \usage{
 \S4method{show}{fitode}(object)
 }
@@ -11,5 +11,6 @@
 \item{object}{fitode object}
 }
 \description{
-Show \code{fitode} object
+Show fitode objects
 }
+\keyword{internal}

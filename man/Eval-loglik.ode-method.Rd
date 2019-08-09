@@ -24,3 +24,4 @@ numeric
 \description{
 Evaluate the log-likelihood model
 }
+\keyword{internal}

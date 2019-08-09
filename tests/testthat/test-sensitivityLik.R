@@ -2,7 +2,7 @@ stopifnot(require("testthat"), require(numDeriv), require("fitode"))
 
 context("likelihood sensitivity tests")
 test_that("SI model", {
-    SI_model <- new("model.ode",
+    SI_model <- odemodel(
         name = "SI",
         model = list(
             S ~ - beta*S*I/N,

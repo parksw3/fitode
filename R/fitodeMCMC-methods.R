@@ -59,22 +59,22 @@ setMethod("predict", "fitodeMCMC",
     }
 )
 
-##' Extracts estimated parameters
+##' Extracts estimated parameters (median of the marginal posterior distributions)
 ##'
-##' @title Extract model coefficients
+##' @title Extract model coefficients from fitodeMCMC objects
 ##' @param object fitodeMCMC object
 ##' @docType methods
 setMethod("coef", "fitodeMCMC", function(object) object@coef)
 
 ##' Calculates variance-covariance matrix from posterior samples
 ##'
-##' @title Extract variance-covariance matrix
+##' @title Extract variance-covariance matrix from fitodeMCMC objects
 ##' @param object fitodeMCMC object
 ##' @docType methods
 setMethod("vcov", "fitodeMCMC", function(object) object@vcov)
 
-##' Calculates standard error by taking the square root of the diagonal matrix
-##' @title Extract standard error
+##' Calculates standard error by taking the square root of the diagonal of the variance-covariance matrix
+##' @title Extract standard error from fitodeMCMC objects
 ##' @param x fitodeMCMC object
 ##' @docType methods
 setMethod("stdEr", "fitodeMCMC", function(x) sqrt(diag(vcov(x))))
@@ -83,7 +83,7 @@ setMethod("stdEr", "fitodeMCMC", function(x) sqrt(diag(vcov(x))))
 ##' Calculate confidence intervals for model parameters and their transformations
 ##' from posterior samples.
 ##'
-##' @title Calculate confidence intervals for model parameters and their transformations
+##' @title Calculate confidence intervals from fitodeMCMC objects for model parameters and their transformations
 ##' @param object fitodeMCMC object
 ##' @param parm character vector specifying model parameters or list of formuals specifying transformations
 ##' @param level the credible level required
@@ -126,10 +126,10 @@ setMethod("confint","fitodeMCMC",
     }
 )
 
-##' Summarize \code{fitodeMCMC} object;
+##' Summarize fitodeMCMC object;
 ##' returns estimate, standard error, confidence intervals, effective sample sizes, and gelman-rubin diagnostic
 ##'
-##' @title Summarize \code{fitodeMCMC} object
+##' @title Summarize fitodeMCMC object
 ##' @param object fitodeMCMC object
 ##' @seealso \code{\link{effectiveSize}} \code{\link{gelman.diag}}
 ##' @docType methods
@@ -154,11 +154,12 @@ setMethod("summary","fitodeMCMC",
     }
 )
 
-##' Show \code{fitodeMCMC} object
+##' Show fitodeMCMC object
 ##'
-##' @title Show \code{fitodeMCMC} object
+##' @title Show fitodeMCMC object
 ##' @param object fitodeMCMC object
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod show
 setMethod("show", "fitodeMCMC",
     function(object) {

@@ -15,6 +15,10 @@ plot_internal(pred, data, onepage = TRUE, xlim, ylim, xlabs, ylabs,
 
 \item{onepage}{(logical) print all figures on one page?}
 
+\item{xlim}{x coordinates range}
+
+\item{ylim}{y coordinates range}
+
 \item{xlabs}{a label for the x axis}
 
 \item{ylabs}{a label for the y axis}

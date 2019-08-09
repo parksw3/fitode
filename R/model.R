@@ -1,16 +1,18 @@
-##' Initializer for model.ode objects
+##' Constructor method of "odemodel" class
 ##'
 ##' @param .Object object
-##' @slot name name of the model
-##' @slot model ode model
-##' @slot observation observation model
-##' @slot initial initial values
-##' @slot par model parameters
-##' @slot link link functions for parameters (log links are used as default)
-##' @slot diffnames optional character vector specifying the names of a variable for which the consecutive difference needs to be calculated
-##' @slot keep_sensitivity (logical) maintain the Jacobian as part of the model
+##' @param name name of the model
+##' @param model ode model
+##' @param observation observation model
+##' @param initial initial values
+##' @param par model parameters
+##' @param link link functions for parameters (log links are used as default)
+##' @param diffnames optional character vector specifying the names of a variable for which the consecutive difference needs to be calculated
+##' @param keep_sensitivity (logical) maintain the Jacobian as a part of the model object?
+##' @name odemodel
+##' @rdname odemodel-class
 ##' @examples
-##' SI_model <- new("model.ode",
+##' SI_model <- odemodel(
 ##'     name = "SI",
 ##'     model = list(
 ##'         S ~ - beta*S*I/N,
@@ -31,7 +33,7 @@
 ##' @exportMethod initialize
 setMethod(
     "initialize",
-    "model.ode",
+    "odemodel",
     function(.Object, name,
              model,
              observation,
@@ -221,15 +223,23 @@ setMethod(
     }
 )
 
+##' Wrapper function odemodel
+##' @name odemodel
+##' @rdname odemodel-class
+##' @keywords internal
+##' @export
+odemodel <- function(...) new("odemodel", ...)
+
 ##' Evaluate the gradients of a model
-##' @param object model.ode object
+##' @param object odemodel object
 ##' @param state state
 ##' @param par parameter values
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod grad
 setMethod(
     "grad",
-    "model.ode",
+    "odemodel",
     function(object, state, par) {
         frame <- as.list(c(state, par))
         gr <- sapply(object@grad, eval, frame)
@@ -238,15 +248,16 @@ setMethod(
 )
 
 ##' Evaluate the jacobian of the gradients
-##' @param object model.ode object
+##' @param object odemodel object
 ##' @param state state
 ##' @param par parameter values
 ##' @param type state of par?
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod jacobian
 setMethod(
     "jacobian",
-    "model.ode",
+    "odemodel",
     definition <- function(object, state, par, type=c("initial", "state", "par")) {
         type <- match.arg(type)
         frame <- as.list(c(state, par))
@@ -264,14 +275,15 @@ setMethod(
 )
 
 ##' Transform the model
-##' @param object model.ode object
+##' @param object odemodel object
 ##' @param transforms list of formulas specifying transformations
 ##' @param par model parameters
 ##' @param keep_sensitivity (logical) maintain the Jacobian as part of the model
+##' @keywords internal
 ##' @exportMethod Transform
 setMethod(
     "Transform",
-    "model.ode",
+    "odemodel",
     function(object, transforms=NULL, par, keep_sensitivity) {
 
         if (missing(keep_sensitivity)) keep_sensitivity <- object@keep_sensitivity
@@ -306,7 +318,7 @@ setMethod(
 
         if (missing(par)) par <- object@par
 
-        new("model.ode",
+        new("odemodel",
             object@name,
             newmodel,
             newobservation,
@@ -319,9 +331,10 @@ setMethod(
 )
 
 ##' Show the model
-##' @param object model.ode object
+##' @param object odemodel object
+##' @keywords internal
 ##' @exportMethod show
-setMethod("show", "model.ode",
+setMethod("show", "odemodel",
     function(object){
         cat("Name:", object@name, "\n")
 

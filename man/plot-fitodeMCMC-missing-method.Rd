@@ -7,8 +7,8 @@
 \title{Plot a fitodeMCMC object}
 \usage{
 \S4method{plot}{fitodeMCMC,missing}(x, level, data, which,
-  onepage = TRUE, xlabs, ylabs, col.traj = "black", lty.traj = 1,
-  col.conf = "black", lty.conf = 4, add = FALSE, ...)
+  onepage = TRUE, xlim, ylim, xlabs, ylabs, col.traj = "black",
+  lty.traj = 1, col.conf = "black", lty.conf = 4, add = FALSE, ...)
 }
 \arguments{
 \item{x}{fitodeMCMC object}
@@ -18,6 +18,10 @@
 \item{which}{which to plot}
 
 \item{onepage}{(logical) print all figures on one page?}
+
+\item{xlim}{x coordinates range}
+
+\item{ylim}{y coordinates range}
 
 \item{xlabs}{a label for the x axis}
 

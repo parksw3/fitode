@@ -3,7 +3,7 @@
 \docType{methods}
 \name{stdEr,fitodeMCMC-method}
 \alias{stdEr,fitodeMCMC-method}
-\title{Extract standard error}
+\title{Extract standard error from fitodeMCMC objects}
 \usage{
 \S4method{stdEr}{fitodeMCMC}(x)
 }
@@ -11,5 +11,5 @@
 \item{x}{fitodeMCMC object}
 }
 \description{
-Calculates standard error by taking the square root of the diagonal matrix
+Calculates standard error by taking the square root of the diagonal of the variance-covariance matrix
 }

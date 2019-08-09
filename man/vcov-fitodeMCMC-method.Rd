@@ -3,7 +3,7 @@
 \docType{methods}
 \name{vcov,fitodeMCMC-method}
 \alias{vcov,fitodeMCMC-method}
-\title{Extract variance-covariance matrix}
+\title{Extract variance-covariance matrix from fitodeMCMC objects}
 \usage{
 \S4method{vcov}{fitodeMCMC}(object)
 }

@@ -14,3 +14,4 @@ jacobian(object, ...)
 \description{
 S4 generic for computing a jacobian
 }
+\keyword{internal}

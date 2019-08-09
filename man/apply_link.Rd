@@ -22,3 +22,4 @@ returns derivative of inverse link functions
 \seealso{
 \code{\link{make.link}}
 }
+\keyword{internal}

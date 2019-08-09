@@ -131,6 +131,9 @@ plot_internal <- function(pred,
 
     if (missing(xlabs)) xlabs <- rep("times", length(pred))
 
+    auto_ylim <- missing(ylim)
+    auto_xlim <- missing(xlim)
+
     for (i in 1:length(pred)) {
         obs.df <- data.frame(
             x=data$times,
@@ -139,13 +142,13 @@ plot_internal <- function(pred,
 
         pred.df <- pred[[i]]
 
-        if (missing(ylim)) {
+        if (auto_ylim) {
             ymin <- 0.95 * min(min(unlist(pred.df[,-1])), obs.df$y, na.rm=TRUE)
             ymax <- 1.05 * max(max(unlist(pred.df[,-1])), obs.df$y, na.rm=TRUE)
             ylim <- c(ymin, ymax)
         }
 
-        if (missing(xlim)) {
+        if (auto_xlim) {
             xlim <- c(min(obs.df$x), max(obs.df$x))
         }
 

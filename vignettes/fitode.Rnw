@@ -97,7 +97,7 @@ for simplicity, we can assume that the observed number of confirmed cases at tim
 Poisson error distribution with mean $X(t)$. This model can be constructed in \texttt{fitode} as
 follows:
 <<expmodel>>=
-exp_model <- new("model.ode",
+exp_model <- odemodel(
     name="exponential",
     model=list(
         X ~ r * X
@@ -162,7 +162,7 @@ is equal to the mean. Instead, we can use a negative binomial distribution, whic
 assumes that variance is a quadratic function of the mean. Then, we have to estimate an
 extra parameter (\texttt{size} argument of the \texttt{dnbinom}) to account for overdispersion:
 <<>>=
-exp_model_nbinom <- new("model.ode",
+exp_model_nbinom <- odemodel(
     name="exponential (nbinom)",
     model=list(
         X ~ r * X
@@ -215,7 +215,7 @@ Instead, we can use \emph{interval counts} to model the true number of cases:
 $X(t) - X(t - \Delta t)$, where $\Delta t$ is the reporting time step.
 This is done by using the \texttt{diffnames} argument
 <<>>=
-logistic_model <- new("model.ode",
+logistic_model <- odemodel(
     name="logistic (nbinom)",
     model=list(
         X ~ r * X * (1 - X/K)
@@ -321,7 +321,7 @@ cumulative number of recovered cases (state variable $R$).
 
 Again, we use interval counts by using \texttt{diffnames=``R''}:
 <<>>=
-SIR_model <- new("model.ode",
+SIR_model <- odemodel(
     name="SIR (nbinom)",
     model=list(
         S ~ - beta * S * I/N,
@@ -446,7 +446,7 @@ Lotka-Volterra model:
 \end{aligned}
 \end{equation}
 <<>>=
-lotka_model <- new("model.ode",
+lotka_model <- odemodel(
     name="Lotka Volterra model",
     model=list(
         u ~ alpha * u - beta * u * v,
@@ -482,7 +482,7 @@ coef(harefit)
 @
 This suggests that poisson is actually enough:
 <<>>=
-lotka_model2 <- new("model.ode",
+lotka_model2 <- odemodel(
     name="Lotka Volterra model (posson)",
     model=list(
         u ~ alpha * u - beta * u * v,

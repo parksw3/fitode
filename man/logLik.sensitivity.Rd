@@ -10,7 +10,7 @@ logLik.sensitivity(parms, model, data, solver.opts = list(method =
 \arguments{
 \item{parms}{named vector of parameter values}
 
-\item{model}{model.ode object}
+\item{model}{odemodel object}
 
 \item{data}{data}
 
@@ -30,3 +30,4 @@ a vector of nll and derivative of nll with respect to model parameters
 Calculate the derivative of the log-likelihood function with respect to model parameters
 using sensitivity equations and chain rule
 }
+\keyword{internal}

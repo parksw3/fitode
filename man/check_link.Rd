@@ -7,7 +7,7 @@
 check_link(model, link)
 }
 \arguments{
-\item{model}{model.ode object}
+\item{model}{odemodel object}
 
 \item{link}{named vector specifying link functions}
 }
@@ -15,3 +15,4 @@ check_link(model, link)
 Check link functions for model parameters -- for \code{\link{fitode}}
 internal usage
 }
+\keyword{internal}

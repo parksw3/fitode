@@ -3,7 +3,7 @@
 \docType{methods}
 \name{confint,fitode-method}
 \alias{confint,fitode-method}
-\title{Calculate confidence intervals for model parameters and their transformations}
+\title{Calculate confidence intervals from fitode objects for model parameters and their transformations}
 \usage{
 \S4method{confint}{fitode}(object, parm, level = 0.95,
   method = c("delta", "profile", "impsamp", "wmvrnorm"), nsim = 1000,

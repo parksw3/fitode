@@ -7,6 +7,7 @@
 ##' @param par additional parameter names
 ##' @param keep_grad maintain the gradient as part of the model
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod initialize
 setMethod(
     "initialize",
@@ -51,6 +52,7 @@ setMethod(
 ##' @param keep_grad maintain the gradient as part of the model
 ##' @return loglik.ode object
 ##' @docType methods
+##' @keywords internal
 ##' @exportMethod Transform
 setMethod(
     "Transform",
@@ -82,6 +84,7 @@ setMethod(
 ##' @param prior list of formulas
 ##' @param prior.density (logical) does this represent a probability density?
 ##' @param keep_grad (logical) keep gradient?
+##' @keywords internal
 make_prior <- function(model, link, prior, prior.density=TRUE, keep_grad=TRUE) {
     prior_list <- lapply(prior, function(ll) {
         tlink <- link[match(deparse(ll[[2]]), names(link))]
@@ -132,6 +135,7 @@ make_prior <- function(model, link, prior, prior.density=TRUE, keep_grad=TRUE) {
 ##' @param link link
 ##' @param prior.density (logical) keep the Jacobian of transformations?
 ##' @param keep_grad (logical) keep gradients?
+##' @keywords internal
 select_prior <- function(family = c("dnorm", "dgamma", "dbeta"),
                          link = c("identity", "log", "logit"),
                          prior.density=TRUE,

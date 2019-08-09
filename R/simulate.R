@@ -1,7 +1,7 @@
 ##' simulate model objects
 ##'
-##' @aliases simulate,model.ode-method
-##' @param object model.ode object
+##' @aliases simulate,odemodel-method
+##' @param object odemodel object
 ##' @param nsim number of simulations
 ##' @param seed seed
 ##' @param times time vector
@@ -13,7 +13,7 @@
 ##' @docType methods
 ##' @importFrom bbmle simulate
 ##' @exportMethod simulate
-setMethod("simulate", "model.ode",
+setMethod("simulate", "odemodel",
     function(object, nsim=1,
              seed=NULL,
              times, parms, y,
@@ -56,7 +56,7 @@ setMethod("simulate", "fitode",
 ##' Simulates deterministic trajectories and propagates observation error
 ##'
 ##' @title Internal function for simulation models
-##' @param model model.ode object
+##' @param model odemodel object
 ##' @param times time vector
 ##' @param parms named vector of parameter values
 ##' @param y initial values

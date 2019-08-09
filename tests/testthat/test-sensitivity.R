@@ -2,7 +2,7 @@ stopifnot(require("testthat"), require(numDeriv), require("fitode"))
 
 context("sensitivity tests")
 test_that("SI model", {
-    SI_model <- new("model.ode",
+    SI_model <- odemodel(,
         name = "SI",
         model = list(
             S ~ - beta*S*I/N,
@@ -30,7 +30,7 @@ test_that("SI model", {
 })
 
 test_that("SEI model", {
-    SEI_model <- new("model.ode",
+    SEI_model <- odemodel(
         name = "SEI",
         model = list(
             S ~ - beta*S*I/N,
@@ -61,7 +61,7 @@ test_that("SEI model", {
 })
 
 test_that("Van der Pol oscillator", {
-    VdP <- new("model.ode",
+    VdP <- odemodel("model.ode",
         name = "VdP",
         model = list(
             y1 ~ y2,

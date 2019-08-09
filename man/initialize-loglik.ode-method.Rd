@@ -26,3 +26,4 @@
 \description{
 The initializer for loglik.ode
 }
+\keyword{internal}
