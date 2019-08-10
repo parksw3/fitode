@@ -119,6 +119,10 @@ break in any case.
 \code{fitode} doesn't do this at present; demote to an ``other'' paragraph?
 See \href{https://cran.r-project.org/package=deSolve/vignettes/compiledCode.pdf}{deSolve vignette on compiled gradient functions}: also cf. \pkg{nimble}, \pkg{odeintr}, \pkg{cOde}, \pkg{dMod}, \pkg{rodeo}, others?
 
+Speed is important when using simulation-based methods (SMC, ABC, etc.;
+see below) or when fitting a large number of series. (Sensitivity-based
+methods can help improve speed, but not as much as compilation.)
+
 \subsection{Multi-start methods}
 
 Slow (hence faster integration would be nice) but deals with multi-modality.
