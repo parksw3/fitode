@@ -12,6 +12,8 @@ Result of ode fitting based on Markov Chain Monte Carlo (MCMC)
 \section{Slots}{
 
 \describe{
+\item{\code{call}}{(languge) The call to \code{\link{fitodeMCMC}}}
+
 \item{\code{model}}{odemodel object}
 
 \item{\code{data}}{the time series data}

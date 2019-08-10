@@ -12,6 +12,8 @@ Result of ode fitting based on Maximum Likelihood Estimation
 \section{Slots}{
 
 \describe{
+\item{\code{call}}{(languge) The call to \code{\link{fitode}}}
+
 \item{\code{model}}{odemodel object}
 
 \item{\code{data}}{the time series data}

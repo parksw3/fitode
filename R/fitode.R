@@ -83,8 +83,8 @@ fixpar <- function(model, fixed) {
 
     model <- Transform(
         model,
-        tlist,
-        par
+        transforms=tlist,
+        par=par
     )
 
     model
