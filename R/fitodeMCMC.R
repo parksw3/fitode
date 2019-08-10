@@ -40,6 +40,8 @@ fitodeMCMC <- function(model, data,
                        solver.opts=list(method="rk4"),
                        solver=ode,
                        ...) {
+    call <- match.call()
+
     if (missing(start))
         stop("starting parameters must be specified via 'start'")
 
@@ -212,7 +214,9 @@ fitodeMCMC <- function(model, data,
     reslist <- coda::as.mcmc.list(reslist)
     lplist <- coda::as.mcmc.list(lplist)
 
-    new("fitodeMCMC", model=model, data=data, coef=coef, vcov=vcov,
+    new("fitodeMCMC",
+        call=call,
+        model=model, data=data, coef=coef, vcov=vcov,
         mcmc=reslist,
         lp=lplist,
         link=link,

@@ -137,6 +137,8 @@ fitode <- function(model, data,
                    force.hessian=FALSE,
                    use.ginv=TRUE,
                    ...) {
+    call <- match.call()
+
     if (missing(start)) stop("starting parameters must be specified via `start'")
 
     if (length(fixed) > 0) model <- fixpar(model, fixed)
@@ -312,11 +314,26 @@ fitode <- function(model, data,
         vcov <- matrix(NA, length(modelpar), length(modelpar))
     }
 
-    new("fitode", model=model, data=data, coef=coef, vcov=vcov,
+    out <- new("fitode", call=call, model=model, data=data, coef=coef, vcov=vcov,
         min=m@min, mle2=m, link=link,
         fixed=as.list(fixed),
         prior=prior
     )
+
+    ## check if this is ols
+    if (length(model@observation) == 1) {
+        if(as.character(model@observation[[1]][[3]][[1]])=="ols") {
+            pred <- predict(out)[[1]]$estimate
+            resid <- pred - out@data[,2]
+
+            estvar <- var(resid)
+
+            out@vcov <- out@vcov * estvar * 2
+            out@mle2@vcov <- out@mle2@vcov * estvar * 2
+        }
+    }
+
+    out
 }
 
 ##' Calculate the derivative of an expression with respect to model parameters

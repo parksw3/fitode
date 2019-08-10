@@ -137,9 +137,14 @@ setMethod(
         }
 
         loglik_list <- lapply(observation, function(ll) {
+            if (as.character(ll[[3]][[1]])=="ols" && length(observation) > 1) {
+                stop("'ols' is only available for univariate time series")
+            }
+
             ll_model <- select_model(as.character(ll[[3]][[1]]))
 
-            ll_check <- match(c(ll_model@mean, ll_model@par), names(as.list(ll[[3]])[-1]))
+            ll_check <- c(match(c(ll_model@mean, ll_model@par), names(as.list(ll[[3]])[-1])),
+                          match(names(as.list(ll[[3]])[-1]), c(ll_model@mean, ll_model@par)))
 
             if (any(is.na(ll_check))) {
                 ll_check_msg <- paste0(

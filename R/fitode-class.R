@@ -84,6 +84,7 @@ setClass(
 ##' Class "fitode".
 ##' Result of ode fitting based on Maximum Likelihood Estimation
 ##'
+##' @slot call (languge) The call to \code{\link{fitode}}
 ##' @slot model odemodel object
 ##' @slot data the time series data
 ##' @slot coef estimated parameters
@@ -97,6 +98,7 @@ setClass(
 ##' @exportClass fitode
 setClass("fitode",
     slots = c(
+        call="language",
         model="odemodel",
         data="data.frame",
         coef="numeric",
@@ -115,6 +117,7 @@ setOldClass("mcmc.list")
 ##' Class "fitodeMCMC".
 ##' Result of ode fitting based on Markov Chain Monte Carlo (MCMC)
 ##'
+##' @slot call (languge) The call to \code{\link{fitodeMCMC}}
 ##' @slot model odemodel object
 ##' @slot data the time series data
 ##' @slot coef estimated parameters (posterior median)
@@ -128,6 +131,7 @@ setOldClass("mcmc.list")
 ##' @exportClass fitodeMCMC
 setClass("fitodeMCMC",
          slots = c(
+             call="language",
              model="odemodel",
              data="data.frame",
              coef="numeric",
