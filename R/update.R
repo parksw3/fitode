@@ -38,7 +38,7 @@ update_internal <- function(object,
                             ...){
     call <- object@call
 
-    extras <- match.call(expand.dots = FALSE)$...
+    extras <- list(...)
 
     model <- eval(call$model)
 
