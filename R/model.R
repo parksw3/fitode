@@ -177,7 +177,7 @@ setMethod(
             }
 
             ll_model <- Transform(ll_model,
-                                  observation=as.character(ll[[2]]),
+                                  observation=deparse(ll[[2]]),
                                   transforms=trans_list,
                                   par=call,
                                   keep_grad=keep_sensitivity

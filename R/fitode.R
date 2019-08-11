@@ -181,11 +181,7 @@ fitode <- function(model, data,
 
     keep_sensitivity <- model@keep_sensitivity
 
-    dataname <- sapply(lapply(model@observation, "[[", 2), as.character)
-
-    data <- data[,c(tcol, dataname)]
-
-    names(data)[1] <- "times"
+    names(data)[match(tcol, names(data))] <- "times"
 
     dataarg <- list(model=model, data=data, solver.opts=solver.opts, solver=solver, linklist=linklist,
                     priorlist=priorlist)
@@ -324,7 +320,7 @@ fitode <- function(model, data,
     if (length(model@observation) == 1) {
         if(as.character(model@observation[[1]][[3]][[1]])=="ols") {
             pred <- predict(out)[[1]]$estimate
-            resid <- pred - out@data[,2]
+            resid <- pred - eval(out@model@observation[[1]][[2]], data)
 
             estvar <- var(resid)
 
@@ -415,7 +411,9 @@ logLik.sensitivity <- function(parms,
 
         ## skip na observations
         ## this trick allows us to model the difference
-        nn <- !is.na(data[,ll_fun@observation])
+        ## FIXME: this is not really efficient...
+        ## FIXME: is this necessarily better than na.rm=TRUE?
+        nn <- !is.na(eval(parse(text=ll_fun@observation), data))
 
         frame <- c(list(mean[[i]][oo]), parms, data)
 

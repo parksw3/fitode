@@ -47,7 +47,7 @@ setMethod("predict", "fitode",
             )
         })
 
-        names(df) <- names(object@data)[-1]
+        names(df) <- sapply(lapply(model@observation, "[[", 2), deparse)
 
         if (!missing(level)) {
             nstate <- length(model@state)
