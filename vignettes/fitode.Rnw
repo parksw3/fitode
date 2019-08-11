@@ -31,26 +31,26 @@ knit_hooks$set(basefig=function(before, options, envir) {
 
 \section{Introduction}
 
-\texttt{fitode} is an R package for fitting ordinary differential equations (ODE)
+\code{fitode} is an R package for fitting ordinary differential equations (ODE)
 using Maximum Likelihood or Bayesian Markov Chain Monte Carlo (MCMC). It relies on
-automatic differentiation features of the \texttt{Deriv} package to solve the
-sensitivity equations and use gradient-based optimization algorithms.
+automatic differentiation features of the \code{Deriv} package to solve the
+sensitivity equations so that gradient-based optimization algorithms can be used.
 \begin{itemize}
     \item response distributions: Gamma, Gaussian, Poisson, and negative
             binomial (NB1 and NB2 parameterization)
     \item link functions on model parameters: log, logit, and identity
-    \item fitting multiple state to multivariate time series
+    \item fitting multiple states to multivariate time series
     \item prior/penalization: Beta, Gamma, and Gaussian distributions
     \item confidence intervals on parameters and their transformations via
             delta method, profiling, and importance sampling
 \end{itemize}
 
-In order to construct a model in \texttt{fitode} you need to:
+In order to construct a model in \code{fitode} you need to:
 \begin{itemize}
     \item specify the gradients using formula notation (e.g., $dX/dt=f(X)$ is
-            expressed as \texttt{X$\sim$f(X)})
+            expressed as \verb+X ~ f(X)+)
     \item specify the observation process using formula notation (e.g.,
-            \texttt{Xobs$\sim$dnorm(mean=X, sd=sigma)})
+            \verb+Xobs ~ dnorm(mean=X, sd=sigma)+
     \item specify the initial conditions using formula notation
     \item specify the parameters of the model
     \item specify the link functions (log-link is the default)
@@ -75,8 +75,8 @@ print(pkgver,quote=FALSE)
 \subsection{Data}
 
 Here, we study a time series of confirmed cases of Ebola during the 2014 outbreak in
-Sierra Leone to characterize epidemic growth patterns. Once you load \texttt{fitode},
-the data set (\texttt{SierraLeone2014}) will be automatically loaded to the global
+Sierra Leone to characterize epidemic growth patterns. Once you load \code{fitode},
+the data set (\code{SierraLeone2014}) will be automatically loaded to the global
 environment.
 <<SierraLeonedata, message=FALSE, warning=FALSE>>=
 library(ggplot2); theme_set(theme_bw())
@@ -86,15 +86,14 @@ plot(SierraLeone2014)
 
 \subsection{Exponential growth model}
 
-Exponential growth model is one of the simplest differential models we can use to
-characterize the initial spread of a disease:
+Exponential growth is one of the simplest models we can use to characterize the initial spread of a disease:
 \begin{equation}
 \frac{dX}{dt} = rX.
 \end{equation}
 This model is parameterized by the initial growth rate $r$ and the initial value $X(0)$.
 Variable $X$ describes the dynamics of \emph{mean} confirmed cases;
 for simplicity, we can assume that the observed number of confirmed cases at time $t$ follows a
-Poisson error distribution with mean $X(t)$. This model can be constructed in \texttt{fitode} as
+Poisson error distribution with mean $X(t)$. This model can be constructed in \code{fitode} as
 follows:
 <<expmodel>>=
 exp_model <- odemodel(
@@ -111,14 +110,14 @@ exp_model <- odemodel(
     par=c("r", "X0")
 )
 @
-Note that the name of the observed variable (\texttt{confirmed}) must be different
-from the name of the state variables (e.g., \texttt{X}) because \texttt{fitode}
-relies on expression evalulations.
+Note that the name of the observed variable (\code{confirmed}) must be different
+from the name of the state variables (e.g., \code{X}) because \code{fitode}
+relies on expression evaluations. \bmb{maybe delete ``because ...''? (not clear)}
 
 In order to fit this model to the data, we have to specify starting parameter for
 the optimization.
 To do so, we can simulate the model for various parameters and try to find a reasonable
-parameter set by eyes. For example, here is a parameter set that I found by trial and error:
+parameter set by eye. For example, here is a parameter set found by trial and error:
 <<expsetup>>=
 start <- c(r=7, X0=30)
 ss <- simulate(exp_model, parms=start, times=SierraLeone2014$times)
@@ -126,42 +125,40 @@ plot(SierraLeone2014)
 lines(X ~ times, data=ss)
 abline(v=2014.8, col="red", lty=2)
 @
-Here, I used the \texttt{simulate} function to simulate the model. It requires a
-parameter set (\texttt{parms} argument) and a time vector (\texttt{times} argument)
-to run. Then, it returns a numerical solution for each state variable as well
-as simulated observations;
+Here, I used the \code{simulate} function to simulate the model. It requires a
+parameter set (\code{parms} argument) and a time vector (\code{times} argument)
+to run. It returns a deterministic ODE solution for each state variable as well
+as stochastic simulated observations based on the ODE solution;
 we will ignore the simulated observations for now.
 
 The data does not exhibit exponential growth forever. In order to fit the exponential
-model, we have to determine a fitting window. For brevity, we will fit the model from the
-beginning of an epidemic to 2014.8 (red dashed line in the previous figure).
+model, we have to determine a fitting window. Here we will fit the model from the
+beginning of the epidemic to time 2014.8 (red dashed line in the previous figure).
 <<expfit>>=
 exp_fit <- fitode(
     model=exp_model,
-    data=SierraLeone2014[SierraLeone2014$times <+ 2014.8,],
+    data=subset(SierraLeone2014, times <= 2014.8),
     start=start
 )
 @
-We can see that the estimated parameters are very close to our initial guess:
+The estimated parameters are very close to our initial guess:
 <<printexp>>=
 exp_fit
 @
-We can quantify the uncertainty in the parameters by using \texttt{confint}:
+We can quantify the uncertainty in the parameters by using \code{confint}:
 <<ciexp>>=
 confint(exp_fit)
 @
-By default, \texttt{confint} will calculate the confidence intervals using the delta method.
-We diagnose the fit by using the \texttt{plot} function:
-<<>>=
+By default, \code{confint} will calculate the confidence intervals using the delta method.
+We diagnose the fit by using the \code{plot} function (the \code{level=0.95} argument specifies that 95\% confidence intervals should be drawn):
+<<plotexp>>=
 plot(exp_fit, level=0.95)
 @
 
-We can see that the uncertainty of our fit is too narrow. This is likely to be
-driven by our choice of the error function. Poisson distribution assumes that variance
-is equal to the mean. Instead, we can use a negative binomial distribution, which
+We can see that the uncertainty of our fit is suspiciously narrow, probably because of our choice of the error function. The Poisson distribution assumes that variance of the residuals is equal to the mean (i.e., the fitted value). Instead, we can use a negative binomial distribution, which
 assumes that variance is a quadratic function of the mean. Then, we have to estimate an
-extra parameter (\texttt{size} argument of the \texttt{dnbinom}) to account for overdispersion:
-<<>>=
+extra parameter (\code{size} argument of the \code{dnbinom}) to account for overdispersion:
+<<nbmodel>>=
 exp_model_nbinom <- odemodel(
     name="exponential (nbinom)",
     model=list(
@@ -177,7 +174,7 @@ exp_model_nbinom <- odemodel(
 )
 @
 We can fit the model again:
-<<>>=
+<<fitnb>>=
 exp_fit_nbinom <- fitode(
     model=exp_model_nbinom,
     data=SierraLeone2014[SierraLeone2014$times <+ 2014.8,],
@@ -188,12 +185,12 @@ Note that we need to specify a starting value for the overdispersion parameter a
 well.
 
 We can plot this fit:
-<<>>=
+<<plotnb>>=
 plot(exp_fit_nbinom, level=0.95)
 @
 We can see that our uncertainty is more reasonable. This
 increases confidence intervals on parameters as well:
-<<>>=
+<<cinb>>=
 confint(exp_fit_nbinom)
 @
 
@@ -201,11 +198,11 @@ confint(exp_fit_nbinom)
 
 Exponential growth model accounts for only the initial portion of
 the observed data. Instead, we might want to try to model the entire
-time series. Note that the cumulative number of cases saturate over time:
-<<>>=
+time series. Note that the cumulative number of cases saturates over time:
+<<cumsumplot>>=
 plot(cumsum(confirmed) ~ times, data=SierraLeone2014)
 @
-We can use a logistic model to describe this saturating patrern:
+We can use a logistic model to describe this saturating pattern:
 \begin{equation}
 \frac{dX}{dt} = r X \left(1 - \frac{X}{K}\right).
 \end{equation}
@@ -213,8 +210,8 @@ While we can fit $X$ directly to cumulative number of cases, it can lead to
 overly confident results due to accumulation of observation error \citep{king2015avoidable}.
 Instead, we can use \emph{interval counts} to model the true number of cases:
 $X(t) - X(t - \Delta t)$, where $\Delta t$ is the reporting time step.
-This is done by using the \texttt{diffnames} argument
-<<>>=
+This is done by using the \code{diffnames} argument
+<<logistmodel>>=
 logistic_model <- odemodel(
     name="logistic (nbinom)",
     model=list(
@@ -231,11 +228,11 @@ logistic_model <- odemodel(
 )
 @
 
-In this case, we need to modify the data set by adding an extra \texttt{NA}
-observation before the first observation; this allows \texttt{fitode} to take
+In this case, we need to modify the data set by adding an extra \code{NA}
+observation before the first observation; this allows \code{fitode} to take
 the interval difference and still end up with the same number of observations
 as the time series.
-<<>>=
+<<addinit>>=
 SierraLeone2014b <- rbind(
     c(times=SierraLeone2014$times[1] -
           diff(SierraLeone2014$times)[1], confirmed=NA),
@@ -244,7 +241,7 @@ SierraLeone2014b <- rbind(
 @
 
 Again, we can try to find a reasonable parameter set by trial and error:
-<<>>=
+<<logistsetup>>=
 start_logistic <-
     c(coef(exp_fit_nbinom), K=sum(SierraLeone2014$confirmed))
 ## need to use a different value for X0
@@ -259,29 +256,29 @@ plot(SierraLeone2014)
 lines(X~times, data=ss_logistic)
 @
 and fit the model:
-<<>>=
+<<logistfit>>=
 logistic_fit <- fitode(
     logistic_model,
     data=SierraLeone2014b,
     start=start_logistic
 )
 @
-In this case, we get a much higer growth rate estimate:
-<<>>=
+In this case, we get a much higher growth rate estimate:
+<<logistci>>=
 confint(logistic_fit)
 @
 Plot:
-<<>>=
+<<logistplot>>=
 plot(logistic_fit, level=0.95)
 @
 There's a clear bias in our fit; the estimated trajectory underestimates
-the peak epidemic. This is likely to affect our parameter estimates.
+the peak of the epidemic. This is likely to affect our parameter estimates.
 
 We can be smarter about our choices of fitting window. Instead of using
 the entire time series, we can fit the logistic model from the
 beginning of an epidemic to the next observation after the peak
 \citep{ma2014estimating}.
-<<>>=
+<<mafit>>=
 ma_begin <- 1
 ma_end <- which.max(SierraLeone2014b$confirmed) + 1
 
@@ -293,13 +290,13 @@ logistic_fit_ma <- fitode(
 @
 
 We get a much better fit:
-<<>>=
+<<maplot>>=
 plot(logistic_fit, level=0.95)
 plot(logistic_fit_ma, level=0.95, add=TRUE, col.traj="red", col.conf="red")
 @
 
 We get slightly wider confidence intervals because we're using less data:
-<<>>=
+<<maci>>=
 confint(logistic_fit_ma)
 @
 
@@ -319,8 +316,8 @@ thus effectively recovering from infection \citep{he2009plug};
 in other words, we model cumulative number of confirmed cases with
 cumulative number of recovered cases (state variable $R$).
 
-Again, we use interval counts by using \texttt{diffnames=``R''}:
-<<>>=
+Again, we use interval counts by using \code{diffnames=``R''}:
+<<sirmodel>>=
 SIR_model <- odemodel(
     name="SIR (nbinom)",
     model=list(
@@ -350,11 +347,11 @@ R(0) &= 0
 \end{aligned}
 \end{equation}
 where $i_0$ is the initial proportion of infected individuals.
-Moreover, setting \texttt{link=c(i0=``logit'')} tells \texttt{fitode} that the
-parameter \texttt{i0} needs to be between 0 and 1.
+Moreover, setting \code{link=c(i0="logit")} tells \code{fitode} that the
+parameter \code{i0} needs to be between 0 and 1.
 
 Searching for starting values:
-<<>>=
+<<sirstart>>=
 SIR_start <- c(beta=70, gamma=60, N=40000, i0=0.0004, phi=6)
 
 ss_SIR <- simulate(SIR_model,
@@ -445,7 +442,7 @@ Lotka-Volterra model:
 \frac{dv}{dt} &= \delta uv - \gamma v
 \end{aligned}
 \end{equation}
-<<>>=
+<<lvmodel>>=
 lotka_model <- odemodel(
     name="Lotka Volterra model",
     model=list(
@@ -465,7 +462,7 @@ lotka_model <- odemodel(
 @
 
 Fit with random starting values?
-<<>>=
+<<lvstart>>=
 harestart <- c(alpha=0.55, beta=0.028, delta=0.026, gamma=0.84, u0=30, v0=10,
                size1=1, size2=1)
 
@@ -477,13 +474,14 @@ plot(harefit, level=0.95)
 @
 
 Esimates of size parameters are too high
-<<>>=
+<<lvcoef>>=
 coef(harefit)
 @
-This suggests that poisson is actually enough:
-<<>>=
+
+This suggests that Poisson is actually good enough:
+<<lvpoiss>>=
 lotka_model2 <- odemodel(
-    name="Lotka Volterra model (posson)",
+    name="Lotka Volterra model (Poisson)",
     model=list(
         u ~ alpha * u - beta * u * v,
         v ~ delta * u * v - gamma * v
@@ -501,7 +499,7 @@ lotka_model2 <- odemodel(
 @
 
 Fit again:
-<<>>=
+<<lvpoissfit>>=
 harefit_poisson <- fitode(lotka_model2, data=hare,
                   start=harestart,
                   tcol="Year")
@@ -510,7 +508,7 @@ plot(harefit_poisson, level=0.95)
 @
 
 Very similar confidence intervals:
-<<>>=
+<<lvpoissci>>=
 confint(harefit)
 confint(harefit_poisson)
 @
