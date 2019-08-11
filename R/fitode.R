@@ -116,6 +116,7 @@ fixpar <- function(model, fixed) {
 ##' @param skip.hessian skip hessian calculation
 ##' @param force.hessian (logical) calculate the hessian numerically instead of taking the jacobian of the gradients based on sensitivity equations
 ##' @param use.ginv (logical) use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
+##' @param quietly suppress progress messages?
 ##' @param ... mle2 arguments
 ##' @import bbmle
 ##' @importFrom numDeriv jacobian hessian
@@ -136,6 +137,7 @@ fitode <- function(model, data,
                    skip.hessian=FALSE,
                    force.hessian=FALSE,
                    use.ginv=TRUE,
+                   quietly=FALSE,
                    ...) {
     if (missing(start)) stop("starting parameters must be specified via `start'")
 
@@ -258,7 +260,7 @@ fitode <- function(model, data,
 
     if (!keep_sensitivity) gradfun <- NULL
 
-    message("Fitting ode ...")
+    if (!quietly) message("Fitting ode ...")
     m <- mle2(objfun,
               vecpar=TRUE,
               start=start,
@@ -276,7 +278,7 @@ fitode <- function(model, data,
         if (!length(modelpar)) {
             vcov <- matrix(0, 0, 0)
         } else {
-            message("Computing vcov on the original scale ...")
+            if (!quietly) message("Computing vcov on the original scale ...")
 
             if (keep_sensitivity && !force.hessian) {
                 hessfun <- numDeriv::jacobian
