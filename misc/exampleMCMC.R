@@ -1,6 +1,6 @@
 library(fitode)
 
-model <- new("model.ode",
+model <- odemodel(
     name = "SI",
     model = list(
         S ~ - beta*S*I/N,
