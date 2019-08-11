@@ -1,6 +1,6 @@
 library(fitode)
 
-model <- new("model.ode",
+model <- odemodel(
     name = "SI",
     model = list(
         S ~ - beta*S*I/N,
@@ -18,24 +18,34 @@ model <- new("model.ode",
     link=c(i0="logit")
 )
 
-## weird prior just for testing
-prior <- list(
-    beta~dgamma(shape=2, rate=1)
-)
+parms <- c(beta=1,gamma=0.5, N=1000, i0=1e-2, size1=10, size2=10)
 
-parms <-c(beta=1,gamma=0.5, N=1000, i0=1e-2, size1=10, size2=10)
-
-df <- simulate(model, times=1:20, parms=parms, seed=101)[,c("times", "susceptible", "infected")]
+df <- simulate(model, times=1:20, parms=parms, seed=101)
 
 system.time(ff <- fitodeMCMC(
     model=model,
     data=df,
     start=parms,
-    vcov = 1*diag(length(parms)),
-    prior=prior,
-    chains=2, thin=10,
-    prior.only=TRUE
+    proposal.vcov = 0.01*diag(length(parms)),
+    thin=10,
+    chains=2,
+    prior=list(
+        beta~dgamma(shape=2, rate=2),
+        gamma~dgamma(shape=2, rate=4),
+        N~dgamma(shape=2, rate=1/500),
+        i0~dbeta(shape1=1, shape2=1),
+        size1~dgamma(shape=2, rate=1/5),
+        size2~dgamma(shape=2, rate=1/5)
+    )
 ))
 
-plot(as.mcmc.list(ff[[1]])[,1])
+plot(ff, level=0.95)
 
+summary(ff)
+
+lattice::xyplot(ff@mcmc)
+
+
+coda::gelman.diag(ff@mcmc)
+
+plot(ff@mcmc[,5])

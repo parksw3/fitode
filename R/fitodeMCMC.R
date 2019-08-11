@@ -40,6 +40,8 @@ fitodeMCMC <- function(model, data,
                        solver.opts=list(method="rk4"),
                        solver=ode,
                        ...) {
+    call <- match.call()
+
     if (missing(start))
         stop("starting parameters must be specified via 'start'")
 
@@ -94,11 +96,7 @@ fitodeMCMC <- function(model, data,
 
     start <- apply_link(start, linklist, "linkfun")
 
-    dataname <- sapply(lapply(model@observation, "[[", 2), as.character)
-
-    data <- data[,c(tcol, dataname)]
-
-    names(data)[1] <- "times"
+    names(data)[match(tcol, names(data))] <- "times"
 
     ## check vcov structure
     ## need to check this after parameters have been transformed
@@ -212,7 +210,9 @@ fitodeMCMC <- function(model, data,
     reslist <- coda::as.mcmc.list(reslist)
     lplist <- coda::as.mcmc.list(lplist)
 
-    new("fitodeMCMC", model=model, data=data, coef=coef, vcov=vcov,
+    new("fitodeMCMC",
+        call=call,
+        model=model, data=data, coef=coef, vcov=vcov,
         mcmc=reslist,
         lp=lplist,
         link=link,

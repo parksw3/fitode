@@ -5,13 +5,17 @@
 \alias{Transform,odemodel-method}
 \title{Transform the model}
 \usage{
-\S4method{Transform}{odemodel}(object, transforms = NULL, par,
-  keep_sensitivity)
+\S4method{Transform}{odemodel}(object, transforms, observation, initial,
+  par, link, keep_sensitivity)
 }
 \arguments{
 \item{object}{odemodel object}
 
 \item{transforms}{list of formulas specifying transformations}
+
+\item{observation}{observation model}
+
+\item{initial}{initial values}
 
 \item{par}{model parameters}
 

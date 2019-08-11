@@ -83,8 +83,8 @@ fixpar <- function(model, fixed) {
 
     model <- Transform(
         model,
-        tlist,
-        par
+        transforms=tlist,
+        par=par
     )
 
     model
@@ -139,6 +139,8 @@ fitode <- function(model, data,
                    use.ginv=TRUE,
                    quietly=FALSE,
                    ...) {
+    call <- match.call()
+
     if (missing(start)) stop("starting parameters must be specified via `start'")
 
     if (length(fixed) > 0) model <- fixpar(model, fixed)
@@ -181,11 +183,7 @@ fitode <- function(model, data,
 
     keep_sensitivity <- model@keep_sensitivity
 
-    dataname <- sapply(lapply(model@observation, "[[", 2), as.character)
-
-    data <- data[,c(tcol, dataname)]
-
-    names(data)[1] <- "times"
+    names(data)[match(tcol, names(data))] <- "times"
 
     dataarg <- list(model=model, data=data, solver.opts=solver.opts, solver=solver, linklist=linklist,
                     priorlist=priorlist)
@@ -314,11 +312,26 @@ fitode <- function(model, data,
         vcov <- matrix(NA, length(modelpar), length(modelpar))
     }
 
-    new("fitode", model=model, data=data, coef=coef, vcov=vcov,
+    out <- new("fitode", call=call, model=model, data=data, coef=coef, vcov=vcov,
         min=m@min, mle2=m, link=link,
         fixed=as.list(fixed),
         prior=prior
     )
+
+    ## check if this is ols
+    if (length(model@observation) == 1) {
+        if(as.character(model@observation[[1]][[3]][[1]])=="ols") {
+            pred <- predict(out)[[1]]$estimate
+            resid <- pred - eval(out@model@observation[[1]][[2]], data)
+
+            estvar <- var(resid)
+
+            out@vcov <- out@vcov * estvar * 2
+            out@mle2@vcov <- out@mle2@vcov * estvar * 2
+        }
+    }
+
+    out
 }
 
 ##' Calculate the derivative of an expression with respect to model parameters
@@ -400,7 +413,9 @@ logLik.sensitivity <- function(parms,
 
         ## skip na observations
         ## this trick allows us to model the difference
-        nn <- !is.na(data[,ll_fun@observation])
+        ## FIXME: this is not really efficient...
+        ## FIXME: is this necessarily better than na.rm=TRUE?
+        nn <- !is.na(eval(parse(text=ll_fun@observation), data))
 
         frame <- c(list(mean[[i]][oo]), parms, data)
 

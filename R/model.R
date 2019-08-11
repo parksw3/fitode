@@ -137,9 +137,14 @@ setMethod(
         }
 
         loglik_list <- lapply(observation, function(ll) {
+            if (as.character(ll[[3]][[1]])=="ols" && length(observation) > 1) {
+                stop("'ols' is only available for univariate time series")
+            }
+
             ll_model <- select_model(as.character(ll[[3]][[1]]))
 
-            ll_check <- match(c(ll_model@mean, ll_model@par), names(as.list(ll[[3]])[-1]))
+            ll_check <- c(match(c(ll_model@mean, ll_model@par), names(as.list(ll[[3]])[-1])),
+                          match(names(as.list(ll[[3]])[-1]), c(ll_model@mean, ll_model@par)))
 
             if (any(is.na(ll_check))) {
                 ll_check_msg <- paste0(
@@ -172,7 +177,7 @@ setMethod(
             }
 
             ll_model <- Transform(ll_model,
-                                  observation=as.character(ll[[2]]),
+                                  observation=deparse(ll[[2]]),
                                   transforms=trans_list,
                                   par=call,
                                   keep_grad=keep_sensitivity
@@ -277,6 +282,8 @@ setMethod(
 ##' Transform the model
 ##' @param object odemodel object
 ##' @param transforms list of formulas specifying transformations
+##' @param observation observation model
+##' @param initial initial values
 ##' @param par model parameters
 ##' @param keep_sensitivity (logical) maintain the Jacobian as part of the model
 ##' @keywords internal
@@ -284,11 +291,16 @@ setMethod(
 setMethod(
     "Transform",
     "odemodel",
-    function(object, transforms=NULL, par, keep_sensitivity) {
-
+    function(object, transforms, observation, initial, par, link, keep_sensitivity) {
         if (missing(keep_sensitivity)) keep_sensitivity <- object@keep_sensitivity
 
-        if (is.null(transforms)) transforms <- list()
+        if (missing(transforms)) transforms <- list()
+
+        if (missing(observation)) observation <- object@observation
+
+        if (missing(initial)) initial <- object@initial
+
+        if (missing(link)) link <- object@link
 
         allvars <- c(object@par)
         transforms <- trans(transforms, allvars)
@@ -300,7 +312,7 @@ setMethod(
         if (length(object@grad) > 0) {
             for(i in 1:nstate) {
                 fixed <- c(as.symbol("~"), as.symbol(object@state[i]))
-                ff <- lapply(list(object@grad[[i]], object@initial[[i]]), function(x){
+                ff <- lapply(list(object@grad[[i]], initial[[i]]), function(x){
                     f <- c(fixed, subst(x[[1]], transforms))
                     f <- as.formula(as.call(f))
                 })
@@ -309,12 +321,10 @@ setMethod(
             }
         }
 
-        newobservation <- lapply(object@observation, function(x) {
+        newobservation <- lapply(observation, function(x) {
             x[[3]] <- as.call(lapply(as.list(x[[3]]), subst, transforms))
             x
         })
-
-            ## TODO: what happens when length(object@grad) > 0??
 
         if (missing(par)) par <- object@par
 
@@ -324,7 +334,7 @@ setMethod(
             newobservation,
             newinitial,
             par,
-            object@link,
+            link,
             object@diffnames,
             keep_sensitivity)
     }

@@ -137,7 +137,7 @@ plot_internal <- function(pred,
     for (i in 1:length(pred)) {
         obs.df <- data.frame(
             x=data$times,
-            y=data[[nm[i]]]
+            y=eval(parse(text=nm[i]), data)
         )
 
         pred.df <- pred[[i]]
