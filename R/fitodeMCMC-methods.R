@@ -32,7 +32,7 @@ setMethod("predict", "fitodeMCMC",
             }
         }
 
-        names(simtraj) <- names(object@data)[-1]
+        names(simtraj) <- sapply(lapply(model@observation, "[[", 2), deparse)
 
         if (!simplify) return(simtraj)
 
