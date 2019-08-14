@@ -37,9 +37,7 @@ update_internal <- function(object,
                             par, link,
                             ...){
     call <- object@call
-
     extras <- list(...)
-
     model <- eval(call$model)
 
     if (!missing(observation) || !missing(initial) || !missing(par) || !missing(link)) {

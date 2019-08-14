@@ -49,6 +49,7 @@ setMethod(
         if (any(sapply(observation, class) != "formula"))
             stop("'observation' must be a list of formulas")
 
+        call <- match.call()
         ## warning
         if("dnorm2" %in% sapply(observation, function(ll) as.character(ll[[3]][[1]])) && keep_sensitivity) {
             warning("Sensitivity equations are unavailable for dnorm2 (changing keep_sensitivity=FALSE).")
@@ -223,7 +224,8 @@ setMethod(
         .Object@state <- state
         .Object@par <- par
         .Object@keep_sensitivity <- keep_sensitivity
-
+        .Object@call <- call
+        
         .Object
     }
 )
