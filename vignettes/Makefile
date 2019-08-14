@@ -1,4 +1,4 @@
-paper.pdf:
+fitode-ms.pdf: fitode.bib
 
 %.tex: %.Rnw
 	Rscript -e "library(knitr); knit('$*.Rnw')"
