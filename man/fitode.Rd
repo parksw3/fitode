@@ -8,7 +8,8 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
   optimizer = "optim", link, fixed = list(), prior = list(),
   prior.density = TRUE, control = list(maxit = 1e+05),
   solver.opts = list(method = "rk4"), solver = ode,
-  skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE, ...)
+  skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE,
+  quietly = FALSE, ...)
 }
 \arguments{
 \item{model}{odemodel object}
@@ -42,6 +43,8 @@ fitode(model, data, start, tcol = "times", method = "BFGS",
 \item{force.hessian}{(logical) calculate the hessian numerically instead of taking the jacobian of the gradients based on sensitivity equations}
 
 \item{use.ginv}{(logical) use generalized inverse (\code{\link{ginv}}) to compute approximate vcov}
+
+\item{quietly}{suppress progress messages?}
 
 \item{...}{mle2 arguments}
 }
