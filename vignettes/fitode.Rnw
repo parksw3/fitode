@@ -160,27 +160,15 @@ We can see that the uncertainty of our fit is too narrow. This is likely to be
 driven by our choice of the error function. Poisson distribution assumes that variance
 is equal to the mean. Instead, we can use a negative binomial distribution, which
 assumes that variance is a quadratic function of the mean. Then, we have to estimate an
-extra parameter (\texttt{size} argument of the \texttt{dnbinom}) to account for overdispersion:
+extra parameter (\texttt{size} argument of the \texttt{dnbinom}) to account for overdispersion.
+This can be done using the \texttt{update} function:
 <<>>=
-exp_model_nbinom <- odemodel(
-    name="exponential (nbinom)",
-    model=list(
-        X ~ r * X
-    ),
+exp_fit_nbinom <- update(
+    exp_fit,
     observation=list(
         confirmed ~ dnbinom(mu=X, size=phi)
     ),
-    initial=list(
-        X ~ X0
-    ),
-    par=c("r", "X0", "phi")
-)
-@
-We can fit the model again:
-<<>>=
-exp_fit_nbinom <- fitode(
-    model=exp_model_nbinom,
-    data=SierraLeone2014[SierraLeone2014$times <+ 2014.8,],
+    par=c("r", "X0", "phi"),
     start=c(start, phi=10)
 )
 @
