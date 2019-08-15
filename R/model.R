@@ -225,7 +225,7 @@ setMethod(
         .Object@par <- par
         .Object@keep_sensitivity <- keep_sensitivity
         .Object@call <- call
-        
+
         .Object
     }
 )
@@ -333,7 +333,7 @@ setMethod(
 
         if (missing(par)) par <- object@par
 
-        new("odemodel",
+        odemodel(
             object@name,
             newmodel,
             newobservation,
