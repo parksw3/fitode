@@ -15,7 +15,7 @@
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\code}[1]{{\tt #1}}
-\newcommand{\pkg}[1]{\href{https://CRAN.R-project.org/package=#1}{#1}}
+\newcommand{\pkg}[1]{\href{https://CRAN.R-project.org/package=#1}{{\tt #1}}}
 \newcommand{\bmb}[1]{{\color{red}$\langle$\emph{BMB: #1}$\rangle$}}
 \newcommand{\swp}[1]{{\color{blue}$\langle$\emph{SWP: #1}$\rangle$}}
 \newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
