@@ -15,4 +15,4 @@ clean:
 	rm -f unnamed*
 	rm -f *.{aux,tikz,out,log,blg,toc,bbl}
 fresh: clean
-	rm -f paper.pdf
+	rm -f fitode-ms.pdf fitode.pdf

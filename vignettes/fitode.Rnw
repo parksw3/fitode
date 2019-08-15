@@ -17,7 +17,7 @@
 
 <<opts,echo=FALSE>>=
 library("knitr")
-opts_chunk$set(fig.width=6,fig.height=4,warning=FALSE,cache=TRUE)
+opts_chunk$set(fig.width=6,fig.height=4,warning=FALSE,cache=TRUE,error=FALSE)
 knit_hooks$set(basefig=function(before, options, envir) {
                    if (before) {
                        par(bty="l",las=1)
@@ -159,19 +159,14 @@ We can see that the uncertainty of our fit is suspiciously narrow, probably beca
 assumes that variance is a quadratic function of the mean. Then, we have to estimate an
 extra parameter (\code{size} argument of the \code{dnbinom}) to account for overdispersion:
 <<nbmodel>>=
-exp_model_nbinom <- odemodel(
-    name="exponential (nbinom)",
-    model=list(
-        X ~ r * X
-    ),
-    observation=list(
-        confirmed ~ dnbinom(mu=X, size=phi)
-    ),
-    initial=list(
-        X ~ X0
-    ),
-    par=c("r", "X0", "phi")
-)
+exp_model_nbinom <-
+  update(exp_model,
+         name="exponential (nbinom)",
+         observation=list(
+           confirmed ~ dnbinom(mu=X, size=phi)
+         ),
+         par=c("r", "X0", "phi")
+         )
 @
 We can fit the model again:
 <<fitnb>>=
@@ -212,19 +207,14 @@ Instead, we can use \emph{interval counts} to model the true number of cases:
 $X(t) - X(t - \Delta t)$, where $\Delta t$ is the reporting time step.
 This is done by using the \code{diffnames} argument
 <<logistmodel>>=
-logistic_model <- odemodel(
-    name="logistic (nbinom)",
-    model=list(
-        X ~ r * X * (1 - X/K)
-    ),
-    observation=list(
-        confirmed ~ dnbinom(mu=X, size=phi)
-    ),
-    initial=list(
-        X ~ X0
-    ),
-    diffnames="X",
-    par=c("r", "X0", "K", "phi")
+logistic_model <- update(
+  exp_model_nbinom,
+  name="logistic (nbinom)",
+  model=list(
+    X ~ r * X * (1 - X/K)
+  ),
+  diffnames="X",
+  par=c("r", "X0", "K", "phi")
 )
 @
 
@@ -386,12 +376,12 @@ plot(SIR_fit_b, level=0.95)
 @
 
 There are several ways we can get the confidence intervals on the growth rate
-($r = \beta - \gamma$). By default, we can use the delta method (this is the default
+($r = \beta - \gamma$). By default, the package uses the delta method.
 option).
 <<cisirb>>=
 confint(SIR_fit_b, parm=list(r~beta-gamma))
 @
-We discuss other methods later
+We discuss other methods later.
 
 \subsection{Summary}
 
@@ -480,19 +470,12 @@ coef(harefit)
 
 This suggests that Poisson is actually good enough:
 <<lvpoiss>>=
-lotka_model2 <- odemodel(
+lotka_model2 <- update(
+  lotka_model,
     name="Lotka Volterra model (Poisson)",
-    model=list(
-        u ~ alpha * u - beta * u * v,
-        v ~ delta * u * v - gamma * v
-    ),
     observation=list(
         Hare ~ dpois(lambda=u),
         Lynx ~ dpois(lambda=v)
-    ),
-    initial=list(
-        u ~ u0,
-        v ~ v0
     ),
     par=c("alpha", "beta", "delta", "gamma", "u0", "v0")
 )

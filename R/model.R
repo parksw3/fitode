@@ -41,7 +41,8 @@ setMethod(
              par,
              link,
              diffnames,
-             keep_sensitivity=TRUE) {
+             keep_sensitivity=TRUE,
+             call) {
         ## TODO: I can't remember why it's asking for a function...
         if (any(sapply(initial, class) != "formula"))
             stop("'initial' must be a list of formulas or a function")
@@ -49,7 +50,6 @@ setMethod(
         if (any(sapply(observation, class) != "formula"))
             stop("'observation' must be a list of formulas")
 
-        call <- match.call()
         ## warning
         if("dnorm2" %in% sapply(observation, function(ll) as.character(ll[[3]][[1]])) && keep_sensitivity) {
             warning("Sensitivity equations are unavailable for dnorm2 (changing keep_sensitivity=FALSE).")
@@ -170,17 +170,17 @@ setMethod(
             likpar <- ll_model@par
 
             if (length(likpar) > 0) {
-                call <- as.list(ll[[3]])[[likpar]]
+                Lcall <- as.list(ll[[3]])[[likpar]]
 
-                trans_list <- append(trans_list, as.formula(as.call(c(as.symbol("~"), as.symbol(likpar), call))))
+                trans_list <- append(trans_list, as.formula(as.call(c(as.symbol("~"), as.symbol(likpar), Lcall))))
             } else {
-                call <- likpar
+                Lcall <- likpar
             }
 
             ll_model <- Transform(ll_model,
                                   observation=deparse(ll[[2]]),
                                   transforms=trans_list,
-                                  par=call,
+                                  par=Lcall,
                                   keep_grad=keep_sensitivity
             )
 
@@ -235,7 +235,10 @@ setMethod(
 ##' @rdname odemodel-class
 ##' @keywords internal
 ##' @export
-odemodel <- function(...) new("odemodel", ...)
+odemodel <- function(...) {
+    call <- match.call()
+    new("odemodel", call=call, ...)
+}
 
 ##' Evaluate the gradients of a model
 ##' @param object odemodel object
