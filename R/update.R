@@ -38,6 +38,8 @@ update_internal <- function(object,
                             ...){
     call <- object@call
 
+    ## FIXME: why doesn't think work?
+    ## extras <- match.call(expand.dots = FALSE)$...
     extras <- list(...)
 
     model <- eval(call$model)
