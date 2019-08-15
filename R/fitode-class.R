@@ -35,7 +35,8 @@ setClass(
         loglik = "list",
         expr="list",
         expr.sensitivity="list",
-        keep_sensitivity  = "logical"
+        keep_sensitivity  = "logical",
+        call = "language"
     )
 )
 

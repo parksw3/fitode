@@ -7,3 +7,10 @@ vignettes/figure
 */#*
 */.#*
 */cache
+*.toc
+*.aux
+*.bbl
+*.blg
+*.out
+*.snm
+*.log

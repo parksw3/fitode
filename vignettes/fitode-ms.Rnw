@@ -1,7 +1,8 @@
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{Outline of paper}
 %\documentclass[nojss]{jss}
-\documentclass{article}
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{natbib}
 \usepackage[utf8]{inputenc}
@@ -15,12 +16,15 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\code}[1]{{\tt #1}}
 \newcommand{\pkg}[1]{\href{https://CRAN.R-project.org/package=#1}{#1}}
-\newcommand{\bmb}[1]{{\color{red} \emph{#1}}}
-\newcommand{\swp}[1]{{\color{blue} \emph{#1}}}
-\newcommand{\djde}[1]{{\color{magenta} \emph{#1}}}
+\newcommand{\bmb}[1]{{\color{red}$\langle$\emph{BMB: #1}$\rangle$}}
+\newcommand{\swp}[1]{{\color{blue}$\langle$\emph{SWP: #1}$\rangle$}}
+\newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
+\newcommand{\thickredline}{{\color{red}\bigskip\begin{center}\linethickness{2mm}\line(1,0){250}\end{center}\bigskip}}
 
 \title{So you want to fit ODEs to data \ldots \bmb{title???}}
-\author{Sang Woo Park \and Ben Bolker \and David J. D. Earn}
+\author{Sang Woo Park \and Ben Bolker \and David J. D. Earn
+  \thanks{Department of Mathematics \& Statistics, McMaster
+    University, Hamilton, Ontario, Canada}}
 \date{\today}
 \begin{document}
 \maketitle
@@ -28,10 +32,54 @@
 \textbf{Target audience:} students and researchers with some degree
 of mathematical sophistication who aren't necessarily great with statistics. They know a reasonable amount about ODEs, probably a little bit about numerical integration, maybe next to nothing about maximum likelihood/process vs observation error/state space models/MCMC/etc..
 
-\textbf{Target journal:} R Journal? JSS? Bull Math Biol?  MEE?
+\textbf{Target journal:} R Journal? JSS? Bull Math Biol? Methods in Ecol \& Evol?
 
 \section{Introduction}
 
+Mathematical models based on ordinary different equations (ODEs) are
+ubiquitous in a vast array of application areas.  \djde{refs? maybe
+  not necessary.}  \bmb{``in science and engineering?''} Researchers studying ODE models are
+often highly skilled in dynamical systems theory, but many lack experience
+estimating the parameters of their models from data.  When confronted
+with observations from the real world, how should one go about fitting
+an ODE model to the data?
+
+In principle, the answer is straightforward: examine all possible
+solutions of the ODEs (considering all possible parameter values and
+initial states) and identify the solution curve that is closest to
+the observed data.  This approach is sometimes feasible, for simple enough problems.  But more often than not, fitting an ODE to data is a challenging statistical and computational problem.  In particular:
+\begin{itemize}
+\item The dimension of the combined of parameter and initial states is
+  rarely less than 4 and often much larger, making a na\"ive search
+  for the best fitting solution computationally overwhelming.
+\item Different measures of goodness of fit may identify different
+  ``best'' solutions.
+\item Multiple solutions, associated with different regions of
+  parameter space, may fit the data equally well, or nearly equally well.
+\item Statistical inference --- testing for clear evidence of the operation of a particular process, attaching a measure of confidence to a parameter estimates, or putting confidence intervals on predictions --- requires
+  additional knowledge or assumptions about the stochastic processes that generate the variation of observed data around the best-fit solution.
+\end{itemize}
+As one attempts to address these issues, more subtle challenges arise
+and one can quickly reach the limits of the state of the art.
+Making meaningful mechanistic inferences from ODE fits to data
+can be difficult, especially when fitting complex models to small,
+noisy data sets.
+
+At this point you may want to give up and work on something else, but
+we hope you won't.  The situation isn't \emph{that} bad.  Our goal
+here is to provide---and to present a pedagogical introduction to---an
+\texttt{R} package that makes fitting many ODEs to data relatively
+painless.  Simultaneously, we aim to explain the
+uncertainties and limitations inherent in ODE-fitting, and provide
+convenient tools and references for users who wish to delve more
+deeply into the subject.
+
+\djde{The general style I'm imagining is similar to \emph{Numerical
+    Recipes \citep{Pres+92}}, i.e., provide tools that work but also
+  explain clearly and concisely why they work, what they are doing,
+  and under what circumstances they can be expected to fail.}
+
+\thickredline
 
 \section{Trajectory matching: from simple to complex}
 

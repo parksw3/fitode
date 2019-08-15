@@ -37,11 +37,9 @@ update_internal <- function(object,
                             par, link,
                             ...){
     call <- object@call
-
     ## FIXME: why doesn't think work?
     ## extras <- match.call(expand.dots = FALSE)$...
     extras <- list(...)
-
     model <- eval(call$model)
 
     if (!missing(observation) || !missing(initial) || !missing(par) || !missing(link)) {
