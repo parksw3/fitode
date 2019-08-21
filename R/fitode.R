@@ -436,7 +436,11 @@ logLik.sensitivity <- function(parms,
                 nll_gr <- -colSums((loglik.gr[[1]] * sens[[i]][oo,])[nn,])
             }
 
-            if(length(loglik.gr) > 1) nll_gr[[ll_fun@par]] <- -sum(loglik.gr[[ll_fun@par]][nn])
+            if(length(loglik.gr) > 1) {
+                if (deparse(ll_grad[[2]]) != "expression(0)") {
+                    nll_gr[[ll_fun@par]] <- -sum(loglik.gr[[ll_fun@par]][nn])
+                }
+            }
 
             sensitivity_list[[i]] <- nll_gr
         }
