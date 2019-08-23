@@ -1,0 +1,5 @@
+- adding new distributions
+    - document (add in `logLik.R`, `simulate.R` ...)
+    - repeat less?
+    - refactor - index table of log-likelihood functions, parameters, rather than `switch()`?
+- unit tests!
