@@ -112,7 +112,7 @@ simulate_internal <- function(model,
     return(out3)
 }
 
-errorfun <- function(family=c("ols", "dnorm", "dpois", "dnbinom", "dnbinom1", "dgamma")) {
+errorfun <- function(family=c("ols", "dnorm", "dpois", "dnbinom", "dnbinom1", "dgamma", "dlnorm")) {
     family <- match.arg(family)
 
     switch(family,
@@ -121,6 +121,8 @@ errorfun <- function(family=c("ols", "dnorm", "dpois", "dnbinom", "dnbinom1", "d
         dpois=function(lambda) rpois(length(lambda), lambda=lambda),
         dnbinom=function(mu, size) rnbinom(length(mu), mu=mu, size=size),
         dnbinom1=function(mu, phi) rnbinom(length(mu), mu=mu, size=mu/phi),
-        dgamma=function(mean, shape) rgamma(length(mean), shape=shape)
+        dgamma=function(mean, shape) rgamma(length(mean), shape=shape),
+        dlnorm=function(meanlog, sdlog) rlnorm(length(meanlog), meanlog=meanlog,
+                                               sdlog=sdlog)
     )
 }

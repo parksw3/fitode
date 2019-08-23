@@ -168,7 +168,7 @@ NBconst <- function(k,x) {
 ##' Select a log-likelihood model
 ##' @keywords internal
 ##' @param dist conditional distribution of reported data (dnorm, dnorm2, dpois, dnbinom, dnbinom1, dgamma)
-select_model <- function(dist = c("ols", "dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1", "dgamma")) {
+select_model <- function(dist = c("ols", "dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1", "dgamma", "dlnorm")) {
     dist <- match.arg(dist)
     name <- dist
     model <- switch(dist,
@@ -223,8 +223,15 @@ select_model <- function(dist = c("ols", "dnorm", "dnorm2", "dpois", "dnbinom", 
             )
 
             loglik_gamma
-        }
-    )
+        },
+        dlnorm={
+            loglik_lognormal <- new("loglik.ode", "lognormal",
+                LL ~-(log(X)-meanlog)^2/(2*sdlog^2) -
+                    log(sd) - 1/2*(log(2*pi)) -log(sdlog) - log(X),
+                ## 1/(sqrt(2 pi) sigma x) e^-((log x - mu)^2 / (2 sigma^2))  
+                mean="meanlog", par="sdlog")
+            loglik_lognormal
+    })
 
     model@name <- name
 
