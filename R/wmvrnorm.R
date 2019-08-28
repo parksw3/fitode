@@ -21,7 +21,7 @@ wmvrnorm <- function(object,
     simpars <- MASS::mvrnorm(nsim,mu=coef(object, "links"),
                              Sigma=vv)
 
-    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(object, "links"), vv)
+    sample.logLik <- mvtnorm::dmvnorm(simpars, coef(object, "links"), vv, log=TRUE)
 
     simpars_orig <- t(apply(simpars, 1, apply_link, object@mle2@data$linklist, "linkinv"))
 
