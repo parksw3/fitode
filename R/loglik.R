@@ -227,7 +227,7 @@ select_model <- function(dist = c("ols", "dnorm", "dnorm2", "dpois", "dnbinom", 
         dlnorm={
             loglik_lognormal <- new("loglik.ode", "lognormal",
                 LL ~-(log(X)-meanlog)^2/(2*sdlog^2) -
-                    log(sd) - 1/2*(log(2*pi)) -log(sdlog) - log(X),
+                    log(sdlog) - 1/2*(log(2*pi)) -log(sdlog) - log(X),
                 ## 1/(sqrt(2 pi) sigma x) e^-((log x - mu)^2 / (2 sigma^2))  
                 mean="meanlog", par="sdlog")
             loglik_lognormal
