@@ -98,6 +98,8 @@ setMethod("predict", "fitode",
             df <- Map(cbind, df, clist)
         }
 
+        attr(df, "loglik.ode") <- sapply(object@model@loglik, function(x) x@name)
+
         df
     }
 )

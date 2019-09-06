@@ -1,3 +1,10 @@
+whichpred <- function(pred, which) {
+    tmpattr <- attr(pred, "loglik.ode")[which]
+    pred <- pred[which]
+    attr(pred, "loglik.ode") <- tmpattr
+    pred
+}
+
 ##' Plot a fitode object
 ##' @aliases plot,fitode-method
 ##' @param x fitode object
@@ -43,7 +50,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
         if (missing(which)) which <- 1:length(pred)
         if (is.character(which)) which <- match(which,names(pred))
 
-        pred <- pred[which]
+        pred <- whichpred(pred, which)
 
         plot_internal(pred, data, onepage, xlim, ylim, xlabs, ylabs, col.traj, lty.traj, col.conf, lty.conf, add, ...)
     }
@@ -83,7 +90,7 @@ setMethod("plot", signature(x="fitodeMCMC", y="missing"),
         if (missing(which)) which <- 1:length(pred)
         if (is.character(which)) which <- match(which,names(pred))
 
-        pred <- pred[which]
+        pred <- whichpred(pred, which)
 
         plot_internal(pred, data, onepage, xlim, ylim, xlabs, ylabs, col.traj, lty.traj, col.conf, lty.conf, add, ...)
     }
@@ -141,6 +148,9 @@ plot_internal <- function(pred,
         )
 
         pred.df <- pred[[i]]
+
+        if (attr(pred, "loglik.ode")[i]=="dlnorm")
+            pred.df[,-1] <- exp(pred.df[,-1])
 
         if (auto_ylim) {
             ymin <- 0.95 * min(min(unlist(pred.df[,-1])), obs.df$y, na.rm=TRUE)
