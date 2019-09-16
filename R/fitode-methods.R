@@ -361,5 +361,6 @@ setMethod("show", "fitode",
         } else {
             cat(paste(paste0(names(object@link), " = ", object@link), collapse="; "))
         }
+        cat("\n")
     }
 )
