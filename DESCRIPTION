@@ -1,9 +1,9 @@
 Package: fitode
 Type: Package
 Title: ODE model fitting tools
-Version: 0.1.0
-Author: Sang Woo Park [aur, cre]
-Maintainer: The package maintainer <yourself@somewhere.net>
+Version: 0.1.1
+Author: Sang Woo Park [aut, cre]
+Maintainer: Sang Woo Park <parksw3@mcmaster.ca>
 Description: Fit dynamical models using sensitivity equations
 License: GPL (>=2)
 Depends: 
