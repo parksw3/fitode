@@ -136,7 +136,8 @@ make_prior <- function(model, link, prior, prior.density=TRUE, keep_grad=TRUE) {
 ##' @param prior.density (logical) keep the Jacobian of transformations?
 ##' @param keep_grad (logical) keep gradients?
 ##' @keywords internal
-select_prior <- function(family = c("dnorm", "dgamma", "dbeta"),
+select_prior <- function(family = c("dnorm", "dgamma", "dbeta",
+                                    "dlnorm"),
                          link = c("identity", "log", "logit"),
                          prior.density=TRUE,
                          keep_grad=TRUE) {
@@ -150,11 +151,13 @@ select_prior <- function(family = c("dnorm", "dgamma", "dbeta"),
     if (family!="dbeta" && link=="logit")
         stop("logit link can be only used with beta prior distribution")
 
+    
     model <- switch(family,
         dnorm={
             loglik_gaussian <- new("prior.ode", "gaussian",
                                    LL ~ -(X-mean)^2/(2*sd^2) - log(sd) - 1/2*log(2*pi) + constant,
                                    par=c("mean", "sd", "constant"),
+                                   ## "constant" is the d(mu)/d(eta) transformation                                   
                                    keep_grad=keep_grad)
             loglik_gaussian
         }, dgamma={
@@ -170,6 +173,15 @@ select_prior <- function(family = c("dnorm", "dgamma", "dbeta"),
                                    lgamma(shape1) - lgamma(shape2) + lgamma(shape1 + shape2) + constant,
                                par=c("shape1", "shape2", "constant"),
                                keep_grad=keep_grad)
+        },
+        dlnorm={
+            loglik_lognormal <- new("prior.ode", "lognormal",
+                           LL ~-(log(X)-meanlog)^2/(2*sdlog^2) -
+                              log(sdlog) - 1/2*(log(2*pi)) -log(sdlog) - log(X),
+                ## 1/(sqrt(2 pi) sigma x) e^-((log x - mu)^2 / (2 sigma^2))  
+                par = c("meanlog", "sdlog", "constant"),
+                keep_grad=keep_grad)
+            loglik_lognormal
         }
     )
 
