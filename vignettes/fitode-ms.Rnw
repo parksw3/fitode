@@ -38,7 +38,7 @@ of mathematical sophistication who aren't necessarily great with statistics. The
 
 Mathematical models based on ordinary different equations (ODEs) are
 ubiquitous in a vast array of application areas.  \djde{refs? maybe
-  not necessary.}  \bmb{``in science and engineering?''} Researchers studying ODE models are
+  not necessary.}  \bmb{``in science and engineering?''} \swp{I like ``in science and engineering''} Researchers studying ODE models are
 often highly skilled in dynamical systems theory, but many lack experience
 estimating the parameters of their models from data.  When confronted
 with observations from the real world, how should one go about fitting
@@ -92,20 +92,19 @@ deeply into the subject.
 
 In order to find a solution of an ODE model that is closest to the observed data,
 we have to first decide on a measure of the distance between the solution and the data.
-For example, we can consider the sum of squared differences between the two.
+One of the most basic measures we can use is the sum of squared differences between the two.
 The least-squares solution of an ODE model (i.e., the solution that minimizes the sum of squared differences) will visually resemble the patterns in the data to some extent;
 therefore, we can expect it give us a biologically sensible set of parameters.
 
-Suppose we have (1) a set of gradient functions $\frac{d\state}{dt}$; (2) a method for numerical integration; (3) a set of observations $\state(t_i)$ where $i = 1, \dots, n$ (for simplicity, from a single time series with $n$ observations); (4) a method for numerical minimization of an objective function.
-Define a trajectory (a solution of the ODE for specified parameters $\params$ [and initial conditions (ICs)] and time points $t_i$) as $\traj(t_i|\params)$. \bmb{notation???}\swp{changed some notations}
-Then, the least-squared fitting seeks to find a set of parametrs, $\hat \params$, that minimize the following objective function: $\sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2$.
+Suppose we have (1) a gradient function that calculates the derivatives $\frac{d\state}{dt}$; (2) a method for numerical integration; (3) a set of observations $\state(t_i)$ where $i = 1, \dots, n$ (for simplicity, from a single time series with $n$ observations); (4) a method for numerical minimization of an objective function.
+Define a trajectory (a solution of the ODE for specified parameters $\params$ [and initial conditions] and time points $t_i$) as $\traj(t_i|\params)$. \bmb{notation???}\swp{changed some notations}
+Then, the method of least-squared fitting seeks to find a set of parametrs, $\hat \params$, that minimize the following objective function: $\sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2$.
 Such set of parameters can be formally defined as follows:
 \begin{equation}
 \hat \params =  \argmin_{\params} \sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2.
 \end{equation}
 The actual process of finding $\hat \beta$ will depend on the minimizer of our choice.
-s
-\swp{Do we just want to put definitions here? Not sure what you're exactly looking for here...}
+
 \begin{description}
 \item[gradient functions]{should be straightforward (you know what you
   want to model, right? \ldots)}
@@ -116,11 +115,7 @@ s
 \item[minimizer]{similar to integrator, i.e. details don't matter if the problem is easy. Derivative-free methods such as Nelder-Mead are robust but slower; derivative-based methods are effective \emph{if sensitivity equations are used} (see below). Some minimizers such as Levenberg-Marquardt are particularly tuned to least-squares (although derivs still matter)}
 \item[initial conditions]{if all variables are observed, we can pretend the initial observations as known without error and set $\hat \state(0) = \state(0)$. Otherwise we have to treat ICs as auxiliary parameters.}
 \end{description}
-
-Least-squares fits provide solutions that are in some sense ``optimal'' (although the Gauss-Markov theorem only applies to \emph{linear} models), but don't provide any scope for inference.
-That said, by avoiding inference, one also avoids having to think much about the characteristics of the observations (independence, distribution, \ldots).
-
-EXAMPLE? (this would look a bit funny with \code{fitode} as we'd have to use a fake-Gaussian)
+\swp{Do we just want to put definitions here? Not sure what you're exactly looking for here...}
 
 \swp{Is it OK to extract data from a figure and put it in the package as long as we cite it? This seems like a good example here...}
 For example, consider a time series of human tumor cell (GI-101A) growth within a nude mice \citep{worschech2009systemic};
@@ -130,22 +125,89 @@ library(fitode)
 plot(tumorgrowth)
 @
 \noindent
-\cite{murphy2016differences} analyzed this data set by fitting seven different ODE models (i.e., exponential, Mendelsohn, logistic, linear, surface, Bertalanffy, and Gompertz) via least-squares and comparing their model predictions.
-Here, we consider the exponential growth model:
+\cite{murphy2016differences} analyzed this time series by fitting seven different ODE models (i.e., exponential, Mendelsohn, logistic, linear, surface, Bertalanffy, and Gompertz) via least-squares and comparing their model predictions.
+Here, we demonstrate the fitting of the exponential growth model.
+
+In order to fit the exponential growth model using least-squares, we have to set up the ODE model using an \code{odemodel} function in \code{fitode}.
+In particular, we have to specify gradient functions (\code{model} argument), an observation model (\code{observation} argument), initial conditions (\code{initial} argument), and parameters (\code{par} argument) of the model.
+The gradient function is simple:
 \begin{equation}
 \frac{dA}{dt} = rA,
 \end{equation}
 where $r$ is the exponential growth rate.
+In \code{fitode}, gradient functions are expressed as a list of \emph{formulas} (the left hand side (LHS) of the formula determines the state variable and the right hand side (RHS) of the formula determines its gradient function):
+<<expgrad, eval=FALSE>>=
+model=list(A ~ r*A)
+@
+\noindent
+Likewise, observation model should specify that we want to minimize the squared sum of differences between the observed \code{volume} and the trajectory of \code{A} (the LHS of the formula determines the observed variable and the RHS of the formula determines the objective function):
+<<expobs, eval=FALSE>>=
+observation=list(volume ~ ols(mean=A))
+@
+\noindent
+We have to specify the initial condition for our state variable:
+<<expini, eval=FALSE>>=
+initial=list(A~A0)
+@
+\noindent
+Finally, we have to specify all parameters (including the initial conditions) of the model.
+In this case, we have two parameters: the exponential growth rate, \code{r}, and the initial condition, \code{A0}.
+<<exppars, eval=FALSE>>=
+par=c("r", "A0")
+@
+\noindent
+Putting them altogether, we can create an \code{odemodel} object as follows:
+<<expmodel>>=
+exp_model <- odemodel(
+  model=list(A ~ r*A),
+  observation=list(volume ~ ols(mean=A)),
+  initial=list(A~A0),
+  par=c("r", "A0")
+)
+@
 
-In order to fit the exponential growth model using least-squares, we have to set up the ODE model using an \code{odemodel} function in \code{fitode}.
+Before we can start fitting this model, we have to specify a starting parameter for the optimization.
+In principle, we can try out multiple starting parameters to test for convergence;
+this is not necessary for sufficiently simple models.
+For now, we will leave the discussion on starting parameters and pick a starting parameter based on visual inspections:
+<<exppick, fig.width=6, fig.height=4>>=
+start <- c(r=0.03, A0=150)
+ss <- simulate(exp_model, parms=start, times=tumorgrowth$day)
+plot(tumorgrowth)
+lines(A~times, data=ss)
+@
 
+To fit the model, we have to call the \code{odemodel} object through the \code{fitode} function.
+<<expfit>>=
+exp_fit <- fitode(
+  model=exp_model,
+  data=tumorgrowth,
+  start=start,
+  tcol="day"
+)
+@
+\noindent
+Once the model has been fitted, we can use the \code{plot} function to plot the estimated trajectory along with the data:
+<<expfitplot, fig.width=6, fig.height=4>>=
+plot(exp_fit)
+@
+\noindent
+Finally, we can obtain the parameter estimates by using the \code{coef} function:
+<<expfitcoef, fig.width=6, fig.height=4>>=
+coef(exp_fit)
+@
 
-
-%% https://bmccancer.biomedcentral.com/articles/10.1186/s12885-016-2164-x#Sec2
+You might think that this fit is good enough and decide to carry on with our analysis of the ODE model using the estimated parameters.
+While least-squares fits provide solutions that are in some sense ``optimal'' (although the Gauss-Markov theorem only applies to \emph{linear} models), but don't provide any scope for inference.
+For example, how much confidence can we have in these parameter estimates?
+That said, by avoiding inference, you also avoid having to think much about the characteristics of the observations (independence, distribution, etc.).
+We hope that you think about these characteristics carefully and continue to follow us through this guide.
 
 \subsection{Gaussian errors}
 
-If we're willing to assume that the residuals (observed-expected) are \emph{independent}, \emph{identically distributed} Gaussian random variables, then we can start making statistical inferences: confidence intervals on parameters, confidence and prediction intervals on predictions, etc.. Assuming independence of successive residuals typically means we are assuming that the noise in the data is \emph{observation error}; that is, the underlying process is deterministic (and smooth), and all the noise in the data comes from (independent) imperfect observations of the process.
+If we're willing to assume that the residuals ($\state(t_i) - \traj(t_i|\params)$) are \emph{independent}, \emph{identically distributed} Gaussian random variables, then we can start making statistical inferences: confidence intervals on parameters, confidence and prediction intervals on predictions, etc..
+Assuming independence of successive residuals typically means we are assuming that the noise in the data is \emph{observation error};
+that is, the underlying process is deterministic (and smooth), and all the noise in the data comes from (independent) imperfect observations of the process.
 
 \begin{itemize}
 \item Gaussian errors are equivalent to \emph{scaled} least-squares errors
@@ -168,6 +230,8 @@ EXAMPLE? (does \code{fitode} have an \code{update} method? that would be
 a cute way to make compact examples)
 
 This doesn't raise very many additional problems.
+
+\thickredline
 
 \section{Increasing robustness and efficiency}
 
