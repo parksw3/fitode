@@ -21,8 +21,8 @@
 \newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
 \newcommand{\thickredline}{{\color{red}\bigskip\begin{center}\linethickness{2mm}\line(1,0){250}\end{center}\bigskip}}
 
-\title{So you want to fit ODEs to data \ldots \bmb{title???}}
-\author{Sang Woo Park \and Ben Bolker \and David J. D. Earn
+\title{A beginner's guide to fitting ordinary different equations to data}
+\author{Sang Woo Park \and Benjamin M. Bolker \and David J. D. Earn
   \thanks{Department of Mathematics \& Statistics, McMaster
     University, Hamilton, Ontario, Canada}}
 \date{\today}
@@ -90,11 +90,22 @@ deeply into the subject.
 \newcommand{\state}{\ensuremath{\boldsymbol{y}}}
 \newcommand{\traj}{\ensuremath{\hat \state}}
 
-The natural (``intuitive''?) approach. Suppose we have (1) a set of gradient functions; (2) a method for numerical integration; (3) a set of observations (for simplicity, from a single time series); (4) a method for numerical minimization of an objective function. Define a trajectory ( a solution of the ODE for specified parameters $\params$ [and ICs] and time points $t_i$) as $\traj(\params,t_i)$ \bmb{notation???}
-\begin{equation}
-\hat \params =  \argmin_{\params} \sum_i \left( \state(t_i) - \traj(\params,t_i) \right)^2
-\end{equation}
+In order to find a solution of an ODE model that is closest to the observed data,
+we have to first decide on a measure of the distance between the solution and the data.
+For example, we can consider the sum of squared differences between the two.
+The least-squares solution of an ODE model (i.e., the solution that minimizes the sum of squared differences) will visually resemble the patterns in the data to some extent;
+therefore, we can expect it give us a biologically sensible set of parameters.
 
+Suppose we have (1) a set of gradient functions $\frac{d\state}{dt}$; (2) a method for numerical integration; (3) a set of observations $\state(t_i)$ where $i = 1, \dots, n$ (for simplicity, from a single time series with $n$ observations); (4) a method for numerical minimization of an objective function.
+Define a trajectory (a solution of the ODE for specified parameters $\params$ [and initial conditions (ICs)] and time points $t_i$) as $\traj(t_i|\params)$. \bmb{notation???}\swp{changed some notations}
+Then, the least-squared fitting seeks to find a set of parametrs, $\hat \params$, that minimize the following objective function: $\sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2$.
+Such set of parameters can be formally defined as follows:
+\begin{equation}
+\hat \params =  \argmin_{\params} \sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2.
+\end{equation}
+The actual process of finding $\hat \beta$ will depend on the minimizer of our choice.
+s
+\swp{Do we just want to put definitions here? Not sure what you're exactly looking for here...}
 \begin{description}
 \item[gradient functions]{should be straightforward (you know what you
   want to model, right? \ldots)}
@@ -106,7 +117,14 @@ The natural (``intuitive''?) approach. Suppose we have (1) a set of gradient fun
 \item[initial conditions]{if all variables are observed, we can pretend the initial observations as known without error and set $\hat \state(0) = \state(0)$. Otherwise we have to treat ICs as auxiliary parameters.}
 \end{description}
 
-Least-squares fits provide solutions that are in some sense ``optimal'' (although the Gauss-Markov theorem only applies to \emph{linear} models), but don't provide any scope for inference. That said, by avoiding inference, one also avoids having to think much about the characteristics of the observations (independence, distribution, \ldots)
+Least-squares fits provide solutions that are in some sense ``optimal'' (although the Gauss-Markov theorem only applies to \emph{linear} models), but don't provide any scope for inference.
+That said, by avoiding inference, one also avoids having to think much about the characteristics of the observations (independence, distribution, \ldots).
+
+For example, consider a time series of confirmed Ebola cases from Sierra Leone from the 2014 outbreak.
+<<ebola_plot>>=
+library(fitode)
+plot(SierraLeone2014)
+@
 
 EXAMPLE? (this would look a bit funny with \code{fitode} as we'd have to use a fake-Gaussian)
 

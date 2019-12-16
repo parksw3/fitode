@@ -23,12 +23,12 @@ df <- simulate(SI_model, times=1:20, parms=parms, seed=101)
 
 df$infected <- df$I + rnorm(length(df$I), sd=10)
 
-system.time(ff <- fitode(
+ff <- fitode(
     model=SI_model,
     data=df,
     start=parms,
     fixed=c(N=1000)
-))
+)
 
 ff2 <- update(ff,
     observation = list(

@@ -22,6 +22,7 @@ parms <- c(beta=1,gamma=0.5, N=1000, i0=1e-2, size1=10, size2=10)
 
 df <- simulate(model, times=1:20, parms=parms, seed=101)
 
+## priors with mcmc
 system.time(ff <- fitodeMCMC(
     model=model,
     data=df,
@@ -39,12 +40,44 @@ system.time(ff <- fitodeMCMC(
     )
 ))
 
+## MAP estimate
+system.time(ff2 <- fitode(
+    model=model,
+    data=df,
+    start=parms,
+    prior=list(
+        beta~dgamma(shape=2, rate=2),
+        gamma~dgamma(shape=2, rate=4),
+        N~dgamma(shape=2, rate=1/500),
+        i0~dbeta(shape1=1, shape2=1),
+        size1~dgamma(shape=2, rate=1/5),
+        size2~dgamma(shape=2, rate=1/5)
+    )
+))
+
+## penalization based on prior (ignoring dmu/deta)
+system.time(ff3 <- fitode(
+    model=model,
+    data=df,
+    start=parms,
+    prior=list(
+        beta~dgamma(shape=2, rate=2),
+        gamma~dgamma(shape=2, rate=4),
+        N~dgamma(shape=2, rate=1/500),
+        i0~dbeta(shape1=1, shape2=1),
+        size1~dgamma(shape=2, rate=1/5),
+        size2~dgamma(shape=2, rate=1/5)
+    ),
+    prior.density = FALSE
+))
+
 plot(ff, level=0.95)
+plot(ff2, level=0.95)
+plot(ff3, level=0.95)
 
 summary(ff)
 
 lattice::xyplot(ff@mcmc)
-
 
 coda::gelman.diag(ff@mcmc)
 
