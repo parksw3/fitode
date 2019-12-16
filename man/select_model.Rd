@@ -5,7 +5,7 @@
 \title{Select a log-likelihood model}
 \usage{
 select_model(dist = c("ols", "dnorm", "dnorm2", "dpois", "dnbinom",
-  "dnbinom1", "dgamma"))
+  "dnbinom1", "dgamma", "dlnorm"))
 }
 \arguments{
 \item{dist}{conditional distribution of reported data (dnorm, dnorm2, dpois, dnbinom, dnbinom1, dgamma)}

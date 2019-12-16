@@ -4,7 +4,7 @@
 \alias{select_prior}
 \title{Select a prior model}
 \usage{
-select_prior(family = c("dnorm", "dgamma", "dbeta"),
+select_prior(family = c("dnorm", "dgamma", "dbeta", "dlnorm"),
   link = c("identity", "log", "logit"), prior.density = TRUE,
   keep_grad = TRUE)
 }

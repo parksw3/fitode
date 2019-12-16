@@ -7,7 +7,7 @@
 \title{Class "odemodel" representing ode models}
 \usage{
 \S4method{initialize}{odemodel}(.Object, name, model, observation, initial,
-  par, link, diffnames, keep_sensitivity = TRUE)
+  par, link, diffnames, keep_sensitivity = TRUE, call)
 
 odemodel(...)
 }
