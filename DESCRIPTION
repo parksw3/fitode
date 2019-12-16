@@ -3,7 +3,7 @@ Type: Package
 Title: ODE model fitting tools
 Version: 0.1.1
 Author: Sang Woo Park [aut, cre]
-Maintainer: Sang Woo Park <parksw3@mcmaster.ca>
+Maintainer: Sang Woo Park <swp2@princeton.edu>
 Description: Fit dynamical models using sensitivity equations
 License: GPL (>=2)
 Depends: 
