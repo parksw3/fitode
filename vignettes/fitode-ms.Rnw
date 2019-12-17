@@ -96,7 +96,7 @@ One of the most basic measures we can use is the sum of squared differences betw
 The least-squares solution of an ODE model (i.e., the solution that minimizes the sum of squared differences) will visually resemble the patterns in the data to some extent;
 therefore, we can expect it give us a biologically sensible set of parameters.
 
-Suppose we have (1) a gradient function that calculates the derivatives $\frac{d\state}{dt}$; (2) a method for numerical integration; (3) a set of observations $\state(t_i)$ where $i = 1, \dots, n$ (for simplicity, from a single time series with $n$ observations); (4) a method for numerical minimization of an objective function.
+Suppose we have (1) a gradient function that represents the derivatives $\frac{d\state}{dt}$; (2) a method for numerical integration; (3) a set of observations $\state(t_i)$ where $i = 1, \dots, n$ (for simplicity, from a single time series with $n$ observations); (4) a method for numerical minimization of an objective function.
 Define a trajectory (a solution of the ODE for specified parameters $\params$ [and initial conditions] and time points $t_i$) as $\traj(t_i|\params)$. \bmb{notation???}\swp{changed some notations}
 Then, the method of least-squared fitting seeks to find a set of parametrs, $\hat \params$, that minimize the following objective function: $\sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2$.
 Such set of parameters can be formally defined as follows:
@@ -205,12 +205,30 @@ We hope that you think about these characteristics carefully and continue to fol
 
 \subsection{Gaussian errors}
 
-If we're willing to assume that the residuals ($\state(t_i) - \traj(t_i|\params)$) are \emph{independent}, \emph{identically distributed} Gaussian random variables, then we can start making statistical inferences: confidence intervals on parameters, confidence and prediction intervals on predictions, etc..
+If we're willing to assume that the residuals ($\state(t_i) - \traj(t_i|\params)$) are \emph{independent}, \emph{identically distributed} Gaussian random variables -- i.e.,
+\begin{equation}
+\state(t_i) \sim \mathcal{N}(\traj(t_i|\params), \sigma^2),
+\end{equation}
+where $\sigma^2$ is the variance of the Gaussian distribution --
+then we can start making statistical inferences: confidence intervals on parameters, confidence and prediction intervals on predictions, etc..
 Assuming independence of successive residuals typically means we are assuming that the noise in the data is \emph{observation error};
 that is, the underlying process is deterministic (and smooth), and all the noise in the data comes from (independent) imperfect observations of the process.
 
+Under these assumptions, the likelihood (i.e., the probability of the observed data) can be written as follows:
+\begin{equation}
+\mathcal L(\state(t_i)|\params) = \prod_{i=1}^n \left( \frac{1}{\sigma \sqrt{2\pi}} \exp \left(-\frac{1}{2 \sigma^2} \left(\state(t_i) - \traj(t_i|\params)\right)^2 \right)\right),
+\end{equation}
+where the parameter set $\params$ includes the variance term $\sigma^2$ of the Gaussian distribution as an auxilliary parameter (i.e., $\sigma^2 \in \params$).
+Our goal is to find a set of parameters $\params$ that maximizes the likelihood;
+such set of parameters is referred to as the maximum likelihood estimate (MLE).
+Equivalently, the MLE can be expressed as a parameter that minimizes the negative log-likelihood function (using the negative log-likelihood results in a more stable numerical computation and useful statistical properties):
+\begin{equation}
+\hat{\beta} = \argmin_{\params} \left( - \frac{n}{2} \log (2 \pi \sigma^2) - \frac{1}{2\sigma^2} \sum_{i=1}^n \left(\state(t_i) - \traj(t_i|\params)\right)^2\right),
+\end{equation}
+which shows that the Gaussian errors are equivalent to \emph{scaled} least-squares errors.
+
+
 \begin{itemize}
-\item Gaussian errors are equivalent to \emph{scaled} least-squares errors
 \item we can fit via explicit Gaussian (with or without normalization terms),
   profiled Gaussian (set $\hat \sigma = \textrm{RSS}/n$), or quasi-likelihood (fit
   with $\sigma=1$, then estimate $\hat \sigma$ from final value of RSS)
