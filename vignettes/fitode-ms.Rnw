@@ -218,14 +218,18 @@ Under these assumptions, the likelihood (i.e., the probability of the observed d
 \begin{equation}
 \mathcal L(\state(t_i)|\params) = \prod_{i=1}^n \left( \frac{1}{\sigma \sqrt{2\pi}} \exp \left(-\frac{1}{2 \sigma^2} \left(\state(t_i) - \traj(t_i|\params)\right)^2 \right)\right),
 \end{equation}
-where the parameter set $\params$ includes the variance term $\sigma^2$ of the Gaussian distribution as an auxilliary parameter (i.e., $\sigma^2 \in \params$).
+where the parameter set $\params$ now includes parameters of the ODE model, initial conditions, and the variance term $\sigma^2$ of the Gaussian distribution as an auxilliary parameter (i.e., $\sigma^2 \in \params$).
 Our goal is to find a set of parameters $\params$ that maximizes the likelihood;
 such set of parameters is referred to as the maximum likelihood estimate (MLE).
-Equivalently, the MLE can be expressed as a parameter that minimizes the negative log-likelihood function (using the negative log-likelihood results in a more stable numerical computation and useful statistical properties):
+Equivalently, the MLE can be expressed as a parameter that minimizes the negative log-likelihood function, which is now our new measure for the distance between the solution and the data:
 \begin{equation}
 \hat{\beta} = \argmin_{\params} \left( - \frac{n}{2} \log (2 \pi \sigma^2) - \frac{1}{2\sigma^2} \sum_{i=1}^n \left(\state(t_i) - \traj(t_i|\params)\right)^2\right),
 \end{equation}
 which shows that the Gaussian errors are equivalent to \emph{scaled} least-squares errors.
+Using the negative log-likelihood also results in a more stable numerical computation and useful statistical properties.
+
+There are several ways in which we can fit an ODE model under the Gaussian assumption.
+First, we can estimate all parameters at once.
 
 
 \begin{itemize}
@@ -239,6 +243,13 @@ which shows that the Gaussian errors are equivalent to \emph{scaled} least-squar
 \end{itemize}
 
 EXAMPLE?
+
+<<>>=
+update(exp_fit,
+       observation=list(volume ~ dnorm(mean=A, sd=sigma)),
+       start=c(coef(exp_fit), sigma=1),
+       par=c("r", "A0", "sigma"))
+@
 
 \subsection{non-Gaussian errors}
 

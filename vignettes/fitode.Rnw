@@ -173,7 +173,7 @@ Note that we need to specify a starting value for the overdispersion parameter a
 well.
 
 Alternatively, we can update \code{odemodel} objects and refit the model:
-<<nbupdate>>=
+<<nbupdate2>>=
 exp_model_nbinom <-
   update(exp_model,
          name="exponential (nbinom)",
