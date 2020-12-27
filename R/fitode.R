@@ -319,16 +319,15 @@ fitode <- function(model, data,
     )
 
     ## check if this is ols
-    if (length(model@observation) == 1) {
-        if(as.character(model@observation[[1]][[3]][[1]])=="ols") {
-            pred <- predict(out)[[1]]$estimate
-            resid <- pred - eval(out@model@observation[[1]][[2]], data)
-
-            estvar <- var(resid)
-
-            out@vcov <- out@vcov * estvar * 2
-            out@mle2@vcov <- out@mle2@vcov * estvar * 2
-        }
+    browser()
+    if (as.character(model@observation[[1]][[3]][[1]])=="ols") {
+        pred <- predict(out)[[1]]$estimate
+        resid <- pred - eval(out@model@observation[[1]][[2]], data)
+        
+        estvar <- var(resid)
+        
+        out@vcov <- out@vcov * estvar * 2
+        out@mle2@vcov <- out@mle2@vcov * estvar * 2
     }
 
     out
