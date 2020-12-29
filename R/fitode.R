@@ -211,6 +211,7 @@ fitode <- function(model, data,
         }
 
         if (inherits(v, "try-error")) {
+            ## FIXME: option to print error ...
             return(NA)
         } else {
             oldnll <<- v[1] - logp
@@ -318,19 +319,34 @@ fitode <- function(model, data,
         prior=prior
     )
 
-    ## check if this is ols
-    browser()
-    if (as.character(model@observation[[1]][[3]][[1]])=="ols") {
-        pred <- predict(out)[[1]]$estimate
-        resid <- pred - eval(out@model@observation[[1]][[2]], data)
-        
-        estvar <- var(resid)
-        
-        out@vcov <- out@vcov * estvar * 2
-        out@mle2@vcov <- out@mle2@vcov * estvar * 2
-    }
+    ## scale variance for OLS models
 
-    out
+    ## in the *univariate* OLS case, we have estimated parameter variances that
+    ## are implicitly estimated with N(0,1)
+    ## need to scale by 2*RSS/n (why?)
+    
+    ## get LHS of formula (element 3), then take its head (element 1)
+    get_head <- function(x) deparse(x[[c(3,1)]])
+    ## check if this is ols
+    any_ols <- FALSE
+    estvar <- list()
+    ## FIXME: clean up
+    for (i in seq_along(model@observation)) {
+        if (get_head(model@observation[[i]])=="ols") {
+            pred <- predict(out)[[i]]$estimate
+            resid <- pred - eval(out@model@observation[[i]][[2]], data)
+            estvar <- c(estvar,list(var(resid)))
+            any_ols <- TRUE
+        }
+        ## FIXME: need to work out how to adjust vcov properly if we have
+        ##  multiple (but not all?) ols()
+        if (any_ols) {
+            estvar <- sum(unlist(estvar))
+            out@vcov <- out@vcov * estvar * 2
+            out@mle2@vcov <- out@mle2@vcov * estvar * 2
+        }
+    }
+    return(out)
 }
 
 ##' Calculate the derivative of an expression with respect to model parameters
@@ -397,6 +413,9 @@ logLik.sensitivity <- function(parms,
                                return.NLL=TRUE,
                                return.traj=FALSE) {
     times <- data$times
+    ## FIXME: check upstream somewhere?
+    if (is.null(times)) stop("data must contain a 'times' element")
+    
     ordered.times <- sort(unique(times))
 
     ss <- ode.sensitivity(model, parms, ordered.times, solver.opts, solver)

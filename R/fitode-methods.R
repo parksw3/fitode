@@ -18,7 +18,7 @@ setMethod("predict", "fitode",
              level,times,
              method=c("delta", "impsamp", "wmvrnorm"),
              nsim=1000){
-        if(missing(times)) times <- sort(unique(object@data$times))
+        if (missing(times)) times <- sort(unique(object@data$times))
         method <- match.arg(method)
 
         if (method=="impsamp") method <- "wmvrnorm"
