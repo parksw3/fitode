@@ -3,3 +3,4 @@
 misc
 ^data-raw$
 git_push
+^\.github$
