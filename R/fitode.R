@@ -202,7 +202,9 @@ fitode <- function(model, data,
         derivpar <- apply_link(par, linklist, "mu.eta")
 
         v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver), silent=TRUE)
-
+        ## FIXME: conditional?
+        if (inherits(v, "try-error")) cat(c(v))
+        
         if (length(priorlist) > 0) {
             logp <- eval(priorlist$prior.density, as.list(par))
             logpgrad <- unname(sapply(priorlist$prior.grad, function(x, y) ifelse(is.null(x), 0, eval(x, y)), as.list(par)))
@@ -325,26 +327,17 @@ fitode <- function(model, data,
     ## are implicitly estimated with N(0,1)
     ## need to scale by 2*RSS/n (why?)
     
-    ## get LHS of formula (element 3), then take its head (element 1)
-    get_head <- function(x) deparse(x[[c(3,1)]])
-    ## check if this is ols
-    any_ols <- FALSE
-    estvar <- list()
-    ## FIXME: clean up
-    for (i in seq_along(model@observation)) {
-        if (get_head(model@observation[[i]])=="ols") {
+    ## check if this is ols ('any' implies 'all' due to previous check)
+    if (any(vapply(model@observation, get_head, character(1))=="ols")) {
+        resids <- list()
+        for (i in seq_along(model@observation)) {
             pred <- predict(out)[[i]]$estimate
-            resid <- pred - eval(out@model@observation[[i]][[2]], data)
-            estvar <- c(estvar,list(var(resid)))
-            any_ols <- TRUE
+            resids <- c(resids,
+                        list(pred - eval(out@model@observation[[i]][[2]], data)))
         }
-        ## FIXME: need to work out how to adjust vcov properly if we have
-        ##  multiple (but not all?) ols()
-        if (any_ols) {
-            estvar <- sum(unlist(estvar))
-            out@vcov <- out@vcov * estvar * 2
-            out@mle2@vcov <- out@mle2@vcov * estvar * 2
-        }
+        estvar <- var(unlist(resids))
+        out@vcov <- out@vcov * estvar * 2
+        out@mle2@vcov <- out@mle2@vcov * estvar * 2
     }
     return(out)
 }
