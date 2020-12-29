@@ -112,6 +112,7 @@ simulate_internal <- function(model,
     return(out3)
 }
 
+#' @importFrom stats rnorm rpois rnbinom rgamma rlnorm
 errorfun <- function(family=c("ols", "dnorm", "dpois", "dnbinom", "dnbinom1", "dgamma", "dlnorm")) {
     family <- match.arg(family)
 

@@ -4,12 +4,26 @@
 \alias{fitode}
 \title{Fit ordinary differential equations model}
 \usage{
-fitode(model, data, start, tcol = "times", method = "BFGS",
-  optimizer = "optim", link, fixed = list(), prior = list(),
-  prior.density = TRUE, control = list(maxit = 1e+05),
-  solver.opts = list(method = "rk4"), solver = ode,
-  skip.hessian = FALSE, force.hessian = FALSE, use.ginv = TRUE,
-  quietly = FALSE, ...)
+fitode(
+  model,
+  data,
+  start,
+  tcol = "times",
+  method = "BFGS",
+  optimizer = "optim",
+  link,
+  fixed = list(),
+  prior = list(),
+  prior.density = TRUE,
+  control = list(maxit = 1e+05),
+  solver.opts = list(method = "rk4"),
+  solver = ode,
+  skip.hessian = FALSE,
+  force.hessian = FALSE,
+  use.ginv = TRUE,
+  quietly = FALSE,
+  ...
+)
 }
 \arguments{
 \item{model}{odemodel object}

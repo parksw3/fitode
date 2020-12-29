@@ -4,8 +4,14 @@
 \alias{ode.solve}
 \title{solve ode models}
 \usage{
-ode.solve(model, times, parms, y, solver.opts = list(method = "rk4"),
-  solver = ode)
+ode.solve(
+  model,
+  times,
+  parms,
+  y,
+  solver.opts = list(method = "rk4"),
+  solver = ode
+)
 }
 \arguments{
 \item{model}{odemodel object}

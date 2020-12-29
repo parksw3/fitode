@@ -6,8 +6,18 @@
 \alias{odemodel}
 \title{Class "odemodel" representing ode models}
 \usage{
-\S4method{initialize}{odemodel}(.Object, name, model, observation, initial,
-  par, link, diffnames, keep_sensitivity = TRUE, call)
+\S4method{initialize}{odemodel}(
+  .Object,
+  name,
+  model,
+  observation,
+  initial,
+  par,
+  link,
+  diffnames,
+  keep_sensitivity = TRUE,
+  call
+)
 
 odemodel(...)
 }
@@ -29,6 +39,8 @@ odemodel(...)
 \item{diffnames}{optional character vector specifying the names of a variable for which the consecutive difference needs to be calculated}
 
 \item{keep_sensitivity}{(logical) maintain the Jacobian as a part of the model object?}
+
+\item{call}{original function call}
 }
 \description{
 Class "odemodel" representing ode models

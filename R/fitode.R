@@ -8,6 +8,8 @@
 ##' @seealso \code{\link{make.link}}
 ##' @keywords internal
 ##' @return list of strings specifying link functions for each model parameter
+##' @importFrom stats make.link
+
 set_link <- function(link, par) {
     link_default <- as.list(rep("log", length(par)))
     names(link_default) <- par
@@ -121,6 +123,8 @@ fixpar <- function(model, fixed) {
 ##' @import bbmle
 ##' @importFrom numDeriv jacobian hessian
 ##' @importFrom MASS ginv
+##' @importFrom methods new
+##' @importFrom stats var
 ##' @seealso \code{\link{mle2}}
 ##' @export fitode
 fitode <- function(model, data,
@@ -195,6 +199,8 @@ fitode <- function(model, data,
     assign("oldgrad",NULL,f.env)
 
     objfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
+        oldpar <- oldnll <- oldgrad <- NULL ## code checking
+        
         if (identical(par,oldpar)) {
             return(oldnll)
         }
@@ -224,6 +230,8 @@ fitode <- function(model, data,
     }
 
     gradfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
+        oldpar <- oldnll <- oldgrad <- NULL ## code checking
+        
         if (identical(par,oldpar)) {
             return(oldgrad)
         }

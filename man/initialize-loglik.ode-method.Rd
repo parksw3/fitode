@@ -5,8 +5,15 @@
 \alias{initialize,loglik.ode-method}
 \title{The initializer for loglik.ode}
 \usage{
-\S4method{initialize}{loglik.ode}(.Object, name, model,
-  observation = "X", mean, par = NULL, keep_grad = TRUE)
+\S4method{initialize}{loglik.ode}(
+  .Object,
+  name,
+  model,
+  observation = "X",
+  mean,
+  par = NULL,
+  keep_grad = TRUE
+)
 }
 \arguments{
 \item{.Object}{object}

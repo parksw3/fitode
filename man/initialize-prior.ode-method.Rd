@@ -5,8 +5,14 @@
 \alias{initialize,prior.ode-method}
 \title{the initializer for prior.ode}
 \usage{
-\S4method{initialize}{prior.ode}(.Object, name, model, observation = "X",
-  par = NULL, keep_grad = TRUE)
+\S4method{initialize}{prior.ode}(
+  .Object,
+  name,
+  model,
+  observation = "X",
+  par = NULL,
+  keep_grad = TRUE
+)
 }
 \arguments{
 \item{.Object}{object}

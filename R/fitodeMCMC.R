@@ -26,7 +26,10 @@ propfun <- function(chol) {
 ##' @param fixed named vector or list of model parameters to fix and their values
 ##' @param solver.opts options for ode integration. See \code{\link{ode}}
 ##' @param solver ode solver
+##' @param ... additional arguments (unused)
 ##' @import coda
+##' @importFrom stats runif median cov as.formula
+##' @importFrom utils head tail
 ##' @export fitodeMCMC
 fitodeMCMC <- function(model, data,
                        start, tcol="times",

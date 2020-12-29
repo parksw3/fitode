@@ -11,6 +11,7 @@
 ##' @importFrom bbmle confint
 ##' @importFrom MASS mvrnorm
 ##' @importFrom grDevices adjustcolor
+##' @importFrom stats qnorm quantile
 ##' @docType methods
 ##' @exportMethod predict
 setMethod("predict", "fitode",

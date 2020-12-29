@@ -4,3 +4,12 @@ misc
 ^data-raw$
 git_push
 ^\.github$
+TODO.md
+.*/cache
+.*/figure
+\.aux
+\.log
+\.blg
+\.bbl
+\.toc
+\.out

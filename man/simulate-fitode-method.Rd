@@ -5,8 +5,7 @@
 \alias{simulate,fitode-method}
 \title{simulate fitode objects}
 \usage{
-\S4method{simulate}{fitode}(object, nsim = 1, seed = NULL, times,
-  parms, y, observation = TRUE)
+\S4method{simulate}{fitode}(object, nsim = 1, seed = NULL, times, parms, y, observation = TRUE)
 }
 \arguments{
 \item{object}{fitode object}

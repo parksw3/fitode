@@ -5,8 +5,15 @@
 \alias{Transform,loglik.ode-method}
 \title{Transform the model}
 \usage{
-\S4method{Transform}{loglik.ode}(object, transforms = NULL, name,
-  observation = "X", mean, par, keep_grad = TRUE)
+\S4method{Transform}{loglik.ode}(
+  object,
+  transforms = NULL,
+  name,
+  observation = "X",
+  mean,
+  par,
+  keep_grad = TRUE
+)
 }
 \arguments{
 \item{object}{loglik.ode object}

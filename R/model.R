@@ -9,6 +9,7 @@
 ##' @param link link functions for parameters (log links are used as default)
 ##' @param diffnames optional character vector specifying the names of a variable for which the consecutive difference needs to be calculated
 ##' @param keep_sensitivity (logical) maintain the Jacobian as a part of the model object?
+##' @param call original function call
 ##' @name odemodel
 ##' @rdname odemodel-class
 ##' @examples
@@ -30,6 +31,8 @@
 ##'     link = c(i0="logit")
 ##' )
 ##' @docType methods
+##' @importFrom methods initialize
+##' @export initialize
 ##' @exportMethod initialize
 setMethod(
     "initialize",
@@ -348,6 +351,8 @@ setMethod(
 ##' Show the model
 ##' @param object odemodel object
 ##' @keywords internal
+##' @importFrom methods show
+##' @export show
 ##' @exportMethod show
 setMethod("show", "odemodel",
     function(object){

@@ -1,5 +1,6 @@
 ##' @importFrom MASS mvrnorm
 ##' @importFrom mvtnorm dmvnorm
+##' @importFrom stats approx
 ##' @keywords internal
 wmvrnorm <- function(object,
                      nsim=1000,

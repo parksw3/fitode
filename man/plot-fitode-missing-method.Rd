@@ -6,15 +6,32 @@
 \alias{plot,fitode-method}
 \title{Plot a fitode object}
 \usage{
-\S4method{plot}{fitode,missing}(x, level, data, which,
-  method = c("delta", "impsamp", "wmvrnorm"), onepage = TRUE, xlim,
-  ylim, xlabs, ylabs, col.traj = "black", lty.traj = 1,
-  col.conf = "black", lty.conf = 4, add = FALSE, nsim = 1000, ...)
+\S4method{plot}{fitode,missing}(
+  x,
+  level,
+  data,
+  which,
+  method = c("delta", "impsamp", "wmvrnorm"),
+  onepage = TRUE,
+  xlim,
+  ylim,
+  xlabs,
+  ylabs,
+  col.traj = "black",
+  lty.traj = 1,
+  col.conf = "black",
+  lty.conf = 4,
+  add = FALSE,
+  nsim = 1000,
+  ...
+)
 }
 \arguments{
 \item{x}{fitode object}
 
 \item{level}{the confidence level required}
+
+\item{data}{(FIXME)}
 
 \item{which}{which to plot}
 

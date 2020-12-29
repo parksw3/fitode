@@ -1,16 +1,19 @@
+R="$(R_HOME)/bin/R CMD"
+Rscript="$(R_HOME)/bin/Rscript"
+
 ## default rule: build & copy paper
 ../inst/doc/fitode-ms.pdf: fitode-ms.pdf fitode.bib
 	mv fitode-ms.pdf ../inst/doc
 
 
 %.tex: %.Rnw
-	Rscript -e "library(knitr); knit('$*.Rnw')"
+	$(Rscript) -e "library(knitr); knit('$*.Rnw')"
 
 %.R: %.Rnw
-	Rscript -e "library(knitr); purl('$*.Rnw')"
+	$(Rscript) -e "library(knitr); purl('$*.Rnw')"
 
 %.tex: %.R
-	time R CMD BATCH --vanilla $*.R
+	time $(R) CMD BATCH --vanilla $*.R
 
 %.pdf: %.tex
 	texi2pdf $<

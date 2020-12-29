@@ -1,12 +1,13 @@
 Package: fitode
 Type: Package
-Title: ODE model fitting tools
+Title: ODE Model Fitting Tools
 Version: 0.1.1
 Author: Sang Woo Park [aut, cre]
 Maintainer: Sang Woo Park <swp2@princeton.edu>
-Description: Fit dynamical models using sensitivity equations
+Description: Fit dynamical models using sensitivity equations.
 License: GPL (>=2)
-Depends: 
+Depends:
+    R (>= 3.0),
     bbmle
 Imports:
     deSolve,
@@ -14,7 +15,12 @@ Imports:
     MASS,
     numDeriv,
     mvtnorm,
-    coda
+    coda,
+    methods
+Suggests:
+    knitr,
+    ggplot2
+VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1

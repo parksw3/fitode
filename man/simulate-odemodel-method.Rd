@@ -5,9 +5,17 @@
 \alias{simulate,odemodel-method}
 \title{simulate model objects}
 \usage{
-\S4method{simulate}{odemodel}(object, nsim = 1, seed = NULL, times,
-  parms, y, solver.opts = list(method = "rk4"), solver = ode,
-  observation = TRUE)
+\S4method{simulate}{odemodel}(
+  object,
+  nsim = 1,
+  seed = NULL,
+  times,
+  parms,
+  y,
+  solver.opts = list(method = "rk4"),
+  solver = ode,
+  observation = TRUE
+)
 }
 \arguments{
 \item{object}{odemodel object}

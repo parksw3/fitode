@@ -8,6 +8,7 @@
 ##' @param times time vector to predict over. Default is set to the time frame of the data.
 ##' @param simplify (logical) simplify output to return estimated trajectories and their
 ##' credible intervals? If \code{simplify=FALSE}, all posterior trajectories will be returned
+##' @importFrom stats setNames
 ##' @docType methods
 setMethod("predict", "fitodeMCMC",
     function(object,

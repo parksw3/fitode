@@ -22,6 +22,7 @@ whichpred <- function(pred, which) {
 ##' @param lty.conf line type of the confidence intervals
 ##' @param add add to another plot?
 ##' @param nsim number of simulations for mvrnorm, wmvrnorm methods
+##' @param data (FIXME)
 ##' @param ... additional arguments to be passed on to the plot function
 ##' @importFrom bbmle plot
 ##' @docType methods
@@ -71,6 +72,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
 ##' @param col.conf colour of the confidence intervals
 ##' @param lty.conf line type of the confidence intervals
 ##' @param add add to another plot?
+##' @param data (FIXME)
 ##' @param ... additional arguments to be passed on to the plot function
 setMethod("plot", signature(x="fitodeMCMC", y="missing"),
     function(x, level,
@@ -110,6 +112,7 @@ setMethod("plot", signature(x="fitodeMCMC", y="missing"),
 ##' @param lty.conf line type of the confidence intervals
 ##' @param add add to another plot?
 ##' @param ... additional arguments to be passed on to the plot function
+##' @importFrom graphics par lines matlines
 plot_internal <- function(pred,
                           data,
                           onepage=TRUE,

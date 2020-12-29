@@ -4,8 +4,13 @@
 \alias{ode.sensitivity}
 \title{Calculate the derivative of the mean expression}
 \usage{
-ode.sensitivity(model, parms, times, solver.opts = list(method = "rk4"),
-  solver = ode)
+ode.sensitivity(
+  model,
+  parms,
+  times,
+  solver.opts = list(method = "rk4"),
+  solver = ode
+)
 }
 \arguments{
 \item{model}{odemodel object}
