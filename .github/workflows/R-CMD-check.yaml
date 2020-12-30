@@ -67,6 +67,9 @@ jobs:
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
 
+      - name: Install texlive etc.
+        run: sudo apt-get install texlive texlive-science texlive-latex-extra texlive-bibtex-extra
+
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE)
