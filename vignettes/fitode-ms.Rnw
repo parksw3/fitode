@@ -1,11 +1,15 @@
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Outline of paper}
-%\documentclass[nojss]{jss}
 \documentclass[12pt]{article}
+%% vignette index specifications need to be *after* \documentclass{}
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{A beginner's guide to fitting ordinary different equations to data}
+%\VignettePackage{fitode}
+%\VignetteDepends{ggplot2}
+%% alternative class: \documentclass[nojss]{jss}
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{natbib}
 \usepackage[utf8]{inputenc}
+\usepackage{color}
 \bibliographystyle{chicago}
 \usepackage{amsmath}
 %% https://tex.stackexchange.com/questions/59702/suggest-a-nice-font-family-for-my-basic-latex-template-text-and-math/59706
@@ -34,6 +38,9 @@ of mathematical sophistication who aren't necessarily great with statistics. The
 
 \textbf{Target journal:} R Journal? JSS? Bull Math Biol? Methods in Ecol \& Evol?
 
+<<setup,include=FALSE>>=
+knitr::opts_chunk$set(eval=FALSE)  ## while tumorgrowth is missing
+@ 
 \section{Introduction}
 
 Mathematical models based on ordinary different equations (ODEs) are
@@ -98,7 +105,7 @@ therefore, we can expect it give us a biologically sensible set of parameters.
 
 Suppose we have (1) a gradient function that represents the derivatives $\frac{d\state}{dt}$; (2) a method for numerical integration; (3) a set of observations $\state(t_i)$ where $i = 1, \dots, n$ (for simplicity, from a single time series with $n$ observations); (4) a method for numerical minimization of an objective function.
 Define a trajectory (a solution of the ODE for specified parameters $\params$ [and initial conditions] and time points $t_i$) as $\traj(t_i|\params)$. \bmb{notation???}\swp{changed some notations}
-Then, the method of least-squared fitting seeks to find a set of parametrs, $\hat \params$, that minimize the following objective function: $\sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2$.
+Then, the method of least-squared fitting seeks to find a set of parameters, $\hat \params$, that minimize the following objective function: $\sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2$.
 Such set of parameters can be formally defined as follows:
 \begin{equation}
 \hat \params =  \argmin_{\params} \sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2.
@@ -121,9 +128,10 @@ The actual process of finding $\hat \beta$ will depend on the minimizer of our c
 For example, consider a time series of human tumor cell (GI-101A) growth within a nude mice \citep{worschech2009systemic};
 the time series data was extracted from the original article (Figure 1A, control data) using WebPlotDigitizer and is included in the \code{fitode} package (see \code{tumorgrowth}).
 <<tumorplot, fig.width=6, fig.height=4, message=FALSE>>=
-library(fitode)
 plot(tumorgrowth)
+library(fitode)
 @
+
 \noindent
 \cite{murphy2016differences} analyzed this time series by fitting seven different ODE models (i.e., exponential, Mendelsohn, logistic, linear, surface, Bertalanffy, and Gompertz) via least-squares and comparing their model predictions.
 Here, we demonstrate the fitting of the exponential growth model.
@@ -136,23 +144,23 @@ The gradient function is simple:
 \end{equation}
 where $r$ is the exponential growth rate.
 In \code{fitode}, gradient functions are expressed as a list of \emph{formulas} (the left hand side (LHS) of the formula determines the state variable and the right hand side (RHS) of the formula determines its gradient function):
-<<expgrad, eval=FALSE>>=
+<<expgrad>>=
 model=list(A ~ r*A)
 @
 \noindent
 Likewise, observation model should specify that we want to minimize the squared sum of differences between the observed \code{volume} and the trajectory of \code{A} (the LHS of the formula determines the observed variable and the RHS of the formula determines the objective function):
-<<expobs, eval=FALSE>>=
+<<expobs>>=
 observation=list(volume ~ ols(mean=A))
 @
 \noindent
 We have to specify the initial condition for our state variable:
-<<expini, eval=FALSE>>=
+<<expini>>=
 initial=list(A~A0)
 @
 \noindent
 Finally, we have to specify all parameters (including the initial conditions) of the model.
 In this case, we have two parameters: the exponential growth rate, \code{r}, and the initial condition, \code{A0}.
-<<exppars, eval=FALSE>>=
+<<exppars>>=
 par=c("r", "A0")
 @
 \noindent
@@ -178,8 +186,8 @@ lines(A~times, data=ss)
 @
 
 To fit the model, we have to call the \code{odemodel} object through the \code{fitode} function.
-<<expfit>>=
-exp_fit <- fitode(
+<<expfit,eval=FALSE>>=
+tumor_exp_fit <- fitode(
   model=exp_model,
   data=tumorgrowth,
   start=start,
@@ -189,12 +197,12 @@ exp_fit <- fitode(
 \noindent
 Once the model has been fitted, we can use the \code{plot} function to plot the estimated trajectory along with the data:
 <<expfitplot, fig.width=6, fig.height=4>>=
-plot(exp_fit)
+plot(tumor_exp_fit)
 @
 \noindent
 Finally, we can obtain the parameter estimates by using the \code{coef} function:
 <<expfitcoef, fig.width=6, fig.height=4>>=
-coef(exp_fit)
+coef(tumor_exp_fit)
 @
 
 You might think that this fit is good enough and decide to carry on with our analysis of the ODE model using the estimated parameters.
@@ -218,7 +226,7 @@ Under these assumptions, the likelihood (i.e., the probability of the observed d
 \begin{equation}
 \mathcal L(\state(t_i)|\params) = \prod_{i=1}^n \left( \frac{1}{\sigma \sqrt{2\pi}} \exp \left(-\frac{1}{2 \sigma^2} \left(\state(t_i) - \traj(t_i|\params)\right)^2 \right)\right),
 \end{equation}
-where the parameter set $\params$ now includes parameters of the ODE model, initial conditions, and the variance term $\sigma^2$ of the Gaussian distribution as an auxilliary parameter (i.e., $\sigma^2 \in \params$).
+where the parameter set $\params$ now includes parameters of the ODE model, initial conditions, and the variance term $\sigma^2$ of the Gaussian distribution as an auxiliary parameter (i.e., $\sigma^2 \in \params$).
 Our goal is to find a set of parameters $\params$ that maximizes the likelihood;
 such set of parameters is referred to as the maximum likelihood estimate (MLE).
 Equivalently, the MLE can be expressed as a parameter that minimizes the negative log-likelihood function, which is now our new measure for the distance between the solution and the data:
@@ -244,8 +252,8 @@ First, we can estimate all parameters at once.
 
 EXAMPLE?
 
-<<>>=
-update(exp_fit,
+<<update_ex>>=
+update(tumor_exp_fit,
        observation=list(volume ~ dnorm(mean=A, sd=sigma)),
        start=c(coef(exp_fit), sigma=1),
        par=c("r", "A0", "sigma"))

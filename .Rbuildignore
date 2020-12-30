@@ -13,3 +13,5 @@ TODO.md
 \.bbl
 \.toc
 \.out
+\.tex
+vignettes/Makefile

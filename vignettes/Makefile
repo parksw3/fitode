@@ -1,16 +1,19 @@
-R="$(R_HOME)/bin/R CMD"
-Rscript="$(R_HOME)/bin/Rscript"
+## R CMD check complains if we use naked "R" or "Rscript", but
+## "$(R_HOME)/bin/Rscript" doesn't necessarily get the right path ...
+R = R
+Rscr = Rscript
+
 
 ## default rule: build & copy paper
-../inst/doc/fitode-ms.pdf: fitode-ms.pdf fitode.bib
-	mv fitode-ms.pdf ../inst/doc
-
+## ../inst/doc/fitode-ms.pdf: fitode-ms.pdf fitode.bib
+## 	mv fitode-ms.pdf ../inst/doc
+##	rm fitode-ms.tex
 
 %.tex: %.Rnw
-	$(Rscript) -e "library(knitr); knit('$*.Rnw')"
+	$(Rscr) -e "knitr::knit('$*.Rnw')"
 
 %.R: %.Rnw
-	$(Rscript) -e "library(knitr); purl('$*.Rnw')"
+	$(Rscr) -e "knitr::purl('$*.Rnw')"
 
 %.tex: %.R
 	time $(R) CMD BATCH --vanilla $*.R
