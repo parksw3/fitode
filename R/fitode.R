@@ -208,7 +208,9 @@ fitode <- function(model, data,
         derivpar <- apply_link(par, linklist, "mu.eta")
 
         v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver), silent=TRUE)
-
+        ## FIXME: conditional?
+        if (inherits(v, "try-error")) cat(c(v))
+        
         if (length(priorlist) > 0) {
             logp <- eval(priorlist$prior.density, as.list(par))
             logpgrad <- unname(sapply(priorlist$prior.grad, function(x, y) ifelse(is.null(x), 0, eval(x, y)), as.list(par)))
@@ -217,6 +219,7 @@ fitode <- function(model, data,
         }
 
         if (inherits(v, "try-error")) {
+            ## FIXME: option to print error ...
             return(NA)
         } else {
             oldnll <<- v[1] - logp
@@ -326,20 +329,25 @@ fitode <- function(model, data,
         prior=prior
     )
 
-    ## check if this is ols
-    if (length(model@observation) == 1) {
-        if(as.character(model@observation[[1]][[3]][[1]])=="ols") {
-            pred <- predict(out)[[1]]$estimate
-            resid <- pred - eval(out@model@observation[[1]][[2]], data)
+    ## scale variance for OLS models
 
-            estvar <- var(resid)
-
-            out@vcov <- out@vcov * estvar * 2
-            out@mle2@vcov <- out@mle2@vcov * estvar * 2
+    ## in the *univariate* OLS case, we have estimated parameter variances that
+    ## are implicitly estimated with N(0,1)
+    ## need to scale by 2*RSS/n (why?)
+    
+    ## check if this is ols ('any' implies 'all' due to previous check)
+    if (any(vapply(model@observation, get_head, character(1))=="ols")) {
+        resids <- list()
+        for (i in seq_along(model@observation)) {
+            pred <- predict(out)[[i]]$estimate
+            resids <- c(resids,
+                        list(pred - eval(out@model@observation[[i]][[2]], data)))
         }
+        estvar <- var(unlist(resids))
+        out@vcov <- out@vcov * estvar * 2
+        out@mle2@vcov <- out@mle2@vcov * estvar * 2
     }
-
-    out
+    return(out)
 }
 
 ##' Calculate the derivative of an expression with respect to model parameters
@@ -406,6 +414,9 @@ logLik.sensitivity <- function(parms,
                                return.NLL=TRUE,
                                return.traj=FALSE) {
     times <- data$times
+    ## FIXME: check upstream somewhere?
+    if (is.null(times)) stop("data must contain a 'times' element")
+    
     ordered.times <- sort(unique(times))
 
     ss <- ode.sensitivity(model, parms, ordered.times, solver.opts, solver)

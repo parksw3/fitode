@@ -54,8 +54,8 @@ setMethod(
             stop("'observation' must be a list of formulas")
 
         ## warning
-        if("dnorm2" %in% sapply(observation, function(ll) as.character(ll[[3]][[1]])) && keep_sensitivity) {
-            warning("Sensitivity equations are unavailable for dnorm2 (changing keep_sensitivity=FALSE).")
+        if("dnorm2" %in% vapply(observation, get_head, character(1)) && keep_sensitivity) {
+            warning("Sensitivity equations are unavailable for dnorm2 (setting keep_sensitivity=FALSE).")
             keep_sensitivity <- FALSE
         }
 
@@ -140,15 +140,17 @@ setMethod(
             stop("model must be a list of formulas or a function")
         }
 
+        models <- vapply(observation, get_head, character(1))
+        if (any(models=="ols") && !all(models=="ols")) {
+            stop("ols() must apply to all observations within a model")
+        }
         loglik_list <- lapply(observation, function(ll) {
-            if (as.character(ll[[3]][[1]])=="ols" && length(observation) > 1) {
-                stop("'ols' is only available for univariate time series")
-            }
 
-            ll_model <- select_model(as.character(ll[[3]][[1]]))
-
-            ll_check <- c(match(c(ll_model@mean, ll_model@par), names(as.list(ll[[3]])[-1])),
-                          match(names(as.list(ll[[3]])[-1]), c(ll_model@mean, ll_model@par)))
+            ll_model <- select_model(get_head(ll))
+            ## FIXME: allow matching by position??
+            rhs_names <- names(as.list(get_rhs(ll))[-1])
+            ll_check <- c(match(c(ll_model@mean, ll_model@par), rhs_names),
+                          match(rhs_names, c(ll_model@mean, ll_model@par)))
 
             if (any(is.na(ll_check))) {
                 ll_check_msg <- paste0(
@@ -208,9 +210,13 @@ setMethod(
 
         ## set up link functions
         if (!missing(link)) {
+
+            nomatch <- which(is.na(match(names(link), par)))
+            if (length(nomatch)>0) stop("Some link functions do not correspond to the model parameters: ",
+                                        paste(names(link)[nomatch],collapse=", "))
+            
             link <- link[names(link) %in% par]
 
-            if (any(is.na(match(names(link), par)))) stop("Some link functions do not correspond to the model parameters.")
         }
 
         link <- unlist(set_link(link, par))
