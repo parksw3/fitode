@@ -10,11 +10,10 @@
 \usepackage{natbib}
 \usepackage[utf8]{inputenc}
 \usepackage{color}
-\bibliographystyle{chicago}
 \usepackage{amsmath}
+\bibliographystyle{chicago}
 %% https://tex.stackexchange.com/questions/59702/suggest-a-nice-font-family-for-my-basic-latex-template-text-and-math/59706
 \usepackage{mathpazo}
-\usepackage{sober}
 %% https://tex.stackexchange.com/questions/5223/command-for-argmin-or-argmax
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}

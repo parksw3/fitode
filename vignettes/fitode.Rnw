@@ -17,7 +17,7 @@
 
 <<opts,echo=FALSE>>=
 library("knitr")
-## DON'T cache, suppress warnings globally
+## DON'T cache=TRUE or warning=FALSE globally
 ## DO set error=FALSE so that errors are not caught
 ##  (except temporarily for debugging purposes)
 opts_chunk$set(fig.width=6,fig.height=4,error=FALSE)
@@ -35,8 +35,7 @@ knit_hooks$set(basefig=function(before, options, envir) {
 \section{Introduction}
 
 \code{fitode} is an R package for fitting ordinary differential equations (ODE)
-using Maximum Likelihood or Bayesian Markov Chain Monte Carlo (MCMC). It relies on
-automatic differentiation features of the \code{Deriv} package to solve the
+using Maximum Likelihood or Bayesian Markov Chain Monte Carlo (MCMC). It relies on symbolic differentiation features of the \code{Deriv} package to solve the
 sensitivity equations so that gradient-based optimization algorithms can be used.
 \begin{itemize}
     \item response distributions: Gamma, Gaussian, Poisson, and negative
