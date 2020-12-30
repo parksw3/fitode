@@ -144,7 +144,7 @@ setMethod(
         if (any(models=="ols") && !all(models=="ols")) {
             stop("ols() must apply to all observations within a model")
         }
-        loglik_list <- lapply(observation, function(ll) {
+        lfun <- function(ll) {
 
             ll_model <- select_model(get_head(ll))
             ## FIXME: allow matching by position??
@@ -169,44 +169,36 @@ setMethod(
             }
 
             trans_obs <- as.formula(as.call(c(as.symbol("~"), as.symbol("X"), ll[[2]])))
-
             trans_list <- list(trans_obs)
-
             likpar <- ll_model@par
-
             if (length(likpar) > 0) {
                 Lcall <- as.list(ll[[3]])[[likpar]]
-
                 trans_list <- append(trans_list, as.formula(as.call(c(as.symbol("~"), as.symbol(likpar), Lcall))))
             } else {
                 Lcall <- likpar
             }
-
             ll_model <- Transform(ll_model,
                                   observation=deparse(ll[[2]]),
                                   transforms=trans_list,
                                   par=Lcall,
                                   keep_grad=keep_sensitivity
             )
-
             expr <- ll[[3]][[ll_model@mean]]
-
             if (keep_sensitivity) {
                 expr.sensitivity <- list(
                     state=lapply(state, function(s) Deriv(expr, s)),
                     par=lapply(par, function(p) Deriv(expr, p))
                 )
-
                 names(expr.sensitivity$state) <- state
                 names(expr.sensitivity$par) <- par
             } else {
                 expr.sensitivity <- list()
             }
-
             list(ll_model=ll_model,
                  expr=expr,
                  expr.sensitivity=expr.sensitivity)
-        })
+        } ## lfun
+        loglik_list <- lapply(observation, lfun)
 
         ## set up link functions
         if (!missing(link)) {

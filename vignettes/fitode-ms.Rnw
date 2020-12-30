@@ -39,7 +39,7 @@ of mathematical sophistication who aren't necessarily great with statistics. The
 \textbf{Target journal:} R Journal? JSS? Bull Math Biol? Methods in Ecol \& Evol?
 
 <<setup,include=FALSE>>=
-knitr::opts_chunk$set(eval=FALSE)  ## while tumorgrowth is missing
+knitr::opts_chunk$set(error=FALSE)  ## stop on error
 @ 
 \section{Introduction}
 
@@ -128,8 +128,8 @@ The actual process of finding $\hat \beta$ will depend on the minimizer of our c
 For example, consider a time series of human tumor cell (GI-101A) growth within a nude mice \citep{worschech2009systemic};
 the time series data was extracted from the original article (Figure 1A, control data) using WebPlotDigitizer and is included in the \code{fitode} package (see \code{tumorgrowth}).
 <<tumorplot, fig.width=6, fig.height=4, message=FALSE>>=
-plot(tumorgrowth)
 library(fitode)
+plot(tumorgrowth)
 @
 
 \noindent
@@ -186,7 +186,7 @@ lines(A~times, data=ss)
 @
 
 To fit the model, we have to call the \code{odemodel} object through the \code{fitode} function.
-<<expfit,eval=FALSE>>=
+<<expfit>>=
 tumor_exp_fit <- fitode(
   model=exp_model,
   data=tumorgrowth,
