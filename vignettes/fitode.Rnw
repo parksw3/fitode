@@ -1,8 +1,8 @@
+\documentclass{article}
 %\VignetteEngine{knitr::knitr}
 %\VignetteDepends{fitode}
-%\VignetteIndexEntry{Getting started with \texttt{fitode} package}
-\documentclass{article}
-\title{Getting started with the \texttt{fitode} package}
+%\VignetteIndexEntry{Getting started with fitode package}
+\title{Getting started with the fitode package}
 \author{Sang Woo Park}
 \usepackage{amsmath}
 \usepackage{natbib}
