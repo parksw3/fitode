@@ -1,6 +1,6 @@
 stopifnot(require("testthat"), require(numDeriv), require("fitode"))
 
-context("log-likelihood tests")
+## context("log-likelihood tests") ## now deprecated
 test_that("normal", {
     distrib <- select_model("dnorm")
 
