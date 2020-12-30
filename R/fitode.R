@@ -1,3 +1,5 @@
+utils::globalVariables(c("oldpar","oldnll","oldgrad"), "fitode", add=TRUE)
+
 ##' Set up link functions for model parameters -- for \code{\link{fitode}}
 ##' internal usage; assumes log-link by default if link functions are
 ##' not specified
@@ -199,11 +201,11 @@ fitode <- function(model, data,
     assign("oldgrad",NULL,f.env)
 
     objfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
-        oldpar <- oldnll <- oldgrad <- NULL ## code checking
         
         if (identical(par,oldpar)) {
             return(oldnll)
         }
+
         origpar <- apply_link(par, linklist, "linkinv")
         derivpar <- apply_link(par, linklist, "mu.eta")
 
@@ -233,7 +235,6 @@ fitode <- function(model, data,
     }
 
     gradfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
-        oldpar <- oldnll <- oldgrad <- NULL ## code checking
         
         if (identical(par,oldpar)) {
             return(oldgrad)
@@ -456,7 +457,7 @@ logLik.sensitivity <- function(parms,
             }
 
             if(length(loglik.gr) > 1) {
-                if (deparse(ll_grad[[2]]) != "expression(0)") {
+                if (deparse1(ll_grad[[2]]) != "expression(0)") {
                     nll_gr[[ll_fun@par]] <- -sum(loglik.gr[[ll_fun@par]][nn])
                 }
             }

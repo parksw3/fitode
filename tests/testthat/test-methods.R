@@ -1,6 +1,5 @@
 stopifnot(require("testthat"), require("fitode"))
 
-context("methods tests")
 test_that("SI model", {
     harbin <- structure(list(week = 2:18,
         Deaths = c(2, 7, 2, 6, 12, 68, 91,
@@ -31,7 +30,10 @@ test_that("SI model", {
     suppressWarnings(ff <- fitode(
         SI_model,
         start=start,
-        data=harbin, tcol="week"
+        data=harbin,
+        tcol="week",
+        quietly = TRUE
+        
     ))
 
     expect_equal(

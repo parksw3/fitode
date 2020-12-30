@@ -9,6 +9,7 @@
 ##' @slot par parameters
 ##' @slot link link functions for parameters (log links are used as default)
 ##' @slot diffnames character vector specifying the names of a variable for which the consecutive difference needs to be calculated
+##' @slot call original function call
 ##' @slot jacobian.initial Jacobian of initial values with respect to its parameters
 ##' @slot jacobian.state Jacobian with respect to its states
 ##' @slot jacobian.par Jacobian with repsect to its parameters

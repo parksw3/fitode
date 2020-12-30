@@ -22,7 +22,7 @@
 
 \item{nsim}{number of simulations}
 
-\item{seed}{seed}
+\item{seed}{random-number seed}
 
 \item{times}{time vector}
 

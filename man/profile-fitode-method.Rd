@@ -8,6 +8,12 @@
 }
 \arguments{
 \item{fitted}{fitted model object}
+
+\item{which}{which parameter(s) to profile? (integer value)}
+
+\item{alpha}{critical level}
+
+\item{trace}{trace progress of computations?}
 }
 \description{
 Profile fitode objects

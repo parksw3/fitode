@@ -188,10 +188,10 @@ lines(A~times, data=ss)
 To fit the model, we have to call the \code{odemodel} object through the \code{fitode} function.
 <<expfit>>=
 tumor_exp_fit <- fitode(
-  model=exp_model,
-  data=tumorgrowth,
-  start=start,
-  tcol="day"
+    model=exp_model,
+    data=tumorgrowth,
+    start=start,
+    tcol="day"
 )
 @
 \noindent
@@ -255,7 +255,7 @@ EXAMPLE?
 <<update_ex>>=
 update(tumor_exp_fit,
        observation=list(volume ~ dnorm(mean=A, sd=sigma)),
-       start=c(coef(exp_fit), sigma=1),
+       start=c(coef(tumor_exp_fit), sigma=1),
        par=c("r", "A0", "sigma"))
 @
 

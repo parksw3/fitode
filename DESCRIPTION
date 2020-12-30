@@ -7,7 +7,7 @@ Maintainer: Sang Woo Park <swp2@princeton.edu>
 Description: Fit dynamical models using sensitivity equations.
 License: GPL (>=2)
 Depends:
-    R (>= 3.0),
+    R (>= 4.0),
     bbmle
 Imports:
     deSolve,
@@ -19,8 +19,10 @@ Imports:
     methods
 Suggests:
     knitr,
-    ggplot2
+    ggplot2,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
+Config/testthat/edition: 3

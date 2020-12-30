@@ -3,11 +3,14 @@
 R = R
 Rscr = Rscript
 
-
 ## default rule: build & copy paper
 ## ../inst/doc/fitode-ms.pdf: fitode-ms.pdf fitode.bib
 ## 	mv fitode-ms.pdf ../inst/doc
 ##	rm fitode-ms.tex
+
+%.pdf: %.Rnw
+	$(Rscr) -e "knitr::knit2pdf('$*.Rnw')"
+	rm $*.tex
 
 %.tex: %.Rnw
 	$(Rscr) -e "knitr::knit('$*.Rnw')"
@@ -20,6 +23,7 @@ Rscr = Rscript
 
 %.pdf: %.tex
 	texi2pdf $<
+
 clean:
 	rm -f unnamed*
 	rm -f *.aux *.tikz *.out *.log *.blg *.toc *.bbl *~ \#*

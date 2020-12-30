@@ -12,6 +12,8 @@
 
 \item{nsim}{number of simulations}
 
+\item{seed}{random-number seed}
+
 \item{times}{time vector}
 
 \item{parms}{named vector of parameter values}

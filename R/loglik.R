@@ -124,9 +124,13 @@ setMethod(
     }
 )
 
-## use Taylor expansion of digamma(a+b) for a>>b
+
 ## discontinuity in second derivative, but ... probably OK
 ## TODO: not sure why it won't work unless I export it??
+##' Taylor expansion of digamma(a+b) for a>>b
+##' @param x first argument
+##' @param y second argument
+##' @param mag cutoff magnitude for switching approximations
 ##' @importFrom Deriv drule
 ##' @keywords internal
 ##' @export
@@ -136,6 +140,10 @@ dfun <- function(x,y,mag=1e8) {
                   digamma(x)-digamma(x+y)))
 }
 
+##' Taylor expansion of trigamma(a+b) (?) for a>>b
+##' @param x first argument
+##' @param y second argument
+##' @param mag cutoff magnitude for switching approximations
 ##' @keywords internal
 ##' @export
 dfun2 <- function(x,y,mag=1e8,focal="x") {

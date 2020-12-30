@@ -10,8 +10,9 @@
 ##' @param diffnames optional character vector specifying the names of a variable for which the consecutive difference needs to be calculated
 ##' @param keep_sensitivity (logical) maintain the Jacobian as a part of the model object?
 ##' @param call original function call
-##' @name odemodel
-##' @rdname odemodel-class
+## removed @name, @rdname as otherwise the appropriate \alias{} doesn't show up and we get a warning about an undocumented method ...
+## https://stackoverflow.com/questions/7356120/how-to-properly-document-s4-methods-using-roxygen2
+## says we should need only @rdname and @aliases ...
 ##' @examples
 ##' SI_model <- odemodel(
 ##'     name = "SI",
@@ -33,7 +34,7 @@
 ##' @docType methods
 ##' @importFrom methods initialize
 ##' @export initialize
-##' @exportMethod initialize
+##' @export
 setMethod(
     "initialize",
     "odemodel",
@@ -201,6 +202,7 @@ setMethod(
         loglik_list <- lapply(observation, lfun)
 
         ## set up link functions
+        ## FIXME:: how does this compare to check_link?
         if (!missing(link)) {
 
             nomatch <- which(is.na(match(names(link), par)))
@@ -231,7 +233,7 @@ setMethod(
     }
 )
 
-##' Wrapper function odemodel
+##' Create a new odemodel
 ##' @name odemodel
 ##' @rdname odemodel-class
 ##' @keywords internal
