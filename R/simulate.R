@@ -3,7 +3,7 @@
 ##' @aliases simulate,odemodel-method
 ##' @param object odemodel object
 ##' @param nsim number of simulations
-##' @param seed seed
+##' @param seed random-number seed
 ##' @param times time vector
 ##' @param parms named vector of parameter values
 ##' @param y initial values
@@ -26,9 +26,11 @@ setMethod("simulate", "odemodel",
 
 ##' simulate fitode objects
 ##'
+## FIXME: use @inheritParams ? 
 ##' @aliases simulate,fitode-method
 ##' @param object fitode object
 ##' @param nsim number of simulations
+##' @param seed random-number seed
 ##' @param times time vector
 ##' @param parms named vector of parameter values
 ##' @param y initial values
@@ -112,6 +114,7 @@ simulate_internal <- function(model,
     return(out3)
 }
 
+#' @importFrom stats rnorm rpois rnbinom rgamma rlnorm
 errorfun <- function(family=c("ols", "dnorm", "dpois", "dnbinom", "dnbinom1", "dgamma", "dlnorm")) {
     family <- match.arg(family)
 

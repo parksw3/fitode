@@ -1,6 +1,5 @@
 stopifnot(require("testthat"), require(numDeriv), require("fitode"))
 
-context("likelihood sensitivity tests")
 test_that("SI model", {
     SI_model <- odemodel(
         name = "SI",

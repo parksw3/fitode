@@ -1,4 +1,5 @@
 .onLoad <- function(libname, pkgname) {
+    k <- x <- a <- b <- y <- NULL ## defeat visible-binding checks
     drule[["NBconst"]] <- alist(k=dfun(k,x),
                                 x=dfun(x,k)+1/x)
 

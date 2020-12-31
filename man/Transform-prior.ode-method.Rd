@@ -5,8 +5,14 @@
 \alias{Transform,prior.ode-method}
 \title{Transform the prior model}
 \usage{
-\S4method{Transform}{prior.ode}(object, transforms = NULL, name,
-  observation = "X", par, keep_grad = TRUE)
+\S4method{Transform}{prior.ode}(
+  object,
+  transforms = NULL,
+  name,
+  observation = "X",
+  par,
+  keep_grad = TRUE
+)
 }
 \arguments{
 \item{object}{object}

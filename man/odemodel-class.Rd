@@ -6,36 +6,12 @@
 \alias{odemodel}
 \title{Class "odemodel" representing ode models}
 \usage{
-\S4method{initialize}{odemodel}(.Object, name, model, observation, initial,
-  par, link, diffnames, keep_sensitivity = TRUE, call)
-
 odemodel(...)
-}
-\arguments{
-\item{.Object}{object}
-
-\item{name}{name of the model}
-
-\item{model}{ode model}
-
-\item{observation}{observation model}
-
-\item{initial}{initial values}
-
-\item{par}{model parameters}
-
-\item{link}{link functions for parameters (log links are used as default)}
-
-\item{diffnames}{optional character vector specifying the names of a variable for which the consecutive difference needs to be calculated}
-
-\item{keep_sensitivity}{(logical) maintain the Jacobian as a part of the model object?}
 }
 \description{
 Class "odemodel" representing ode models
 
-Constructor method of "odemodel" class
-
-Wrapper function odemodel
+Create a new odemodel
 }
 \section{Slots}{
 
@@ -58,6 +34,8 @@ Wrapper function odemodel
 
 \item{\code{diffnames}}{character vector specifying the names of a variable for which the consecutive difference needs to be calculated}
 
+\item{\code{call}}{original function call}
+
 \item{\code{jacobian.initial}}{Jacobian of initial values with respect to its parameters}
 
 \item{\code{jacobian.state}}{Jacobian with respect to its states}
@@ -73,23 +51,4 @@ Wrapper function odemodel
 \item{\code{keep_sensitivity}}{(logical) keep sensitivity equations?}
 }}
 
-\examples{
-SI_model <- odemodel(
-    name = "SI",
-    model = list(
-        S ~ - beta*S*I/N,
-        I ~ beta*S*I/N - gamma*I
-    ),
-    observation = list(
-        susceptible ~ dnorm(mean=S, sd=sigma1),
-        infected ~ dnorm(mean=I, sd=sigma2)
-    ),
-    initial = list(
-        S ~ N * (1 - i0),
-        I ~ N * i0
-    ),
-    par = c("beta", "gamma", "N", "i0", "sigma1", "sigma2"),
-    link = c(i0="logit")
-)
-}
 \keyword{internal}

@@ -4,8 +4,15 @@
 \alias{logLik.sensitivity}
 \title{Calculate the derivative of the log-likelihood function}
 \usage{
-logLik.sensitivity(parms, model, data, solver.opts = list(method =
-  "rk4"), solver = ode, return.NLL = TRUE, return.traj = FALSE)
+logLik.sensitivity(
+  parms,
+  model,
+  data,
+  solver.opts = list(method = "rk4"),
+  solver = ode,
+  return.NLL = TRUE,
+  return.traj = FALSE
+)
 }
 \arguments{
 \item{parms}{named vector of parameter values}

@@ -11,6 +11,7 @@
 ##' @importFrom bbmle confint
 ##' @importFrom MASS mvrnorm
 ##' @importFrom grDevices adjustcolor
+##' @importFrom stats qnorm quantile
 ##' @docType methods
 ##' @exportMethod predict
 setMethod("predict", "fitode",
@@ -167,6 +168,9 @@ setMethod("logLik", "fitode", function(object){-object@min})
 ##'
 ##' @param fitted fitted model object
 ##' @importFrom bbmle profile
+##' @param which which parameter(s) to profile? (integer value)
+##' @param alpha critical level
+##' @param trace trace progress of computations?
 ##' @exportMethod profile
 setMethod("profile", "fitode",
     function(fitted,

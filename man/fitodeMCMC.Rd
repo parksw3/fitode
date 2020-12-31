@@ -4,11 +4,25 @@
 \alias{fitodeMCMC}
 \title{Fit ordinary differential equations model using MCMC}
 \usage{
-fitodeMCMC(model, data, start, tcol = "times", proposal.vcov,
-  prior = list(), chains = 1, iter = 2000, burnin = iter/2,
-  thin = 1, refresh = max(iter/10, 1), prior.only = FALSE, link,
-  fixed = list(), solver.opts = list(method = "rk4"), solver = ode,
-  ...)
+fitodeMCMC(
+  model,
+  data,
+  start,
+  tcol = "times",
+  proposal.vcov,
+  prior = list(),
+  chains = 1,
+  iter = 2000,
+  burnin = iter/2,
+  thin = 1,
+  refresh = max(iter/10, 1),
+  prior.only = FALSE,
+  link,
+  fixed = list(),
+  solver.opts = list(method = "rk4"),
+  solver = ode,
+  ...
+)
 }
 \arguments{
 \item{model}{ode model}
@@ -42,6 +56,8 @@ fitodeMCMC(model, data, start, tcol = "times", proposal.vcov,
 \item{solver.opts}{options for ode integration. See \code{\link{ode}}}
 
 \item{solver}{ode solver}
+
+\item{...}{additional arguments (unused)}
 }
 \description{
 This function fits ordinary differential equations models to a uni- or

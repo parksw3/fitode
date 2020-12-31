@@ -4,8 +4,17 @@
 \alias{simulate_internal}
 \title{Internal function for simulation models}
 \usage{
-simulate_internal(model, times, parms, y, solver.opts = list(method =
-  "rk4"), solver = ode, observation = TRUE, nsim = 1, seed = NULL)
+simulate_internal(
+  model,
+  times,
+  parms,
+  y,
+  solver.opts = list(method = "rk4"),
+  solver = ode,
+  observation = TRUE,
+  nsim = 1,
+  seed = NULL
+)
 }
 \arguments{
 \item{model}{odemodel object}

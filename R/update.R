@@ -11,7 +11,9 @@ setMethod("update", "fitode",
               observation, initial,
               par, link,
               ...){
-        update_internal(object, observation, initial, par, link, ...)
+        pf <- parent.frame(2) ## need this to jump back through the S4 '.local' context?
+        ## pass this down to avoid too much guessing about how far back up to go ...
+        update_internal(object, observation, initial, par, link, pf= pf, ...)
     }
 )
 
@@ -28,19 +30,20 @@ setMethod("update", "fitodeMCMC",
               observation, initial,
               par, link,
               ...){
-        update_internal(object, observation, initial, par, link, ...)
+        update_internal(object, observation, initial, par, link, pf=parent.frame(), ...)
     }
 )
 
 update_internal <- function(object,
                             observation, initial,
                             par, link,
+                            pf,
                             ...){
     call <- object@call
     ## FIXME: why doesn't think work?
     ## extras <- match.call(expand.dots = FALSE)$...
     extras <- list(...)
-    model <- eval(call$model)
+    model <- eval(call$model, pf)
 
     if (!missing(observation) || !missing(initial) || !missing(par) || !missing(link)) {
         model <- Transform(
@@ -68,5 +71,5 @@ update_internal <- function(object,
     ## CHECK:
     ## I probably have to go up twice to evaluate this properly?
     ## bbmle::update() goes up once but fitode has update_internal
-    eval(call, parent.frame(2))
+    eval(call, pf)
 }

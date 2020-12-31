@@ -5,8 +5,15 @@
 \alias{initialize,solution.ode-method}
 \title{Constructor for solution.ode class}
 \usage{
-\S4method{initialize}{solution.ode}(.Object, y, times, model, parms,
-  solver.opts = list(method = "rk4"), solver = ode)
+\S4method{initialize}{solution.ode}(
+  .Object,
+  y,
+  times,
+  model,
+  parms,
+  solver.opts = list(method = "rk4"),
+  solver = ode
+)
 }
 \arguments{
 \item{.Object}{object}

@@ -5,8 +5,7 @@
 \alias{jacobian,odemodel-method}
 \title{Evaluate the jacobian of the gradients}
 \usage{
-\S4method{jacobian}{odemodel}(object, state, par, type = c("initial",
-  "state", "par"))
+\S4method{jacobian}{odemodel}(object, state, par, type = c("initial", "state", "par"))
 }
 \arguments{
 \item{object}{odemodel object}

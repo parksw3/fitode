@@ -1,3 +1,5 @@
+utils::globalVariables(c("oldpar","oldnll","oldgrad"), "fitode", add=TRUE)
+
 ##' Set up link functions for model parameters -- for \code{\link{fitode}}
 ##' internal usage; assumes log-link by default if link functions are
 ##' not specified
@@ -8,6 +10,8 @@
 ##' @seealso \code{\link{make.link}}
 ##' @keywords internal
 ##' @return list of strings specifying link functions for each model parameter
+##' @importFrom stats make.link
+
 set_link <- function(link, par) {
     link_default <- as.list(rep("log", length(par)))
     names(link_default) <- par
@@ -121,6 +125,8 @@ fixpar <- function(model, fixed) {
 ##' @import bbmle
 ##' @importFrom numDeriv jacobian hessian
 ##' @importFrom MASS ginv
+##' @importFrom methods new
+##' @importFrom stats var
 ##' @seealso \code{\link{mle2}}
 ##' @export fitode
 fitode <- function(model, data,
@@ -194,10 +200,15 @@ fitode <- function(model, data,
     assign("oldpar",NULL,f.env)
     assign("oldgrad",NULL,f.env)
 
+    ## FIXME: how do objfun() and gradfun() actually differ? Can we repeat less code?
+    ## This could probably be done by copying the function and hacking just the 'return' line ... ?
+    ## (or, more sensibly, encapsulating most of the code in a sub-function)
     objfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
+        
         if (identical(par,oldpar)) {
             return(oldnll)
         }
+
         origpar <- apply_link(par, linklist, "linkinv")
         derivpar <- apply_link(par, linklist, "mu.eta")
 
@@ -227,6 +238,7 @@ fitode <- function(model, data,
     }
 
     gradfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
+        
         if (identical(par,oldpar)) {
             return(oldgrad)
         }
@@ -448,7 +460,7 @@ logLik.sensitivity <- function(parms,
             }
 
             if(length(loglik.gr) > 1) {
-                if (deparse(ll_grad[[2]]) != "expression(0)") {
+                if (deparse1(ll_grad[[2]]) != "expression(0)") {
                     nll_gr[[ll_fun@par]] <- -sum(loglik.gr[[ll_fun@par]][nn])
                 }
             }

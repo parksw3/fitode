@@ -1,8 +1,8 @@
+\documentclass{article}
 %\VignetteEngine{knitr::knitr}
 %\VignetteDepends{fitode}
-%\VignetteIndexEntry{Getting started with \texttt{fitode} package}
-\documentclass{article}
-\title{Getting started with the \texttt{fitode} package}
+%\VignetteIndexEntry{Getting started with fitode package}
+\title{Getting started with the fitode package}
 \author{Sang Woo Park}
 \usepackage{amsmath}
 \usepackage{natbib}
@@ -17,7 +17,10 @@
 
 <<opts,echo=FALSE>>=
 library("knitr")
-opts_chunk$set(fig.width=6,fig.height=4,warning=FALSE,cache=TRUE,error=FALSE)
+## DON'T cache=TRUE or warning=FALSE globally
+## DO set error=FALSE so that errors are not caught
+##  (except temporarily for debugging purposes)
+opts_chunk$set(fig.width=6,fig.height=4,error=FALSE)
 knit_hooks$set(basefig=function(before, options, envir) {
                    if (before) {
                        par(bty="l",las=1)
@@ -32,8 +35,7 @@ knit_hooks$set(basefig=function(before, options, envir) {
 \section{Introduction}
 
 \code{fitode} is an R package for fitting ordinary differential equations (ODE)
-using Maximum Likelihood or Bayesian Markov Chain Monte Carlo (MCMC). It relies on
-automatic differentiation features of the \code{Deriv} package to solve the
+using Maximum Likelihood or Bayesian Markov Chain Monte Carlo (MCMC). It relies on symbolic differentiation features of the \code{Deriv} package to solve the
 sensitivity equations so that gradient-based optimization algorithms can be used.
 \begin{itemize}
     \item response distributions: Gamma, Gaussian, Poisson, and negative
@@ -78,7 +80,7 @@ Here, we study a time series of confirmed cases of Ebola during the 2014 outbrea
 Sierra Leone to characterize epidemic growth patterns. Once you load \code{fitode},
 the data set (\code{SierraLeone2014}) will be automatically loaded to the global
 environment.
-<<SierraLeonedata, message=FALSE, warning=FALSE>>=
+<<SierraLeonedata, message=FALSE, warning=FALSE, basefig=TRUE>>=
 library(ggplot2); theme_set(theme_bw())
 library(fitode)
 plot(SierraLeone2014)
@@ -110,15 +112,15 @@ exp_model <- odemodel(
     par=c("r", "X0")
 )
 @
-Note that the name of the observed variable (\code{confirmed}) must be different
-from the name of the state variables (e.g., \code{X}) because \code{fitode}
-relies on expression evaluations. \bmb{maybe delete ``because ...''? (not clear)}
+Note that the name(s) of the observed variable(s) (here, \code{confirmed}) must be different
+from the name(s) of the state variable(s) (here, \code{X}).
 
-In order to fit this model to the data, we have to specify starting parameter for
+In order to fit this model to the data, we have to specify starting parameters for
 the optimization.
 To do so, we can simulate the model for various parameters and try to find a reasonable
 parameter set by eye. For example, here is a parameter set found by trial and error:
-<<expsetup>>=
+
+<<expsetup,basefig=TRUE>>=
 start <- c(r=7, X0=30)
 ss <- simulate(exp_model, parms=start, times=SierraLeone2014$times)
 plot(SierraLeone2014)
@@ -150,15 +152,16 @@ We can quantify the uncertainty in the parameters by using \code{confint}:
 confint(exp_fit)
 @
 By default, \code{confint} will calculate the confidence intervals using the delta method.
+\bmb{are these 'delta method' or Wald CIs??}
 We diagnose the fit by using the \code{plot} function (the \code{level=0.95} argument specifies that 95\% confidence intervals should be drawn):
-<<plotexp>>=
+<<plotexp,basefig=TRUE>>=
 plot(exp_fit, level=0.95)
 @
 
-We can see that the uncertainty of our fit is suspiciously narrow, probably because of our choice of the error function. The Poisson distribution assumes that variance of the residuals is equal to the mean (i.e., the fitted value). Instead, we can use a negative binomial distribution, which
+The confidence intervals on our predictions are suspiciously narrow, probably because of our choice of the error function. The Poisson distribution assumes that variance of the residuals is equal to the mean (i.e., the fitted value). Instead, we can use a negative binomial distribution, which 
 assumes that variance is a quadratic function of the mean. Then, we have to estimate an
 extra parameter (\code{size} argument of the \code{dnbinom}) to account for overdispersion.
-This can be done using the \code{update} function:
+We use the \code{update} function to adjust only these particular aspects of the model, leaving the gradient specification the same:
 <<nbupdate>>=
 exp_fit_nbinom <- update(
     exp_fit,
@@ -172,7 +175,7 @@ exp_fit_nbinom <- update(
 Note that we need to specify a starting value for the overdispersion parameter as
 well.
 
-Alternatively, we can update \code{odemodel} objects and refit the model:
+Alternatively, we can update the \code{odemodel} object and refit the model:
 <<nbupdate2>>=
 exp_model_nbinom <-
   update(exp_model,
@@ -189,14 +192,15 @@ exp_fit_nbinom2 <- fitode(
     start=c(start, phi=10)
 )
 @
-They will both give the same results.
+
+Both approaches give the same results.
 
 We can plot this fit:
-<<plotnb>>=
+<<plotnb,basefig=TRUE>>=
 plot(exp_fit_nbinom, level=0.95)
 @
-We can see that our uncertainty is more reasonable. This
-increases confidence intervals on parameters as well:
+Our uncertainty is now more reasonable. This change
+widens the confidence intervals on parameters as well:
 <<cinb>>=
 confint(exp_fit_nbinom)
 @
@@ -206,7 +210,7 @@ confint(exp_fit_nbinom)
 Exponential growth model accounts for only the initial portion of
 the observed data. Instead, we might want to try to model the entire
 time series. Note that the cumulative number of cases saturates over time:
-<<cumsumplot>>=
+<<cumsumplot,basefig=TRUE>>=
 plot(cumsum(confirmed) ~ times, data=SierraLeone2014)
 @
 We can use a logistic model to describe this saturating pattern:
@@ -243,7 +247,7 @@ SierraLeone2014b <- rbind(
 @
 
 Again, we can try to find a reasonable parameter set by trial and error:
-<<logistsetup>>=
+<<logistsetup,warning=FALSE,basefig=TRUE>>=
 start_logistic <-
     c(coef(exp_fit_nbinom), K=sum(SierraLeone2014$confirmed))
 ## need to use a different value for X0
@@ -258,7 +262,7 @@ plot(SierraLeone2014)
 lines(X~times, data=ss_logistic)
 @
 and fit the model:
-<<logistfit>>=
+<<logistfit,warning=FALSE>>=
 logistic_fit <- fitode(
     logistic_model,
     data=SierraLeone2014b,
@@ -270,17 +274,17 @@ In this case, we get a much higher growth rate estimate:
 confint(logistic_fit)
 @
 Plot:
-<<logistplot>>=
+<<logistplot,basefig=TRUE>>=
 plot(logistic_fit, level=0.95)
 @
-There's a clear bias in our fit; the estimated trajectory underestimates
+There is a clear bias in our fit; the estimated trajectory underestimates
 the peak of the epidemic. This is likely to affect our parameter estimates.
 
 We can be smarter about our choices of fitting window. Instead of using
 the entire time series, we can fit the logistic model from the
-beginning of an epidemic to the next observation after the peak
+beginning of the epidemic to the next observation after the peak
 \citep{ma2014estimating}.
-<<mafit>>=
+<<mafit,warning=FALSE>>=
 ma_begin <- 1
 ma_end <- which.max(SierraLeone2014b$confirmed) + 1
 
@@ -291,12 +295,12 @@ logistic_fit_ma <- update(
 @
 
 We get a much better fit:
-<<maplot>>=
+<<maplot,basefig=TRUE>>=
 plot(logistic_fit, level=0.95)
 plot(logistic_fit_ma, level=0.95, add=TRUE, col.traj="red", col.conf="red")
 @
 
-We get slightly wider confidence intervals because we're using less data:
+We get slightly wider confidence intervals on the parameters because we're using less data:
 <<maci>>=
 confint(logistic_fit_ma)
 @
@@ -317,7 +321,7 @@ thus effectively recovering from infection \citep{he2009plug};
 in other words, we model cumulative number of confirmed cases with
 cumulative number of recovered cases (state variable $R$).
 
-Again, we use interval counts by using \code{diffnames=``R''}:
+Again, we use interval counts by using \code{diffnames="R"}:
 <<sirmodel>>=
 SIR_model <- odemodel(
     name="SIR (nbinom)",
@@ -339,7 +343,7 @@ SIR_model <- odemodel(
     link=c(i0="logit")
 )
 @
-For brevity, we assumed that the initial conditions are given by
+For simplicity, we assumed that there are no recovered individuals at the beginning of the epidemic\footnote{Since these individuals would be completely uninvolved in the epidemic, and we are estimating the population size, we can make this assumption without any loss of generality}. The initial conditions are given by
 \begin{equation}
 \begin{aligned}
 S(0) &= N (1 - i_0)\\
@@ -348,11 +352,12 @@ R(0) &= 0
 \end{aligned}
 \end{equation}
 where $i_0$ is the initial proportion of infected individuals.
-Moreover, setting \code{link=c(i0="logit")} tells \code{fitode} that the
-parameter \code{i0} needs to be between 0 and 1.
+Setting \code{link=c(i0="logit")} tells \code{fitode} that the
+parameter \code{i0} needs to be between 0 and 1. \footnote{The \emph{logit}, or
+log-odds, function (\code{qlogis()} in R), is the inverse of a logistic curve; it is a natural way to transform a value from the range [0,1] to $[-\infty,\infty]$.}
 
 Searching for starting values:
-<<sirstart>>=
+<<sirstart,warning=FALSE,basefig=TRUE>>=
 SIR_start <- c(beta=70, gamma=60, N=40000, i0=0.0004, phi=6)
 
 ss_SIR <- simulate(SIR_model,
@@ -362,7 +367,7 @@ plot(SierraLeone2014)
 lines(ss_SIR$times, ss_SIR$R)
 @
 Fit:
-<<sirfit>>=
+<<sirfit,cache=TRUE,warning=FALSE>>=
 SIR_fit <- fitode(
     SIR_model,
     data=SierraLeone2014b,
@@ -370,34 +375,36 @@ SIR_fit <- fitode(
 )
 @
 Plot:
-<<sirfitplot>>=
+<<sirfitplot,basefig=TRUE>>=
 plot(SIR_fit, level=0.95)
 @
 Again, the SIR model underestimates the peak.
 
 This could be a problem with fitting window.
 When we get rid of the long tail in the time series, we get a much better fit:
-<<sirbfit>>=
+
+<<sirbfit,cache=TRUE,warning=FALSE>>=
 SIR_fit_b <- update(
     SIR_fit,
     data=SierraLeone2014b[SierraLeone2014b$times < 2015.4,]
 )
+@
 
+<<plot_sirbfit,basefig=TRUE>>=
 plot(SIR_fit_b, level=0.95)
 @
 
 There are several ways we can get the confidence intervals on the growth rate
 ($r = \beta - \gamma$). By default, the package uses the delta method.
-option).
+
 <<cisirb>>=
 confint(SIR_fit_b, parm=list(r~beta-gamma))
 @
 We discuss other methods later.
 
-\subsection{Summary}
+Figure~\ref{fig:fitsummary} compares the results of all of the methods we have tried.
 
-Here, we summarize the estimates from different fits:
-<<fitsummary>>=
+<<fitsummary,echo=FALSE,fig.cap="Comparison of growth rate estimates">>=
 fit_summ <- data.frame(
     fits=c("exponential\n(poisson)", "exponential\n(nbinom)",
            "logistic\n(full)",
@@ -420,17 +427,18 @@ fit_summ <- data.frame(
 
 fit_summ$fits <- factor(fit_summ$fits, level=fit_summ$fits)
 
-ggplot(fit_summ) +
-    geom_point(aes(fits, estimate)) +
-    geom_errorbar(aes(fits, ymin=lwr, ymax=upr), width=0.2) +
-    scale_x_discrete("Models") +
-    scale_y_continuous("Initial epidemic growth rate")
+print(ggplot(fit_summ)
+      + geom_pointrange(aes(fits, estimate, ymin=lwr, ymax=upr))
+      + labs(y="Initial epidemic growth rate")
+      + coord_flip()
+      )
 @
 
 \section{Advanced fitting - multivariate time series}
 
 Data:
 <<haredata>>=
+## FIXME: store these data locally
 hare <- read.csv("https://raw.githubusercontent.com/stan-dev/example-models/master/knitr/lotka-volterra/hudson-bay-lynx-hare.csv", skip=2)
 plot(Hare~Year, data=hare, type="l")
 lines(Lynx~Year, data=hare, type="l", col=2)
@@ -463,33 +471,38 @@ lotka_model <- odemodel(
 @
 
 Fit with good starting values (estimated by someone else):
-<<lvstart>>=
+<<lvstart,warning=FALSE>>=
+## warnings about NaN values in log1p/log
 harestart <- c(alpha=0.55, beta=0.028, delta=0.026, gamma=0.84, u0=30, v0=10,
                size1=1, size2=1)
 
 harefit <- fitode(lotka_model, data=hare,
                   start=harestart,
                   tcol="Year")
-
+## FIXME:: lots of NaN warnings from log1p(mu/size2), log(size2+mu), etc.
 plot(harefit, level=0.95)
 @
 
-Esimates of size parameters are too high
+Esimates of size parameters are extremely large:
 <<lvcoef>>=
 coef(harefit)
 @
 
 This suggests that Poisson is actually good enough:
-<<lvpoiss>>=
+<<lvpoiss,warning=FALSE>>=
+## FIXME: we need this (fancy stuff with filling in all
+## of the links as log) now because I'm checking links more carefully
+## is there a way around this?
+poisson_pars <- setdiff(lotka_model@par, c("size1", "size2")) 
 harefit_poisson <- update(
     harefit,
     observation=list(
         Hare ~ dpois(lambda=u),
         Lynx ~ dpois(lambda=v)
     ),
-    par=c("alpha", "beta", "delta", "gamma", "u0", "v0")
+    link=setNames(rep("log",length(poisson_pars)),poisson_pars),
+    par=poisson_pars
 )
-
 plot(harefit_poisson, level=0.95)
 @
 
@@ -498,6 +511,8 @@ Very similar confidence intervals:
 confint(harefit)
 confint(harefit_poisson)
 @
+
+\bmb{make this into a figure?}
 
 \bibliography{fitode}
 \end{document}

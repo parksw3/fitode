@@ -1,3 +1,4 @@
+#' @importFrom methods is
 trans <- function(formulae, allvars) {
     # extract vars from an expression
     vars <- function(e) {
