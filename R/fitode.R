@@ -200,6 +200,9 @@ fitode <- function(model, data,
     assign("oldpar",NULL,f.env)
     assign("oldgrad",NULL,f.env)
 
+    ## FIXME: how do objfun() and gradfun() actually differ? Can we repeat less code?
+    ## This could probably be done by copying the function and hacking just the 'return' line ... ?
+    ## (or, more sensibly, encapsulating most of the code in a sub-function)
     objfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
         
         if (identical(par,oldpar)) {

@@ -152,15 +152,16 @@ We can quantify the uncertainty in the parameters by using \code{confint}:
 confint(exp_fit)
 @
 By default, \code{confint} will calculate the confidence intervals using the delta method.
+\bmb{are these 'delta method' or Wald CIs??}
 We diagnose the fit by using the \code{plot} function (the \code{level=0.95} argument specifies that 95\% confidence intervals should be drawn):
-<<plotexp>>=
+<<plotexp,basefig=TRUE>>=
 plot(exp_fit, level=0.95)
 @
 
-We can see that the uncertainty of our fit is suspiciously narrow, probably because of our choice of the error function. The Poisson distribution assumes that variance of the residuals is equal to the mean (i.e., the fitted value). Instead, we can use a negative binomial distribution, which
+The confidence intervals on our predictions are suspiciously narrow, probably because of our choice of the error function. The Poisson distribution assumes that variance of the residuals is equal to the mean (i.e., the fitted value). Instead, we can use a negative binomial distribution, which 
 assumes that variance is a quadratic function of the mean. Then, we have to estimate an
 extra parameter (\code{size} argument of the \code{dnbinom}) to account for overdispersion.
-This can be done using the \code{update} function:
+We use the \code{update} function to adjust only these particular aspects of the model, leaving the gradient specification the same:
 <<nbupdate>>=
 exp_fit_nbinom <- update(
     exp_fit,
@@ -174,7 +175,7 @@ exp_fit_nbinom <- update(
 Note that we need to specify a starting value for the overdispersion parameter as
 well.
 
-Alternatively, we can update \code{odemodel} objects and refit the model:
+Alternatively, we can update the \code{odemodel} object and refit the model:
 <<nbupdate2>>=
 exp_model_nbinom <-
   update(exp_model,
@@ -191,14 +192,15 @@ exp_fit_nbinom2 <- fitode(
     start=c(start, phi=10)
 )
 @
-They will both give the same results.
+
+Both approaches give the same results.
 
 We can plot this fit:
-<<plotnb>>=
+<<plotnb,basefig=TRUE>>=
 plot(exp_fit_nbinom, level=0.95)
 @
-We can see that our uncertainty is more reasonable. This
-increases confidence intervals on parameters as well:
+Our uncertainty is now more reasonable. This change
+widens the confidence intervals on parameters as well:
 <<cinb>>=
 confint(exp_fit_nbinom)
 @
@@ -208,7 +210,7 @@ confint(exp_fit_nbinom)
 Exponential growth model accounts for only the initial portion of
 the observed data. Instead, we might want to try to model the entire
 time series. Note that the cumulative number of cases saturates over time:
-<<cumsumplot>>=
+<<cumsumplot,basefig=TRUE>>=
 plot(cumsum(confirmed) ~ times, data=SierraLeone2014)
 @
 We can use a logistic model to describe this saturating pattern:
@@ -245,7 +247,7 @@ SierraLeone2014b <- rbind(
 @
 
 Again, we can try to find a reasonable parameter set by trial and error:
-<<logistsetup>>=
+<<logistsetup,warning=FALSE,basefig=TRUE>>=
 start_logistic <-
     c(coef(exp_fit_nbinom), K=sum(SierraLeone2014$confirmed))
 ## need to use a different value for X0
@@ -260,7 +262,7 @@ plot(SierraLeone2014)
 lines(X~times, data=ss_logistic)
 @
 and fit the model:
-<<logistfit>>=
+<<logistfit,warning=FALSE>>=
 logistic_fit <- fitode(
     logistic_model,
     data=SierraLeone2014b,
@@ -272,17 +274,17 @@ In this case, we get a much higher growth rate estimate:
 confint(logistic_fit)
 @
 Plot:
-<<logistplot>>=
+<<logistplot,basefig=TRUE>>=
 plot(logistic_fit, level=0.95)
 @
-There's a clear bias in our fit; the estimated trajectory underestimates
+There is a clear bias in our fit; the estimated trajectory underestimates
 the peak of the epidemic. This is likely to affect our parameter estimates.
 
 We can be smarter about our choices of fitting window. Instead of using
 the entire time series, we can fit the logistic model from the
-beginning of an epidemic to the next observation after the peak
+beginning of the epidemic to the next observation after the peak
 \citep{ma2014estimating}.
-<<mafit>>=
+<<mafit,warning=FALSE>>=
 ma_begin <- 1
 ma_end <- which.max(SierraLeone2014b$confirmed) + 1
 
@@ -293,12 +295,12 @@ logistic_fit_ma <- update(
 @
 
 We get a much better fit:
-<<maplot>>=
+<<maplot,basefig=TRUE>>=
 plot(logistic_fit, level=0.95)
 plot(logistic_fit_ma, level=0.95, add=TRUE, col.traj="red", col.conf="red")
 @
 
-We get slightly wider confidence intervals because we're using less data:
+We get slightly wider confidence intervals on the parameters because we're using less data:
 <<maci>>=
 confint(logistic_fit_ma)
 @
@@ -341,7 +343,7 @@ SIR_model <- odemodel(
     link=c(i0="logit")
 )
 @
-For brevity, we assumed that the initial conditions are given by
+For simplicity, we assumed that there are no recovered individuals at the beginning of the epidemic\footnote{Since these individuals would be completely uninvolved in the epidemic, and we are estimating the population size, we can make this assumption without any loss of generality}. The initial conditions are given by
 \begin{equation}
 \begin{aligned}
 S(0) &= N (1 - i_0)\\
@@ -350,11 +352,12 @@ R(0) &= 0
 \end{aligned}
 \end{equation}
 where $i_0$ is the initial proportion of infected individuals.
-Moreover, setting \code{link=c(i0="logit")} tells \code{fitode} that the
-parameter \code{i0} needs to be between 0 and 1.
+Setting \code{link=c(i0="logit")} tells \code{fitode} that the
+parameter \code{i0} needs to be between 0 and 1. \footnote{The \emph{logit}, or
+log-odds, function (\code{qlogis()} in R), is the inverse of a logistic curve; it is a natural way to transform a value from the range [0,1] to $[-\infty,\infty]$.}
 
 Searching for starting values:
-<<sirstart>>=
+<<sirstart,warning=FALSE,basefig=TRUE>>=
 SIR_start <- c(beta=70, gamma=60, N=40000, i0=0.0004, phi=6)
 
 ss_SIR <- simulate(SIR_model,
@@ -372,7 +375,7 @@ SIR_fit <- fitode(
 )
 @
 Plot:
-<<sirfitplot>>=
+<<sirfitplot,basefig=TRUE>>=
 plot(SIR_fit, level=0.95)
 @
 Again, the SIR model underestimates the peak.
@@ -385,23 +388,23 @@ SIR_fit_b <- update(
     SIR_fit,
     data=SierraLeone2014b[SierraLeone2014b$times < 2015.4,]
 )
+@
 
+<<plot_sirbfit,basefig=TRUE>>=
 plot(SIR_fit_b, level=0.95)
 @
 
 There are several ways we can get the confidence intervals on the growth rate
 ($r = \beta - \gamma$). By default, the package uses the delta method.
-option).
+
 <<cisirb>>=
 confint(SIR_fit_b, parm=list(r~beta-gamma))
 @
 We discuss other methods later.
 
-\subsection{Summary}
+Figure~\ref{fig:fitsummary} compares the results of all of the methods we have tried.
 
-Here, we summarize the estimates from different fits:
-
-<<fitsummary,echo=FALSE>>=
+<<fitsummary,echo=FALSE,fig.cap="Comparison of growth rate estimates">>=
 fit_summ <- data.frame(
     fits=c("exponential\n(poisson)", "exponential\n(nbinom)",
            "logistic\n(full)",
@@ -487,7 +490,8 @@ coef(harefit)
 
 This suggests that Poisson is actually good enough:
 <<lvpoiss,warning=FALSE>>=
-## FIXME: we need this now because I'm checking links more carefully
+## FIXME: we need this (fancy stuff with filling in all
+## of the links as log) now because I'm checking links more carefully
 ## is there a way around this?
 poisson_pars <- setdiff(lotka_model@par, c("size1", "size2")) 
 harefit_poisson <- update(
@@ -507,6 +511,8 @@ Very similar confidence intervals:
 confint(harefit)
 confint(harefit_poisson)
 @
+
+\bmb{make this into a figure?}
 
 \bibliography{fitode}
 \end{document}
