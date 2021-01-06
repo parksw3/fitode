@@ -180,11 +180,11 @@ select_model <- function(dist = c("ols", "dnorm", "dnorm2", "dpois", "dnbinom", 
     dist <- match.arg(dist)
     name <- dist
     model <- switch(dist,
+        ## FIXME: in general, why create a named object then return it by name ... ?
         ols={
             loglik_ols <- new("loglik.ode", "ols",
                 LL ~ -(X-mean)^2,
                 mean="mean",par=NULL)
-
             loglik_ols
         }, dnorm={
             loglik_gaussian <- new("loglik.ode", "gaussian",
