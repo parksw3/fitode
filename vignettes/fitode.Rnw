@@ -1,6 +1,7 @@
 \documentclass{article}
 %\VignetteEngine{knitr::knitr}
 %\VignetteDepends{fitode}
+%\VignetteDepends{bbmle}
 %\VignetteIndexEntry{Getting started with fitode package}
 \title{Getting started with the fitode package}
 \author{Sang Woo Park}
@@ -78,7 +79,7 @@ print(pkgver,quote=FALSE)
 
 Here, we study a time series of confirmed cases of Ebola during the 2014 outbreak in
 Sierra Leone to characterize epidemic growth patterns. Once you load \code{fitode},
-the data set (\code{SierraLeone2014}) will be automatically loaded to the global
+the data set (\code{SierraLeone2014}) will be automatically loaded into the global
 environment.
 <<SierraLeonedata, message=FALSE, warning=FALSE, basefig=TRUE>>=
 library(ggplot2); theme_set(theme_bw())
@@ -94,7 +95,7 @@ Exponential growth is one of the simplest models we can use to characterize the 
 \end{equation}
 This model is parameterized by the initial growth rate $r$ and the initial value $X(0)$.
 Variable $X$ describes the dynamics of \emph{mean} confirmed cases;
-for simplicity, we can assume that the observed number of confirmed cases at time $t$ follows a
+we will assume that the observed number of confirmed cases at time $t$ follows a
 Poisson error distribution with mean $X(t)$. This model can be constructed in \code{fitode} as
 follows:
 <<expmodel>>=
@@ -127,7 +128,8 @@ plot(SierraLeone2014)
 lines(X ~ times, data=ss)
 abline(v=2014.8, col="red", lty=2)
 @
-Here, I used the \code{simulate} function to simulate the model. It requires a
+
+Here, we used the \code{simulate} function to simulate the model. It requires a
 parameter set (\code{parms} argument) and a time vector (\code{times} argument)
 to run. It returns a deterministic ODE solution for each state variable as well
 as stochastic simulated observations based on the ODE solution;
@@ -136,6 +138,7 @@ we will ignore the simulated observations for now.
 The data does not exhibit exponential growth forever. In order to fit the exponential
 model, we have to determine a fitting window. Here we will fit the model from the
 beginning of the epidemic to time 2014.8 (red dashed line in the previous figure).
+
 <<expfit>>=
 exp_fit <- fitode(
     model=exp_model,
@@ -147,6 +150,17 @@ The estimated parameters are very close to our initial guess:
 <<printexp>>=
 exp_fit
 @
+
+Since the exponential ODE has a simple closed-form analytical solution, we could
+also have used MLE directly in this case:
+
+<<expfit2>>=
+mlefit <- bbmle::mle2(confirmed ~ dpois(X0*exp(r*(times-times[1]))),
+                      data=subset(SierraLeone2014, times <= 2014.8),
+                      start=as.list(start))
+coef(mlefit)
+@ 
+
 We can quantify the uncertainty in the parameters by using \code{confint}:
 <<ciexp>>=
 confint(exp_fit)
@@ -475,7 +489,6 @@ Fit with good starting values (estimated by someone else):
 ## warnings about NaN values in log1p/log
 harestart <- c(alpha=0.55, beta=0.028, delta=0.026, gamma=0.84, u0=30, v0=10,
                size1=1, size2=1)
-
 harefit <- fitode(lotka_model, data=hare,
                   start=harestart,
                   tcol="Year")
@@ -503,16 +516,22 @@ harefit_poisson <- update(
     link=setNames(rep("log",length(poisson_pars)),poisson_pars),
     par=poisson_pars
 )
+@
+
+<<lvpoissfit,basefig=TRUE>>=
 plot(harefit_poisson, level=0.95)
 @
 
-Very similar confidence intervals:
-<<lvpoissci>>=
-confint(harefit)
-confint(harefit_poisson)
-@
+Using `confint()` on the two models shows that the confidence intervals on the parameters
+are nearly identical, except for the two negative binomial parameters which have extremely
+wide (even ridiculously wide) confidence intervals; the standard Wald approximation fails here.
 
-\bmb{make this into a figure?}
-
+<<lvnbci,warning=FALSE>>=
+confint(harefit,
+        parm=c("size1","size2"),
+        method="profile",
+        std.err=1,
+        tol.newmin=0.1)
+@ 
 \bibliography{fitode}
 \end{document}
