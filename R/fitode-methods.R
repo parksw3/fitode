@@ -171,17 +171,18 @@ setMethod("logLik", "fitode", function(object){-object@min})
 ##' @param which which parameter(s) to profile? (integer value)
 ##' @param alpha critical level
 ##' @param trace trace progress of computations?
+##' @param ... additional arguments passed to mle2 profiling method
 ##' @exportMethod profile
 setMethod("profile", "fitode",
     function(fitted,
              which=1:p,
              alpha=0.05,
-             trace=FALSE) {
+             trace=FALSE,
+             ...) {
         ## TODO: make this fancier?
         p <- length(fitted@coef)
-
         prof <- profile(fitted@mle2, which=which, continuation="naive", trace=trace,
-                        alpha=alpha)
+                        alpha=alpha,...)
 
         prof
     }
@@ -197,13 +198,15 @@ setMethod("profile", "fitode",
 ##' @param method method for calculating confidence intervals
 ##' @param nsim number of simulations to be used for importance sampling
 ##' @param seed seed
+##' @param ... extra arguments passed to profiling method
 ##' @docType methods
 ##' @exportMethod confint
 setMethod("confint", "fitode",
     function (object, parm, level=0.95,
               method=c("delta", "profile", "impsamp", "wmvrnorm"),
               nsim=1000,
-              seed) {
+              seed,
+              ...) {
 
         method <- match.arg(method)
 
@@ -224,7 +227,7 @@ setMethod("confint", "fitode",
 
             if (method=="profile") {
                 prof <- profile(object, which=match(parm, names(object@coef)),
-                                alpha=1-level)
+                                alpha=1-level, ...)
 
                 ci0 <- confint(prof, level=level)
 

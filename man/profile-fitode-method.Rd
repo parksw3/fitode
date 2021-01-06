@@ -4,7 +4,7 @@
 \alias{profile,fitode-method}
 \title{Profile fitode objects}
 \usage{
-\S4method{profile}{fitode}(fitted, which = 1:p, alpha = 0.05, trace = FALSE)
+\S4method{profile}{fitode}(fitted, which = 1:p, alpha = 0.05, trace = FALSE, ...)
 }
 \arguments{
 \item{fitted}{fitted model object}
@@ -14,6 +14,8 @@
 \item{alpha}{critical level}
 
 \item{trace}{trace progress of computations?}
+
+\item{...}{additional arguments passed to mle2 profiling method}
 }
 \description{
 Profile fitode objects

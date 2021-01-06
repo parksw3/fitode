@@ -11,7 +11,8 @@
   level = 0.95,
   method = c("delta", "profile", "impsamp", "wmvrnorm"),
   nsim = 1000,
-  seed
+  seed,
+  ...
 )
 }
 \arguments{
@@ -26,6 +27,8 @@
 \item{nsim}{number of simulations to be used for importance sampling}
 
 \item{seed}{seed}
+
+\item{...}{extra arguments passed to profiling method}
 }
 \description{
 Calculate confidence intervals for model parameters and their transformations using
