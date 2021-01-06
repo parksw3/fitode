@@ -486,13 +486,11 @@ lotka_model <- odemodel(
 
 Fit with good starting values (estimated by someone else):
 <<lvstart,warning=FALSE>>=
-## warnings about NaN values in log1p/log
 harestart <- c(alpha=0.55, beta=0.028, delta=0.026, gamma=0.84, u0=30, v0=10,
                size1=1, size2=1)
 harefit <- fitode(lotka_model, data=hare,
                   start=harestart,
                   tcol="Year")
-## FIXME:: lots of NaN warnings from log1p(mu/size2), log(size2+mu), etc.
 plot(harefit, level=0.95)
 @
 
@@ -522,9 +520,10 @@ harefit_poisson <- update(
 plot(harefit_poisson, level=0.95)
 @
 
-Using `confint()` on the two models shows that the confidence intervals on the parameters
-are nearly identical, except for the two negative binomial parameters which have extremely
-wide (even ridiculously wide) confidence intervals; the standard Wald approximation fails here.
+Using \code{confint()} on the two models (with the default method, Wald approximation) shows that the confidence intervals on the parameters
+are nearly identical --- except for the two negative binomial parameters which have extremely (ridiculously) wide confidence intervals, e.g. the 95\% CI for the dispersion parameter on hares is \{\Sexpr{confint(harefit)["size1","2.5 %"]}, \Sexpr{confint(harefit)["size1","97.5 %"]}\}. This problem occurs because the standard Wald approximation fails badly for these parameters.
+
+We can get \emph{lower} bounds on the confidence intervals for the dispersion parameters by using likelihood profiling. We have to work a little harder; we (1) manually set the parameter standard error to provide an initial scale for the profile (since the Wald estimate of the standard errors fails badly in this case) and (2) allow the profiling to proceed even if it discovers a fit that is slightly better (by up to 0.1 log-likelihood units) than the original fit. 
 
 <<lvnbci,warning=FALSE>>=
 confint(harefit,
@@ -532,6 +531,9 @@ confint(harefit,
         method="profile",
         std.err=1,
         tol.newmin=0.1)
-@ 
+@
+
+The results tell us that the upper 95\% CIs are undefined (as would be expected if the model is not significantly better than Poisson), and the lower 95\% CIs are $\approx 50$.
+
 \bibliography{fitode}
 \end{document}
