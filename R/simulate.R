@@ -119,7 +119,7 @@ errorfun <- function(family=c("ols", "dnorm", "dpois", "dnbinom", "dnbinom1", "d
     family <- match.arg(family)
 
     switch(family,
-        ols=function(mean) rnorm(length(mean), mean=mean, sd=1),
+        ols=function(mean) rnorm(length(mean), mean=mean, sd=1), ## FIXME: should this be zero-sd? or empirical sd?
         dnorm=function(mean, sd) rnorm(length(mean), mean=mean, sd=sd),
         dpois=function(lambda) rpois(length(lambda), lambda=lambda),
         dnbinom=function(mu, size) rnbinom(length(mu), mu=mu, size=size),
