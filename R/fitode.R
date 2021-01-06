@@ -194,6 +194,7 @@ fitode <- function(model, data,
     dataarg <- list(model=model, data=data, solver.opts=solver.opts, solver=solver, linklist=linklist,
                     priorlist=priorlist)
 
+    ## environment for memoisation (storing previously tried parameters/results)
     f.env <- new.env()
     ## set initial values
     assign("oldnll",NULL,f.env)
@@ -203,18 +204,19 @@ fitode <- function(model, data,
     ## FIXME: how do objfun() and gradfun() actually differ? Can we repeat less code?
     ## This could probably be done by copying the function and hacking just the 'return' line ... ?
     ## (or, more sensibly, encapsulating most of the code in a sub-function)
-    objfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
-        
-        if (identical(par,oldpar)) {
-            return(oldnll)
-        }
+    objgrad_fun <- function(par, data, solver.opts, solver, linklist, priorlist, type) {
 
+        if (identical(par,f.env$oldpar)) {
+            return(switch(type,
+                          obj=f.env$oldnll,
+                          grad=f.env$oldgrad))
+        }
         origpar <- apply_link(par, linklist, "linkinv")
         derivpar <- apply_link(par, linklist, "mu.eta")
 
         v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver), silent=TRUE)
-        ## FIXME: conditional?
-        if (inherits(v, "try-error")) cat(c(v))
+        ## FIXME: allow printing of errors
+        ## if (inherits(v, "try-error")) cat(c(v))
         
         if (length(priorlist) > 0) {
             logp <- eval(priorlist$prior.density, as.list(par))
@@ -227,47 +229,26 @@ fitode <- function(model, data,
             ## FIXME: option to print error ...
             return(NA)
         } else {
-            oldnll <<- v[1] - logp
+            assign("oldnll", v[1] - logp, f.env)
             grad <- v[-1] * derivpar - logpgrad
             if (length(grad) > 0) names(grad) <- names(derivpar) ## TODO: need a better way of dealing this
-            oldgrad <<- grad
-            oldpar <<- par
+            assign("oldgrad", grad, f.env)
+            assign("oldpar",  par, f.env)
 
-            return(oldnll)
+            return(switch(type,
+                          obj=f.env$oldnll,
+                          grad=f.env$oldgrad))
         }
-    }
+    } 
 
+    ## slightly hackish: mle2 expects explicit names, can't just pass '...'
+    objfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
+        objgrad_fun(par, data, solver.opts, solver, linklist, priorlist, type="obj")
+    }
     gradfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
-        
-        if (identical(par,oldpar)) {
-            return(oldgrad)
-        }
-        origpar <- apply_link(par, linklist, "linkinv")
-        derivpar <- apply_link(par, linklist, "mu.eta")
-
-        v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver), silent=TRUE)
-
-        if (length(priorlist) > 0) {
-            logp <- eval(priorlist$prior.density, as.list(par))
-            logpgrad <- unname(sapply(priorlist$prior.grad, function(x, y) ifelse(is.null(x), 0, eval(x, y)), as.list(par)))
-        } else {
-            logp <- logpgrad <- 0
-        }
-
-        if (inherits(v, "try-error")) {
-            return(NA)
-        } else {
-            oldnll <<- v[1] - logp
-            grad <- v[-1] * derivpar - logpgrad
-            names(grad) <- names(derivpar)
-            oldgrad <<- grad
-            oldpar <<- par
-            return(grad)
-        }
-    }
-
-    environment(objfun) <- f.env
-    environment(gradfun) <- f.env
+        objgrad_fun(par, data, solver.opts, solver, linklist, priorlist, type="grad")
+    }        
+    
     parnames <- names(start)
     attr(objfun, "parnames") <- parnames
 
