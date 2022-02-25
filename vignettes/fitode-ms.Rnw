@@ -1,7 +1,7 @@
 \documentclass[12pt]{article}
 %% vignette index specifications need to be *after* \documentclass{}
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{A beginner's guide to fitting ordinary different equations to data}
+%\VignetteIndexEntry{A beginner's guide to fitting ordinary differential equations to data}
 %\VignettePackage{fitode}
 %\VignetteDepends{ggplot2}
 %% alternative class: \documentclass[nojss]{jss}
@@ -24,7 +24,7 @@
 \newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
 \newcommand{\thickredline}{{\color{red}\bigskip\begin{center}\linethickness{2mm}\line(1,0){250}\end{center}\bigskip}}
 
-\title{A beginner's guide to fitting ordinary different equations to data}
+\title{A beginner's guide to fitting ordinary differential equations to data}
 \author{Sang Woo Park \and Benjamin M. Bolker \and David J. D. Earn
   \thanks{Department of Mathematics \& Statistics, McMaster
     University, Hamilton, Ontario, Canada}}
@@ -42,7 +42,7 @@ knitr::opts_chunk$set(error=FALSE)  ## stop on error
 @ 
 \section{Introduction}
 
-Mathematical models based on ordinary different equations (ODEs) are
+Mathematical models based on ordinary differential equations (ODEs) are
 ubiquitous in a vast array of application areas.  \djde{refs? maybe
   not necessary.}  \bmb{``in science and engineering?''} \swp{I like ``in science and engineering''} Researchers studying ODE models are
 often highly skilled in dynamical systems theory, but many lack experience
