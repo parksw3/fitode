@@ -59,14 +59,15 @@ fitodeMCMC <- function(model, data,
     link <- check_link(model, link)
 
     ## check prior
-    if (class(prior)=="list") {
-        if (length(prior) == 0) {
+    if (inherits(prior, "list")) {
+        if (length(prior) == 0)
+ {
             warning("prior distributions must be specified via 'prior'")
             priorlist <- list()
         } else {
             priorlist <- make_prior(model, unlist(link), prior, prior.density=TRUE, keep_grad=FALSE)
         }
-    # }  else if (class(prior)=="function") {
+    # }  else if (inherits(prior, "function")) {
     #     stop("Not supported yet")
     } else {
         stop("'prior' must be a list of formulas")
