@@ -39,21 +39,26 @@ test_that("SI model", {
     expect_equal(
         coef(ff),
         structure(c(1.85082710742599, 1.08315701471954, 2162.03690454815,
-            0.000482746970936824, 35.9813684389218),
-            .Names = c("beta", "gamma", "N", "i0", "size")))
+                    0.000482746970936824, 35.9813684389218),
+                  .Names = c("beta", "gamma", "N", "i0", "size")),
+        tolerance = 1e-6)
 
     expect_equal(
         coef(ff, "links"),
         structure(c(0.615632624272599, 0.0798799387838958, 7.67880606768721,
             -7.63553504774462, 3.58300126112103),
-            .Names = c("log.beta", "log.gamma", "log.N", "logit.i0", "log.size")))
+            .Names = c("log.beta", "log.gamma", "log.N", "logit.i0", "log.size")),
+        tolerance = 1e-6)
 
     expect_equal(
         logLik(ff),
-        -67.6503511573217
+        -67.6503511573217,
+        tolerance = 1e-6
     )
 
+
     expect_equal(
+        tolerance = 1e-6,
         predict(ff, level=0.95)[[1]],
         structure(
             list(times = 2:18,

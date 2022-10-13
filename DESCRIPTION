@@ -3,7 +3,7 @@ Type: Package
 Title: ODE Model Fitting Tools
 Version: 0.1.1
 Authors@R: c(
-    person("Park","Sang Woo", role=c("aut","cre"),
+    person("Sang Woo", "Park", role=c("aut","cre"),
     email="swp2@princeton.edu",
     comment=c(ORCID="0000-0003-2202-3361")),
     person("Ben","Bolker", role="aut",
