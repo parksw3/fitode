@@ -43,17 +43,16 @@ knitr::opts_chunk$set(error=FALSE)  ## stop on error
 \section{Introduction}
 
 Mathematical models based on ordinary differential equations (ODEs) are
-ubiquitous in a vast array of application areas.  \djde{refs? maybe
-  not necessary.}  \bmb{``in science and engineering?''} \swp{I like ``in science and engineering''} Researchers studying ODE models are
+ubiquitous in science and engineering. Researchers studying ODEs are
 often highly skilled in dynamical systems theory, but many lack experience
 estimating the parameters of their models from data.  When confronted
 with observations from the real world, how should one go about fitting
 an ODE model to the data?
 
-In principle, the answer is straightforward: examine all possible
-solutions of the ODEs (considering all possible parameter values and
+In principle, the answer is straightforward: compute many
+solutions of the ODEs (considering a large range of parameter values and
 initial states) and identify the solution curve that is closest to
-the observed data.  This approach is sometimes feasible, for simple enough problems.  But more often than not, fitting an ODE to data is a challenging statistical and computational problem.  In particular:
+the observed data.  This approach is sometimes feasible, for simple enough problems.  More often than not, however, fitting an ODE to data is a challenging statistical and computational problem.  In particular:
 \begin{itemize}
 \item The dimension of the combined of parameter and initial states is
   rarely less than 4 and often much larger, making a na\"ive search
@@ -103,9 +102,9 @@ The least-squares solution of an ODE model (i.e., the solution that minimizes th
 therefore, we can expect it give us a biologically sensible set of parameters.
 
 Suppose we have (1) a gradient function that represents the derivatives $\frac{d\state}{dt}$; (2) a method for numerical integration; (3) a set of observations $\state(t_i)$ where $i = 1, \dots, n$ (for simplicity, from a single time series with $n$ observations); (4) a method for numerical minimization of an objective function.
-Define a trajectory (a solution of the ODE for specified parameters $\params$ [and initial conditions] and time points $t_i$) as $\traj(t_i|\params)$. \bmb{notation???}\swp{changed some notations}
-Then, the method of least-squared fitting seeks to find a set of parameters, $\hat \params$, that minimize the following objective function: $\sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2$.
-Such set of parameters can be formally defined as follows:
+Define a trajectory (a solution of the ODE for specified parameters $\params$ [and initial conditions] and time points $t_i$) as $\traj(t_i|\params)$. 
+Then, the method of least-squared fitting seeks to find a parameter vector, $\hat \params$, that minimizes the following objective function: $\sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2$.
+Such a vector can be formally defined as
 \begin{equation}
 \hat \params =  \argmin_{\params} \sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2.
 \end{equation}
@@ -185,7 +184,7 @@ lines(A~times, data=ss)
 @
 
 To fit the model, we have to call the \code{odemodel} object through the \code{fitode} function.
-<<expfit>>=
+<<expfit, message=FALSE>>=
 tumor_exp_fit <- fitode(
     model=exp_model,
     data=tumorgrowth,
@@ -198,26 +197,30 @@ Once the model has been fitted, we can use the \code{plot} function to plot the 
 <<expfitplot, fig.width=6, fig.height=4>>=
 plot(tumor_exp_fit)
 @
+
 \noindent
 Finally, we can obtain the parameter estimates by using the \code{coef} function:
 <<expfitcoef, fig.width=6, fig.height=4>>=
 coef(tumor_exp_fit)
 @
+\bmb{what is our convention for listing functions? \code{fun} or \code{fun()}?}
 
 You might think that this fit is good enough and decide to carry on with our analysis of the ODE model using the estimated parameters.
-While least-squares fits provide solutions that are in some sense ``optimal'' (although the Gauss-Markov theorem only applies to \emph{linear} models), but don't provide any scope for inference.
-For example, how much confidence can we have in these parameter estimates?
-That said, by avoiding inference, you also avoid having to think much about the characteristics of the observations (independence, distribution, etc.).
+Least-squares fits provide useful solutions (e.g. for making predictions), but we need more structure if we want to make inferences on the model parameters, or assess the uncertainty of our estimates or predictions.
+% BMB: don't think we need this?
+% That said, by avoiding inference, you also avoid having to think much about the characteristics of the observations (independence, distribution, etc.).
 We hope that you think about these characteristics carefully and continue to follow us through this guide.
 
 \subsection{Gaussian errors}
 
-If we're willing to assume that the residuals ($\state(t_i) - \traj(t_i|\params)$) are \emph{independent}, \emph{identically distributed} Gaussian random variables -- i.e.,
+Suppose we are willing to assume that the residuals ($\state(t_i) - \traj(t_i|\params)$) are \emph{independent}, \emph{identically distributed} Gaussian random variables -- i.e.,
 \begin{equation}
-\state(t_i) \sim \mathcal{N}(\traj(t_i|\params), \sigma^2),
+\state(t_i) \sim \mathcal{N}(\traj(t_i|\params), \sigma^2)
 \end{equation}
-where $\sigma^2$ is the variance of the Gaussian distribution --
-then we can start making statistical inferences: confidence intervals on parameters, confidence and prediction intervals on predictions, etc..
+where $\sigma^2$ is the variance of the Gaussian distribution.
+(This assumption is sometimes equivalently expressed as $\state(t_i) = \traj(t_i) + \varepsilon$, where $\varepsilon \sim \mathcal{N}(0, \sigma^2)$.)
+Then we can start making statistical inferences: constructing confidence intervals on parameters and predictions, testing statistical hypotheses about parameters, etc..
+\bmb{left out ``prediction intervals'' --- feels like too much detail}
 Assuming independence of successive residuals typically means we are assuming that the noise in the data is \emph{observation error};
 that is, the underlying process is deterministic (and smooth), and all the noise in the data comes from (independent) imperfect observations of the process.
 
@@ -249,9 +252,7 @@ First, we can estimate all parameters at once.
 \item now we are assuming independence, so measuring cumulative variables will result in incorrect inference (cf. ODE papers in epidemiology that do this carelessly??)
 \end{itemize}
 
-EXAMPLE?
-
-<<update_ex>>=
+<<update_ex, message=FALSE>>=
 update(tumor_exp_fit,
        observation=list(volume ~ dnorm(mean=A, sd=sigma)),
        start=c(coef(tumor_exp_fit), sigma=1),
