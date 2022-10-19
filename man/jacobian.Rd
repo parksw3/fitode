@@ -11,6 +11,9 @@ jacobian(object, ...)
 
 \item{...}{further arguments passed to methods}
 }
+\value{
+The jacobian of the object.
+}
 \description{
 S4 generic for computing a jacobian
 }

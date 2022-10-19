@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{fitode object}
 }
+\value{
+The summary of the fitode object
+}
 \description{
 Summarize fitode objects;
 returns estimate, standard error, and confidence intervals

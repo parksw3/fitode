@@ -8,6 +8,7 @@
 ##' @param times time vector to predict over. Default is set to the time frame of the data.
 ##' @param simplify (logical) simplify output to return estimated trajectories and their
 ##' credible intervals? If \code{simplify=FALSE}, all posterior trajectories will be returned
+##' @return Estimated trajectories and their credible intervals of the fitodeMCMC object
 ##' @importFrom stats setNames
 ##' @docType methods
 setMethod("predict", "fitodeMCMC",
@@ -66,6 +67,7 @@ setMethod("predict", "fitodeMCMC",
 ##'
 ##' @title Extract model coefficients from fitodeMCMC objects
 ##' @param object fitodeMCMC object
+##' @return The estimated median coefficients of the fitodeMCMC object
 ##' @docType methods
 setMethod("coef", "fitodeMCMC", function(object) object@coef)
 
@@ -73,23 +75,26 @@ setMethod("coef", "fitodeMCMC", function(object) object@coef)
 ##'
 ##' @title Extract variance-covariance matrix from fitodeMCMC objects
 ##' @param object fitodeMCMC object
+##' @return The variance-covariance matrix of the fitodeMCMC object
 ##' @docType methods
 setMethod("vcov", "fitodeMCMC", function(object) object@vcov)
 
 ##' Calculates standard error by taking the square root of the diagonal of the variance-covariance matrix
 ##' @title Extract standard error from fitodeMCMC objects
 ##' @param x fitodeMCMC object
+##' @return The standard error of the fitodeMCMC object
 ##' @docType methods
 setMethod("stdEr", "fitodeMCMC", function(x) sqrt(diag(vcov(x))))
 
 
-##' Calculate confidence intervals for model parameters and their transformations
+##' Calculate credible intervals for model parameters and their transformations
 ##' from posterior samples.
 ##'
-##' @title Calculate confidence intervals from fitodeMCMC objects for model parameters and their transformations
+##' @title Calculate credible intervals from fitodeMCMC objects for model parameters and their transformations
 ##' @param object fitodeMCMC object
 ##' @param parm character vector specifying model parameters or list of formuals specifying transformations
 ##' @param level the credible level required
+##' @return The credible intervals of the fitodeMCMC object
 ##' @docType methods
 setMethod("confint","fitodeMCMC",
     function(object, parm, level=0.95) {
@@ -130,10 +135,11 @@ setMethod("confint","fitodeMCMC",
 )
 
 ##' Summarize fitodeMCMC object;
-##' returns estimate, standard error, confidence intervals, effective sample sizes, and gelman-rubin diagnostic
+##' returns estimate, standard error, credible intervals, effective sample sizes, and gelman-rubin diagnostic
 ##'
 ##' @title Summarize fitodeMCMC object
 ##' @param object fitodeMCMC object
+##' @return The summary of the fitodeMCMC object
 ##' @seealso \code{\link{effectiveSize}} \code{\link{gelman.diag}}
 ##' @docType methods
 setMethod("summary","fitodeMCMC",
@@ -161,6 +167,7 @@ setMethod("summary","fitodeMCMC",
 ##'
 ##' @title Show fitodeMCMC object
 ##' @param object fitodeMCMC object
+##' @return No return value, called for side effects
 ##' @docType methods
 ##' @keywords internal
 ##' @exportMethod show

@@ -24,6 +24,7 @@ whichpred <- function(pred, which) {
 ##' @param nsim number of simulations for mvrnorm, wmvrnorm methods
 ##' @param data (FIXME)
 ##' @param ... additional arguments to be passed on to the plot function
+##' @return No return value, called for side effects
 ##' @importFrom bbmle plot
 ##' @docType methods
 ##' @exportMethod plot

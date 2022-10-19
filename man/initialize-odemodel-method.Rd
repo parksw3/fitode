@@ -39,6 +39,9 @@
 
 \item{call}{original function call}
 }
+\value{
+An object of class ``odemodel'' as described in \code{\link{odemodel-class}}.
+}
 \description{
 Constructor method of "odemodel" class
 }

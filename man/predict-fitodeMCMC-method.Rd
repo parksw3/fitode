@@ -17,6 +17,9 @@
 \item{simplify}{(logical) simplify output to return estimated trajectories and their
 credible intervals? If \code{simplify=FALSE}, all posterior trajectories will be returned}
 }
+\value{
+Estimated trajectories and their credible intervals of the fitodeMCMC object
+}
 \description{
 Computes estimated trajectories and their credible intervals.
 The estimated trajectories are obtained by taking the median trajectories

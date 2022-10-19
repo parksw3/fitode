@@ -159,7 +159,7 @@ mlefit <- bbmle::mle2(confirmed ~ dpois(X0*exp(r*(times-times[1]))),
                       data=subset(SierraLeone2014, times <= 2014.8),
                       start=as.list(start))
 coef(mlefit)
-@ 
+@
 
 We can quantify the uncertainty in the parameters by using \code{confint}:
 <<ciexp>>=
@@ -172,7 +172,7 @@ We diagnose the fit by using the \code{plot} function (the \code{level=0.95} arg
 plot(exp_fit, level=0.95)
 @
 
-The confidence intervals on our predictions are suspiciously narrow, probably because of our choice of the error function. The Poisson distribution assumes that variance of the residuals is equal to the mean (i.e., the fitted value). Instead, we can use a negative binomial distribution, which 
+The confidence intervals on our predictions are suspiciously narrow, probably because of our choice of the error function. The Poisson distribution assumes that variance of the residuals is equal to the mean (i.e., the fitted value). Instead, we can use a negative binomial distribution, which
 assumes that variance is a quadratic function of the mean. Then, we have to estimate an
 extra parameter (\code{size} argument of the \code{dnbinom}) to account for overdispersion.
 We use the \code{update} function to adjust only these particular aspects of the model, leaving the gradient specification the same:
@@ -504,7 +504,7 @@ This suggests that Poisson is actually good enough:
 ## FIXME: we need this (fancy stuff with filling in all
 ## of the links as log) now because I'm checking links more carefully
 ## is there a way around this?
-poisson_pars <- setdiff(lotka_model@par, c("size1", "size2")) 
+poisson_pars <- setdiff(lotka_model@par, c("size1", "size2"))
 harefit_poisson <- update(
     harefit,
     observation=list(
@@ -523,7 +523,7 @@ plot(harefit_poisson, level=0.95)
 Using \code{confint()} on the two models (with the default method, Wald approximation) shows that the confidence intervals on the parameters
 are nearly identical --- except for the two negative binomial parameters which have extremely (ridiculously) wide confidence intervals, e.g. the 95\% CI for the dispersion parameter on hares is \{\Sexpr{confint(harefit)["size1","2.5 %"]}, \Sexpr{confint(harefit)["size1","97.5 %"]}\}. This problem occurs because the standard Wald approximation fails badly for these parameters.
 
-We can get \emph{lower} bounds on the confidence intervals for the dispersion parameters by using likelihood profiling. We have to work a little harder; we (1) manually set the parameter standard error to provide an initial scale for the profile (since the Wald estimate of the standard errors fails badly in this case) and (2) allow the profiling to proceed even if it discovers a fit that is slightly better (by up to 0.1 log-likelihood units) than the original fit. 
+We can get \emph{lower} bounds on the confidence intervals for the dispersion parameters by using likelihood profiling. We have to work a little harder; we (1) manually set the parameter standard error to provide an initial scale for the profile (since the Wald estimate of the standard errors fails badly in this case) and (2) allow the profiling to proceed even if it discovers a fit that is slightly better (by up to 0.1 log-likelihood units) than the original fit.
 
 <<lvnbci,warning=FALSE>>=
 confint(harefit,

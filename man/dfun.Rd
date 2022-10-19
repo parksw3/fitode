@@ -13,6 +13,9 @@ dfun(x, y, mag = 1e+08)
 
 \item{mag}{cutoff magnitude for switching approximations}
 }
+\value{
+numeric
+}
 \description{
 Taylor expansion of digamma(a+b) for a>>b
 }

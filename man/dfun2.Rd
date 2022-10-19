@@ -13,6 +13,9 @@ dfun2(x, y, mag = 1e+08, focal = "x")
 
 \item{mag}{cutoff magnitude for switching approximations}
 }
+\value{
+numeric
+}
 \description{
 Taylor expansion of trigamma(a+b) (?) for a>>b
 }

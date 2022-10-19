@@ -11,6 +11,9 @@ Transform(object, ...)
 
 \item{...}{further arguments passed to methods}
 }
+\value{
+The result of transforming the object.
+}
 \description{
 S4 generic for transforming an object
 }

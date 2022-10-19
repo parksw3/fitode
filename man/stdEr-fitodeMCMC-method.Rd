@@ -10,6 +10,9 @@
 \arguments{
 \item{x}{fitodeMCMC object}
 }
+\value{
+The standard error of the fitodeMCMC object
+}
 \description{
 Calculates standard error by taking the square root of the diagonal of the variance-covariance matrix
 }

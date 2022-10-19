@@ -13,6 +13,9 @@ apply_link(par, linklist, type = c("linkfun", "linkinv", "mu.eta"))
 
 \item{type}{string specifying which function should be applied}
 }
+\value{
+vector of parameter values with link transformations
+}
 \description{
 Apply link functions to model parameters -- for \code{\link{fitode}}
 internal usage. \code{type=linkfun} applies link functions;

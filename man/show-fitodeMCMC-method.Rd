@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{fitodeMCMC object}
 }
+\value{
+No return value, called for side effects
+}
 \description{
 Show fitodeMCMC object
 }

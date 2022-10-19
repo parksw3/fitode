@@ -28,7 +28,7 @@
 \item{keep_grad}{maintain the gradient as part of the model}
 }
 \value{
-loglik.ode object
+An object of class ``prior.ode'' as described in \code{\link{prior.ode-class}}.
 }
 \description{
 Transform the prior model

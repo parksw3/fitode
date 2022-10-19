@@ -11,6 +11,9 @@ hessian(object, ...)
 
 \item{...}{further arguments passed to methods}
 }
+\value{
+The hessian of the object.
+}
 \description{
 S4 generic for computing a hessian
 }

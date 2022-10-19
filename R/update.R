@@ -5,6 +5,7 @@
 ##' @param par model parameters
 ##' @param link link functions for parameters (log links are used as default)
 ##' @param ... additional arguments to be passed to fitode
+##' @return An object of class ``fitode'' as described in \code{\link{fitode-class}}.
 ##' @exportMethod update
 setMethod("update", "fitode",
     function (object,
@@ -24,6 +25,7 @@ setMethod("update", "fitode",
 ##' @param par model parameters
 ##' @param link link functions for parameters (log links are used as default)
 ##' @param ... additional arguments to be passed to fitode
+##' @return An object of class ``fitode'' as described in \code{\link{fitodeMCMC-class}}.
 ##' @exportMethod update
 setMethod("update", "fitodeMCMC",
     function (object,

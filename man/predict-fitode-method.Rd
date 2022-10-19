@@ -24,6 +24,9 @@
 
 \item{nsim}{number of simulations for mvrnorm, wmvrnorm methods}
 }
+\value{
+The estimated trajectories and their confidence intervals of the fitode object
+}
 \description{
 Computes estimated trajectories and their confidence intervals (using either
 the delta method or importance sampling).

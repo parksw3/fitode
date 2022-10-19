@@ -11,6 +11,9 @@ grad(object, ...)
 
 \item{...}{further arguments passed to methods}
 }
+\value{
+The gradient of the object.
+}
 \description{
 S4 generic for computing a gradient
 }

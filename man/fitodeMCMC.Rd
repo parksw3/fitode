@@ -59,6 +59,9 @@ fitodeMCMC(
 
 \item{...}{additional arguments (unused)}
 }
+\value{
+An object of class ``fitodeMCMC'' as described in \code{\link{fitodeMCMC-class}}.
+}
 \description{
 This function fits ordinary differential equations models to a uni- or
 multi-variate time series by MCMC using the Metropolis-Hastings update

@@ -34,6 +34,7 @@ setClass(
 ##' @param parms parameters of the solution
 ##' @param solver.opts options for ode solver
 ##' @param solver ode solver (must take y, times, func, and parms as arguments)
+##' @return An object of class ``solution.ode'' as described in \code{\link{solution.ode-class}}.
 ##' @docType methods
 ##' @keywords internal
 ##' @exportMethod initialize
@@ -103,6 +104,7 @@ setMethod(
 ##' @param y initial values
 ##' @param solver.opts options for ode solver
 ##' @param solver ode solver (must take y, times, func, and parms as arguments)
+##' @return An object of class ``solution.ode'' as described in \code{\link{solution.ode-class}}.
 ##' @import deSolve
 ##' @keywords internal
 ##' @export

@@ -27,6 +27,7 @@ propfun <- function(chol) {
 ##' @param solver.opts options for ode integration. See \code{\link{ode}}
 ##' @param solver ode solver
 ##' @param ... additional arguments (unused)
+##' @return An object of class ``fitodeMCMC'' as described in \code{\link{fitodeMCMC-class}}.
 ##' @import coda
 ##' @importFrom stats runif median cov as.formula
 ##' @importFrom utils head tail

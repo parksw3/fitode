@@ -10,6 +10,7 @@
 ##' @param solver.opts options for ode solver
 ##' @param solver ode solver (must take y, times, func, and parms arguments)
 ##' @param observation (logical) propagate observation error?
+##' @return The numerical simulation of the object
 ##' @docType methods
 ##' @importFrom bbmle simulate
 ##' @exportMethod simulate
@@ -26,7 +27,7 @@ setMethod("simulate", "odemodel",
 
 ##' simulate fitode objects
 ##'
-## FIXME: use @inheritParams ? 
+## FIXME: use @inheritParams ?
 ##' @aliases simulate,fitode-method
 ##' @param object fitode object
 ##' @param nsim number of simulations
@@ -35,6 +36,7 @@ setMethod("simulate", "odemodel",
 ##' @param parms named vector of parameter values
 ##' @param y initial values
 ##' @param observation (logical) propagate observation error?
+##' @return The numerical simulation of the object
 ##' @docType methods
 setMethod("simulate", "fitode",
     function(object, nsim=1,

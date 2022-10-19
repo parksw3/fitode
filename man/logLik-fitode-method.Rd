@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{fitode object}
 }
+\value{
+The log-likelihood of the fitode object
+}
 \description{
 Extract log-likelihood of a fit
 }

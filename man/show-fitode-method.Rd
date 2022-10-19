@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{fitode object}
 }
+\value{
+No return value, called for side effects
+}
 \description{
 Show fitode objects
 }

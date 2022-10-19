@@ -1,6 +1,7 @@
-##' S4 generic for evaluate an object
+##' S4 generic for evaluating an object
 ##' @param object an \code{R} object
 ##' @param ... further arguments passed to methods
+##' @return The result of evaluating the object.
 ##' @keywords internal
 ##' @export
 setGeneric(
@@ -13,6 +14,7 @@ setGeneric(
 ##' S4 generic for computing a gradient
 ##' @param object an \code{R} object
 ##' @param ... further arguments passed to methods
+##' @return The gradient of the object.
 ##' @keywords internal
 ##' @export
 setGeneric(
@@ -25,6 +27,7 @@ setGeneric(
 ##' S4 generic for computing a hessian
 ##' @param object an \code{R} object
 ##' @param ... further arguments passed to methods
+##' @return The hessian of the object.
 ##' @keywords internal
 ##' @export
 setGeneric(
@@ -37,6 +40,7 @@ setGeneric(
 ##' S4 generic for computing a jacobian
 ##' @param object an \code{R} object
 ##' @param ... further arguments passed to methods
+##' @return The jacobian of the object.
 ##' @keywords internal
 ##' @export
 setGeneric(
@@ -49,6 +53,7 @@ setGeneric(
 ##' S4 generic for transforming an object
 ##' @param object an \code{R} object
 ##' @param ... further arguments passed to methods
+##' @return The result of transforming the object.
 ##' @keywords internal
 ##' @export
 setGeneric(

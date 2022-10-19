@@ -6,6 +6,7 @@
 ##' @param observation observation variable name
 ##' @param par additional parameter names
 ##' @param keep_grad maintain the gradient as part of the model
+##' @return An object of class ``prior.ode'' as described in \code{\link{prior.ode-class}}.
 ##' @docType methods
 ##' @keywords internal
 ##' @exportMethod initialize
@@ -50,7 +51,7 @@ setMethod(
 ##' @param observation observation variable name
 ##' @param par additional parameter names
 ##' @param keep_grad maintain the gradient as part of the model
-##' @return loglik.ode object
+##' @return An object of class ``prior.ode'' as described in \code{\link{prior.ode-class}}.
 ##' @docType methods
 ##' @keywords internal
 ##' @exportMethod Transform

@@ -7,6 +7,7 @@
 ##' @param times time vector to predict over. Default is set to the time frame of the data.
 ##' @param method confidence interval method. Default is set to Delta method.
 ##' @param nsim number of simulations for mvrnorm, wmvrnorm methods
+##' @return The estimated trajectories and their confidence intervals of the fitode object
 ##' @importFrom bbmle predict
 ##' @importFrom bbmle confint
 ##' @importFrom MASS mvrnorm
@@ -112,6 +113,7 @@ setMethod("predict", "fitode",
 ##' @param type type of coefficients. The default (\code{type=response}) is on the
 ##' response scale; this is the scale on which the model parameters are defined.
 ##' Alternatively, \code{type=link} can be used to obtain parameters on the estimated scale.
+##' @return The estimated coefficients of the fitode object
 ##' @importFrom bbmle coef
 ##' @docType methods
 ##' @exportMethod coef
@@ -132,6 +134,7 @@ setMethod("coef", "fitode",
 ##' @param type type of covariance matrix. The default (\code{type=response}) is on the
 ##' response scale; this is the scale on which the model parameters are defined.
 ##' Alternatively, \code{type=link} can be used to obtain the covariance matrix on the estimated scale.
+##' @return The variance-covariance matrix of the fitode object
 ##' @importFrom bbmle vcov
 ##' @docType methods
 ##' @exportMethod vcov
@@ -153,6 +156,7 @@ setMethod("vcov", "fitode",
 ##' @param type type of standard error. The default (\code{type=response}) is on the
 ##' response scale; this is the scale on which the model parameters are defined.
 ##' Alternatively, \code{type=link} can be used to obtain standard errors on the estimated scale.
+##' @return The standard error of the fitode object
 ##' @docType methods
 ##' @exportMethod stdEr
 setMethod("stdEr", "fitode", function(x,type=c("response", "links")){sqrt(diag(vcov(x, type)))})
@@ -160,6 +164,7 @@ setMethod("stdEr", "fitode", function(x,type=c("response", "links")){sqrt(diag(v
 ##' Extract log-likelihood of a fit
 ##' @title Extract log-likelihood
 ##' @param object fitode object
+##' @return The log-likelihood of the fitode object
 ##' @docType methods
 ##' @exportMethod logLik
 setMethod("logLik", "fitode", function(object){-object@min})
@@ -172,6 +177,7 @@ setMethod("logLik", "fitode", function(object){-object@min})
 ##' @param alpha critical level
 ##' @param trace trace progress of computations?
 ##' @param ... additional arguments passed to mle2 profiling method
+##' @return The log-likelihood profile of the fitode object
 ##' @exportMethod profile
 setMethod("profile", "fitode",
     function(fitted,
@@ -199,6 +205,7 @@ setMethod("profile", "fitode",
 ##' @param nsim number of simulations to be used for importance sampling
 ##' @param seed seed
 ##' @param ... extra arguments passed to profiling method
+##' @return The confidence intervals for model parameters and their transformations of the fitode object
 ##' @docType methods
 ##' @exportMethod confint
 setMethod("confint", "fitode",
@@ -322,6 +329,7 @@ setMethod("confint", "fitode",
 ##'
 ##' @title Summarize fitode object
 ##' @param object fitode object
+##' @return The summary of the fitode object
 ##' @importFrom bbmle summary
 ##' @docType methods
 ##' @exportMethod summary
@@ -347,6 +355,7 @@ setMethod("summary","fitode",
 ##'
 ##' @title Show fitode objects
 ##' @param object fitode object
+##' @return No return value, called for side effects
 ##' @docType methods
 ##' @exportMethod show
 ##' @keywords internal

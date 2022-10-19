@@ -30,6 +30,7 @@ set_link <- function(link, par) {
 ##' @param par named vector of parameter values
 ##' @param linklist list containing \code{linkfun}, \code{linkinv}, and \code{mu.eta} for each link
 ##' @param type string specifying which function should be applied
+##' @return vector of parameter values with link transformations
 ##' @keywords internal
 ##' @seealso \code{\link{make.link}}
 apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
@@ -122,6 +123,7 @@ fixpar <- function(model, fixed) {
 ##' @param use.ginv (logical) use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
 ##' @param quietly suppress progress messages?
 ##' @param ... mle2 arguments
+##' @return An object of class ``fitode'' as described in \code{\link{fitode-class}}.
 ##' @import bbmle
 ##' @importFrom numDeriv jacobian hessian
 ##' @importFrom MASS ginv
@@ -217,7 +219,7 @@ fitode <- function(model, data,
         v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver), silent=TRUE)
         ## FIXME: allow printing of errors
         ## if (inherits(v, "try-error")) cat(c(v))
-        
+
         if (length(priorlist) > 0) {
             logp <- eval(priorlist$prior.density, as.list(par))
             logpgrad <- unname(sapply(priorlist$prior.grad, function(x, y) ifelse(is.null(x), 0, eval(x, y)), as.list(par)))
@@ -239,7 +241,7 @@ fitode <- function(model, data,
                           obj=f.env$oldnll,
                           grad=f.env$oldgrad))
         }
-    } 
+    }
 
     ## slightly hackish: mle2 expects explicit names, can't just pass '...'
     objfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
@@ -247,8 +249,8 @@ fitode <- function(model, data,
     }
     gradfun <- function(par, data, solver.opts, solver, linklist, priorlist) {
         objgrad_fun(par, data, solver.opts, solver, linklist, priorlist, type="grad")
-    }        
-    
+    }
+
     parnames <- names(start)
     attr(objfun, "parnames") <- parnames
 
@@ -319,7 +321,7 @@ fitode <- function(model, data,
     ## in the *univariate* OLS case, we have estimated parameter variances that
     ## are implicitly estimated with N(0,1)
     ## need to scale by 2*RSS/n (why?)
-    
+
     ## check if this is ols ('any' implies 'all' due to previous check)
     if (any(vapply(model@observation, get_head, character(1))=="ols")) {
         resids <- list()
@@ -401,7 +403,7 @@ logLik.sensitivity <- function(parms,
     times <- data$times
     ## FIXME: check upstream somewhere?
     if (is.null(times)) stop("data must contain a 'times' element")
-    
+
     ordered.times <- sort(unique(times))
 
     ss <- ode.sensitivity(model, parms, ordered.times, solver.opts, solver)

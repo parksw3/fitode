@@ -27,6 +27,9 @@
 
 \item{keep_sensitivity}{(logical) maintain the Jacobian as part of the model}
 }
+\value{
+An object of class ``odemodel'' as described in \code{\link{odemodel-class}}.
+}
 \description{
 Transform the model
 }

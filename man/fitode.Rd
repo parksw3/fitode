@@ -62,6 +62,9 @@ fitode(
 
 \item{...}{mle2 arguments}
 }
+\value{
+An object of class ``fitode'' as described in \code{\link{fitode-class}}.
+}
 \description{
 This function fits ordinary differential equations models to a uni- or
 multi-variate time series by maximum likelihood.

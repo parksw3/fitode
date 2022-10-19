@@ -30,6 +30,9 @@
 
 \item{solver}{ode solver (must take y, times, func, and parms as arguments)}
 }
+\value{
+An object of class ``solution.ode'' as described in \code{\link{solution.ode-class}}.
+}
 \description{
 Constructor for solution.ode class
 }

@@ -10,6 +10,7 @@
 ##' @param diffnames optional character vector specifying the names of a variable for which the consecutive difference needs to be calculated
 ##' @param keep_sensitivity (logical) maintain the Jacobian as a part of the model object?
 ##' @param call original function call
+##' @return An object of class ``odemodel'' as described in \code{\link{odemodel-class}}.
 ## removed @name, @rdname as otherwise the appropriate \alias{} doesn't show up and we get a warning about an undocumented method ...
 ## https://stackoverflow.com/questions/7356120/how-to-properly-document-s4-methods-using-roxygen2
 ## says we should need only @rdname and @aliases ...
@@ -208,7 +209,7 @@ setMethod(
             nomatch <- which(is.na(match(names(link), par)))
             if (length(nomatch)>0) stop("Some link functions do not correspond to the model parameters: ",
                                         paste(names(link)[nomatch],collapse=", "))
-            
+
             link <- link[names(link) %in% par]
 
         }
@@ -294,6 +295,7 @@ setMethod(
 ##' @param initial initial values
 ##' @param par model parameters
 ##' @param keep_sensitivity (logical) maintain the Jacobian as part of the model
+##' @return An object of class ``odemodel'' as described in \code{\link{odemodel-class}}.
 ##' @keywords internal
 ##' @exportMethod Transform
 setMethod(

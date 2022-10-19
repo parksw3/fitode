@@ -14,6 +14,9 @@
 response scale; this is the scale on which the model parameters are defined.
 Alternatively, \code{type=link} can be used to obtain standard errors on the estimated scale.}
 }
+\value{
+The standard error of the fitode object
+}
 \description{
 Calculates standard error by taking the square root of the diagonal matrix
 }

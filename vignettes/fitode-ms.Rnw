@@ -39,7 +39,7 @@ of mathematical sophistication who aren't necessarily great with statistics. The
 
 <<setup,include=FALSE>>=
 knitr::opts_chunk$set(error=FALSE)  ## stop on error
-@ 
+@
 \section{Introduction}
 
 Mathematical models based on ordinary differential equations (ODEs) are

@@ -3,7 +3,7 @@
 \docType{methods}
 \name{confint,fitodeMCMC-method}
 \alias{confint,fitodeMCMC-method}
-\title{Calculate confidence intervals from fitodeMCMC objects for model parameters and their transformations}
+\title{Calculate credible intervals from fitodeMCMC objects for model parameters and their transformations}
 \usage{
 \S4method{confint}{fitodeMCMC}(object, parm, level = 0.95)
 }
@@ -14,7 +14,10 @@
 
 \item{level}{the credible level required}
 }
+\value{
+The credible intervals of the fitodeMCMC object
+}
 \description{
-Calculate confidence intervals for model parameters and their transformations
+Calculate credible intervals for model parameters and their transformations
 from posterior samples.
 }

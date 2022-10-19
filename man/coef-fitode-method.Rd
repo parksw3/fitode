@@ -14,6 +14,9 @@
 response scale; this is the scale on which the model parameters are defined.
 Alternatively, \code{type=link} can be used to obtain parameters on the estimated scale.}
 }
+\value{
+The estimated coefficients of the fitode object
+}
 \description{
 Extracts estimated parameters (either on response scales or link scales)
 }

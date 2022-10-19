@@ -19,6 +19,9 @@
 
 \item{...}{additional arguments to be passed to fitode}
 }
+\value{
+An object of class ``fitode'' as described in \code{\link{fitode-class}}.
+}
 \description{
 Update fitode fits
 }

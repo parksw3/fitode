@@ -1,6 +1,6 @@
 Package: fitode
 Type: Package
-Title: ODE Model Fitting Tools
+Title: Tools for Ordinary Differential Equations Model Fitting
 Version: 0.1.1
 Authors@R: c(
     person("Sang Woo", "Park", role=c("aut","cre"),
@@ -9,7 +9,7 @@ Authors@R: c(
     person("Ben","Bolker", role="aut",
 	comment=c(ORCID="0000-0002-2127-0443"))
 	)
-Description: Fit dynamical models using sensitivity equations.
+Description: Methods and functions for fitting ordinary differential equations (ODE) model in R. Sensitivity equations are used to compute the gradients of ODE trajectories with respect to underlying parameters, which in turn allows for more stable fitting. Other fitting methods, such as MCMC (Markov chain Monte Carlo), are also available.
 License: GPL (>=2)
 Depends:
     R (>= 4.0),
@@ -29,5 +29,5 @@ Suggests:
 VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Config/testthat/edition: 3

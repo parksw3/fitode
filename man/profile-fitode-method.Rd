@@ -17,6 +17,9 @@
 
 \item{...}{additional arguments passed to mle2 profiling method}
 }
+\value{
+The log-likelihood profile of the fitode object
+}
 \description{
 Profile fitode objects
 }

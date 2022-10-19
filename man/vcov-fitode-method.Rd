@@ -14,6 +14,9 @@
 response scale; this is the scale on which the model parameters are defined.
 Alternatively, \code{type=link} can be used to obtain the covariance matrix on the estimated scale.}
 }
+\value{
+The variance-covariance matrix of the fitode object
+}
 \description{
 Extracts variance-covariance matrix (either on response scales or link scales)
 }

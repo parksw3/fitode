@@ -7,6 +7,7 @@
 ##' @param mean mean variable name
 ##' @param par additional parameter names
 ##' @param keep_grad maintain the gradient as part of the model
+##' @return An object of class ``loglik.ode'' as described in \code{\link{loglik.ode-class}}.
 ##' @importFrom Deriv Deriv
 ##' @docType methods
 ##' @keywords internal
@@ -131,6 +132,7 @@ setMethod(
 ##' @param x first argument
 ##' @param y second argument
 ##' @param mag cutoff magnitude for switching approximations
+##' @return numeric
 ##' @importFrom Deriv drule
 ##' @keywords internal
 ##' @export
@@ -144,6 +146,7 @@ dfun <- function(x,y,mag=1e8) {
 ##' @param x first argument
 ##' @param y second argument
 ##' @param mag cutoff magnitude for switching approximations
+##' @return numeric
 ##' @keywords internal
 ##' @export
 dfun2 <- function(x,y,mag=1e8,focal="x") {
@@ -236,7 +239,7 @@ select_model <- function(dist = c("ols", "dnorm", "dnorm2", "dpois", "dnbinom", 
             loglik_lognormal <- new("loglik.ode", "lognormal",
                 LL ~-(log(X)-meanlog)^2/(2*sdlog^2) -
                     log(sdlog) - 1/2*(log(2*pi)) -log(sdlog) - log(X),
-                ## 1/(sqrt(2 pi) sigma x) e^-((log x - mu)^2 / (2 sigma^2))  
+                ## 1/(sqrt(2 pi) sigma x) e^-((log x - mu)^2 / (2 sigma^2))
                 mean="meanlog", par="sdlog")
             loglik_lognormal
     })

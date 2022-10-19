@@ -27,6 +27,9 @@
 
 \item{keep_grad}{maintain the gradient as part of the model}
 }
+\value{
+An object of class ``prior.ode'' as described in \code{\link{prior.ode-class}}.
+}
 \description{
 the initializer for prior.ode
 }

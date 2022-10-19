@@ -36,6 +36,9 @@
 
 \item{observation}{(logical) propagate observation error?}
 }
+\value{
+The numerical simulation of the object
+}
 \description{
 simulate model objects
 }

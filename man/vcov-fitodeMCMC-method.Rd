@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{fitodeMCMC object}
 }
+\value{
+The variance-covariance matrix of the fitodeMCMC object
+}
 \description{
 Calculates variance-covariance matrix from posterior samples
 }

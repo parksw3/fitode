@@ -30,6 +30,9 @@
 
 \item{...}{extra arguments passed to profiling method}
 }
+\value{
+The confidence intervals for model parameters and their transformations of the fitode object
+}
 \description{
 Calculate confidence intervals for model parameters and their transformations using
 (1) delta method, (2) profile likelihood, and (3) importance sampling.

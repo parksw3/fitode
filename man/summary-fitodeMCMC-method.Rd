@@ -10,9 +10,12 @@
 \arguments{
 \item{object}{fitodeMCMC object}
 }
+\value{
+The summary of the fitodeMCMC object
+}
 \description{
 Summarize fitodeMCMC object;
-returns estimate, standard error, confidence intervals, effective sample sizes, and gelman-rubin diagnostic
+returns estimate, standard error, credible intervals, effective sample sizes, and gelman-rubin diagnostic
 }
 \seealso{
 \code{\link{effectiveSize}} \code{\link{gelman.diag}}

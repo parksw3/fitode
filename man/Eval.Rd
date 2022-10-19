@@ -2,7 +2,7 @@
 % Please edit documentation in R/generic.R
 \name{Eval}
 \alias{Eval}
-\title{S4 generic for evaluate an object}
+\title{S4 generic for evaluating an object}
 \usage{
 Eval(object, ...)
 }
@@ -11,7 +11,10 @@ Eval(object, ...)
 
 \item{...}{further arguments passed to methods}
 }
+\value{
+The result of evaluating the object.
+}
 \description{
-S4 generic for evaluate an object
+S4 generic for evaluating an object
 }
 \keyword{internal}

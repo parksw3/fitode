@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{fitodeMCMC object}
 }
+\value{
+The estimated median coefficients of the fitodeMCMC object
+}
 \description{
 Extracts estimated parameters (median of the marginal posterior distributions)
 }
