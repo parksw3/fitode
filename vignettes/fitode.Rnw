@@ -21,7 +21,6 @@ library("knitr")
 ## DON'T cache=TRUE or warning=FALSE globally
 ## DO set error=FALSE so that errors are not caught
 ##  (except temporarily for debugging purposes)
-orig_pars <- par(no.readonly = TRUE)
 opts_chunk$set(fig.width=6,fig.height=4,error=FALSE)
 knit_hooks$set(basefig=function(before, options, envir) {
                    if (before) {
@@ -536,10 +535,6 @@ confint(harefit,
 @
 
 The results tell us that the upper 95\% CIs are undefined (as would be expected if the model is not significantly better than Poisson), and the lower 95\% CIs are $\approx 50$.
-
-<<reset_pars, echo = FALSE>>=
-par(orig_pars)
-@
 
 \bibliography{fitode}
 \end{document}
