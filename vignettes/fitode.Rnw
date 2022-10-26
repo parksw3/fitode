@@ -24,7 +24,8 @@ library("knitr")
 opts_chunk$set(fig.width=6,fig.height=4,error=FALSE)
 knit_hooks$set(basefig=function(before, options, envir) {
                    if (before) {
-                       par(bty="l",las=1)
+                       oldpar <- par(bty="l",las=1)
+                       on.exit(par(oldpar))
                    } else { }
                })
 @

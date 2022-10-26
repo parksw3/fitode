@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{odemodel object}
 }
+\value{
+No return value, called for side effects
+}
 \description{
 Show the model
 }

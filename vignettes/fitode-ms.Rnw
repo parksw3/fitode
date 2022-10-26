@@ -102,7 +102,7 @@ The least-squares solution of an ODE model (i.e., the solution that minimizes th
 therefore, we can expect it give us a biologically sensible set of parameters.
 
 Suppose we have (1) a gradient function that represents the derivatives $\frac{d\state}{dt}$; (2) a method for numerical integration; (3) a set of observations $\state(t_i)$ where $i = 1, \dots, n$ (for simplicity, from a single time series with $n$ observations); (4) a method for numerical minimization of an objective function.
-Define a trajectory (a solution of the ODE for specified parameters $\params$ [and initial conditions] and time points $t_i$) as $\traj(t_i|\params)$. 
+Define a trajectory (a solution of the ODE for specified parameters $\params$ [and initial conditions] and time points $t_i$) as $\traj(t_i|\params)$.
 Then, the method of least-squared fitting seeks to find a parameter vector, $\hat \params$, that minimizes the following objective function: $\sum_{i=1}^n \left( \state(t_i) - \traj(t_i|\params)) \right)^2$.
 Such a vector can be formally defined as
 \begin{equation}

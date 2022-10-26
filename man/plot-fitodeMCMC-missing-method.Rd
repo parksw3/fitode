@@ -54,6 +54,9 @@
 
 \item{...}{additional arguments to be passed on to the plot function}
 }
+\value{
+No return value, called for side effects
+}
 \description{
 Plot a fitodeMCMC object
 }

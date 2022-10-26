@@ -75,6 +75,7 @@ setMethod("plot", signature(x="fitode", y="missing"),
 ##' @param add add to another plot?
 ##' @param data (FIXME)
 ##' @param ... additional arguments to be passed on to the plot function
+##' @return No return value, called for side effects
 setMethod("plot", signature(x="fitodeMCMC", y="missing"),
     function(x, level,
              data,
@@ -131,7 +132,6 @@ plot_internal <- function(pred,
             rows <- ceiling(round(sqrt(nplots)))
             columns <- ceiling(nplots/rows)
             mfrow_orig <- par(mfrow=c(rows,columns))
-
             on.exit(par(mfrow_orig))
         }
     }

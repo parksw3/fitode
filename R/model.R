@@ -352,6 +352,7 @@ setMethod(
 
 ##' Show the model
 ##' @param object odemodel object
+##' @return No return value, called for side effects
 ##' @keywords internal
 ##' @importFrom methods show
 ##' @export show

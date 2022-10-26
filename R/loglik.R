@@ -159,16 +159,6 @@ dfun2 <- function(x,y,mag=1e8,focal="x") {
                            -trigamma(x+y))))
 }
 
-w_lbeta <- function(a,b) {
-    ## when we have an effectively-Poisson case
-    ## lbeta gives "underflow occurred in 'lgammacor'" frequently ...
-    ## suppressWarnings() causes an obscure error ?
-    ## using w_lbeta rather than lbeta causes obscure errors from Deriv()
-    op <- options(warn=-1)
-    on.exit(options(op))
-    return(lbeta(a,b))
-}
-
 NBconst <- function(k,x) {
     return(ifelse(x==0,0,lbeta(k,x)+log(x)))
 }

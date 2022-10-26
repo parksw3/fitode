@@ -9,7 +9,7 @@ Authors@R: c(
     person("Ben","Bolker", role="aut",
 	comment=c(ORCID="0000-0002-2127-0443"))
 	)
-Description: Methods and functions for fitting ordinary differential equations (ODE) model in R. Sensitivity equations are used to compute the gradients of ODE trajectories with respect to underlying parameters, which in turn allows for more stable fitting. Other fitting methods, such as MCMC (Markov chain Monte Carlo), are also available.
+Description: Methods and functions for fitting ordinary differential equations (ODE) model in 'R'. Sensitivity equations are used to compute the gradients of ODE trajectories with respect to underlying parameters, which in turn allows for more stable fitting. Other fitting methods, such as MCMC (Markov chain Monte Carlo), are also available.
 License: GPL (>=2)
 Depends:
     R (>= 4.0),

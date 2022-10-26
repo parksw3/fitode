@@ -30,6 +30,9 @@
 
 \item{keep_grad}{maintain the gradient as part of the model}
 }
+\value{
+An object of class ``loglik.ode'' as described in \code{\link{loglik.ode-class}}.
+}
 \description{
 The initializer for loglik.ode
 }
