@@ -1,0 +1,290 @@
+\documentclass{article}
+%\VignetteEngine{knitr::knitr}
+%\VignetteDepends{fitode}
+%\VignetteDepends{bbmle}
+%\VignetteIndexEntry{Getting started with fitode package}
+\title{Fitting epidemic models}
+\author{Sang Woo Park}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{hyperref}
+\newcommand{\rzero}{{\cal R}_0}
+\newcommand{\code}[1]{{\tt #1}}
+\newcommand{\bmb}[1]{{\color{blue} bmb: \emph{#1}}}
+\bibliographystyle{chicago}
+\date{\today}
+\begin{document}
+\maketitle
+
+<<opts,echo=FALSE>>=
+library("knitr")
+## DON'T cache=TRUE or warning=FALSE globally
+## DO set error=FALSE so that errors are not caught
+##  (except temporarily for debugging purposes)
+opts_chunk$set(fig.width=6,fig.height=4,error=FALSE)
+knit_hooks$set(basefig=function(before, options, envir) {
+                   if (before) {
+                       oldpar <- par(bty="l",las=1)
+                       on.exit(par(oldpar))
+                   } else { }
+               })
+@
+
+\tableofcontents
+
+\pagebreak
+
+\section{Introduction}
+
+\begin{itemize}
+  \item Fitting epidemic models to estimate underlying parameters, such as the basic reproduction number
+\end{itemize}
+
+\section{Data}
+
+<<SierraLeonedata, message=FALSE, warning=FALSE, basefig=TRUE>>=
+library(dplyr)
+library(ggplot2); theme_set(theme_bw())
+library(fitode)
+plot(SierraLeone2014)
+@
+
+\section{Fits}
+
+\subsection{Prevalence fitting}
+
+The Susceptible-Infected-Recovered (SIR) model describes how disease spreads in
+a homogeneous population:
+\begin{equation}
+\begin{aligned}
+\frac{dS}{dt} &= - \beta S \frac{I}{N}\\
+\frac{dI}{dt} &= \beta S \frac{I}{N} - \gamma I\\
+\frac{dR}{dt} &= \gamma I
+\end{aligned}
+\end{equation}
+Fitting prevalence is the simplest thing we can do:
+<<sirprevmodel>>=
+SIR_prev_model <- odemodel(
+    name="SIR basic",
+    model=list(
+        S ~ - beta * S * I/N,
+        I ~ beta * S * I/N - gamma * I,
+        R ~ gamma * I
+    ),
+    observation=list(
+        confirmed ~ dnbinom(mu=I, size=phi)
+    ),
+    initial=list(
+        S ~ N * (1 - i0),
+        I ~ N * i0,
+        R ~ 0
+    ),
+    par=c("beta", "gamma", "N", "i0", "phi"),
+    link=c(i0="logit")
+)
+@
+
+Searching for starting values:
+<<sirstart,warning=FALSE,basefig=TRUE>>=
+SIR_prev_start <- c(beta=70, gamma=60, N=40000, i0=0.0004, phi=6)
+
+ss_SIR_prev <- simulate(SIR_prev_model,
+    parms=SIR_prev_start, times=SierraLeone2014$times)
+
+plot(SierraLeone2014)
+lines(ss_SIR_prev$times, ss_SIR_prev$I)
+@
+Fit:
+<<sirfit,cache=TRUE,warning=FALSE>>=
+SIR_prev_fit <- fitode(
+    SIR_prev_model,
+    data=SierraLeone2014,
+    start=SIR_prev_start
+)
+@
+Plot:
+<<sirfitplot,basefig=TRUE>>=
+plot(SIR_prev_fit, level=0.95)
+@
+Underestimates the peak but otherwise not bad.
+
+\subsection{Incidence fitting}
+
+But we want to fit incidence. Assuming incidence is reported at the end of recovery:
+<<sirincmodel>>=
+SierraLeone2014b <- rbind(
+    c(times=SierraLeone2014$times[1] -
+          diff(SierraLeone2014$times)[1], confirmed=NA),
+    SierraLeone2014
+)
+
+SIR_inc_model <- odemodel(
+    name="SIR incidence",
+    model=list(
+        S ~ - beta * S * I/N,
+        I ~ beta * S * I/N - gamma * I,
+        R ~ gamma * I
+    ),
+    observation=list(
+        confirmed ~ dnbinom(mu=R, size=phi)
+    ),
+    diffnames="R",
+    initial=list(
+        S ~ N * (1 - i0),
+        I ~ N * i0,
+        R ~ 0
+    ),
+    par=c("beta", "gamma", "N", "i0", "phi"),
+    link=c(i0="logit")
+)
+@
+
+Fit:
+<<sirincfit,cache=TRUE,warning=FALSE>>=
+SIR_inc_fit <- fitode(
+    SIR_inc_model,
+    data=SierraLeone2014b,
+    start=SIR_prev_start
+)
+@
+Plot:
+<<sirincfitplot,basefig=TRUE>>=
+plot(SIR_prev_fit, level=0.95)
+plot(SIR_inc_fit, level=0.95, col.traj="red", col.conf="red", add=TRUE)
+@
+Nearly identical fits in this case...
+
+\subsection{SEIR model fitting}
+
+<<seirincmodel>>=
+SEIR_inc_model <- odemodel(
+    name="SEIR incidence",
+    model=list(
+        S ~ - beta * S * I/N,
+        E ~ beta * S * I/N - sigma * E,
+        I ~ sigma * E - gamma * I,
+        R ~ gamma * I
+    ),
+    observation=list(
+        confirmed ~ dnbinom(mu=R, size=phi)
+    ),
+    diffnames="R",
+    initial=list(
+        S ~ N * (1 - i0),
+        E ~ N * i0/2,
+        I ~ N * i0/2,
+        R ~ 0
+    ),
+    par=c("beta", "sigma", "gamma", "N", "i0", "phi"),
+    link=c(i0="logit")
+)
+@
+
+Searching for starting values again. Need to solve the ODE at a finer scale because rates are too high...
+<<seirstart,warning=FALSE,basefig=TRUE>>=
+SEIR_inc_start <- c(beta=140, sigma=120, gamma=120, N=40000, i0=0.0004, phi=6)
+
+ss_SEIR_inc <- simulate(SEIR_inc_model,
+    parms=SEIR_inc_start, times=SierraLeone2014$times,
+    solver.opts=list(method="rk4",
+                     hini=1/102))
+
+plot(SierraLeone2014)
+lines(ss_SEIR_inc$times, ss_SEIR_inc$R)
+@
+
+Fit.
+<<seirincfit,cache=TRUE,warning=FALSE>>=
+SEIR_inc_fit <- fitode(
+    SEIR_inc_model,
+    data=SierraLeone2014b,
+    start=SEIR_inc_start,
+    solver.opts=list(method="rk4",
+                     hini=1/102)
+)
+@
+Plot:
+<<seirfitplot,basefig=TRUE>>=
+plot(SIR_inc_fit, level=0.95)
+plot(SEIR_inc_fit, level=0.95, col.traj="red", col.conf="red", add=TRUE)
+@
+Nearly identical fits with pretty different parameter values:
+<<compsumm>>==
+summary(SIR_inc_fit)
+summary(SEIR_inc_fit)
+@
+
+\subsection{SE2I2R model fitting}
+
+<<se2i2rincmodel>>=
+SE2I2R_inc_model <- odemodel(
+    name="SE2I2R incidence",
+    model=list(
+        S ~ - beta * S * (I1+I2)/N,
+        E1 ~ beta * S * (I1+I2)/N - 2 * sigma * E1,
+        E2 ~ 2 * sigma * E1 - 2 * sigma * E2,
+        I1 ~ 2 * sigma * E2 - 2 * gamma * I1,
+        I2 ~ 2 * gamma * I1 - 2 * gamma * I2,
+        R ~ 2 * gamma * I2
+    ),
+    observation=list(
+        confirmed ~ dnbinom(mu=R, size=phi)
+    ),
+    diffnames="R",
+    initial=list(
+        S ~ N * (1 - i0),
+        E1 ~ N * i0/4,
+        E2 ~ N * i0/4,
+        I1 ~ N * i0/4,
+        I2 ~ N * i0/4,
+        R ~ 0
+    ),
+    par=c("beta", "sigma", "gamma", "N", "i0", "phi"),
+    link=c(i0="logit")
+)
+@
+
+Fit.
+<<se2i2rincfit,cache=TRUE,warning=FALSE>>=
+SE2I2R_inc_fit <- fitode(
+    SE2I2R_inc_model,
+    data=SierraLeone2014b,
+    start=coef(SEIR_inc_fit),
+    solver.opts=list(method="rk4",
+                     hini=1/102)
+)
+@
+Plot:
+<<se2i2rfitplot,basefig=TRUE>>=
+plot(SEIR_inc_fit, level=0.95)
+plot(SE2I2R_inc_fit, level=0.95, col.traj="red", col.conf="red", add=TRUE)
+@
+Again, incredibly similar fits.
+
+\subsection{Summarize parameter estimates}
+
+<<summarize>>==
+allsummary <- list(
+  SIR_prev_fit,
+  SIR_inc_fit,
+  SEIR_inc_fit,
+  SE2I2R_inc_fit
+) %>%
+  lapply(function(x) {
+    out <- as.data.frame(summary(x))
+    out$name <- x@model@name
+    out$param <- rownames(out)
+
+    out
+  }) %>%
+  bind_rows
+
+ggplot(allsummary) +
+  geom_point(aes(Estimate, name)) +
+  geom_errorbarh(aes(xmin=`l-95% CI`, xmax=`u-95% CI`, y=name), height=0) +
+  facet_wrap(~param, scale="free",
+             nrow=3)
+@
+
+\bibliography{fitode}
+\end{document}
