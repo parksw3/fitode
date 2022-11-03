@@ -1,8 +1,9 @@
 \documentclass{article}
 %\VignetteEngine{knitr::knitr}
+%\VignetteDepends{dplyr}
 %\VignetteDepends{fitode}
-%\VignetteDepends{bbmle}
-%\VignetteIndexEntry{Getting started with fitode package}
+%\VignetteDepends{ggplot2}
+%\VignetteIndexEntry{Fitting epidemic models}
 \title{Fitting epidemic models}
 \author{Sang Woo Park}
 \usepackage{amsmath}
@@ -285,6 +286,9 @@ ggplot(allsummary) +
   facet_wrap(~param, scale="free",
              nrow=3)
 @
+
+
+
 
 \bibliography{fitode}
 \end{document}
