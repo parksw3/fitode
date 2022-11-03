@@ -1,6 +1,5 @@
 \documentclass{article}
 %\VignetteEngine{knitr::knitr}
-%\VignetteDepends{dplyr}
 %\VignetteDepends{fitode}
 %\VignetteDepends{ggplot2}
 %\VignetteIndexEntry{Fitting epidemic models}
@@ -44,7 +43,6 @@ knit_hooks$set(basefig=function(before, options, envir) {
 \section{Data}
 
 <<SierraLeonedata, message=FALSE, warning=FALSE, basefig=TRUE>>=
-library(dplyr)
 library(ggplot2); theme_set(theme_bw())
 library(fitode)
 plot(SierraLeone2014)
