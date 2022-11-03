@@ -270,15 +270,15 @@ allsummary <- list(
   SIR_inc_fit,
   SEIR_inc_fit,
   SE2I2R_inc_fit
-) %>%
+) |>
   lapply(function(x) {
     out <- as.data.frame(summary(x))
     out$name <- x@model@name
     out$param <- rownames(out)
 
     out
-  }) %>%
-  bind_rows
+  }) |>
+  do.call(what="rbind")
 
 ggplot(allsummary) +
   geom_point(aes(Estimate, name)) +
