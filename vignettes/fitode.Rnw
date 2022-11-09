@@ -10,7 +10,11 @@
 \usepackage{hyperref}
 \newcommand{\rzero}{{\cal R}_0}
 \newcommand{\code}[1]{{\tt #1}}
-\newcommand{\bmb}[1]{{\color{blue} bmb: \emph{#1}}}
+\newcommand{\bmb}[1]{{\color{red}$\langle$\emph{BMB: #1}$\rangle$}}
+\newcommand{\swp}[1]{{\color{blue}$\langle$\emph{SWP: #1}$\rangle$}}
+\newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
+\newcommand{\thickredline}{{\color{red}\bigskip\begin{center}\linethickness{2mm}\line(1,0){250}\end{center}\bigskip}}
+\newcommand{\needref}{{\color{orange}(REFERENCE PLEASE)}}
 \bibliographystyle{chicago}
 \date{\today}
 \begin{document}
@@ -36,9 +40,14 @@ knit_hooks$set(basefig=function(before, options, envir) {
 
 \section{Introduction}
 
-\code{fitode} is an R package for fitting ordinary differential equations (ODE)
-using Maximum Likelihood or Bayesian Markov Chain Monte Carlo (MCMC). It relies on symbolic differentiation features of the \code{Deriv} package to solve the
-sensitivity equations so that gradient-based optimization algorithms can be used.
+\code{fitode} is an R package for fitting ordinary differential
+equations (ODE) using Maximum Likelihood \needref or Bayesian Markov
+Chain Monte Carlo (MCMC) \needref. It relies on symbolic
+differentiation features of the \code{Deriv} package \citep{DerivPkg}
+to solve the sensitivity equations \needref so that gradient-based
+optimization algorithms \needref can be used.
+\djde{What is a good pedagogical intro source that defines all the
+  jargon you use below?  I've added one for the Delta method.}
 \begin{itemize}
     \item response distributions: Gamma, Gaussian, Poisson, and negative
             binomial (NB1 and NB2 parameterization)
@@ -46,7 +55,7 @@ sensitivity equations so that gradient-based optimization algorithms can be used
     \item fitting multiple states to multivariate time series
     \item prior/penalization: Beta, Gamma, and Gaussian distributions
     \item confidence intervals on parameters and their transformations via
-            delta method, profiling, and importance sampling
+            delta method \citep{VerH12}, profiling, and importance sampling
 \end{itemize}
 
 In order to construct a model in \code{fitode} you need to:
@@ -133,7 +142,9 @@ abline(v=2014.8, col="red", lty=2)
 Here, we used the \code{simulate} function to simulate the model. It requires a
 parameter set (\code{parms} argument) and a time vector (\code{times} argument)
 to run. It returns a deterministic ODE solution for each state variable as well
-as stochastic simulated observations based on the ODE solution;
+as stochastic simulated observations based on the ODE
+solution\djde{meaning what exactly? ``based on the ODE'' could mean
+  many different things};
 we will ignore the simulated observations for now.
 
 The data does not exhibit exponential growth forever. In order to fit the exponential
