@@ -120,8 +120,7 @@ The actual process of finding $\hat \beta$ will depend on the minimizer of our c
 \item[minimizer]{similar to integrator, i.e. details don't matter if the problem is easy. Derivative-free methods such as Nelder-Mead are robust but slower; derivative-based methods are effective \emph{if sensitivity equations are used} (see below). Some minimizers such as Levenberg-Marquardt are particularly tuned to least-squares (although derivs still matter)}
 \item[initial conditions]{if all variables are observed, we can
     pretend the initial observations as known without error and set
-    $\hat \state(0) = \state(0)$. Otherwise we have to treat ICs as
-    auxiliary parameters.\djde{definition of auxiliary parameters? reference?}}
+    $\hat \state(0) = \state(0)$. Otherwise we have to estimate ICs along with other model parameters \citep{bjornstadEpidemics2018}.\djde{definition of auxiliary parameters? reference?} \swp{Is this writing clearer?}}
 \end{description}
 \swp{Do we just want to put definitions here? Not sure what you're exactly looking for here...}
 
@@ -239,11 +238,9 @@ Equivalently, the MLE can be expressed as a parameter that minimizes the negativ
 \hat{\beta} = \argmin_{\params} \left( - \frac{n}{2} \log (2 \pi \sigma^2) - \frac{1}{2\sigma^2} \sum_{i=1}^n \left(\state(t_i) - \traj(t_i|\params)\right)^2\right),
 \end{equation}
 which shows that the Gaussian errors are equivalent to \emph{scaled} least-squares errors.
-Using the negative log-likelihood also results in a more stable
-numerical computation \djde{Why?} and useful statistical
-properties\djde{such as?  why would such a transformation change
-the statistical properties?}.
-
+In general, using the log-likelihood is mathematically more convenient and numerically more stable than using the plain likelihood because most of the terms can be expressed as sums, rather than products---for example, multiplying many small likelihood values is likely to lead to imprecise calculations and therefore numerical instability \djde{Why?} \swp{Is this good enough? Neither Bjornstad's or Ben's book explicitly say that this is the reason so I'm not sure if we can cite them?}.
+Using the negative log-likelihood provides further advantanges: (1) most optimization tools are designed to minimize, rather than maximize, objective functions and (2) the negative log-likelihood function is required for quantifying uncertainties in parameter estimates \djde{such as?  why would such a transformation change
+the statistical properties?}. \swp{Is this good enough?}
 There are several ways in which we can fit an ODE model under the Gaussian assumption.
 First, we can estimate all parameters at once.
 
