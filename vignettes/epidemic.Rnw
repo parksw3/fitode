@@ -39,15 +39,111 @@ knit_hooks$set(basefig=function(before, options, envir) {
   \item Fitting epidemic models to estimate underlying parameters, such as the basic reproduction number
 \end{itemize}
 
-\section{Data}
+\section{Plague}
 
-<<SierraLeonedata, message=FALSE, warning=FALSE, basefig=TRUE>>=
+\subsection{Data}
+
+Data from Kermack and McKendrick:
+
+<<pdata>>=
 library(ggplot2); theme_set(theme_bw())
 library(fitode)
-plot(SierraLeone2014)
+plot(bombay)
 @
 
-\section{Fits}
+\subsection{Approximate model}
+
+KM suggested that deaths correspond to $\frac{dR}{dt}$ in the SIR model with following approximations:
+
+\begin{equation}
+\frac{dR}{dt} = 890 \mathrm{sech}^2(0.2 t - 3.4)
+\end{equation}
+
+<<>>==
+plot(bombay)
+curve(890 * 1/cosh(0.2 * x - 3.4)^2, add=TRUE)
+@
+
+This gives a pretty good fit.
+
+<<>>==
+nlsfit <- nls(mort ~ a/cosh(b * week - c)^2, data=bombay,
+    start = list(a = 890, b=0.2, c=3.4))
+@
+
+Even better fits:
+<<>>==
+plot(bombay)
+curve(coef(nlsfit)[1] * 1/cosh(coef(nlsfit)[2] * x - coef(nlsfit)[3])^2, add=TRUE)
+@
+
+With very similar parameters:
+<<>>==
+coef(nlsfit)
+@
+
+But we can't interpret any of the model parameters.
+
+\subsection{SIR model}
+
+Instead, we want to fit the SIR model. First, treating data as $dR/dt$ and minimizing SSE.
+
+<<sirmortmodel>>=
+SIR_mort_model <- odemodel(
+    name="SIR mortality rate",
+    model=list(
+        S ~ - beta * S * I/N,
+        I ~ beta * S * I/N - gamma * I,
+        R ~ gamma * I
+    ),
+    observation=list(
+        mort ~ ols(mean = gamma * I)
+    ),
+    initial=list(
+        S ~ N * (1 - i0),
+        I ~ N * i0,
+        R ~ 0
+    ),
+    par=c("beta", "gamma", "N", "i0"),
+    link=c(i0="logit")
+)
+@
+
+Searching for starting values through trial and error:
+<<sirmortstart,warning=FALSE,basefig=TRUE>>=
+SIR_mort_start <- c(beta=1, gamma=0.5, N=7000, i0=0.0004)
+
+ss_SIR_mort <- simulate(SIR_mort_model,
+    parms=SIR_mort_start, times=bombay$week)
+
+plot(bombay)
+lines(ss_SIR_mort$times, ss_SIR_mort$I)
+@
+Fit:
+<<sirmortfit,cache=TRUE,warning=FALSE>>=
+SIR_mort_fit <- fitode(
+    SIR_mort_model,
+    data=bombay,
+    start=SIR_mort_start,
+    tcol="week"
+)
+@
+Plot:
+<<sirmortfitplot,basefig=TRUE>>=
+plot(SIR_mort_fit, level=0.95)
+@
+Extrememly unrealistic parameters:
+<<sirmortcoef>>=
+coef(SIR_mort_fit)
+@
+
+\section{Ebola}
+
+\subsection{Data}
+
+<<SierraLeonedata, message=FALSE, warning=FALSE, basefig=TRUE>>=
+plot(SierraLeone2014)
+@
 
 \subsection{Prevalence fitting}
 
