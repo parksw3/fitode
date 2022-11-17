@@ -137,7 +137,7 @@ Very good fit, but unrealistic parameters with mean infectious period of 0.4 day
 coef(SIR_mort_fit)
 @
 What happens if we try to assume a longer (and more realistic) infectious period?
-<<sirmortfit,cache=TRUE,warning=FALSE>>=
+<<sirmortfit2,cache=TRUE,warning=FALSE>>=
 SIR_mort_fit2 <- fitode(
     SIR_mort_model,
     data=bombay,
