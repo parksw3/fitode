@@ -174,24 +174,6 @@ application of their SIR model \eqref{eq:SIR} to the epidemic of
 plague in Bombay in 1905--1906.  The observed data (black dots in
 Figure~\ref{fig:Bombay}) were weekly numbers of deaths from plague.
 
-\begin{figure}
-<<bombayfig, echo=FALSE>>=
-sech <- function(x) {1/cosh(x)}
-sech_approx <- function(t, a, omega, phi) {
-    a * sech(omega*t - phi)^2
-}
-f <- function(t) sech_approx(t, a=890, omega=0.2, phi=3.4)
-tvals <- seq(0,33,length=100)
-plot(tvals, f(tvals), bty="L", col="darkred", type="l", lwd=3, xpd=NA,
-     ylim=c(0,900),
-     xaxs="i", yaxs="i", las=1, xlab="weeks", ylab="plague deaths")
-points(mort ~ week, data = fitode::bombay, xpd=NA)
-@ 
-\caption{The plague epidemic in Bombay, 17 December 1905 to 21 July 1906.
-  \emph{cf.}\ chart in \cite[p.\,714]{KermMcKe27}.}
-\label{fig:Bombay}
-\end{figure}
-
 Referring to their version of Figure~\ref{fig:Bombay}, Kermack and
 McKendrick \cite[p.\,714]{KermMcKe27} argued that ``As at least 80 to
 90 per cent.\ of the cases reported terminate fatally, the ordinate
@@ -217,7 +199,7 @@ number at time $t=0$)
   \phi &= \textrm{arctanh}\left(\frac{\Reff - 1}{2\omega/\gamma}
          \right)\,, \\
   \text{and}\quad
-  a &= \frac{S_0}{\Reff}\,\omega \,,
+  a &= \frac{S_0}{\Reff}\,\omega \,.
 \end{align}
 \end{subequations}
 \end{linenomath*}
@@ -226,9 +208,9 @@ KM column of Table~\ref{tab:Bombay}, and they plotted their
 ``calculated'' curve, which we have reproduced in red in
 Figure~\ref{fig:Bombay}.  
 
-This curve does appear to provide a good fit to the data, but Kermack
-and McKendrick \cite{KermMcKe27} gave no indication of how their
-parameter estimates were obtained.  \djde{When was least-squares
+The red curve does appear to provide a reasonable fit to the data, but
+Kermack and McKendrick \cite{KermMcKe27} gave no indication of how
+their parameter estimates were obtained.  \djde{When was least-squares
   trajectory matching first done?  Do we think they did that?  or just
   played with parameter values and fitted by eye?}  Whatever their
 process, they must have engaged in some sort of \term{trajectory
@@ -240,28 +222,98 @@ curve and the data.  Thus, the \term{objective function} that is
 natural to minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
-\sum_{i=1}^n (f(t_i;\boldbeta) - y_i)^2 \,,
+\sum_{i=1}^n \big(f(t_i;\boldbeta) - y_i\big)^2 \,,
 \end{equation}
 \end{linenomath*}
-where the observed data are the points $\{(t_i,y_i)\}$,
+where the observed data are the points $\{(t_i,y_i):i=1,\ldots,n\}$,
 $f(t;\boldbeta)$ is the model \eqref{eq:sech}, and the parameter
 vector for Kermack and McKendrick's problem is
 $\boldbeta=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
 respect to $\boldbeta$ would have required some heroic arithmetic
 with a pencil and paper in 1927, but it is a simple task with the
-aid of a computer, as in the following R code.
+aid of a computer, as in the following R code that exploits the
+nonlinear least squares function \texttt{nls}.
 
-\djde{insert code chunk that does it}
 
-... explain normal CIs from least squares and how least squares is max
-likelihood in this case ...
+<<KM.approx, echo=FALSE>>=
+sech <- function(x) {1/cosh(x)}
+KM_approx <- function(t, a, omega, phi) {
+    a * sech(omega*t - phi)^2
+}
+f <- function(t) KM_approx(t, a=890, omega=0.2, phi=3.4)
+## KM's fitted values:
+a.KM <- 890
+omega.KM <- 0.2
+phi.KM <- 3.4
+tpeak.KM <- phi.KM / omega.KM
+@ 
 
-\thickredline
+<<nls.bombay>>=
+nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
+              data = fitode::bombay, 
+              start = list(a = 890, omega = 0.2, phi = 3.4))
+(fitted.parameters <- coef(nlsfit))
+@ 
+We do not actually need to start with such a good initial guess:
+<<nls.bombay.2>>=
+nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
+              data = fitode::bombay, 
+              start = list(a = 1800, omega = 0.1, phi = 2))
+(fitted.parameters <- coef(nlsfit))
+@ 
+
+\begin{figure}
+<<bombayfig, echo=FALSE>>=
+tmax <- 33
+tvals <- seq(0,tmax,length=1000)
+col.KM <- "#E41A1C"
+col.us <- "#377EB8"
+bombay_plot <- function(type = "l", ...) {
+    plot(NA, NA , bty="L", type="n", xlim=c(0,tmax), ylim=c(0,900),
+         xaxs="i", yaxs="i", las=1, 
+         yaxt="n",
+         xlab="weeks", ylab="plague deaths",
+         ...
+         )
+    axis(side=2, at=100*(0:9), las=1)
+}
+lwd <- 3
+bombay_plot()
+points(mort ~ week, data = fitode::bombay, xpd=NA, pch=19)
+lines(tvals, f(tvals), lwd=lwd, xpd=NA, col=col.KM)
+a <- fitted.parameters["a"]
+omega <- fitted.parameters["omega"]
+phi <- fitted.parameters["phi"]
+tpeak <- phi/omega
+dig <- 3 # number of significant digits for printing
+lines(tvals, KM_approx(tvals, a=a, omega=omega, phi=phi),
+      xpd=NA, lwd=lwd, col=col.us)
+legend("topleft", bty="n", lwd=lwd, col=c(col.KM,col.us),
+       legend=c("KM","us"))
+
+@ 
+\caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
+  1906.  The data (black dots) were digitized from the chart in
+  \cite[p.\,714]{KermMcKe27}. The fitted curves are based on the KM
+  approximation \eqref{eq:sech}; the associated parameter estimates
+  are given in Table~\ref{tab:Bombay}.}
+\label{fig:Bombay}
+\end{figure}
+
+\djde{explain normal CIs from least squares and how least squares is max
+likelihood in this case}
+
+\djde{What is the standard way to get CIs on the parameters and confidence
+  bands on the fit from the \texttt{nlsfit} object?}
+
+\djde{What is the best way to invert the parameter relationships in
+  \eqref{eq:sechparams} to get $\beta$ and $\gamma$?  And how should
+  we compute CIs for the derived parameters?  Delta method?}
 
 \djde{We must comment on whether the estimated $\beta$ and $\gamma$
   are actually reasonable given what we know about pneumonic plague,
   e.g., from Gani and Leach \cite{GaniLeac04}.
-  But also not KM's caution about interpreting the param values.}
+  But also note KM's caution about interpreting the param values.}
 
 \djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is
 likely to be much better than fitting the initial condition $I_0$.}
@@ -277,14 +329,19 @@ likely to be much better than fitting the initial condition $I_0$.}
       %% parameters.
     }
     \medskip
-  \begin{tabular}{l | c | c | c | c}
-    \bfseries Estimated parameter & \bfseries symbol & \bfseries units & \bfseries KM & \bfseries us \\\hline
-    peak removal rate & $a$ & 1/weeks & 890  & \\
-    outbreak speed & $\omega$ & 1/weeks & 0.2 & \\
-    outbreak centre & $\phi$ & -- & 3.4 & \\
+  \begin{tabular}{l | c | c | c | c c}
+    \bfseries Estimated parameter & \bfseries symbol & \bfseries units
+    & \bfseries KM & \bfseries us & \bfseries 95\% CI \\\hline
+    peak removal rate & $a$ & 1/weeks & \Sexpr{a.KM} & 
+      \Sexpr{signif(a,dig)} & (,)\\
+    outbreak speed & $\omega$ & 1/weeks & 
+      \Sexpr{omega.KM} & \Sexpr{signif(omega,dig-1)} & (,) \\
+    outbreak centre & $\phi$ & -- & \Sexpr{phi.KM} & 
+      \Sexpr{signif(phi,dig)} & (,) \\
     \noalign{\vspace{10pt}}
     \bfseries Derived parameter \\\hline
-    peak time & $\tpeak = {\phi}/{\omega}$ & weeks & 17 \\
+    peak time & $\tpeak = {\phi}/{\omega}$ & weeks & 
+      \Sexpr{tpeak.KM} & \Sexpr{signif(tpeak,dig)} & (,) \\
     transmission rate & $\beta$ & 1/weeks & \\
     removal rate & $\gamma$ & 1/weeks & \\
     mean generation interval & $\Tg = {1}/{\gamma}$ & weeks & \\
@@ -300,6 +357,12 @@ likely to be much better than fitting the initial condition $I_0$.}
 
 \subsection*{Things to mention}
 
+application of \texttt{fitsir} to song downloads, and how we
+convinced ourselves that the SIR model was reasonable for that
+problem \cite{Rosa+21}.
+
+\paragraph*{notes from Ben.}
+
 pedagogical refs: I would use Raue et al \cite{raue2013lessons} for
 sensitivity equations and see how much of the rest is defined in
 Bjornstad's book \cite{bjornstadEpidemics2018} (or fall back on mine).
@@ -313,9 +376,6 @@ model (despite the nice historical connection with K\&M
 threshold, as suggested by Kermack and McKendrick, but an example of
 epidemic driven by seasonality.'' \cite{bacaermodel2012}
 \end{quote}
-application of \texttt{fitsir} to song downloads, and how we
-convinced ourselves that the SIR model was reasonable for that
-problem \cite{Rosa+21}.
 
 \bibliographystyle{tfs}
 \bibliography{brauer-ms,fitode}
