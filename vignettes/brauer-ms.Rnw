@@ -178,12 +178,14 @@ Figure~\ref{fig:Bombay}) were weekly numbers of deaths from plague.
 <<bombayfig, echo=FALSE>>=
 sech <- function(x) {1/cosh(x)}
 sech_approx <- function(t, a, omega, phi) {
-    a * (sech(omega*t - phi))
+    a * sech(omega*t - phi)^2
 }
 f <- function(t) sech_approx(t, a=890, omega=0.2, phi=3.4)
 tvals <- seq(0,33,length=100)
 plot(tvals, f(tvals), bty="L", col="darkred", type="l", lwd=3, xpd=NA,
+     ylim=c(0,900),
      xaxs="i", yaxs="i", las=1, xlab="weeks", ylab="plague deaths")
+points(mort ~ week, data = fitode::bombay, xpd=NA)
 @ 
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July 1906.
   \emph{cf.}\ chart in \cite[p.\,714]{KermMcKe27}.}
