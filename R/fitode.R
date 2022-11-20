@@ -86,10 +86,13 @@ fixpar <- function(model, fixed) {
 
     par <- model@par[!(model@par %in% names(fixed))]
 
+    link <- model@link[!(model@par %in% names(fixed))]
+
     model <- Transform(
         model,
         transforms=tlist,
-        par=par
+        par=par,
+        link=link
     )
 
     model

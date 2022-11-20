@@ -37,3 +37,14 @@
 #'  \item{volume}{}
 #' }
 "tumorgrowth"
+
+#' Data from 1905 plauge outbreak in Mumbai (formerly called Bombay)
+#'
+#' Plague death reports ...
+#'
+#' @format A data frame with 31 rows comprising:
+#' \describe{
+#' \item{week}{week}
+#' \item{mort}{mortality}
+#' }
+"bombay"
