@@ -49,6 +49,7 @@
 \newcommand{\Reff}{\R_{\rm e}}
 \usepackage{bm} % bold math
 \newcommand{\boldbeta}{\bm{\beta}}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 
 \begin{document}
 
@@ -231,39 +232,93 @@ vector for Kermack and McKendrick's problem is
 $\boldbeta=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
 respect to $\boldbeta$ would have required some heroic arithmetic
 with a pencil and paper in 1927, but it is a simple task with the
-aid of a computer, as in the following R code that exploits the
-nonlinear least squares function \texttt{nls}.
+aid of a computer.
 
-
-<<KM.approx, echo=FALSE>>=
-sech <- function(x) {1/cosh(x)}
-KM_approx <- function(t, a, omega, phi) {
-    a * sech(omega*t - phi)^2
-}
-f <- function(t) KM_approx(t, a=890, omega=0.2, phi=3.4)
-## KM's fitted values:
-a.KM <- 890
-omega.KM <- 0.2
-phi.KM <- 3.4
-tpeak.KM <- phi.KM / omega.KM
-@ 
+In the following segment of R code, we fit equation \eqref{eq:sech} to
+the Bombay plague data (which are built in to the \code{fitode}
+package that we describe below, as a data frame with columns
+\code{week} and \code{mort}).  We exploit R's nonlinear least squares
+function (\code{nls}), which attempts to minimize the distance
+\eqref{eq:leastsquares} to the data, starting from an initial guess
+(\code{start}).
 
 <<nls.bombay>>=
+sech <- function(x) {1/cosh(x)}
+KM_approx <- function(t, a, omega, phi) {a * sech(omega*t - phi)^2}
+KM.parameters <- c(a = 890, omega = 0.2, phi = 3.4)
+nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
+              data = fitode::bombay,
+              start = KM.parameters)
+(fitted.parameters <- coef(nlsfit))
+(percent.difference <- 100*(KM.parameters - fitted.parameters)
+                           /fitted.parameters)
+@ 
+
+Above, we chose as our starting guess the fitted parameter values of
+Kermack and McKendrick (see Table~\ref{tab:Bombay}), and found that
+the least squares parameter values differ from KM's by a few percent.
+Our least squares fitted function is show in blue in
+Figure~\ref{fig:Bombay}.
+
+Starting from someone else's fit is not a great way to test the
+method, but fortunately the least squares fit for this problem is not
+very sensitive to the initial guess.  While not necessary for this
+problem, to make a reasonable initial guess, it can help to think
+about the meaning of parameters.  For example, in the case of
+equation~\eqref{eq:sech}, it is useful to note that $a$ is the maximum
+of the function~\eqref{eq:sech}, and if write $\omega t - \phi$ as
+$\omega(t-\tpeak)$ then $\tpeak$ is the time at which the maximum
+occurs; both $a$ and $\tpeak$ can be guessed approximately by looking
+at the plotted observed data.  \djde{We could ``guess'' a value of
+  $\omega$ by noting that $\sech^2{(\omega t)}\to e^{2\omega t}$ as
+  $t\to-\infty$, so we could estimate $\omega$ as the slope of
+  $\log(y_i/2)$\dots a little hard to do by eye from the data plot.}
+
+<<nls.bombay.2>>=
+a.guess <- 1000
+tpeak.guess <- 15
+omega.guess <- 0.1
+phi.guess <- omega.guess * tpeak.guess
 nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
               data = fitode::bombay, 
-              start = list(a = 890, omega = 0.2, phi = 3.4))
+              start = c(a = a.guess, omega = omega.guess,
+                        phi = phi.guess))
 (fitted.parameters <- coef(nlsfit))
 @ 
-We do not actually need to start with such a good initial guess:
-<<nls.bombay.2>>=
-nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
-              data = fitode::bombay, 
-              start = list(a = 1800, omega = 0.1, phi = 2))
-(fitted.parameters <- coef(nlsfit))
+
+If you experiment with initial guesses, you will find that if you make
+a sufficiently bad guess, then \code{nls} will fail.  e.g.,
+$a=2000$, $\tpeak=5$, $\omega=0.1$ yields
+a \code{singular gradient} error.
+
+More interesting is that
+$a=500$, $\tpeak=5$, $\omega=0.1$ yields
+$a=869$, $\omega=-0.19$, $\phi=-3.48$
+
+This illustrates a very important fact: there is not necessarily a unique
+best fit set of parameters!  In this case, this alternative solution
+exists because $\sech^2$ is symmetric about the $y$ axis, but in
+general, there can be many local minima that cause \code{nls} to
+converge, and may not in general be equally good.
+
+If you know that your parameters should be in a certain range, then you
+can pass that information to \code{nls}.  For example, to ensure
+that all the parameters are non-negative, you would add the option
+
+<<eval=FALSE>>=
+lower = c(a = 0, omega = 0, phi = 0)
+@ 
+
+<<KM fitted values, echo=FALSE>>=
+a.KM <- KM.parameters["a"]
+omega.KM <- KM.parameters["omega"]
+phi.KM <- KM.parameters["phi"]
+tpeak.KM <- phi.KM / omega.KM
+f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
 @ 
 
 \begin{figure}
-<<bombayfig, echo=FALSE>>=
+<<Bombayfigure, echo=FALSE>>=
 tmax <- 33
 tvals <- seq(0,tmax,length=1000)
 col.KM <- "#E41A1C"
