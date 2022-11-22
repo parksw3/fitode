@@ -25,6 +25,7 @@ Imports:
 Suggests:
     knitr,
     ggplot2,
+    propagate,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Encoding: UTF-8

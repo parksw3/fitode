@@ -61,20 +61,26 @@ KM suggested that deaths correspond to $\frac{dR}{dt}$ in the SIR model with fol
 
 <<>>==
 plot(bombay)
-curve(890 * 1/cosh(0.2 * x - 3.4)^2, add=TRUE)
+curve(890 * 1/cosh(0.2 * (x-1) - 3.4)^2, add=TRUE)
 @
 
 This gives a pretty good fit.
 
-<<>>==
-nlsfit <- nls(mort ~ a/cosh(b * week - c)^2, data=bombay,
-    start = list(a = 890, b=0.2, c=3.4))
+<<nlsfit, message=FALSE, cache=TRUE>>==
+nlsfit <- nls(mort ~ a/cosh(b * (week - 1) - c)^2, data=bombay,
+              start = list(a = 890, b=0.2, c=3.4))
+if (requireNamespace("propagate")) {
+    pp <- propagate::predictNLS(nlsfit)
+}
 @
 
 Even better fits:
 <<>>==
 plot(bombay)
-curve(coef(nlsfit)[1] * 1/cosh(coef(nlsfit)[2] * x - coef(nlsfit)[3])^2, add=TRUE)
+curve(coef(nlsfit)[1] * 1/cosh(coef(nlsfit)[2] * (x -1 ) - coef(nlsfit)[3])^2, add=TRUE)
+matlines(bombay$week, pp$summary[,c("Prop.2.5%", "Prop.97.5%")],
+         col = 1, lty = 2)
+curve(890 * 1/cosh(0.2 * (x-1) - 3.4)^2, add=TRUE, col = 2)
 @
 
 With very similar parameters:
