@@ -119,7 +119,7 @@ susceptible, infected or removed\footnote{In the words of Kermack and
   those who are sick, by recovery or by death''.}, $\beta$ is the
 transmission rate, and $\gamma$ is the recovery rate.  In that
 original paper, Kermack and McKendrick \cite[p.\,714]{KermMcKe27} also
-fit their model to plague mortality data from an epidemic in Bombay
+fit their model to plague mortality data from an epidemic in Bombay \swp{(now Mumbai)}
 that occurred about 20 years before their paper was written.
 
 In the century that has elapsed since publication of Kermack and
@@ -132,23 +132,23 @@ either as differential equations following the tradition of Kermack
 and McKendrick \cite{KermMcKe27}, or as \term{stochastic processes} in
 the tradition of Bartlett \cite{Bart60}.  In recent years, as the
 power of computers has grown exponentially, there has been increasing
-interest in \term{agent-based models}\needref, which represent each
-individual as a separate unit that can have unique properties.
+interest in \term{agent-based models}, which represent each
+individual as a separate unit that can have unique properties \cite{eubank2004modelling}.
 
 Throughout the history of the subject, and regardless of the modelling
 frameworks they have exploited, mathematical epidemiologists have
 frequently attempted to fit---or at least to compare---their models to
-observed infectious disease data.  Such fits have often been fairly
-na\"{\i}ve, with little or no consideration of their quality; but over
+observed infectious disease data. \swp{Is this too strong?:} Such fits have often been fairly
+na\"{\i}ve \swp{simple?}, with little \swp{definitely too strong: or no} consideration of their quality; but over
 the years, there has been a trend towards greater sophistication and
 statistical rigour in parameter estimation for infectious disease
 models, and books that explain these methods have begun to appear in
 recent decades \cite{Bolk08,bjornstadEpidemics2018}.  Careful
 consideration of uncertainty is especially important when epidemic
 models are used for the development and analysis of policy options for
-infectious disease management, a challenge that has absorbed the
-attention of most mathematical epidemiologists during the course of the
-present COVID-19 pandemic.
+infectious disease management \cite{elderd2006uncertainty}, a challenge that has absorbed the
+attention of most \swp{many? most seems too strong} mathematical epidemiologists during the course of the
+present COVID-19 pandemic \swp{Can't find appropriate papers to cite here...}.
 
 While visiting the University of British Columbia in 2014--2015, one
 of us (DE) had many conversations with Fred Brauer about epidemic
@@ -180,7 +180,7 @@ McKendrick \cite[p.\,714]{KermMcKe27} argued that ``As at least 80 to
 90 per cent.\ of the cases reported terminate fatally, the ordinate
 may be taken as approximately representing [$\dbydt{R}$] as a function
 of $t$.''  Since computers did not yet exist, and an exact analytical
-form for this function could not be found, they proceeded to 
+form for this function could not be found, they proceeded to
 assume \cite[p.\,713]{KermMcKe27}
 that $\frac{\beta}{\gamma}R(t)\ll1$, which yields
 the
@@ -207,20 +207,17 @@ number at time $t=0$)
 They then presented the parameter estimates that we have listed in the
 KM column of Table~\ref{tab:Bombay}, and they plotted their
 ``calculated'' curve, which we have reproduced in red in
-Figure~\ref{fig:Bombay}.  
+Figure~\ref{fig:Bombay}.
 
 The red curve does appear to provide a reasonable fit to the data, but
 Kermack and McKendrick \cite{KermMcKe27} gave no indication of how
 their parameter estimates were obtained.  \djde{When was least-squares
   trajectory matching first done?  Do we think they did that?  or just
-  played with parameter values and fitted by eye?} \bmb{FWIW, K\&M say (after
-  commenting on all of the assumptions involved: ``None of these assumptions are strictly fulfilled and consequently the numerical equation can only be a very rough approximation. A close fit is not to be expected, and deductions
-as to the actual values of the various constants should not be drawn. It may be said,
-however, that the calculated curve, which implies that the rates did not vary during the period of the epidemic, conforms roughly to the observed figures.'' The use of ``implies'' here is interesting/potentially dodgy; in fact as pointed out by \cite{bacaermodel2012}, other lines of eviedence suggest that the rates \emph{did} vary \ldots } Whatever their
+  played with parameter values and fitted by eye?}  Whatever their
 process, they must have engaged in some sort of \term{trajectory
   matching}, i.e., adjusting parameter values until the
 model---equation~\eqref{eq:sech} in their case---is, by some measure,
-close to the observed data points.  The most obvious
+as close as possible to the observed data points.  The most obvious
 metric for this purpose is the Euclidean distance between the model
 curve and the data.  Thus, the \term{objective function} that is
 natural to minimize is
@@ -249,13 +246,13 @@ function (\code{nls}), which attempts to minimize the distance
 sech <- function(x) {1/cosh(x)}
 KM_approx <- function(t, a, omega, phi) {a * sech(omega*t - phi)^2}
 KM.parameters <- c(a = 890, omega = 0.2, phi = 3.4)
-nlsfit <- nls(mort ~ KM_approx(week-1, a, omega, phi), 
+nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
               data = fitode::bombay,
               start = KM.parameters)
 (fitted.parameters <- coef(nlsfit))
 (percent.difference <- 100*(KM.parameters - fitted.parameters)
                            /fitted.parameters)
-@ 
+@
 
 Above, we chose as our starting guess the fitted parameter values of
 Kermack and McKendrick (see Table~\ref{tab:Bombay}), and found that
@@ -282,12 +279,12 @@ a.guess <- 1000
 tpeak.guess <- 15
 omega.guess <- 0.1
 phi.guess <- omega.guess * tpeak.guess
-nlsfit <- nls(mort ~ KM_approx(week-1, a, omega, phi), 
-              data = fitode::bombay, 
+nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
+              data = fitode::bombay,
               start = c(a = a.guess, omega = omega.guess,
                         phi = phi.guess))
 (fitted.parameters <- coef(nlsfit))
-@ 
+@
 
 If you experiment with initial guesses, you will find that if you make
 a sufficiently bad guess, then \code{nls} will fail.  e.g.,
@@ -310,16 +307,15 @@ that all the parameters are non-negative, you would add the option
 
 <<eval=FALSE>>=
 lower = c(a = 0, omega = 0, phi = 0)
-@ 
+@
 
 <<KM fitted values, echo=FALSE>>=
 a.KM <- KM.parameters["a"]
 omega.KM <- KM.parameters["omega"]
 phi.KM <- KM.parameters["phi"]
 tpeak.KM <- phi.KM / omega.KM
-## note adjusted t for starting at t=1 vs t=0
-f <- function(t) KM_approx(t-1, a=a.KM, omega=omega.KM, phi=phi.KM)
-@ 
+f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
+@
 
 \begin{figure}
 <<Bombayfigure, echo=FALSE>>=
@@ -329,7 +325,7 @@ col.KM <- "#E41A1C"
 col.us <- "#377EB8"
 bombay_plot <- function(type = "l", ...) {
     plot(NA, NA , bty="L", type="n", xlim=c(0,tmax), ylim=c(0,900),
-         xaxs="i", yaxs="i", las=1, 
+         xaxs="i", yaxs="i", las=1,
          yaxt="n",
          xlab="weeks", ylab="plague deaths",
          ...
@@ -350,7 +346,7 @@ lines(tvals, KM_approx(tvals, a=a, omega=omega, phi=phi),
 legend("topleft", bty="n", lwd=lwd, col=c(col.KM,col.us),
        legend=c("KM","us"))
 
-@ 
+@
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
   1906.  The data (black dots) were digitized from the chart in
   \cite[p.\,714]{KermMcKe27}. The fitted curves are based on the KM
@@ -391,15 +387,15 @@ likely to be much better than fitting the initial condition $I_0$.}
   \begin{tabular}{l | c | c | c | c c}
     \bfseries Estimated parameter & \bfseries symbol & \bfseries units
     & \bfseries KM & \bfseries us & \bfseries 95\% CI \\\hline
-    peak removal rate & $a$ & 1/weeks & \Sexpr{a.KM} & 
+    peak removal rate & $a$ & 1/weeks & \Sexpr{a.KM} &
       \Sexpr{signif(a,dig)} & (,)\\
-    outbreak speed & $\omega$ & 1/weeks & 
+    outbreak speed & $\omega$ & 1/weeks &
       \Sexpr{omega.KM} & \Sexpr{signif(omega,dig-1)} & (,) \\
-    outbreak centre & $\phi$ & -- & \Sexpr{phi.KM} & 
+    outbreak centre & $\phi$ & -- & \Sexpr{phi.KM} &
       \Sexpr{signif(phi,dig)} & (,) \\
     \noalign{\vspace{10pt}}
     \bfseries Derived parameter \\\hline
-    peak time & $\tpeak = {\phi}/{\omega}$ & weeks & 
+    peak time & $\tpeak = {\phi}/{\omega}$ & weeks &
       \Sexpr{tpeak.KM} & \Sexpr{signif(tpeak,dig)} & (,) \\
     transmission rate & $\beta$ & 1/weeks & \\
     removal rate & $\gamma$ & 1/weeks & \\
