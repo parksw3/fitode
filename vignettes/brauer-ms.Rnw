@@ -246,7 +246,7 @@ function (\code{nls}), which attempts to minimize the distance
 sech <- function(x) {1/cosh(x)}
 KM_approx <- function(t, a, omega, phi) {a * sech(omega*t - phi)^2}
 KM.parameters <- c(a = 890, omega = 0.2, phi = 3.4)
-nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
+nlsfit <- nls(mort ~ KM_approx(week-1, a, omega, phi), 
               data = fitode::bombay,
               start = KM.parameters)
 (fitted.parameters <- coef(nlsfit))
@@ -279,7 +279,7 @@ a.guess <- 1000
 tpeak.guess <- 15
 omega.guess <- 0.1
 phi.guess <- omega.guess * tpeak.guess
-nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
+nlsfit <- nls(mort ~ KM_approx(week-1, a, omega, phi), 
               data = fitode::bombay, 
               start = c(a = a.guess, omega = omega.guess,
                         phi = phi.guess))
