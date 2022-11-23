@@ -38,7 +38,7 @@
 #' }
 "tumorgrowth"
 
-#' Data from 1905 plauge outbreak in Mumbai (formerly called Bombay)
+#' Data from 1905 plague outbreak in Mumbai (formerly called Bombay)
 #'
 #' Plague death reports ...
 #'

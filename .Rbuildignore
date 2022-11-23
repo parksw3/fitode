@@ -19,7 +19,6 @@ Makefile
 cache/
 figure/
 vignettes/figure/
-vignettes/fitode-ms.Rnw
-vignettes/fitode-ms.tex
-vignettes/fitode-ms.pdf
+vignettes/fitode-ms.*
+vignettes/brauer-ms.*
 outputs/*
