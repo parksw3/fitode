@@ -213,11 +213,14 @@ The red curve does appear to provide a reasonable fit to the data, but
 Kermack and McKendrick \cite{KermMcKe27} gave no indication of how
 their parameter estimates were obtained.  \djde{When was least-squares
   trajectory matching first done?  Do we think they did that?  or just
-  played with parameter values and fitted by eye?}  Whatever their
+  played with parameter values and fitted by eye?} \bmb{FWIW, K\&M say (after
+  commenting on all of the assumptions involved: ``None of these assumptions are strictly fulfilled and consequently the numerical equation can only be a very rough approximation. A close fit is not to be expected, and deductions
+as to the actual values of the various constants should not be drawn. It may be said,
+however, that the calculated curve, which implies that the rates did not vary during the period of the epidemic, conforms roughly to the observed figures.'' The use of ``implies'' here is interesting/potentially dodgy; in fact as pointed out by \cite{bacaermodel2012}, other lines of eviedence suggest that the rates \emph{did} vary \ldots } Whatever their
 process, they must have engaged in some sort of \term{trajectory
   matching}, i.e., adjusting parameter values until the
 model---equation~\eqref{eq:sech} in their case---is, by some measure,
-as close as possible to the observed data points.  The most obvious
+close to the observed data points.  The most obvious
 metric for this purpose is the Euclidean distance between the model
 curve and the data.  Thus, the \term{objective function} that is
 natural to minimize is
