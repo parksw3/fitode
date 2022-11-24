@@ -213,8 +213,9 @@ The red curve does appear to provide a reasonable fit to the data, but
 Kermack and McKendrick \cite{KermMcKe27} gave no indication of how
 their parameter estimates were obtained.  \djde{When was least-squares
   trajectory matching first done?  Do we think they did that?  or just
-  played with parameter values and fitted by eye?}  Whatever their
-process, they must have engaged in some sort of \term{trajectory
+  played with parameter values and fitted by eye?}
+  \swp{It seems unlikely that they had the ability to perform least squares back in 1927... I was able to find least squares SIR and SI3R(!) model fit from 1990 \cite[p.\,51]{kryscio1990modeling} but not sure if there's anything earlier.}
+Whatever their process, they must have engaged in some sort of \term{trajectory
   matching}, i.e., adjusting parameter values until the
 model---equation~\eqref{eq:sech} in their case---is, by some measure,
 as close as possible to the observed data points.  The most obvious
