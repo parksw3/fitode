@@ -48,6 +48,8 @@ Data from Kermack and McKendrick:
 <<pdata>>=
 library(ggplot2); theme_set(theme_bw())
 library(fitode)
+library(propagate)
+library(nleqslv)
 plot(bombay)
 @
 
@@ -74,9 +76,7 @@ pp <- NULL
 
 Compute prediction errors (slow)
 <<propagate, message=FALSE, cache=TRUE>>=
-if (requireNamespace("propagate")) {
-    pp <- propagate::predictNLS(nlsfit)
-}
+pp <- propagate::predictNLS(nlsfit)
 @
 
 Even better fits:
@@ -112,29 +112,26 @@ objfn <- function(x, targets = coef.nlsfit) {
 }
 objfn(start)
 with(c(as.list(start),as.list(coef.nlsfit)), (R0-1)/(2*omega/gamma))
-if (requireNamespace("nleqslv")) {
-    out <- nleqslv::nleqslv(x = start, objfn)
-}
+out <- nleqslv::nleqslv(x = start, objfn)
 out$x
 (Tinf.weeks <- unname(1/out$x["gamma"]))
 @
 
 Quick and dirty confidence regions (samples): this takes about 22 seconds on my machine)
 <<samples, cache=TRUE>>=
-if (requireNamespace("nleqslv")) {
-    set.seed(101)
-    csamples <- MASS::mvrnorm(10000, mu = coef.nlsfit,
-                              Sigma = vcov(nlsfit))
-    fitfun <- function(t) {
-        res <- suppressWarnings(
-            try(nleqslv::nleqslv(x = start, objfn, targets = t)$x,
-                silent = TRUE)
-        )
-        if (inherits(res, "try-error")) return(rep(NA_real_, 3))
-        return(res)
-    }
-    psamples <- t(apply(csamples, 1, fitfun))
-    colnames(psamples) <- names(out$x)
+set.seed(101)
+csamples <- MASS::mvrnorm(10000, mu = coef.nlsfit,
+                          Sigma = vcov(nlsfit))
+fitfun <- function(t) {
+    res <- suppressWarnings(
+        try(nleqslv::nleqslv(x = start, objfn, targets = t)$x,
+            silent = TRUE)
+    )
+    if (inherits(res, "try-error")) return(rep(NA_real_, 3))
+    return(res)
+}
+psamples <- t(apply(csamples, 1, fitfun))
+colnames(psamples) <- names(out$x)
 @
 
 ?? R and gamma look overly narrow, I0 is ridiculously wide
@@ -142,7 +139,7 @@ The MVN/Wald assumption may be terrible.  There a bunch of possible
 options (reparameterization, importance sampling, parametric bootstrap ...)
 but I'm not sure it's worth going down the rabbit hole?
 
-<<>>=
+<<psample_quantiles>>=
 t(apply(psamples, 2, quantile, c(0.025, 0.975), na.rm = TRUE))
 @ 
 
