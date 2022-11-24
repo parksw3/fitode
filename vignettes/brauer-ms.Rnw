@@ -82,9 +82,9 @@
   problems.  He was curious to know how one goes about fitting
   dynamical models to data, and why it can be hard.  Initially in
   response to Fred's questions, we developed a user-friendly
-  \texttt{R} package that facilitates fitting ordinary differential
+  \code{R} package that facilitates fitting ordinary differential
   equations to observed time series.  Here, we exploit the package
-  (\texttt{fitode}) to provide a brief tutorial introduction to
+  (\code{fitode}) to provide a brief tutorial introduction to
   fitting compartmental epidemic models to a single observed time
   series.  We assume that, similar to Fred, the reader is familiar
   with dynamical systems from a mathematical perspective, but has
@@ -94,7 +94,7 @@
 
 \begin{keywords}
   epidemic models; infectious diseases; ordinary differential
-  equations; parameter estimation; maximum likelihood; \texttt{fitode}
+  equations; parameter estimation; maximum likelihood; \code{fitode}
 \end{keywords}
 
 \section{Introduction}
@@ -217,7 +217,7 @@ their parameter estimates were obtained.  \djde{When was least-squares
 process, they must have engaged in some sort of \term{trajectory
   matching}, i.e., adjusting parameter values until the
 model---equation~\eqref{eq:sech} in their case---is, by some measure,
-as close as possible to the observed data points.  The most obvious
+close to the observed data points.  The most obvious
 metric for this purpose is the Euclidean distance between the model
 curve and the data.  Thus, the \term{objective function} that is
 natural to minimize is
@@ -234,6 +234,7 @@ respect to $\boldbeta$ would have required some heroic arithmetic
 with a pencil and paper in 1927, but it is a simple task with the
 aid of a computer.
 
+
 In the following segment of R code, we fit equation \eqref{eq:sech} to
 the Bombay plague data (which are built in to the \code{fitode}
 package that we describe below, as a data frame with columns
@@ -242,9 +243,10 @@ function (\code{nls}), which attempts to minimize the distance
 \eqref{eq:leastsquares} to the data, starting from an initial guess
 (\code{start}).
 
-<<nls.bombay>>=
+<<nls_bombay>>=
 sech <- function(x) {1/cosh(x)}
-KM_approx <- function(t, a, omega, phi) {a * sech(omega*t - phi)^2}
+## (t-1) because our time starts from 1; K&M matches best starting from t=0
+KM_approx <- function(t, a, omega, phi) {a * sech(omega*(t-1) - phi)^2}
 KM.parameters <- c(a = 890, omega = 0.2, phi = 3.4)
 nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
               data = fitode::bombay,
@@ -274,7 +276,7 @@ at the plotted observed data.  \djde{We could ``guess'' a value of
   $t\to-\infty$, so we could estimate $\omega$ as the slope of
   $\log(y_i/2)$\dots a little hard to do by eye from the data plot.}
 
-<<nls.bombay.2>>=
+<<nls_bombay_2>>=
 a.guess <- 1000
 tpeak.guess <- 15
 omega.guess <- 0.1
@@ -293,7 +295,8 @@ a \code{singular gradient} error.
 
 More interesting is that
 $a=500$, $\tpeak=5$, $\omega=0.1$ yields
-$a=869$, $\omega=-0.19$, $\phi=-3.48$
+$a=869$, $\omega=-0.19$, $\phi=-3.48$.
+%% BMB: can we automate this some more?
 
 This illustrates a very important fact: there is not necessarily a unique
 best fit set of parameters!  In this case, this alternative solution
@@ -305,20 +308,21 @@ If you know that your parameters should be in a certain range, then you
 can pass that information to \code{nls}.  For example, to ensure
 that all the parameters are non-negative, you would add the option
 
-<<eval=FALSE>>=
+<<lower, eval=FALSE>>=
 lower = c(a = 0, omega = 0, phi = 0)
 @
 
-<<KM fitted values, echo=FALSE>>=
-a.KM <- KM.parameters["a"]
-omega.KM <- KM.parameters["omega"]
-phi.KM <- KM.parameters["phi"]
+<<KM_fitted_values, echo=FALSE>>=
+parnames <- c("a", "omega", "phi")
+for (p in parnames) {
+    assign(paste0(p, ".KM"), KM.parameters[[p]])
+}
 tpeak.KM <- phi.KM / omega.KM
 f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
 @
 
 \begin{figure}
-<<Bombayfigure, echo=FALSE>>=
+<<Bombay_figure, echo=FALSE>>=
 tmax <- 33
 tvals <- seq(0,tmax,length=1000)
 col.KM <- "#E41A1C"
@@ -336,12 +340,18 @@ lwd <- 3
 bombay_plot()
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=19)
 lines(tvals, f(tvals), lwd=lwd, xpd=NA, col=col.KM)
-a <- fitted.parameters["a"]
-omega <- fitted.parameters["omega"]
-phi <- fitted.parameters["phi"]
-tpeak <- phi/omega
+
+for (p in parnames) {
+    assign(paste0(p, ".us"), fitted.parameters[[p]])
+}
+cc <- suppressMessages(confint(nlsfit))
+for (p in parnames) {
+    assign(paste0(p,".lwr"), cc[p, "2.5%"])
+    assign(paste0(p,".upr"), cc[p, "97.5%"])
+}
+tpeak <- phi.us/omega.us
 dig <- 3 # number of significant digits for printing
-lines(tvals, KM_approx(tvals, a=a, omega=omega, phi=phi),
+lines(tvals, KM_approx(tvals, a=a.us, omega=omega.us, phi=phi.us),
       xpd=NA, lwd=lwd, col=col.us)
 legend("topleft", bty="n", lwd=lwd, col=c(col.KM,col.us),
        legend=c("KM","us"))
@@ -359,19 +369,33 @@ legend("topleft", bty="n", lwd=lwd, col=c(col.KM,col.us),
 likelihood in this case}
 
 \djde{What is the standard way to get CIs on the parameters and confidence
-  bands on the fit from the \texttt{nlsfit} object?}
+  bands on the fit from the \code{nlsfit} object?} \bmb{\code{confint()} for CIs on parameters (now implemented). CIs on predictions are harder. \code{fitode()} has built-in methods, not very well documented in \code{help("predict,fitode-method")}; for \code{nls} the \code{propagate} package works, but is doing some pretty fancy stuff (simulation plus higher-than-second-order Taylor expansions, I think)}
 
 \djde{What is the best way to invert the parameter relationships in
   \eqref{eq:sechparams} to get $\beta$ and $\gamma$?  And how should
-  we compute CIs for the derived parameters?  Delta method?}
+  we compute CIs for the derived parameters?  Delta method?} \bmb{some combination of Delta method and ??; see epidemics vignette}
 
 \djde{We must comment on whether the estimated $\beta$ and $\gamma$
   are actually reasonable given what we know about pneumonic plague,
   e.g., from Gani and Leach \cite{GaniLeac04}.
   But also note KM's caution about interpreting the param values.}
+\bmb{This comment? ``None of these assumptions are strictly fulfilled and consequently the numerical equation
+can only be a very rough approximation. A close fit is not to be expected, and deductions
+as to the actual values of the various constants should not be drawn. It may be said,
+however, that the calculated curve, which implies that the rates did not vary during the
+period of the epidemic, conforms roughly to the observed figure.''  As \cite{bacaermodel2012} points out,
+the fit of the curve to the data does \emph{not} necessary imply that the rates were constant \ldots}
+
 
 \djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is
 likely to be much better than fitting the initial condition $I_0$.}
+
+<<fmt_CI, echo=FALSE>>=
+ci_fmt  <- function(p) (format(cc[p,], digits = 2)
+    |> paste(collapse = ", ")
+    |> sprintf(fmt = "(%s)")
+)
+@
 
 \begin{table}
   \begin{center}
@@ -388,11 +412,11 @@ likely to be much better than fitting the initial condition $I_0$.}
     \bfseries Estimated parameter & \bfseries symbol & \bfseries units
     & \bfseries KM & \bfseries us & \bfseries 95\% CI \\\hline
     peak removal rate & $a$ & 1/weeks & \Sexpr{a.KM} &
-      \Sexpr{signif(a,dig)} & (,)\\
+      \Sexpr{signif(a.us,dig)} & \Sexpr{ci_fmt("a")} \\
     outbreak speed & $\omega$ & 1/weeks &
-      \Sexpr{omega.KM} & \Sexpr{signif(omega,dig-1)} & (,) \\
+      \Sexpr{omega.KM} & \Sexpr{signif(omega.us, dig-1)} &  \Sexpr{ci_fmt("omega")} \\
     outbreak centre & $\phi$ & -- & \Sexpr{phi.KM} &
-      \Sexpr{signif(phi,dig)} & (,) \\
+      \Sexpr{signif(phi.us, dig)} &  \Sexpr{ci_fmt("phi")} \\
     \noalign{\vspace{10pt}}
     \bfseries Derived parameter \\\hline
     peak time & $\tpeak = {\phi}/{\omega}$ & weeks &
@@ -412,7 +436,7 @@ likely to be much better than fitting the initial condition $I_0$.}
 
 \subsection*{Things to mention}
 
-application of \texttt{fitsir} to song downloads, and how we
+application of \code{fitsir} to song downloads, and how we
 convinced ourselves that the SIR model was reasonable for that
 problem \cite{Rosa+21}.
 
