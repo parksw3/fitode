@@ -48,6 +48,8 @@ Data from Kermack and McKendrick:
 <<pdata>>=
 library(ggplot2); theme_set(theme_bw())
 library(fitode)
+library(propagate)
+library(nleqslv)
 plot(bombay)
 @
 
@@ -61,26 +63,31 @@ KM suggested that deaths correspond to $\frac{dR}{dt}$ in the SIR model with fol
 
 <<>>==
 plot(bombay)
-curve(890 * 1/cosh(0.2 * (x-1) - 3.4)^2, add=TRUE)
+curve(890 * 1/cosh(0.2 * x - 3.4)^2, add=TRUE)
 @
 
 This gives a pretty good fit.
 
-<<nlsfit, message=FALSE, cache=TRUE>>==
-nlsfit <- nls(mort ~ a/cosh(b * (week - 1) - c)^2, data=bombay,
-              start = list(a = 890, b=0.2, c=3.4))
-if (requireNamespace("propagate")) {
-    pp <- propagate::predictNLS(nlsfit)
-}
+<<nlsfit>>==
+nlsfit <- nls(mort ~ a/cosh(omega * (week - 1) - phi)^2, data=bombay,
+              start = list(a = 890, omega=0.2, phi=3.4))
+pp <- NULL
+@
+
+Compute prediction errors (slow)
+<<propagate, message=FALSE, cache=TRUE>>=
+pp <- propagate::predictNLS(nlsfit)
 @
 
 Even better fits:
-<<>>==
+<<better_fits>>==
 plot(bombay)
-curve(coef(nlsfit)[1] * 1/cosh(coef(nlsfit)[2] * (x -1 ) - coef(nlsfit)[3])^2, add=TRUE)
-matlines(bombay$week, pp$summary[,c("Prop.2.5%", "Prop.97.5%")],
-         col = 1, lty = 2)
-curve(890 * 1/cosh(0.2 * (x-1) - 3.4)^2, add=TRUE, col = 2)
+curve(coef(nlsfit)[1] * 1/cosh(coef(nlsfit)[2] * x - coef(nlsfit)[3])^2, add=TRUE)
+if (!is.null(pp)) {
+    matlines(bombay$week, pp$summary[,c("Prop.2.5%", "Prop.97.5%")],
+             col = 1, lty = 2)
+}
+curve(890 * 1/cosh(0.2 * x - 3.4)^2, add=TRUE, col = 2)
 @
 
 With very similar parameters:
@@ -90,26 +97,50 @@ coef(nlsfit)
 
 But we can't interpret any of the model parameters.
 
-<<match_KM, eval = FALSE>>=
+<<match_KM>>=
 S0 <- 100000
-start <- c(R = 2, I0 = 1, gamma = 0.2)
+start <- c(R0 = 2, I0 = 1, gamma = 0.2)
 coef.nlsfit <- coef(nlsfit)
 names(coef.nlsfit) <- c("a","omega","phi")
 objfn <- function(x, targets = coef.nlsfit) {
     with(c(as.list(x),as.list(targets)),
     {
-        c(gamma/2*sqrt((R-1)^2 + 2*I0/S0*R^2) - omega,
-          atanh((R-1)/(2*omega/gamma)) - phi,
-          S0/R*omega - a)
+        c(gamma/2*sqrt((R0-1)^2 + 2*I0/S0*R0^2) - omega,
+          atanh((R0-1)/(2*omega/gamma)) - phi,
+          S0/R0*omega - a)
     })
 }
 objfn(start)
-with(c(as.list(start),as.list(coef.nlsfit)), (R-1)/(2*omega/gamma))
-if (requireNamespace("nleqslv")) {
-    out <- nleqslv::nleqslv(x = start, objfn)
-}
+with(c(as.list(start),as.list(coef.nlsfit)), (R0-1)/(2*omega/gamma))
+out <- nleqslv::nleqslv(x = start, objfn)
 out$x
 (Tinf.weeks <- unname(1/out$x["gamma"]))
+@
+
+Quick and dirty confidence regions (samples): this takes about 22 seconds on my machine)
+<<samples, cache=TRUE>>=
+set.seed(101)
+csamples <- MASS::mvrnorm(10000, mu = coef.nlsfit,
+                          Sigma = vcov(nlsfit))
+fitfun <- function(t) {
+    res <- suppressWarnings(
+        try(nleqslv::nleqslv(x = start, objfn, targets = t)$x,
+            silent = TRUE)
+    )
+    if (inherits(res, "try-error")) return(rep(NA_real_, 3))
+    return(res)
+}
+psamples <- t(apply(csamples, 1, fitfun))
+colnames(psamples) <- names(out$x)
+@
+
+?? R and gamma look overly narrow, I0 is ridiculously wide
+The MVN/Wald assumption may be terrible.  There a bunch of possible
+options (reparameterization, importance sampling, parametric bootstrap ...)
+but I'm not sure it's worth going down the rabbit hole?
+
+<<psample_quantiles>>=
+t(apply(psamples, 2, quantile, c(0.025, 0.975), na.rm = TRUE))
 @ 
 
 \subsection{SIR model}
