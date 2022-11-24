@@ -97,7 +97,7 @@ coef(nlsfit)
 
 But we can't interpret any of the model parameters.
 
-<<match_KM, eval = FALSE>>=
+<<match_KM>>=
 S0 <- 100000
 start <- c(R0 = 2, I0 = 1, gamma = 0.2)
 coef.nlsfit <- coef(nlsfit)
