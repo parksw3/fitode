@@ -245,8 +245,7 @@ function (\code{nls}), which attempts to minimize the distance
 
 <<nls_bombay>>=
 sech <- function(x) {1/cosh(x)}
-## (t-1) because our time starts from 1; K&M matches best starting from t=0
-KM_approx <- function(t, a, omega, phi) {a * sech(omega*(t-1) - phi)^2}
+KM_approx <- function(t, a, omega, phi) {a * sech(omega*t - phi)^2}
 KM.parameters <- c(a = 890, omega = 0.2, phi = 3.4)
 nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
               data = fitode::bombay,
