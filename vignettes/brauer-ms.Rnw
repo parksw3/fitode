@@ -257,7 +257,7 @@ nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
 Above, we chose as our starting guess the fitted parameter values of
 Kermack and McKendrick (see Table~\ref{tab:Bombay}), and found that
 the least squares parameter values differ from KM's by a few percent.
-Our least squares fitted function is show in blue in
+Our least squares fitted function is shown in blue in
 Figure~\ref{fig:Bombay}.
 
 Starting from someone else's fit is not a great way to test the
@@ -308,6 +308,8 @@ that all the parameters are non-negative, you would add the option
 <<eval=FALSE>>=
 lower = c(a = 0, omega = 0, phi = 0)
 @ 
+
+which would prevent convergence to negative $\omega$ and $\phi$.
 
 <<KM fitted values, echo=FALSE>>=
 a.KM <- KM.parameters["a"]
