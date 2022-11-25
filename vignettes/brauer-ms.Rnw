@@ -250,13 +250,19 @@ nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
               data = fitode::bombay,
               start = KM.parameters)
 (fitted.parameters <- coef(nlsfit))
+@ 
+
+\noindent
+Above, we chose as our starting guess the fitted parameter values of
+Kermack and McKendrick (see Table~\ref{tab:Bombay}).  The least
+squares parameter values differ from KM's by a few percent:
+
+<<percent.diff>>=
 (percent.difference <- 100*(KM.parameters - fitted.parameters)
                            /fitted.parameters)
 @ 
 
-Above, we chose as our starting guess the fitted parameter values of
-Kermack and McKendrick (see Table~\ref{tab:Bombay}), and found that
-the least squares parameter values differ from KM's by a few percent.
+\noindent
 Our least squares fitted function is shown in blue in
 Figure~\ref{fig:Bombay}.
 
@@ -269,14 +275,17 @@ equation~\eqref{eq:sech}, it is useful to note that $a$ is the maximum
 of the function~\eqref{eq:sech}, and if write $\omega t - \phi$ as
 $\omega(t-\tpeak)$ then $\tpeak$ is the time at which the maximum
 occurs; both $a$ and $\tpeak$ can be guessed approximately by looking
-at the plotted observed data.  \djde{We could ``guess'' a value of
-  $\omega$ by noting that $\sech^2{(\omega t)}\to e^{2\omega t}$ as
-  $t\to-\infty$, so we could estimate $\omega$ as the slope of
-  $\log(y_i/2)$\dots a little hard to do by eye from the data plot.}
+at the plotted observed data, and a very rough guess is sufficient
+converge on the same fit:
+%%
+\djde{We could ``guess'' a value of $\omega$ by noting that
+  $\sech^2{(\omega t)}\to e^{2\omega t}$ as $t\to-\infty$, so we could
+  estimate $\omega$ as the slope of $\log(y_i/2)$\dots a little hard
+  to do by eye from the data plot.}
 
 <<nls.bombay.2>>=
-a.guess <- 1000
-tpeak.guess <- 15
+a.guess <- 1000    # crude "by eye" estimate of peak value
+tpeak.guess <- 15  # crude "by eye" estimate of peak time
 omega.guess <- 0.1
 phi.guess <- omega.guess * tpeak.guess
 nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
@@ -286,29 +295,28 @@ nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
 (fitted.parameters <- coef(nlsfit))
 @ 
 
-If you experiment with initial guesses, you will find that if you make
-a sufficiently bad guess, then \code{nls} will fail.  e.g.,
-$a=2000$, $\tpeak=5$, $\omega=0.1$ yields
-a \code{singular gradient} error.
+However, if you experiment with initial guesses, you will find that if
+you make a sufficiently \emph{bad} guess, then \code{nls} will fail.
+For example, starting from $a=2000$, $\tpeak=5$, and $\omega=0.1$
+yields a \code{singular gradient} error.  More interestingly, starting
+from $a=500$, $\tpeak=5$, and $\omega=0.1$ yields $a=869$,
+$\omega=-0.19$, $\phi=-3.48$, which is far from our fitted values and
+illustrates a very important fact: there is \emph{not necessarily a
+  unique best fit set of parameters!}  In this case, the alternative
+solution exists because $\sech^2(x)$ is symmetric about the $y$ axis, but
+in general, there can be many local minima that cause \code{nls} to
+converge to points that may or may not be equally good.
 
-More interesting is that
-$a=500$, $\tpeak=5$, $\omega=0.1$ yields
-$a=869$, $\omega=-0.19$, $\phi=-3.48$
-
-This illustrates a very important fact: there is not necessarily a unique
-best fit set of parameters!  In this case, this alternative solution
-exists because $\sech^2$ is symmetric about the $y$ axis, but in
-general, there can be many local minima that cause \code{nls} to
-converge, and may not in general be equally good.
-
-If you know that your parameters should be in a certain range, then you
-can pass that information to \code{nls}.  For example, to ensure
-that all the parameters are non-negative, you would add the option
+If you know that your parameters should be in a certain range, then
+you can pass that information to \code{nls}.  For example, to ensure
+that all the parameters are non-negative (and exclude the alternative
+fit above), you would add the \code{nls} option
 
 <<eval=FALSE>>=
 lower = c(a = 0, omega = 0, phi = 0)
 @ 
 
+\noindent
 which would prevent convergence to negative $\omega$ and $\phi$.
 
 <<KM fitted values, echo=FALSE>>=
