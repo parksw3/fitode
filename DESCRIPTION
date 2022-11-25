@@ -25,6 +25,7 @@ Imports:
 Suggests:
     knitr,
     ggplot2,
+    nleqslv,
     propagate,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
