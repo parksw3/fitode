@@ -33,6 +33,7 @@
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{lineno}\renewcommand\thelinenumber{\color{gray}\arabic{linenumber}}
+\usepackage{placeins}
 \newcommand{\thickredline}{{\color{red}\bigskip\begin{center}\linethickness{2mm}\line(1,0){250}\end{center}\bigskip}}
 \newcommand{\bmb}[1]{{\color{red}$\langle$\emph{BMB: #1}$\rangle$}}
 \newcommand{\swp}[1]{{\color{blue}$\langle$\emph{SWP: #1}$\rangle$}}
@@ -47,6 +48,8 @@
 \newcommand{\R}{{\mathcal R}}
 \newcommand{\Tg}{T_{\rm g}}
 \newcommand{\Reff}{\R_{\rm e}}
+\usepackage{xspace}
+\newcommand{\KM}{KM\xspace}
 \usepackage{bm} % bold math
 \newcommand{\boldbeta}{\bm{\beta}}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
@@ -99,7 +102,7 @@
 
 \section{Introduction}
 
-In their landmark 1927 paper, Kermack and McKendrick
+In their landmark 1927 paper, Kermack and McKendrick (KM)
 \cite[p.\,713]{KermMcKe27} introduced the now-standard
 susceptible-infected-removed (SIR) epidemic model,
 \begin{linenomath*}
@@ -114,26 +117,26 @@ susceptible-infected-removed (SIR) epidemic model,
   \end{subequations}
 \end{linenomath*}
 where $S$, $I$ and $R$ represent the numbers of individuals who are
-susceptible, infected or removed\footnote{In the words of Kermack and
-  McKendrick \cite[p.\,701]{KermMcKe27}, ``removed from the number of
-  those who are sick, by recovery or by death''.}, $\beta$ is the
-transmission rate, and $\gamma$ is the recovery rate.  In that
-original paper, Kermack and McKendrick \cite[p.\,714]{KermMcKe27} also
-fit their model to plague mortality data from an epidemic in Bombay
-that occurred about 20 years before their paper was written.
+susceptible, infected or removed\footnote{In the words of \KM
+  \cite[p.\,701]{KermMcKe27}, ``removed from the number of those who
+  are sick, by recovery or by death''.}, $\beta$ is the transmission
+rate, and $\gamma$ is the recovery rate.  In that original paper,
+\KM \cite[p.\,714]{KermMcKe27} also fit their model
+to plague mortality data from an epidemic in Bombay (now Mumbai) that
+occurred about 20 years before their paper was written.
 
-In the century that has elapsed since publication of Kermack and
-McKendrick's initial paper, the field of mathematical epidemiology has
-expanded and matured, and has been the subject of many books
+In the century that has elapsed since publication of \KM's initial
+paper, the field of mathematical epidemiology has expanded and
+matured, and has been the subject of many books
 \cite{Bart60,Bail75,AndeMay91,AndeBrit00b,DiekHees00,BrauCast01,Brau+19}
 and review articles \cite{Heth00,Earn+02,Earn09}.  The focus has
 tended to be on \term{compartmental models} like the SIR model, cast
-either as differential equations following the tradition of Kermack
-and McKendrick \cite{KermMcKe27}, or as \term{stochastic processes} in
-the tradition of Bartlett \cite{Bart60}.  In recent years, as the
-power of computers has grown exponentially, there has been increasing
-interest in \term{agent-based models}\needref, which represent each
-individual as a separate unit that can have unique properties.
+either as differential equations following the tradition of \KM
+\cite{KermMcKe27}, or as \term{stochastic processes} in the tradition
+of Bartlett \cite{Bart60}.  In recent years, as the power of computers
+has grown exponentially, there has been increasing interest in
+\term{agent-based models}\needref, which represent each individual as
+a separate unit that can have unique properties.
 
 Throughout the history of the subject, and regardless of the modelling
 frameworks they have exploited, mathematical epidemiologists have
@@ -170,21 +173,19 @@ Fred's memory.
 
 \section{Kermack and McKendrick's fit}
 
-We begin by revisiting Kermack and McKendrick's \cite{KermMcKe27}
+We begin by revisiting \KM's \cite{KermMcKe27}
 application of their SIR model \eqref{eq:SIR} to the epidemic of
 plague in Bombay in 1905--1906.  The observed data (black dots in
 Figure~\ref{fig:Bombay}) were weekly numbers of deaths from plague.
 
-Referring to their version of Figure~\ref{fig:Bombay}, Kermack and
-McKendrick \cite[p.\,714]{KermMcKe27} argued that ``As at least 80 to
-90 per cent.\ of the cases reported terminate fatally, the ordinate
-may be taken as approximately representing [$\dbydt{R}$] as a function
-of $t$.''  Since computers did not yet exist, and an exact analytical
-form for this function could not be found, they proceeded to 
-assume \cite[p.\,713]{KermMcKe27}
-that $\frac{\beta}{\gamma}R(t)\ll1$, which yields
-the
-approximate analytical form,
+Referring to their version of Figure~\ref{fig:Bombay}, \KM
+\cite[p.\,714]{KermMcKe27} argued that ``As at least 80 to 90 per
+cent.\ of the cases reported terminate fatally, the ordinate may be
+taken as approximately representing [$\dbydt{R}$] as a function of
+$t$.''  Since computers did not yet exist, and an exact analytical
+form for this function could not be found, they proceeded to assume
+\cite[p.\,713]{KermMcKe27} that $\frac{\beta}{\gamma}R(t)\ll1$, which
+yields the approximate analytical form,
 \begin{linenomath*}
 \begin{equation}\label{eq:sech}
 \ddt{R} \simeq a \sech^2{(\omega\,t - \phi)} \,,
@@ -210,7 +211,7 @@ KM column of Table~\ref{tab:Bombay}, and they plotted their
 Figure~\ref{fig:Bombay}.  
 
 The red curve does appear to provide a reasonable fit to the data, but
-Kermack and McKendrick \cite{KermMcKe27} gave no indication of how
+\KM \cite{KermMcKe27} gave no indication of how
 their parameter estimates were obtained.  \djde{When was least-squares
   trajectory matching first done?  Do we think they did that?  or just
   played with parameter values and fitted by eye?}  Whatever their
@@ -228,7 +229,7 @@ natural to minimize is
 \end{linenomath*}
 where the observed data are the points $\{(t_i,y_i):i=1,\ldots,n\}$,
 $f(t;\boldbeta)$ is the model \eqref{eq:sech}, and the parameter
-vector for Kermack and McKendrick's problem is
+vector for \KM's problem is
 $\boldbeta=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
 respect to $\boldbeta$ would have required some heroic arithmetic
 with a pencil and paper in 1927, but it is a simple task with the
@@ -254,7 +255,7 @@ nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
 
 \noindent
 Above, we chose as our starting guess the fitted parameter values of
-Kermack and McKendrick (see Table~\ref{tab:Bombay}).  The least
+\KM (see Table~\ref{tab:Bombay}).  The least
 squares parameter values differ from KM's by a few percent:
 
 <<percent.diff>>=
@@ -318,6 +319,9 @@ lower = c(a = 0, omega = 0, phi = 0)
 
 \noindent
 which would prevent convergence to negative $\omega$ and $\phi$.
+In general, the potential existence of multiple local optima is something
+that makes fitting models to data hard, and you need to be cautious in
+interpretting any fit to which your fitting algorithm has converged.
 
 <<KM fitted values, echo=FALSE>>=
 a.KM <- KM.parameters["a"]
@@ -328,7 +332,7 @@ f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
 @ 
 
 \begin{figure}
-<<Bombayfigure, echo=FALSE>>=
+<<Bombayfigure, echo=FALSE, fig.height=5>>=
 tmax <- 33
 tvals <- seq(0,tmax,length=1000)
 col.KM <- "#E41A1C"
@@ -365,6 +369,49 @@ legend("topleft", bty="n", lwd=lwd, col=c(col.KM,col.us),
 \label{fig:Bombay}
 \end{figure}
 
+If we accept our fit as satisfactory, what can we infer about the
+dynamics of plague that KM were attempting to capture with the SIR
+model \eqref{eq:SIR}?  We need to convert the parameters of KM's
+approximation \eqref{eq:sechparams} back to the original parameters
+that are directly related to the mechanism of disease spread that the
+model formalizes (i.e., $\beta$ and $\gamma$, and initial conditions
+$S_0$ and $I_0$).
+
+\FloatBarrier
+
+The nonlinear algebraic relationships specified by
+equation~\eqref{eq:sechparams} cannot be inverted analytically, so we
+need to do it numerically.  Unsurprisingly, there is an R package for
+this kind of nonlinear algebraic inversion (\code{nleqslv}), which we
+can use to write a function to invert equation~\eqref{eq:sechparams}:
+
+<<invert nonlinear equations>>=
+omega_fun <- function(Reff, gamma, S0, I0)
+    {(gamma/2)*sqrt((Reff-1)^2+(2*I0/S0)*Reff^2)}
+phi_fun <- function(Reff, gamma, S0, I0)
+    {atanh((Reff-1)/(2*omega_fun(Reff,gamma,S0,I0)/gamma))}
+a_fun <- function(Reff, gamma, S0, I0)
+    {(S0/Reff)*omega_fun(Reff,gamma,S0,I0)}
+objective_fun <- function(x, targets) {
+    with(c(as.list(x),as.list(targets)), {
+        c(omega_fun(Reff,gamma,S0,I0) - omega,
+          phi_fun(Reff,gamma,S0,I0) - phi,
+          a_fun(Reff,gamma,S0,I0) - a)
+    })
+}
+find_orig_params <- function(orig.params.guess, fitted.params) {
+    f <- function(x) objective_fun(x, targets=fitted.params)
+    out <- nleqslv::nleqslv(x = orig.params.guess, fn = f)$x
+    return(c(out, S0=S0, beta=out[["Reff"]]*out[["gamma"]]/S0,
+             Tg=1/out[["gamma"]]))
+}
+Npop <- 10^6 # Bombay population in 1900
+S0 <- Npop - 1
+(orig.params.guess <- c(Reff=2, gamma=0.2, I0=Npop-S0))
+(objective_fun(x = orig.params.guess, targets = coef(nlsfit)))
+(orig.params <- find_orig_params(orig.params.guess, fitted.params=coef(nlsfit)))
+@ 
+
 \djde{explain normal CIs from least squares and how least squares is max
 likelihood in this case}
 
@@ -385,7 +432,7 @@ likely to be much better than fitting the initial condition $I_0$.}
 
 \begin{table}
   \begin{center}
-    \caption{Parameters of Kermack and McKendrick's \cite{KermMcKe27}
+    \caption{Parameters of \KM's \cite{KermMcKe27}
       approximation \eqref{eq:sech} to the SIR model \eqref{eq:SIR},
       as estimated by them \cite{KermMcKe27} and by us (including 95\%
       confidence intervals).
@@ -438,7 +485,7 @@ model (despite the nice historical connection with K\&M
 \cite{KermMcKe27}):
 \begin{quote}
 ``So the 1906 epidemic is clearly not a good example of epidemic stopping because the number of susceptible humans has decreased under a
-threshold, as suggested by Kermack and McKendrick, but an example of
+threshold, as suggested by \KM, but an example of
 epidemic driven by seasonality.'' \cite{bacaermodel2012}
 \end{quote}
 
