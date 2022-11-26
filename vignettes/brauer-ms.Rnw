@@ -283,6 +283,7 @@ converge on the same fit:
   $\sech^2{(\omega t)}\to e^{2\omega t}$ as $t\to-\infty$, so we could
   estimate $\omega$ as the slope of $\log(y_i/2)$\dots a little hard
   to do by eye from the data plot.}
+  \swp{seems like an overkill to me. I don't think it hurts to say that we just chose 0.1}
 
 <<nls.bombay.2>>=
 a.guess <- 1000    # crude "by eye" estimate of peak value
@@ -318,7 +319,7 @@ lower = c(a = 0, omega = 0, phi = 0)
 @ 
 
 \noindent
-which would prevent convergence to negative $\omega$ and $\phi$.
+which would prevent convergence to negative $\omega$ and $\phi$. \swp{Is this a good place to introduce link functions? Or too early? Or at least hint at it?  Example text:} \swp{Instead, we can also estimate the parameters on the log scale and convert them back to the the original scale by exponentiating the estimated parameters. This would allow parameter estimation to happen on an unconstrained scale (between negative infinity and infinity), providing a more stable fitting. As we discuss later, we can use \textbf{link functions} to convert parameters with constraints to unconstrained scales for more general cases.}
 In general, the potential existence of multiple local optima is something
 that makes fitting models to data hard, and you need to be cautious in
 interpretting any fit to which your fitting algorithm has converged.
