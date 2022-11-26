@@ -201,7 +201,7 @@ number at time $t=0$)
   \phi &= \textrm{arctanh}\left(\frac{\Reff - 1}{2\omega/\gamma}
          \right)\,, \\
   \text{and}\quad
-  a &= \frac{4 \omega^2 I_0}{2 \gamma  R_e^2}  \,.
+  a &=  \frac{S_0}{\Reff^2}\,\omega  \,.
 \end{align}
 \end{subequations}
 \end{linenomath*}
