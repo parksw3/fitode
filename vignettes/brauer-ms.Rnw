@@ -384,19 +384,32 @@ $S_0$ and $I_0$).
 The nonlinear algebraic relationships specified by
 equation~\eqref{eq:sechparams} can be inverted analytically following \cite{bacaermodel2012}. But since we have four variables ($I(0)$, $S(0)$, $\beta$, and $\gamma$) and are only given three parameters ($a$, $\omega$, and $\phi$), we begin by assuming $I(0) = 1$.
 
+\begin{linenomath*}
+\begin{subequations}\label{eq:invertparams}
+\begin{align}
+  \Reff &= \frac{1}{2}\bigg( 1 +
+          \sqrt{1 + \frac{4\,\omega\,I_0 \sinh\!{(2\phi)}}{a}}\bigg) \,, \\
+  \gamma &= \frac{2\,\omega\tanh{\phi}}{\Reff-1} \\
+  S_0 &= \frac{2\,\Reff\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} \\ % Bacaer eq. (3)
+  \beta &= \frac{\Reff\gamma}{S_0} \\
+  \Tg & = \frac{1}{\gamma}
+\end{align}
+\end{subequations}
+\end{linenomath*}
+
 <<invert KM analytically>>=
-invertpar <- function(I0, param) {
-    with(as.list(param), {
+invert_params <- function(I0, params) {
+    with(as.list(params), {
         Reff <- (1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2
 	q <- (Reff-1)/tanh(phi)
 	gamma <- 2 * omega/q ## gamma has a unit of 1/week
 	S0 <- 2 * Reff * I0 * sinh(phi)^2/(Reff - 1)^2
 	beta <- Reff * gamma/S0
-
+        ## express Tg in days:
 	c(Reff=Reff, S0=S0, Tg=7/gamma, beta=beta)
     })
 }
-invertpar(1, coef(nlsfit))
+invert_params(I0 = 1, params = coef(nlsfit))
 @
 
 \swp{old text:} so we
