@@ -384,7 +384,13 @@ The nonlinear algebraic relationships specified by
 equation~\eqref{eq:sechparams} cannot be inverted analytically, so we
 need to do it numerically.  Unsurprisingly, there is an R package for
 this kind of nonlinear algebraic inversion (\code{nleqslv}), which we
-can use to write a function to invert equation~\eqref{eq:sechparams}:
+can use to write a function to invert equation~\eqref{eq:sechparams}.
+\swp{The problem is that we're assuming S0 = 1e6 - 1. We can't do this.
+We need much lower S0 to fit the data. So by assuming a very large S0,
+things go crazy.  So we're better off startng with assuming I0 = 1 and
+assuming the rest. That's the whole point of Bacaer's paper: that the
+required S0 to fit the data is so low that the standard SIR model is
+actually not appropriate for modeling the bombay epidemic}
 
 <<invert nonlinear equations>>=
 omega_fun <- function(Reff, gamma, S0, I0)
@@ -392,7 +398,7 @@ omega_fun <- function(Reff, gamma, S0, I0)
 phi_fun <- function(Reff, gamma, S0, I0)
     {atanh((Reff-1)/(2*omega_fun(Reff,gamma,S0,I0)/gamma))}
 a_fun <- function(Reff, gamma, S0, I0)
-    {(S0/Reff)*omega_fun(Reff,gamma,S0,I0)}
+    {(S0/Reff^2)*omega_fun(Reff,gamma,S0,I0)}
 objective_fun <- function(x, targets) {
     with(c(as.list(x),as.list(targets)), {
         c(omega_fun(Reff,gamma,S0,I0) - omega,
@@ -406,9 +412,8 @@ find_orig_params <- function(orig.params.guess, fitted.params) {
     return(c(out, S0=S0, beta=out[["Reff"]]*out[["gamma"]]/S0,
              Tg=1/out[["gamma"]]))
 }
-Npop <- 10^6 # Bombay population in 1900
-S0 <- Npop - 1
-(orig.params.guess <- c(Reff=2, gamma=0.2, I0=Npop-S0))
+I0 <- 1
+(orig.params.guess <- c(Reff=2, gamma=0.2, S0=1e6)) ## where 1e6 is the population size of bombay at 1990
 (objective_fun(x = orig.params.guess, targets = coef(nlsfit)))
 (orig.params <- find_orig_params(orig.params.guess, fitted.params=coef(nlsfit)))
 @ 
