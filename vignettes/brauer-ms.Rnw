@@ -135,23 +135,23 @@ either as differential equations following the tradition of \KM
 \cite{KermMcKe27}, or as \term{stochastic processes} in the tradition
 of Bartlett \cite{Bart60}.  In recent years, as the power of computers
 has grown exponentially, there has been increasing interest in
-\term{agent-based models}\needref, which represent each individual as
-a separate unit that can have unique properties.
+\term{agent-based models}, which represent each individual as
+a separate unit that can have unique properties \cite{eubank2004modelling}.
 
 Throughout the history of the subject, and regardless of the modelling
 frameworks they have exploited, mathematical epidemiologists have
 frequently attempted to fit---or at least to compare---their models to
-observed infectious disease data.  Such fits have often been fairly
-na\"{\i}ve, with little or no consideration of their quality; but over
+observed infectious disease data. \swp{Is this too strong?:} Such fits have often been fairly
+na\"{\i}ve \swp{simple?}, with little or \swp{definitely too strong: or no} consideration of their quality; but over
 the years, there has been a trend towards greater sophistication and
 statistical rigour in parameter estimation for infectious disease
 models, and books that explain these methods have begun to appear in
 recent decades \cite{Bolk08,bjornstadEpidemics2018}.  Careful
 consideration of uncertainty is especially important when epidemic
 models are used for the development and analysis of policy options for
-infectious disease management, a challenge that has absorbed the
-attention of most mathematical epidemiologists during the course of the
-present COVID-19 pandemic.
+infectious disease management \cite{elderd2006uncertainty}, a challenge that has absorbed the
+attention of most \swp{many? most seems too strong} mathematical epidemiologists during the course of the
+present COVID-19 pandemic \swp{Can't find appropriate papers to cite here...}.
 
 While visiting the University of British Columbia in 2014--2015, one
 of us (DE) had many conversations with Fred Brauer about epidemic
@@ -214,7 +214,7 @@ The red curve does appear to provide a reasonable fit to the data, but
 \KM \cite{KermMcKe27} gave no indication of how
 their parameter estimates were obtained.  \djde{When was least-squares
   trajectory matching first done?  Do we think they did that?  or just
-  played with parameter values and fitted by eye?}  Whatever their
+  played with parameter values and fitted by eye?} \swp{It seems unlikely that they had the ability to perform least squares back in 1927... I was able to find least squares SIR and SI3R(!) model fit from 1990 \cite[p.\,51]{kryscio1990modeling} but not sure if there's anything earlier.}  Whatever their
 process, they must have engaged in some sort of \term{trajectory
   matching}, i.e., adjusting parameter values until the
 model---equation~\eqref{eq:sech} in their case---is, by some measure,
