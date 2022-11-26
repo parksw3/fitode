@@ -382,7 +382,24 @@ $S_0$ and $I_0$).
 \FloatBarrier
 
 The nonlinear algebraic relationships specified by
-equation~\eqref{eq:sechparams} cannot be inverted analytically, so we
+equation~\eqref{eq:sechparams} can be inverted analytically following \cite{bacaermodel2012}. But since we have four variables ($I(0)$, $S(0)$, $\beta$, and $\gamma$) and are only given three parameters ($a$, $\omega$, and $\phi$), we begin by assuming $I(0) = 1$.
+
+<<invert KM analytically>>=
+invertpar <- function(I0, param) {
+    with(as.list(param), {
+        Reff <- (1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2
+	q <- (Reff-1)/tanh(phi)
+	gamma <- 2 * omega/q ## gamma has a unit of 1/week
+	S0 <- 2 * Reff * I0 * sinh(phi)^2/(Reff - 1)^2
+	beta <- Reff * gamma/S0
+
+	c(Reff=Reff, S0=S0, Tg=7/gamma, beta=beta)
+    })
+}
+invertpar(1, coef(nlsfit))
+@
+
+\swp{old text:} so we
 need to do it numerically.  Unsurprisingly, there is an R package for
 this kind of nonlinear algebraic inversion (\code{nleqslv}), which we
 can use to write a function to invert equation~\eqref{eq:sechparams}.
@@ -399,7 +416,7 @@ omega_fun <- function(Reff, gamma, S0, I0)
 phi_fun <- function(Reff, gamma, S0, I0)
     {atanh((Reff-1)/(2*omega_fun(Reff,gamma,S0,I0)/gamma))}
 a_fun <- function(Reff, gamma, S0, I0)
-    {(S0/Reff^2)*omega_fun(Reff,gamma,S0,I0)}
+    {(2 * S0/(gamma * Reff^2))*omega_fun(Reff,gamma,S0,I0)^2}
 objective_fun <- function(x, targets) {
     with(c(as.list(x),as.list(targets)), {
         c(omega_fun(Reff,gamma,S0,I0) - omega,
@@ -410,7 +427,8 @@ objective_fun <- function(x, targets) {
 find_orig_params <- function(orig.params.guess, fitted.params) {
     f <- function(x) objective_fun(x, targets=fitted.params)
     out <- nleqslv::nleqslv(x = orig.params.guess, fn = f)$x
-    return(c(out, S0=S0, beta=out[["Reff"]]*out[["gamma"]]/S0,
+    S0 <- out[["S0"]]
+    return(c(out, beta=out[["Reff"]]*out[["gamma"]]/S0,
              Tg=1/out[["gamma"]]))
 }
 I0 <- 1
