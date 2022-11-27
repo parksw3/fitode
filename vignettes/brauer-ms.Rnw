@@ -141,17 +141,22 @@ a separate unit that can have unique properties \cite{eubank2004modelling}.
 Throughout the history of the subject, and regardless of the modelling
 frameworks they have exploited, mathematical epidemiologists have
 frequently attempted to fit---or at least to compare---their models to
-observed infectious disease data. \swp{Is this too strong?:} Such fits have often been fairly
-na\"{\i}ve \swp{simple?}, with little or \swp{definitely too strong: or no} consideration of their quality; but over
-the years, there has been a trend towards greater sophistication and
+observed infectious disease data. Such fits have often been fairly
+na\"{\i}ve, with limited consideration of their quality; but over the
+years, there has been a trend towards greater sophistication and
 statistical rigour in parameter estimation for infectious disease
 models, and books that explain these methods have begun to appear in
 recent decades \cite{Bolk08,bjornstadEpidemics2018}.  Careful
 consideration of uncertainty is especially important when epidemic
 models are used for the development and analysis of policy options for
-infectious disease management \cite{elderd2006uncertainty}, a challenge that has absorbed the
-attention of most \swp{many? most seems too strong} mathematical epidemiologists during the course of the
-present COVID-19 pandemic \swp{Can't find appropriate papers to cite here...}.
+infectious disease management \cite{elderd2006uncertainty}, a
+challenge that has absorbed the attention of many mathematical
+epidemiologists during the course of the present COVID-19 pandemic
+\cite{Hill+21}.
+\swp{Can't find appropriate papers to cite here...}
+\djde{I added the only one that came to mind.  There are probably
+other articles of this type commenting on modelling working for
+PH during the pandemic.}
 
 While visiting the University of British Columbia in 2014--2015, one
 of us (DE) had many conversations with Fred Brauer about epidemic
@@ -188,25 +193,41 @@ form for this function could not be found, they proceeded to assume
 yields the approximate analytical form,
 \begin{linenomath*}
 \begin{equation}\label{eq:sech}
-\ddt{R} \simeq a \sech^2{(\omega\,t - \phi)} \,,
+\ddt{R} \simeq a \sech^2{(\omega\,t - \phi)} \,.
 \end{equation}
 \end{linenomath*}
- where (writing $\Reff\equiv S_0\beta/\gamma$ for the effective reproduction
-number at time $t=0$)
-\swp{KM actually has a typo in their paper... we need to look at \cite{bacaermodel2012} for the correct equations.}
+Noting that the basic reproduction number is
+\begin{linenomath*}
+\begin{equation}\label{eq:R0def}
+\R_0 = \frac{N\beta}{\gamma} \,,
+\end{equation}
+\end{linenomath*}
+where $N$ is the total population size,
+and hence the effective reproduction number at time $t=0$
+is
+\begin{linenomath*}
+\begin{equation}\label{eq:Reffdef}
+\Reff = \frac{S_0\beta}{\gamma} \,,
+\end{equation}
+\end{linenomath*}
+the parameters in equation~\eqref{eq:sech} can be
+written\footnote{There is a typographical error in equation (31) of
+  \KM \cite{KermMcKe27}: their factor $\sqrt{-q}$ should be $(-q)$ in
+  their equivalent of the parameter we call $a$.  Baca\"er
+  \cite[\S3]{bacaermodel2012} corrected this error without comment.}
 \begin{linenomath*}
 \begin{subequations}\label{eq:sechparams}
 \begin{align}
   \omega &= \frac{\gamma}{2} \sqrt{(\Reff-1)^2 +
-           \frac{2I_0}{S_0}\Reff^2}\,,\\
-  \phi &= \textrm{arctanh}\left(\frac{\Reff - 1}{2\omega/\gamma}
-         \right)\,, \\
+           \frac{2I_0}{S_0}\Reff^2}\,, \label{eq:omega} \\ 
+  \phi &= \textrm{arctanh}\left(\frac{\Reff - 1}{2\,\omega/\gamma}
+         \right)\,, \label{eq:phi} \\
   \text{and}\quad
-  a &= \frac{2 S_0}{\gamma \Reff^2} \omega^2  \,.
+  a &= \frac{2\,\omega^2 S_0}{\gamma\,\Reff^2} \label{eq:a} \,.
 \end{align}
 \end{subequations}
 \end{linenomath*}
-They then presented the parameter estimates that we have listed in the
+\KM then presented the parameter estimates that we have listed in the
 KM column of Table~\ref{tab:Bombay}, and they plotted their
 ``calculated'' curve, which we have reproduced in red in
 Figure~\ref{fig:Bombay}.  
@@ -251,7 +272,7 @@ KM.parameters <- c(a = 890, omega = 0.2, phi = 3.4)
 nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
               data = fitode::bombay,
               start = KM.parameters)
-(fitted.parameters <- coef(nlsfit))
+(nls.parameters <- coef(nlsfit))
 @ 
 
 \noindent
@@ -260,8 +281,8 @@ Above, we chose as our starting guess the fitted parameter values of
 squares parameter values differ from KM's by a few percent:
 
 <<percent.diff>>=
-(percent.difference <- 100*(KM.parameters - fitted.parameters)
-                           /fitted.parameters)
+(percent.difference <- 100*(KM.parameters - nls.parameters)
+                           /nls.parameters)
 @ 
 
 \noindent
@@ -275,27 +296,26 @@ problem, to make a reasonable initial guess, it can help to think
 about the meaning of parameters.  For example, in the case of
 equation~\eqref{eq:sech}, it is useful to note that $a$ is the maximum
 of the function~\eqref{eq:sech}, and if write $\omega t - \phi$ as
-$\omega(t-\tpeak)$ then $\tpeak$ is the time at which the maximum
-occurs; both $a$ and $\tpeak$ can be guessed approximately by looking
-at the plotted observed data, and a very rough guess is sufficient
-converge on the same fit:
-%%
-\djde{We could ``guess'' a value of $\omega$ by noting that
-  $\sech^2{(\omega t)}\to e^{2\omega t}$ as $t\to-\infty$, so we could
-  estimate $\omega$ as the slope of $\log(y_i/2)$\dots a little hard
-  to do by eye from the data plot.}
-  \swp{seems like an overkill to me. I don't think it hurts to say that we just chose 0.1}
+$\omega(t-\tpeak)$ then 
+\begin{linenomath*}
+  \begin{equation}\label{eq:tpeak}
+    \tpeak = \frac{\phi}{\omega}
+  \end{equation}
+\end{linenomath*}
+is the time at which the maximum occurs; both $a$ and $\tpeak$ can be
+guessed approximately by looking at the plotted observed data, and a
+very rough guess is sufficient to converge on the same fit:
 
 <<nls.bombay.2>>=
 a.guess <- 1000    # crude "by eye" estimate of peak value
 tpeak.guess <- 15  # crude "by eye" estimate of peak time
-omega.guess <- 0.1
+omega.guess <- 1   # wild guess
 phi.guess <- omega.guess * tpeak.guess
 nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
               data = fitode::bombay, 
               start = c(a = a.guess, omega = omega.guess,
                         phi = phi.guess))
-(fitted.parameters <- coef(nlsfit))
+(nls.parameters <- coef(nlsfit))
 @ 
 
 However, if you experiment with initial guesses, you will find that if
@@ -320,25 +340,44 @@ lower = c(a = 0, omega = 0, phi = 0)
 @ 
 
 \noindent
-which would prevent convergence to negative $\omega$ and $\phi$. \swp{Is this a good place to introduce link functions? Or too early? Or at least hint at it?  Example text:} \swp{Instead, we can also estimate the parameters on the log scale and convert them back to the the original scale by exponentiating the estimated parameters. This would allow parameter estimation to happen on an unconstrained scale (between negative infinity and infinity), providing a more stable fitting. As we discuss later, we can use \textbf{link functions} to convert parameters with constraints to unconstrained scales for more general cases.}
-In general, the potential existence of multiple local optima is something
-that makes fitting models to data hard, and you need to be cautious in
-interpretting any fit to which your fitting algorithm has converged.
+which would prevent convergence to negative $\omega$ and
+$\phi$. \swp{Is this a good place to introduce link functions? Or too
+  early? Or at least hint at it?  Example text:} \swp{Instead, we can
+  also estimate the parameters on the log scale and convert them back
+  to the the original scale by exponentiating the estimated
+  parameters. This would allow parameter estimation to happen on an
+  unconstrained scale (between negative infinity and infinity),
+  providing a more stable fitting. As we discuss later, we can use
+  \term{link functions} to convert parameters with constraints to
+  unconstrained scales for more general cases.}  \djde{Good idea.
+  I'll revisit this when I've got further with writing the rest of the
+  paper.}  In general, the potential existence of multiple local
+optima is something that makes fitting models to data hard, and you
+need to be cautious in interpretting any fit to which your fitting
+algorithm has converged.
 
 <<KM fitted values, echo=FALSE>>=
-a.KM <- KM.parameters["a"]
-omega.KM <- KM.parameters["omega"]
-phi.KM <- KM.parameters["phi"]
-tpeak.KM <- phi.KM / omega.KM
-f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
+dig <- 3 # number of significant digits for printing
+a.KM <- signif(KM.parameters["a"],dig)
+omega.KM <- signif(KM.parameters["omega"],dig)
+phi.KM <- signif(KM.parameters["phi"],dig)
+tpeak.KM <- signif(phi.KM / omega.KM,dig)
+@ 
+
+<<nls fitted values, echo=FALSE>>=
+a.nls <- signif(nls.parameters["a"],dig)
+omega.nls <- signif(nls.parameters["omega"],dig)
+phi.nls <- signif(nls.parameters["phi"],dig)
+tpeak.nls <- signif(phi.nls/omega.nls,dig)
 @ 
 
 \begin{figure}
 <<Bombayfigure, echo=FALSE, fig.height=5>>=
+f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
 tmax <- 33
 tvals <- seq(0,tmax,length=1000)
 col.KM <- "#E41A1C"
-col.us <- "#377EB8"
+col.nls <- "#377EB8"
 bombay_plot <- function(type = "l", ...) {
     plot(NA, NA , bty="L", type="n", xlim=c(0,tmax), ylim=c(0,900),
          xaxs="i", yaxs="i", las=1, 
@@ -352,15 +391,10 @@ lwd <- 3
 bombay_plot()
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=19)
 lines(tvals, f(tvals), lwd=lwd, xpd=NA, col=col.KM)
-a <- fitted.parameters["a"]
-omega <- fitted.parameters["omega"]
-phi <- fitted.parameters["phi"]
-tpeak <- phi/omega
-dig <- 3 # number of significant digits for printing
-lines(tvals, KM_approx(tvals, a=a, omega=omega, phi=phi),
-      xpd=NA, lwd=lwd, col=col.us)
-legend("topleft", bty="n", lwd=lwd, col=c(col.KM,col.us),
-       legend=c("KM","us"))
+lines(tvals, KM_approx(tvals, a=a.nls, omega=omega.nls, phi=phi.nls),
+      xpd=NA, lwd=lwd, col=col.nls)
+legend("topleft", bty="n", lwd=lwd, col=c(col.KM,col.nls),
+       legend=c("KM","nls"))
 
 @ 
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
@@ -382,22 +416,66 @@ $S_0$ and $I_0$).
 \FloatBarrier
 
 The nonlinear algebraic relationships specified by
-equation~\eqref{eq:sechparams} can be inverted analytically following \cite{bacaermodel2012}. But since we have four variables ($I(0)$, $S(0)$, $\beta$, and $\gamma$) and are only given three parameters ($a$, $\omega$, and $\phi$), we begin by assuming $I(0) = 1$.
-
+equation~\eqref{eq:sechparams} can be inverted 
+analytically\footnote{In (common) situations in which
+  nonlinear algebraic equations cannot be solved analytically,
+  they can still be solved numerically, for example with
+  the \code{nleqslv} package in R.}
+\cite[\S3]{bacaermodel2012}, to obtain
 \begin{linenomath*}
 \begin{subequations}\label{eq:invertparams}
 \begin{align}
   \Reff &= \frac{1}{2}\bigg( 1 +
-          \sqrt{1 + \frac{4\,\omega\,I_0 \sinh\!{(2\phi)}}{a}}\bigg) \,, \\
-  \gamma &= \frac{2\,\omega\tanh{\phi}}{\Reff-1} \\
-  S_0 &= \frac{2\,\Reff\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} \\ % Bacaer eq. (3)
-  \beta &= \frac{\Reff\gamma}{S_0} \\
-  \Tg & = \frac{1}{\gamma}
+          \sqrt{1 + \frac{4\,\omega\,I_0 \sinh\!{(2\phi)}}{a}}\bigg) \,,
+          \label{eq:Reff} \\
+  \gamma &= \frac{2\,\omega\tanh{\phi}}{\Reff-1} \label{eq:gamma} \\
+  S_0 &= \frac{2\,\Reff\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} % Bacaer eq. (3)
+      \label{eq:S0}
 \end{align}
 \end{subequations}
 \end{linenomath*}
+Since there are four original parameters ($\beta$, $\gamma$, $S_0$,
+$I_0$) and only three parameters in \KM's approximation
+\eqref{eq:sech} ($a$, $\omega$, $\phi$), one of the four original
+parameters needs to be specified separately, and we have taken this to
+be the initial prevalence $I_0$.  From
+equation~\eqref{eq:invertparams}, we can compute the transmission
+rate,
+\begin{linenomath*}
+\begin{equation}\label{eq:beta}
+  \beta = \frac{\Reff\gamma}{S_0} \,,
+\end{equation}
+\end{linenomath*}
+and the mean intrinsic generation interval \cite{ChamDush15},
+\begin{linenomath*}
+\begin{equation}\label{eq:Tg}
+  \Tg = \frac{1}{\gamma} \,,
+\end{equation}
+\end{linenomath*}
+which is the same as the mean infectious period in this simple model
+\cite{Cham+18}.
 
-<<invert KM analytically>>=
+Table~\ref{tab:Bombay} lists the values of the parameters as estimated
+by \KM and by us using \code{nls}.  \swp{The problem is that we're
+  assuming S0 = 1e6 - 1. We can't do this.  We need much lower S0 to
+  fit the data. So by assuming a very large S0, things go crazy.  So
+  we're better off startng with assuming I0 = 1 and assuming the
+  rest. That's the whole point of Bacaer's paper: that the required S0
+  to fit the data is so low that the standard SIR model is actually
+  not appropriate for modeling the bombay epidemic} \djde{I'll return
+  to this after reading Baca\"er \cite{bacaermodel2012}. Meanwhile I
+  will note that Gani and Leach \cite{GaniLeac04} found
+  $\R_0\simeq1.3\pm1.8$ and $\Tg\simeq6.8\pm2.2$ days, for ``modern''
+  pneumonic plague, and based on that $\Tg$ we \cite{Earn+20} found
+  similar $\R_0$ for 17th century plague in London.  Baca\"er
+  \cite{bacaermodel2012} seems to assume (like \KM) that plague in
+  Bombay had a CFP of near 1.  Anyway, the point of the discussion
+  here will be to alert readers to be cautious for all sorts of
+  reasons, and a good fit of a model to data does not necessarily mean
+  that it is fair to make inferences from estimated parameter values.}
+\djde{Note KM's caution about interpreting the param values.}
+
+<<invert KM analytically, echo=FALSE>>=
 invert_params <- function(I0, params) {
     with(as.list(params), {
         Reff <- (1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2
@@ -405,103 +483,92 @@ invert_params <- function(I0, params) {
 	gamma <- 2 * omega/q ## gamma has a unit of 1/week
 	S0 <- 2 * Reff * I0 * sinh(phi)^2/(Reff - 1)^2
 	beta <- Reff * gamma/S0
-        ## express Tg in days:
-	c(Reff=Reff, S0=S0, Tg=7/gamma, beta=beta)
+	c(Reff=Reff, S0=S0, gamma=gamma, Tg=1/gamma, beta=beta)
     })
 }
-invert_params(I0 = 1, params = coef(nlsfit))
+I0.KM <- 1
+orig.params.KM <- invert_params(I0 = I0.KM, params = KM.parameters)
+orig.params.KM <- signif(orig.params.KM,dig)
+Reff.KM <- orig.params.KM[["Reff"]]
+S0.KM <- orig.params.KM[["S0"]]
+gamma.KM <- orig.params.KM[["gamma"]]
+Tg.KM <- orig.params.KM[["Tg"]]
+beta.KM <- orig.params.KM[["beta"]]
+I0.nls <- 1
+orig.params.nls <- invert_params(I0 = I0.nls, params = coef(nlsfit))
+orig.params.nls <- signif(orig.params.nls,dig)
+Reff.nls <- orig.params.nls[["Reff"]]
+S0.nls <- orig.params.nls[["S0"]]
+gamma.nls <- orig.params.nls[["gamma"]]
+Tg.nls <- orig.params.nls[["Tg"]]
+beta.nls <- orig.params.nls[["beta"]]
 @
 
-\swp{old text:} so we
-need to do it numerically.  Unsurprisingly, there is an R package for
-this kind of nonlinear algebraic inversion (\code{nleqslv}), which we
-can use to write a function to invert equation~\eqref{eq:sechparams}.
-\swp{The problem is that we're assuming S0 = 1e6 - 1. We can't do this.
-We need much lower S0 to fit the data. So by assuming a very large S0,
-things go crazy.  So we're better off startng with assuming I0 = 1 and
-assuming the rest. That's the whole point of Bacaer's paper: that the
-required S0 to fit the data is so low that the standard SIR model is
-actually not appropriate for modeling the bombay epidemic}
-
-<<invert nonlinear equations>>=
-omega_fun <- function(Reff, gamma, S0, I0)
-    {(gamma/2)*sqrt((Reff-1)^2+(2*I0/S0)*Reff^2)}
-phi_fun <- function(Reff, gamma, S0, I0)
-    {atanh((Reff-1)/(2*omega_fun(Reff,gamma,S0,I0)/gamma))}
-a_fun <- function(Reff, gamma, S0, I0)
-    {(2 * S0/(gamma * Reff^2))*omega_fun(Reff,gamma,S0,I0)^2}
-objective_fun <- function(x, targets) {
-    with(c(as.list(x),as.list(targets)), {
-        c(omega_fun(Reff,gamma,S0,I0) - omega,
-          phi_fun(Reff,gamma,S0,I0) - phi,
-          a_fun(Reff,gamma,S0,I0) - a)
-    })
-}
-find_orig_params <- function(orig.params.guess, fitted.params) {
-    f <- function(x) objective_fun(x, targets=fitted.params)
-    out <- nleqslv::nleqslv(x = orig.params.guess, fn = f)$x
-    S0 <- out[["S0"]]
-    return(c(out, beta=out[["Reff"]]*out[["gamma"]]/S0,
-             Tg=1/out[["gamma"]]))
-}
-I0 <- 1
-(orig.params.guess <- c(Reff=2, gamma=0.2, S0=1e6))
-(objective_fun(x = orig.params.guess, targets = coef(nlsfit)))
-(orig.params <- find_orig_params(orig.params.guess, fitted.params=coef(nlsfit)))
-@ 
-
+The final column of Table~\ref{tab:Bombay} lists 95\% confidence
+intervals on our \code{nls} parameter estimates.
 \djde{explain normal CIs from least squares and how least squares is max
 likelihood in this case}
-
 \djde{What is the standard way to get CIs on the parameters and confidence
   bands on the fit from the \texttt{nlsfit} object?}
-
-\djde{What is the best way to invert the parameter relationships in
-  \eqref{eq:sechparams} to get $\beta$ and $\gamma$?  And how should
-  we compute CIs for the derived parameters?  Delta method?}
-
-\djde{We must comment on whether the estimated $\beta$ and $\gamma$
-  are actually reasonable given what we know about pneumonic plague,
-  e.g., from Gani and Leach \cite{GaniLeac04}.
-  But also note KM's caution about interpreting the param values.}
+\djde{How should we compute CIs for the derived parameters?  Delta
+  method?}
 
 \djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is
 likely to be much better than fitting the initial condition $I_0$.}
 
 \begin{table}
   \begin{center}
-    \caption{Parameters of \KM's \cite{KermMcKe27}
-      approximation \eqref{eq:sech} to the SIR model \eqref{eq:SIR},
-      as estimated by them \cite{KermMcKe27} and by us (including 95\%
-      confidence intervals).
-      %% The horizontal line separates parameters that are directly
-      %% estimated from those that are derived from the estimated
-      %% parameters.
-    }
+    \caption{Parameters of \KM's \cite{KermMcKe27} approximation
+      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, as estimated by
+      them \cite{KermMcKe27} and by us using nonlinear least squares.
+      The $\R_0$ estimates assume the population of Bombay was
+      $N=1$ million \cite[p.\,408]{bacaermodel2012}.
+     %%  (including 95\% confidence intervals).  
+     %%  Given values of the estimated parameters
+     %% $(a,\omega,\phi)$, we specify $I_0$ and derive implied values of the
+     %%  original parameters using equation~\eqref{eq:invertparams}.
+     %%
+     %% The horizontal line separates parameters that are directly
+     %% estimated from those that are derived from the estimated
+     %% parameters.
+}
     \medskip
-  \begin{tabular}{l | c | c | c | c c}
-    \bfseries Estimated parameter & \bfseries symbol & \bfseries units
-    & \bfseries KM & \bfseries us & \bfseries 95\% CI \\\hline
-    peak removal rate & $a$ & 1/weeks & \Sexpr{a.KM} & 
-      \Sexpr{signif(a,dig)} & (,)\\
-    outbreak speed & $\omega$ & 1/weeks & 
-      \Sexpr{omega.KM} & \Sexpr{signif(omega,dig-1)} & (,) \\
-    outbreak centre & $\phi$ & -- & \Sexpr{phi.KM} & 
-      \Sexpr{signif(phi,dig)} & (,) \\
+  \begin{tabular}{l | c | c | c | c | c c}
+    \bfseries Estimated parameter & \bfseries symbol 
+    & \bfseries equation & \bfseries units
+    & \bfseries KM & \bfseries nls & \bfseries 95\% CI \\\hline
+    peak removal rate & $a$& \eqref{eq:a} & 1/weeks & \Sexpr{a.KM} & 
+      \Sexpr{signif(a.nls,dig)} & (,)\\
+    outbreak speed & $\omega$ & \eqref{eq:omega} & 1/weeks & 
+      \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} & (,) \\
+    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.KM} & 
+      \Sexpr{signif(phi.nls,dig)} & (,) \\
+    %%
+    \noalign{\vspace{10pt}}
+    \bfseries Specified parameter \\\hline
+    initial prevalence & $I_0$ & -- & -- &
+      \Sexpr{I0.KM} & \Sexpr{I0.nls} & \\
+    %%
     \noalign{\vspace{10pt}}
     \bfseries Derived parameter \\\hline
-    peak time & $\tpeak = {\phi}/{\omega}$ & weeks & 
-      \Sexpr{tpeak.KM} & \Sexpr{signif(tpeak,dig)} & (,) \\
-    transmission rate & $\beta$ & 1/weeks & \\
-    removal rate & $\gamma$ & 1/weeks & \\
-    mean generation interval & $\Tg = {1}/{\gamma}$ & weeks & \\
-    basic reproduction number & $\R_0 = {\beta}/{\gamma}$ & -- &
+    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks & 
+      \Sexpr{tpeak.KM} & \Sexpr{tpeak.nls} & (,) \\
+    effective reproduction number & $\Reff$ 
+      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- & 
+      \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & (,) \\
+    removal rate & $\gamma$ & \eqref{eq:gamma} & 1/weeks & 
+      \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & (,) \\
+    initial susceptibles & $S_0$ & \eqref{eq:S0} & -- & 
+      \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & (,) \\
+    transmission rate & $\beta$ & \eqref{eq:beta} & 1/weeks & 
+      \Sexpr{beta.KM} & \Sexpr{beta.nls} & (,) \\
+    mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
+      \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & (,) \\
+    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
+      \Sexpr{signif(10^6*Reff.KM/S0.KM,dig)} 
+      & \Sexpr{signif(10^6*Reff.nls/S0.nls,dig)} & (,)
   \end{tabular}
   \end{center}
-  {\footnotesize\emph{Note:} Given $a$, $\omega$, and $\phi$, we
-    obtain $\beta$ and $\gamma$ by numerically inverting the
-    relationships in \eqref{eq:sechparams}.  \djde{This will be a
-      nuisance.}}
   \label{tab:Bombay}
 \end{table}
 
