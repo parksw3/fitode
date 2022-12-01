@@ -219,7 +219,7 @@ written\footnote{There is a typographical error in equation (31) of
 \begin{subequations}\label{eq:sechparams}
 \begin{align}
   \omega &= \frac{\gamma}{2} \sqrt{(\Reff-1)^2 +
-           \frac{2I_0}{S_0}\Reff^2}\,, \label{eq:omega} \\ 
+           \frac{2I_0}{S_0}\Reff^2}\,, \label{eq:omega} \\
   \phi &= \textrm{arctanh}\left(\frac{\Reff - 1}{2\,\omega/\gamma}
          \right)\,, \label{eq:phi} \\
   \text{and}\quad
@@ -230,7 +230,7 @@ written\footnote{There is a typographical error in equation (31) of
 \KM then presented the parameter estimates that we have listed in the
 KM column of Table~\ref{tab:Bombay}, and they plotted their
 ``calculated'' curve, which we have reproduced in red in
-Figure~\ref{fig:Bombay}.  
+Figure~\ref{fig:Bombay}.
 
 The red curve does appear to provide a reasonable fit to the data, but
 \KM \cite{KermMcKe27} gave no indication of how
@@ -269,11 +269,11 @@ function (\code{nls}), which attempts to minimize the distance
 sech <- function(x) {1/cosh(x)}
 KM_approx <- function(t, a, omega, phi) {a * sech(omega*t - phi)^2}
 KM.parameters <- c(a = 890, omega = 0.2, phi = 3.4)
-nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
+nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
               data = fitode::bombay,
               start = KM.parameters)
 (nls.parameters <- coef(nlsfit))
-@ 
+@
 
 \noindent
 Above, we chose as our starting guess the fitted parameter values of
@@ -283,7 +283,7 @@ squares parameter values differ from KM's by a few percent:
 <<percent.diff>>=
 (percent.difference <- 100*(KM.parameters - nls.parameters)
                            /nls.parameters)
-@ 
+@
 
 \noindent
 Our least squares fitted function is shown in blue in
@@ -296,7 +296,7 @@ problem, to make a reasonable initial guess, it can help to think
 about the meaning of parameters.  For example, in the case of
 equation~\eqref{eq:sech}, it is useful to note that $a$ is the maximum
 of the function~\eqref{eq:sech}, and if write $\omega t - \phi$ as
-$\omega(t-\tpeak)$ then 
+$\omega(t-\tpeak)$ then
 \begin{linenomath*}
   \begin{equation}\label{eq:tpeak}
     \tpeak = \frac{\phi}{\omega}
@@ -311,12 +311,12 @@ a.guess <- 1000    # crude "by eye" estimate of peak value
 tpeak.guess <- 15  # crude "by eye" estimate of peak time
 omega.guess <- 1   # wild guess
 phi.guess <- omega.guess * tpeak.guess
-nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi), 
-              data = fitode::bombay, 
+nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
+              data = fitode::bombay,
               start = c(a = a.guess, omega = omega.guess,
                         phi = phi.guess))
 (nls.parameters <- coef(nlsfit))
-@ 
+@
 
 However, if you experiment with initial guesses, you will find that if
 you make a sufficiently \emph{bad} guess, then \code{nls} will fail.
@@ -340,11 +340,11 @@ fit above), you would add the \code{nls} option
 
 <<eval=FALSE>>=
 lower = c(a = 0, omega = 0, phi = 0)
-@ 
+@
 
 \noindent
 which would prevent convergence to negative $\omega$ and $\phi$.
-Alternatively, you could write 
+Alternatively, you could write
 \begin{linenomath*}
   \begin{equation}\label{eq:loglink}
     a=e^A,\quad \omega=e^\Omega,\quad \phi=e^\Phi \,,
@@ -382,14 +382,14 @@ a.KM <- signif(KM.parameters["a"],dig)
 omega.KM <- signif(KM.parameters["omega"],dig)
 phi.KM <- signif(KM.parameters["phi"],dig)
 tpeak.KM <- signif(phi.KM / omega.KM,dig)
-@ 
+@
 
 <<nls fitted values, echo=FALSE>>=
 a.nls <- signif(nls.parameters["a"],dig)
 omega.nls <- signif(nls.parameters["omega"],dig)
 phi.nls <- signif(nls.parameters["phi"],dig)
 tpeak.nls <- signif(phi.nls/omega.nls,dig)
-@ 
+@
 
 \begin{figure}
 <<Bombayfigure, echo=FALSE, fig.height=5>>=
@@ -400,7 +400,7 @@ col.KM <- "#E41A1C"
 col.nls <- "#377EB8"
 bombay_plot <- function(type = "l", ...) {
     plot(NA, NA , bty="L", type="n", xlim=c(0,tmax), ylim=c(0,900),
-         xaxs="i", yaxs="i", las=1, 
+         xaxs="i", yaxs="i", las=1,
          yaxt="n",
          xlab="weeks", ylab="plague deaths",
          ...
@@ -416,7 +416,7 @@ lines(tvals, KM_approx(tvals, a=a.nls, omega=omega.nls, phi=phi.nls),
 legend("topleft", bty="n", lwd=lwd, col=c(col.KM,col.nls),
        legend=c("KM","nls"))
 
-@ 
+@
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
   (black dots) were digitized from \cite[Table~IX, p.\,753]{JHyg}
@@ -437,7 +437,7 @@ $S_0$ and $I_0$).
 \FloatBarrier
 
 The nonlinear algebraic relationships specified by
-equation~\eqref{eq:sechparams} can be inverted 
+equation~\eqref{eq:sechparams} can be inverted
 analytically\footnote{In (common) situations in which
   nonlinear algebraic equations cannot be solved analytically,
   they can still be solved numerically, for example with
@@ -507,6 +507,7 @@ invert_params <- function(I0, params) {
 	c(Reff=Reff, S0=S0, gamma=gamma, Tg=1/gamma, beta=beta)
     })
 }
+N.KM <- 10^6
 I0.KM <- 1
 orig.params.KM <- invert_params(I0 = I0.KM, params = KM.parameters)
 orig.params.KM <- signif(orig.params.KM,dig)
@@ -523,6 +524,46 @@ S0.nls <- orig.params.nls[["S0"]]
 gamma.nls <- orig.params.nls[["gamma"]]
 Tg.nls <- orig.params.nls[["Tg"]]
 beta.nls <- orig.params.nls[["beta"]]
+R0.nls <- Reff.nls/S0.nls*N.KM
+@
+
+<<delta-method-ci, echo=FALSE>>==
+convert_express <- list(
+    tpeak=expression(phi/omega),
+    Reff=expression((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2),
+    gamma=expression(2 * omega/((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2-1)/tanh(phi)),
+    S0=expression(2 * ((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) * I0 * sinh(phi)^2/(((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) - 1)^2),
+    beta=expression((((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) - 1) * omega * tanh(phi)/(I0 * sinh(phi)^2)),
+    Tg=expression(1/(2 * omega/((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2-1)/tanh(phi))),
+    R0=expression((((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) - 1)^2/(2 * I0 * sinh(phi)^2)*N)
+)
+
+##dg/dx
+dgdx <- sapply(convert_express, function(x) {
+    dd <- deriv(x, c("a", "omega", "phi"))
+    ee <- eval(dd, c(as.list(nls.parameters), I0=I0.KM, N=N.KM))
+    attr(ee, "gradient")
+})
+
+vcov <- vcov(nlsfit)
+est_vcov <- t(dgdx) %*% vcov %*% dgdx
+est_err <- sqrt(diag(est_vcov))
+est_par <- c(tpeak=tpeak.nls, Reff=Reff.nls, gamma=gamma.nls, S0=S0.nls, beta=beta.nls, Tg=Tg.nls, R0=R0.nls)
+z <- -qnorm((1-0.95)/2)
+
+cc.delta <- matrix(
+    c(est_par - z * est_err, est_par + z * est_err),
+    ncol=2,
+    dimnames=list(
+        c("tpeak", "Reff", "gamma", "S0", "beta", "Tg", "R0"),
+        c("2.5%", "97.5%")
+    )
+)
+
+for (p in rownames(cc.delta)) {
+    assign(paste0(p,".lwr"), cc.delta[p, "2.5%"])
+    assign(paste0(p,".upr"), cc.delta[p, "97.5%"])
+}
 @
 
 The final column of Table~\ref{tab:Bombay} lists 95\% \term{confidence
@@ -575,7 +616,7 @@ likely to be much better than fitting the initial condition $I_0$.}
       them \cite{KermMcKe27} and by us using nonlinear least squares.
       The $\R_0$ estimates assume the population of Bombay was
       $N=1$ million \cite[p.\,408]{bacaermodel2012}.
-     %%  (including 95\% confidence intervals).  
+     %%  (including 95\% confidence intervals).
      %%  Given values of the estimated parameters
      %% $(a,\omega,\phi)$, we specify $I_0$ and derive implied values of the
      %%  original parameters using equation~\eqref{eq:invertparams}.
@@ -586,14 +627,14 @@ likely to be much better than fitting the initial condition $I_0$.}
 }
     \medskip
   \begin{tabular}{l | c | c | c | c | c c}
-    \bfseries Estimated parameter & \bfseries symbol 
+    \bfseries Estimated parameter & \bfseries symbol
     & \bfseries equation & \bfseries units
     & \bfseries KM & \bfseries nls & \bfseries 95\% CI \\\hline
-    peak removal rate & $a$& \eqref{eq:a} & 1/weeks & \Sexpr{a.KM} & 
+    peak removal rate & $a$& \eqref{eq:a} & 1/weeks & \Sexpr{a.KM} &
       \Sexpr{signif(a.nls,dig)} & (,)\\
-    outbreak speed & $\omega$ & \eqref{eq:omega} & 1/weeks & 
+    outbreak speed & $\omega$ & \eqref{eq:omega} & 1/weeks &
       \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} & (,) \\
-    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.KM} & 
+    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.KM} &
       \Sexpr{signif(phi.nls,dig)} & (,) \\
     %%
     \noalign{\vspace{10pt}}
@@ -603,22 +644,22 @@ likely to be much better than fitting the initial condition $I_0$.}
     %%
     \noalign{\vspace{10pt}}
     \bfseries Derived parameter \\\hline
-    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks & 
-      \Sexpr{tpeak.KM} & \Sexpr{tpeak.nls} & (,) \\
-    effective reproduction number & $\Reff$ 
-      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- & 
-      \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & (,) \\
-    removal rate & $\gamma$ & \eqref{eq:gamma} & 1/weeks & 
-      \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & (,) \\
-    initial susceptibles & $S_0$ & \eqref{eq:S0} & -- & 
-      \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & (,) \\
-    transmission rate & $\beta$ & \eqref{eq:beta} & 1/weeks & 
-      \Sexpr{beta.KM} & \Sexpr{beta.nls} & (,) \\
+    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
+      \Sexpr{tpeak.KM} & \Sexpr{tpeak.nls} & \Sexpr{ci_fmt("tpeak", cc.delta)} \\
+    effective reproduction number & $\Reff$
+      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
+      \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & \Sexpr{ci_fmt("Reff", cc.delta)} \\
+    removal rate & $\gamma$ & \eqref{eq:gamma} & 1/weeks &
+      \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & \Sexpr{ci_fmt("gamma", cc.delta)} \\
+    initial susceptibles & $S_0$ & \eqref{eq:S0} & -- &
+      \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta)} \\
+    transmission rate & $\beta$ & \eqref{eq:beta} & 1/weeks &
+      \Sexpr{beta.KM} & \Sexpr{beta.nls} & \Sexpr{ci_fmt("beta", cc.delta)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
-      \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & (,) \\
+      \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta)} \\
     basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
-      \Sexpr{signif(10^6*Reff.KM/S0.KM,dig)} 
-      & \Sexpr{signif(10^6*Reff.nls/S0.nls,dig)} & (,)
+      \Sexpr{signif(10^6*Reff.KM/S0.KM,dig)}
+      & \Sexpr{signif(10^6*Reff.nls/S0.nls,dig)} & \Sexpr{ci_fmt("R0", cc.delta)}
   \end{tabular}
   \end{center}
   \label{tab:Bombay}
@@ -648,7 +689,7 @@ model~\eqref{eq:SIR} to the Bombay plague epidemic.
 We begin by loading the package
 <<load fitode>>=
 library(fitode)
-@ 
+@
 \noindent
 and defining a model object:
 <<sirmortmodel>>=
