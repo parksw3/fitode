@@ -53,6 +53,16 @@
 \usepackage{bm} % bold math
 \newcommand{\boldbeta}{\bm{\beta}}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+%% tables
+\usepackage{multirow}   % for tables
+%\usepackage{subfig}
+\usepackage{tabularx}   % pretty tables
+\usepackage{tabularray} % allows rowsep via tblr environment
+%% table details
+\renewcommand{\arraystretch}{1.5} % more interline spacing
+%% https://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
+\usepackage{ragged2e}
+%%\usepackage{array} % for m{...}
 
 \begin{document}
 
@@ -652,34 +662,36 @@ likely to be much better than fitting the initial condition $I_0$.}
      %% parameters.
 }
     \medskip
-  \begin{tabular}{l | c | c | c | c | c c}
-    \bfseries Estimated parameter & \bfseries symbol
-    & \bfseries equation & \bfseries units
+    %% making use of ragged2e and array packages:
+    \RaggedRight
+  \begin{tabular}{ m{3cm} | c | c | c | c | c c}
+    \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
+    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
     & \bfseries KM & \bfseries nls & \bfseries 95\% CI \\\hline
-    peak removal rate & $a$& \eqref{eq:a} & 1/weeks & \Sexpr{a.KM} &
+    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{a.KM} &
       \Sexpr{signif(a.nls,dig)} & \Sexpr{ci_fmt("a", cc)} \\
-    outbreak speed & $\omega$ & \eqref{eq:omega} & 1/weeks &
+    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} & \Sexpr{ci_fmt("omega", cc)} \\
     outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.KM} &
       \Sexpr{signif(phi.nls,dig)} & \Sexpr{ci_fmt("phi", cc)} \\
     %%
     \noalign{\vspace{10pt}}
-    \bfseries Specified parameter \\\hline
+    \bfseries Specified\break parameter \\\hline
     initial prevalence & $I_0$ & -- & -- &
       \Sexpr{I0.KM} & \Sexpr{I0.nls} & \\
     %%
     \noalign{\vspace{10pt}}
-    \bfseries Derived parameter \\\hline
+    \bfseries Derived\break parameter \\\hline
     peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
       \Sexpr{tpeak.KM} & \Sexpr{tpeak.nls} & \Sexpr{ci_fmt("tpeak", cc.delta)} \\
     effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
       \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & \Sexpr{ci_fmt("Reff", cc.delta)} \\
-    removal rate & $\gamma$ & \eqref{eq:gamma} & 1/weeks &
+    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & \Sexpr{ci_fmt("gamma", cc.delta)} \\
     initial susceptibles & $S_0$ & \eqref{eq:S0} & -- &
       \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta)} \\
-    transmission rate & $\beta$ & \eqref{eq:beta} & 1/weeks &
+    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{beta.KM} & \Sexpr{beta.nls} & \Sexpr{ci_fmt("beta", cc.delta)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
       \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta)} \\
