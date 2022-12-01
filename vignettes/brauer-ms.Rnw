@@ -78,7 +78,7 @@
 
 \bmb{For future reference: ORCID 0000-0002-2127-0443, twitter @bolkerb, Mastodon @bbolker@fediscience.org}
 
-\swp{Mine: ORCID 0000-0003-2202-3361, twitter @sang_woo_park, Mastodon @sangwoopark@ecoevo.social }
+\swp{Mine: ORCID 0000-0003-2202-3361, twitter @sang\_woo\_park, Mastodon @sangwoopark@ecoevo.social}
 
 \bigskip \bigskip
 
@@ -396,17 +396,27 @@ probabilities.
 <<KM-fitted-values, echo=FALSE>>=
 parnames <- c("a", "omega", "phi")
 dig <- 3 # number of significant digits for printing
-a.KM <- signif(KM.parameters["a"],dig)
-omega.KM <- signif(KM.parameters["omega"],dig)
-phi.KM <- signif(KM.parameters["phi"],dig)
-tpeak.KM <- signif(phi.KM / omega.KM,dig)
+for (p in parnames) {
+    assign(paste0(p, ".KM"), signif(KM.parameters[[p]], dig))
+}
+## calc sig *after* taking the ratio ...
+tpeak.KM <- with(as.list(KM.parameters), signif(phi / omega,dig))
 @
 
 <<nls-fitted-values, echo=FALSE>>=
-a.nls <- signif(nls.parameters["a"],dig)
-omega.nls <- signif(nls.parameters["omega"],dig)
-phi.nls <- signif(nls.parameters["phi"],dig)
-tpeak.nls <- signif(phi.nls/omega.nls,dig)
+for (p in parnames) {
+    assign(paste0(p, ".nls"), signif(nls.parameters[[p]], dig))
+}
+tpeak.nls <- with(as.list(nls.parameters), signif(phi / omega,dig))
+cc <- suppressMessages(confint(nlsfit))
+ci_fmt  <- function(p, cc) (format(cc[p,], digits = 2)
+    |> paste(collapse = ", ")
+    |> sprintf(fmt = "(%s)")
+)
+for (p in parnames) {
+    assign(paste0(p,".lwr"), cc[p, "2.5%"])
+    assign(paste0(p,".upr"), cc[p, "97.5%"])
+}
 @
 
 \begin{figure}
