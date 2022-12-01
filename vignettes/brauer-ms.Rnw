@@ -379,17 +379,27 @@ probabilities.
 <<KM-fitted-values, echo=FALSE>>=
 parnames <- c("a", "omega", "phi")
 dig <- 3 # number of significant digits for printing
-a.KM <- signif(KM.parameters["a"],dig)
-omega.KM <- signif(KM.parameters["omega"],dig)
-phi.KM <- signif(KM.parameters["phi"],dig)
-tpeak.KM <- signif(phi.KM / omega.KM,dig)
+for (p in parnames) {
+    assign(paste0(p, ".KM"), signif(KM.parameters[[p]], dig))
+}
+## calc sig *after* taking the ratio ...
+tpeak.KM <- with(as.list(KM.parameters), signif(phi / omega,dig))
 @ 
 
-<<nls fitted values, echo=FALSE>>=
-a.nls <- signif(nls.parameters["a"],dig)
-omega.nls <- signif(nls.parameters["omega"],dig)
-phi.nls <- signif(nls.parameters["phi"],dig)
-tpeak.nls <- signif(phi.nls/omega.nls,dig)
+<<nls-fitted-values, echo=FALSE>>=
+for (p in parnames) {
+    assign(paste0(p, ".nls"), signif(nls.parameters[[p]], dig))
+}
+tpeak.nls <- with(as.list(nls.parameters), signif(phi / omega,dig))
+cc <- suppressMessages(confint(nlsfit))
+ci_fmt  <- function(p) (format(cc[p,], digits = 2)
+    |> paste(collapse = ", ")
+    |> sprintf(fmt = "(%s)")
+)
+for (p in parnames) {
+    assign(paste0(p,".lwr"), cc[p, "2.5%"])
+    assign(paste0(p,".upr"), cc[p, "97.5%"])
+}
 @ 
 
 \begin{figure}
@@ -560,11 +570,11 @@ likely to be much better than fitting the initial condition $I_0$.}
     & \bfseries equation & \bfseries units
     & \bfseries KM & \bfseries nls & \bfseries 95\% CI \\\hline
     peak removal rate & $a$& \eqref{eq:a} & 1/weeks & \Sexpr{a.KM} & 
-      \Sexpr{signif(a.nls,dig)} & (,)\\
+      \Sexpr{signif(a.nls,dig)} & \Sexpr{ci_fmt("a")} \\
     outbreak speed & $\omega$ & \eqref{eq:omega} & 1/weeks & 
-      \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} & (,) \\
+      \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} &  \Sexpr{ci_fmt("omega")} \\
     outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.KM} & 
-      \Sexpr{signif(phi.nls,dig)} & (,) \\
+      \Sexpr{signif(phi.nls,dig)} &  \Sexpr{ci_fmt("phi")} \\
     %%
     \noalign{\vspace{10pt}}
     \bfseries Specified parameter \\\hline
