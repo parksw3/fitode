@@ -326,12 +326,15 @@ from $a=500$, $\tpeak=5$, and $\omega=0.1$ yields $a=869$,
 $\omega=-0.19$, $\phi=-3.48$, which is far from our fitted values and
 illustrates a very important fact: there is \emph{not necessarily a
   unique best fit set of parameters!}  In this case, the alternative
-solution exists because $\sech^2(x)$ is symmetric about the $y$ axis, but
-in general, there can be many local minima that cause \code{nls} to
-converge to points that may or may not be equally good.
+solution exists because $\sech^2(x)$ is symmetric about the $y$ axis,
+but in general, there can be many local minima that cause \code{nls}
+to converge to points that may or may not be equally good.  In
+general, the potential existence of multiple local optima is something
+that makes fitting models to data hard, and you need to be cautious in
+interpretting any fit to which your fitting algorithm has converged.
 
 If you know that your parameters should be in a certain range, then
-you can pass that information to \code{nls}.  For example, to ensure
+you can exclude values outside that range.  For example, to ensure
 that all the parameters are non-negative (and exclude the alternative
 fit above), you would add the \code{nls} option
 
@@ -340,21 +343,38 @@ lower = c(a = 0, omega = 0, phi = 0)
 @ 
 
 \noindent
-which would prevent convergence to negative $\omega$ and
-$\phi$. \swp{Is this a good place to introduce link functions? Or too
-  early? Or at least hint at it?  Example text:} \swp{Instead, we can
-  also estimate the parameters on the log scale and convert them back
-  to the the original scale by exponentiating the estimated
+which would prevent convergence to negative $\omega$ and $\phi$.
+Alternatively, you could write 
+\begin{linenomath*}
+  \begin{equation}\label{eq:loglink}
+    a=e^A,\quad \omega=e^\Omega,\quad \phi=e^\Phi \,,
+  \end{equation}
+\end{linenomath*}
+and fit $A$, $\Omega$, and $\Phi$, which would guarantee positive $a$,
+$\omega$, and $\phi$ without having to constrain the values of the
+fitted parameters.  This last suggestion may just seem like a cute
+trick, but there is more to it than that.  Optimization algorithms
+generally perform better on unconstrained scales\needref, so it is
+advantageous to link parameters that must lie in a given range to
+unconstrained parameters that can be fit more reliably.  In
+equation~\eqref{eq:loglink}, the \term{link function} that converts
+the parameters to the unconstrained scale is $\log$.  Another common
+link function is logit (the inverse of the logistic function), which
+converts the unit interval $(0,1)$ to $(-\infty,\infty)$, and is
+especially convenient when parameters represent proportions or
+probabilities.
+%%
+\swp{Is this a good place to introduce link functions? Or too early?
+  Or at least hint at it?  Example text:} \swp{Instead, we can also
+  estimate the parameters on the log scale and convert them back to
+  the the original scale by exponentiating the estimated
   parameters. This would allow parameter estimation to happen on an
   unconstrained scale (between negative infinity and infinity),
   providing a more stable fitting. As we discuss later, we can use
   \term{link functions} to convert parameters with constraints to
   unconstrained scales for more general cases.}  \djde{Good idea.
-  I'll revisit this when I've got further with writing the rest of the
-  paper.}  In general, the potential existence of multiple local
-optima is something that makes fitting models to data hard, and you
-need to be cautious in interpretting any fit to which your fitting
-algorithm has converged.
+  I've added some text along these lines.  I'll revisit this when I've
+  got further with writing the rest of the paper.}
 
 <<KM fitted values, echo=FALSE>>=
 dig <- 3 # number of significant digits for printing
@@ -398,10 +418,11 @@ legend("topleft", bty="n", lwd=lwd, col=c(col.KM,col.nls),
 
 @ 
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
-  1906.  The data (black dots) were digitized from the chart in
-  \cite[p.\,714]{KermMcKe27}. The fitted curves are based on the KM
-  approximation \eqref{eq:sech}; the associated parameter estimates
-  are given in Table~\ref{tab:Bombay}.}
+  1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
+  (black dots) were digitized from \cite[Table~IX, p.\,753]{JHyg}
+  \djde{What is the full ref for that J. Hyg. paper?}  The fitted
+  curves are based on the KM approximation \eqref{eq:sech}; the
+  associated parameter estimates are given in Table~\ref{tab:Bombay}.}
 \label{fig:Bombay}
 \end{figure}
 
