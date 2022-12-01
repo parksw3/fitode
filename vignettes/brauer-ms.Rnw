@@ -265,7 +265,7 @@ function (\code{nls}), which attempts to minimize the distance
 \eqref{eq:leastsquares} to the data, starting from an initial guess
 (\code{start}).
 
-<<nls.bombay>>=
+<<nls-bombay>>=
 sech <- function(x) {1/cosh(x)}
 KM_approx <- function(t, a, omega, phi) {a * sech(omega*t - phi)^2}
 KM.parameters <- c(a = 890, omega = 0.2, phi = 3.4)
@@ -280,7 +280,7 @@ Above, we chose as our starting guess the fitted parameter values of
 \KM (see Table~\ref{tab:Bombay}).  The least
 squares parameter values differ from KM's by a few percent:
 
-<<percent.diff>>=
+<<percent-diff>>=
 (percent.difference <- 100*(KM.parameters - nls.parameters)
                            /nls.parameters)
 @ 
@@ -306,7 +306,7 @@ is the time at which the maximum occurs; both $a$ and $\tpeak$ can be
 guessed approximately by looking at the plotted observed data, and a
 very rough guess is sufficient to converge on the same fit:
 
-<<nls.bombay.2>>=
+<<nls-bombay-2>>=
 a.guess <- 1000    # crude "by eye" estimate of peak value
 tpeak.guess <- 15  # crude "by eye" estimate of peak time
 omega.guess <- 1   # wild guess
@@ -338,7 +338,7 @@ you can exclude values outside that range.  For example, to ensure
 that all the parameters are non-negative (and exclude the alternative
 fit above), you would add the \code{nls} option
 
-<<eval=FALSE>>=
+<<lower-ex, eval=FALSE>>=
 lower = c(a = 0, omega = 0, phi = 0)
 @ 
 
@@ -376,7 +376,8 @@ probabilities.
   I've added some text along these lines.  I'll revisit this when I've
   got further with writing the rest of the paper.}
 
-<<KM fitted values, echo=FALSE>>=
+<<KM-fitted-values, echo=FALSE>>=
+parnames <- c("a", "omega", "phi")
 dig <- 3 # number of significant digits for printing
 a.KM <- signif(KM.parameters["a"],dig)
 omega.KM <- signif(KM.parameters["omega"],dig)
@@ -392,7 +393,7 @@ tpeak.nls <- signif(phi.nls/omega.nls,dig)
 @ 
 
 \begin{figure}
-<<Bombayfigure, echo=FALSE, fig.height=5>>=
+<<Bombay-figure, echo=FALSE, fig.height=5>>=
 f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
 tmax <- 33
 tvals <- seq(0,tmax,length=1000)
@@ -496,7 +497,7 @@ by \KM and by us using \code{nls}.  \swp{The problem is that we're
   that it is fair to make inferences from estimated parameter values.}
 \djde{Note KM's caution about interpreting the param values.}
 
-<<invert KM analytically, echo=FALSE>>=
+<<invert-KM-analytically, echo=FALSE>>=
 invert_params <- function(I0, params) {
     with(as.list(params), {
         Reff <- (1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2
