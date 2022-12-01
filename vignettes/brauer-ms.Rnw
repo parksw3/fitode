@@ -381,17 +381,15 @@ converts the unit interval $(0,1)$ to $(-\infty,\infty)$, and is
 especially convenient when parameters represent proportions or
 probabilities.
 %%
-\swp{Is this a good place to introduce link functions? Or too early?
-  Or at least hint at it?  Example text:} \swp{Instead, we can also
-  estimate the parameters on the log scale and convert them back to
-  the the original scale by exponentiating the estimated
-  parameters. This would allow parameter estimation to happen on an
-  unconstrained scale (between negative infinity and infinity),
-  providing a more stable fitting. As we discuss later, we can use
-  \term{link functions} to convert parameters with constraints to
-  unconstrained scales for more general cases.}  \djde{Good idea.
+\swp{Maybe add this so it doesn't look like we're introducing this for
+no reason: Link functions are implemented in \code{fitode} as we
+demonstrate later.}
+\djde{Good idea.
   I've added some text along these lines.  I'll revisit this when I've
   got further with writing the rest of the paper.}
+  \swp{I still wonder if it's a little early to introduce link functions if we're
+not going to use them until much later when we actually use fitode. Or maybe
+the last sentence I suggested helps with that issue a bit.}
 
 <<KM-fitted-values, echo=FALSE>>=
 parnames <- c("a", "omega", "phi")
