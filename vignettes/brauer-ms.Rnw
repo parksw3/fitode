@@ -76,6 +76,8 @@
 
 \djde{The \href{https://www.tandfonline.com/action/authorSubmission?show=instructions&journalCode=tjbd20}{author instructions} say ``please also include ORCiDs and social media handles (Facebook, Twitter or LinkedIn)'' but it isn't clear where to put them.}
 
+\bmb{For future reference: ORCID 0000-0002-2127-0443, twitter @bolkerb, Mastodon @bbolker@fediscience.org}
+
 \bigskip \bigskip
 
 \begin{abstract}
@@ -86,7 +88,7 @@
   dynamical models to data, and why it can be hard.  Initially in
   response to Fred's questions, we developed a user-friendly
   \code{R} package that facilitates fitting ordinary differential
-  equations to observed time series.  Here, we exploit the package
+  equations to observed time series.  Here, we use the package
   (\code{fitode}) to provide a brief tutorial introduction to
   fitting compartmental epidemic models to a single observed time
   series.  We assume that, similar to Fred, the reader is familiar
@@ -129,8 +131,8 @@ In the century that has elapsed since publication of \KM's initial
 paper, the field of mathematical epidemiology has expanded and
 matured, and has been the subject of many books
 \cite{Bart60,Bail75,AndeMay91,AndeBrit00b,DiekHees00,BrauCast01,Brau+19}
-and review articles \cite{Heth00,Earn+02,Earn09}.  The focus has
-tended to be on \term{compartmental models} like the SIR model, cast
+and review articles \cite{Heth00,Earn+02,Earn09}. Researchers have
+primarily focused on \term{compartmental models} like the SIR model, cast
 either as differential equations following the tradition of \KM
 \cite{KermMcKe27}, or as \term{stochastic processes} in the tradition
 of Bartlett \cite{Bart60}.  In recent years, as the power of computers
@@ -138,14 +140,16 @@ has grown exponentially, there has been increasing interest in
 \term{agent-based models}, which represent each individual as
 a separate unit that can have unique properties \cite{eubank2004modelling}.
 
+\bmb{I would normally object to ``exponentially'' on pedantic grounds but here it's actually justified \ldots}
+
 Throughout the history of the subject, and regardless of the modelling
 frameworks they have exploited, mathematical epidemiologists have
 frequently attempted to fit---or at least to compare---their models to
-observed infectious disease data. Such fits have often been fairly
-na\"{\i}ve, with limited consideration of their quality; but over the
-years, there has been a trend towards greater sophistication and
+observed infectious disease data. Such fits have often been
+na\"{\i}ve, with limited consideration of their quality. Over the
+years, however, there has been a trend towards greater sophistication and
 statistical rigour in parameter estimation for infectious disease
-models, and books that explain these methods have begun to appear in
+models; books that explain these methods have begun to appear in
 recent decades \cite{Bolk08,bjornstadEpidemics2018}.  Careful
 consideration of uncertainty is especially important when epidemic
 models are used for the development and analysis of policy options for
@@ -173,7 +177,7 @@ model fitting to Fred and others like him, i.e., individuals who are
 comfortable with mathematical analysis of ODEs but have little or no
 experience with statistics and parameter estimation.  Unfortunately,
 we have lost the opportunity to present our work to Fred, but it seems
-fitting (!) to present such a tutorial in this volume dedicated to
+fitting (!) \bmb{cute} to present such a tutorial in this volume dedicated to
 Fred's memory.
 
 \section{Kermack and McKendrick's fit}
@@ -187,13 +191,13 @@ Referring to their version of Figure~\ref{fig:Bombay}, \KM
 \cite[p.\,714]{KermMcKe27} argued that ``As at least 80 to 90 per
 cent.\ of the cases reported terminate fatally, the ordinate may be
 taken as approximately representing [$\dbydt{R}$] as a function of
-$t$.''  Since computers did not yet exist, and an exact analytical
+$t$.''  Since (non-human\footnote{\url{https://en.wikipedia.org/wiki/Computer_(occupation)} \bmb{will remove this footnote eventually}}) computers did not yet exist, and an exact analytical
 form for this function could not be found, they proceeded to assume
 \cite[p.\,713]{KermMcKe27} that $\frac{\beta}{\gamma}R(t)\ll1$, which
 yields the approximate analytical form,
 \begin{linenomath*}
 \begin{equation}\label{eq:sech}
-\ddt{R} \simeq a \sech^2{(\omega\,t - \phi)} \,.
+\ddt{R} \approx a \sech^2{(\omega\,t - \phi)} \,.
 \end{equation}
 \end{linenomath*}
 Noting that the basic reproduction number is
@@ -258,7 +262,7 @@ with a pencil and paper in 1927, but it is a simple task with the
 aid of a computer.
 
 In the following segment of R code, we fit equation \eqref{eq:sech} to
-the Bombay plague data (which are built in to the \code{fitode}
+the Bombay plague data (which are included in the \code{fitode}
 package that we describe below, as a data frame with columns
 \code{week} and \code{mort}).  We exploit R's nonlinear least squares
 function (\code{nls}), which attempts to minimize the distance
@@ -274,6 +278,10 @@ nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
               start = KM.parameters)
 (nls.parameters <- coef(nlsfit))
 @
+
+\bmb{the \code{(...)} trick for printing the value of an assignment
+  is nice and compact, but might be confusing for naive readers? (i.e.
+  do we want an explicit \code{print()} statement here, and throughout?)}
 
 \noindent
 Above, we chose as our starting guess the fitted parameter values of
@@ -327,11 +335,12 @@ $\omega=-0.19$, $\phi=-3.48$, which is far from our fitted values and
 illustrates a very important fact: there is \emph{not necessarily a
   unique best fit set of parameters!}  In this case, the alternative
 solution exists because $\sech^2(x)$ is symmetric about the $y$ axis,
-but in general, there can be many local minima that cause \code{nls}
-to converge to points that may or may not be equally good.  In
-general, the potential existence of multiple local optima is something
-that makes fitting models to data hard, and you need to be cautious in
-interpretting any fit to which your fitting algorithm has converged.
+but in general, there can be multiple local minima that cause \code{nls}
+to converge to points that may or may not represent equally good fits to the data.  In general, the potential existence of multiple local optima is something
+that makes fitting models to data hard; you need to be cautious in
+interpreting any fit to which your fitting algorithm has converged.
+\bmb{\cite{raue2013lessons} have some suggestions about how to diagnose
+  multiple optima but this is probably beyond the scope of this paper}
 
 If you know that your parameters should be in a certain range, then
 you can exclude values outside that range.  For example, to ensure
@@ -353,10 +362,12 @@ Alternatively, you could write
 and fit $A$, $\Omega$, and $\Phi$, which would guarantee positive $a$,
 $\omega$, and $\phi$ without having to constrain the values of the
 fitted parameters.  This last suggestion may just seem like a cute
-trick, but there is more to it than that.  Optimization algorithms
-generally perform better on unconstrained scales\needref, so it is
-advantageous to link parameters that must lie in a given range to
-unconstrained parameters that can be fit more reliably.  In
+trick, but there is more to it than that.  A much broader
+range of optimization algorithms is available for unconstrained fitting;
+numerical parameter values of very small magnitude can also
+lead to numerical instability,
+so it is advantageous to link parameters that must lie in a given range to
+unconstrained parameters that can be fit more easily.  In
 equation~\eqref{eq:loglink}, the \term{link function} that converts
 the parameters to the unconstrained scale is $\log$.  Another common
 link function is logit (the inverse of the logistic function), which
