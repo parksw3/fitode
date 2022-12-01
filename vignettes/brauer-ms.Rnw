@@ -363,18 +363,16 @@ link function is logit (the inverse of the logistic function), which
 converts the unit interval $(0,1)$ to $(-\infty,\infty)$, and is
 especially convenient when parameters represent proportions or
 probabilities.
+\swp{Maybe add this so it doesn't look like we're introducing this for
+no reason: Link functions are implemented in \code{fitode} as we
+demonstrate later.}
 %%
-\swp{Is this a good place to introduce link functions? Or too early?
-  Or at least hint at it?  Example text:} \swp{Instead, we can also
-  estimate the parameters on the log scale and convert them back to
-  the the original scale by exponentiating the estimated
-  parameters. This would allow parameter estimation to happen on an
-  unconstrained scale (between negative infinity and infinity),
-  providing a more stable fitting. As we discuss later, we can use
-  \term{link functions} to convert parameters with constraints to
-  unconstrained scales for more general cases.}  \djde{Good idea.
+\djde{Good idea.
   I've added some text along these lines.  I'll revisit this when I've
   got further with writing the rest of the paper.}
+\swp{I still wonder if it's a little early to introduce link functions if we're
+not going to use them until much later when we actually use fitode. Or maybe
+the last sentence I suggested helps with that issue a bit.}
 
 <<KM-fitted-values, echo=FALSE>>=
 parnames <- c("a", "omega", "phi")
@@ -392,7 +390,7 @@ for (p in parnames) {
 }
 tpeak.nls <- with(as.list(nls.parameters), signif(phi / omega,dig))
 cc <- suppressMessages(confint(nlsfit))
-ci_fmt  <- function(p) (format(cc[p,], digits = 2)
+ci_fmt  <- function(p, cc) (format(cc[p,], digits = 2)
     |> paste(collapse = ", ")
     |> sprintf(fmt = "(%s)")
 )
@@ -518,6 +516,7 @@ invert_params <- function(I0, params) {
 	c(Reff=Reff, S0=S0, gamma=gamma, Tg=1/gamma, beta=beta)
     })
 }
+N.KM <- 10^6
 I0.KM <- 1
 orig.params.KM <- invert_params(I0 = I0.KM, params = KM.parameters)
 orig.params.KM <- signif(orig.params.KM,dig)
@@ -534,7 +533,49 @@ S0.nls <- orig.params.nls[["S0"]]
 gamma.nls <- orig.params.nls[["gamma"]]
 Tg.nls <- orig.params.nls[["Tg"]]
 beta.nls <- orig.params.nls[["beta"]]
+R0.nls <- Reff.nls/S0.nls*N.KM
 @
+
+<<delta-method-ci, echo=FALSE>>==
+convert_express <- list(
+    tpeak=expression(phi/omega),
+    Reff=expression((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2),
+    gamma=expression(2 * omega/((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2-1)/tanh(phi)),
+    S0=expression(2 * ((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) * I0 * sinh(phi)^2/(((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) - 1)^2),
+    beta=expression((((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) - 1) * omega * tanh(phi)/(I0 * sinh(phi)^2)),
+    Tg=expression(1/(2 * omega/((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2-1)/tanh(phi))),
+    R0=expression((((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) - 1)^2/(2 * I0 * sinh(phi)^2)*N)
+)
+
+##dg/dx
+dgdx <- sapply(convert_express, function(x) {
+    dd <- deriv(x, c("a", "omega", "phi"))
+    ee <- eval(dd, c(as.list(nls.parameters), I0=I0.KM, N=N.KM))
+    attr(ee, "gradient")
+})
+
+vcov <- vcov(nlsfit)
+est_vcov <- t(dgdx) %*% vcov %*% dgdx
+est_err <- sqrt(diag(est_vcov))
+est_par <- c(tpeak=tpeak.nls, Reff=Reff.nls, gamma=gamma.nls, S0=S0.nls, beta=beta.nls, Tg=Tg.nls, R0=R0.nls)
+z <- -qnorm((1-0.95)/2)
+
+cc.delta <- matrix(
+    c(est_par - z * est_err, est_par + z * est_err),
+    ncol=2,
+    dimnames=list(
+        c("tpeak", "Reff", "gamma", "S0", "beta", "Tg", "R0"),
+        c("2.5%", "97.5%")
+    )
+)
+
+for (p in rownames(cc.delta)) {
+    assign(paste0(p,".lwr"), cc.delta[p, "2.5%"])
+    assign(paste0(p,".upr"), cc.delta[p, "97.5%"])
+}
+@
+
+
 
 The final column of Table~\ref{tab:Bombay} lists 95\% confidence
 intervals on our \code{nls} parameter estimates.
@@ -570,11 +611,11 @@ likely to be much better than fitting the initial condition $I_0$.}
     & \bfseries equation & \bfseries units
     & \bfseries KM & \bfseries nls & \bfseries 95\% CI \\\hline
     peak removal rate & $a$& \eqref{eq:a} & 1/weeks & \Sexpr{a.KM} &
-      \Sexpr{signif(a.nls,dig)} & \Sexpr{ci_fmt("a")} \\
+      \Sexpr{signif(a.nls,dig)} & \Sexpr{ci_fmt("a", cc)} \\
     outbreak speed & $\omega$ & \eqref{eq:omega} & 1/weeks &
-      \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} &  \Sexpr{ci_fmt("omega")} \\
+      \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} &  \Sexpr{ci_fmt("omega", cc)} \\
     outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.KM} &
-      \Sexpr{signif(phi.nls,dig)} &  \Sexpr{ci_fmt("phi")} \\
+      \Sexpr{signif(phi.nls,dig)} &  \Sexpr{ci_fmt("phi", cc)} \\
     %%
     \noalign{\vspace{10pt}}
     \bfseries Specified parameter \\\hline
@@ -584,21 +625,21 @@ likely to be much better than fitting the initial condition $I_0$.}
     \noalign{\vspace{10pt}}
     \bfseries Derived parameter \\\hline
     peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
-      \Sexpr{tpeak.KM} & \Sexpr{tpeak.nls} & (,) \\
+      \Sexpr{tpeak.KM} & \Sexpr{tpeak.nls} & \Sexpr{ci_fmt("tpeak", cc.delta)} \\
     effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
-      \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & (,) \\
+      \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & \Sexpr{ci_fmt("Reff", cc.delta)} \\
     removal rate & $\gamma$ & \eqref{eq:gamma} & 1/weeks &
-      \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & (,) \\
+      \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & \Sexpr{ci_fmt("gamma", cc.delta)} \\
     initial susceptibles & $S_0$ & \eqref{eq:S0} & -- &
-      \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & (,) \\
+      \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta)} \\
     transmission rate & $\beta$ & \eqref{eq:beta} & 1/weeks &
-      \Sexpr{beta.KM} & \Sexpr{beta.nls} & (,) \\
+      \Sexpr{beta.KM} & \Sexpr{beta.nls} & \Sexpr{ci_fmt("beta", cc.delta)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
-      \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & (,) \\
+      \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta)} \\
     basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
       \Sexpr{signif(10^6*Reff.KM/S0.KM,dig)}
-      & \Sexpr{signif(10^6*Reff.nls/S0.nls,dig)} & (,)
+      & \Sexpr{signif(10^6*Reff.nls/S0.nls,dig)} & \Sexpr{ci_fmt("R0", cc.delta)}
   \end{tabular}
   \end{center}
   \label{tab:Bombay}
