@@ -89,9 +89,9 @@
   problems.  He was curious to know how one goes about fitting
   dynamical models to data, and why it can be hard.  Initially in
   response to Fred's questions, we developed a user-friendly
-  \texttt{R} package that facilitates fitting ordinary differential
+  \code{R} package that facilitates fitting ordinary differential
     equations to observed time series.  Here, we use the package
-  (\texttt{fitode}) to provide a brief tutorial introduction to
+  (\code{fitode}) to provide a brief tutorial introduction to
   fitting compartmental epidemic models to a single observed time
   series.  We assume that, similar to Fred, the reader is familiar
   with dynamical systems from a mathematical perspective, but has
@@ -101,7 +101,7 @@
 
 \begin{keywords}
   epidemic models; infectious diseases; ordinary differential
-  equations; parameter estimation; maximum likelihood; \texttt{fitode}
+  equations; parameter estimation; maximum likelihood; \code{fitode}
 \end{keywords}
 
 \section{Introduction}
@@ -605,7 +605,7 @@ late in the epidemic).  Instead, we \djde{Ben, can you please: (1)
   confidence bands on the plotted curve, and add the confidence bands
   to the plot (or make another plot); and (2) explain how CIs on the
   parameter estimates are obtained and spew them here.  Daniel
-  basically did it in \texttt{epidemic.Rnw} but without explanation.}
+  basically did it in \code{epidemic.Rnw} but without explanation.}
 
 Bear in mind that at each step of this approach, we are making a very
 specific, strong assumptions (when we ``imagine'').  To begin with, it
@@ -619,7 +619,7 @@ stochastic nature of infection and removal events\needref.
 \djde{explain how least squares is max likelihood assuming the normal
   observation errors}
 \djde{What is the standard way to get CIs on the parameters and confidence
-  bands on the fit from the \texttt{nlsfit} object?}
+  bands on the fit from the \code{nlsfit} object?}
 \djde{How should we compute CIs for the derived parameters?  Delta
   method?}
 
@@ -782,7 +782,7 @@ Very small population size.
 
 \subsection*{Things to mention}
 
-application of \texttt{fitsir} to song downloads, and how we
+application of \code{fitsir} to song downloads, and how we
 convinced ourselves that the SIR model was reasonable for that
 problem \cite{Rosa+21}.
 
