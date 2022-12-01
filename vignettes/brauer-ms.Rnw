@@ -458,8 +458,8 @@ analytically\footnote{In (common) situations in which
 Since there are four original parameters ($\beta$, $\gamma$, $S_0$,
 $I_0$) and only three parameters in \KM's approximation
 \eqref{eq:sech} ($a$, $\omega$, $\phi$), one of the four original
-parameters needs to be specified separately, and we have taken this to
-be the initial prevalence $I_0$.  From
+parameters needs to be specified separately, and above we have taken
+this to be the initial prevalence $I_0$.  From
 equation~\eqref{eq:invertparams}, we can compute the transmission
 rate,
 \begin{linenomath*}
@@ -525,10 +525,41 @@ Tg.nls <- orig.params.nls[["Tg"]]
 beta.nls <- orig.params.nls[["beta"]]
 @
 
-The final column of Table~\ref{tab:Bombay} lists 95\% confidence
-intervals on our \code{nls} parameter estimates.
-\djde{explain normal CIs from least squares and how least squares is max
-likelihood in this case}
+The final column of Table~\ref{tab:Bombay} lists 95\% \term{confidence
+  intervals} (CIs) on our \code{nls} parameter estimates.  To arrive
+at these confidence levels, we have employed a standard approach.  We
+imagine that the model \eqref{eq:sech} is a perfect representation of
+reality, and we consider the deviations from the model curve in
+Figure~\ref{fig:Bombay} to be observation errors.  We then imagine
+that observation error for each data point is independent and
+identically distributed (iid), and drawn from a normal distribution
+with zero mean and the same standard deviation $\sigma$ equal to the
+standard deviation of the residuals (the differences between the model
+curve and the observed data).  With this assumption, we could
+na\"ively draw confidence bands by adding $\pm1.96\,\sigma$ to our
+fitted model curve,\footnote{For a \code{Normal}$(0,\sigma)$
+  distribution, 95\% of the probability lies between $-1.96\,\sigma$
+  and $+1.96\,\sigma$.}  which would emphasize the folly in assuming
+the observation error has the same absolute magnitude throughout the
+epidemic (in particular the lower limit would go below zero early and
+late in the epidemic).  Instead, we \djde{Ben, can you please: (1)
+  fill in a brief description of what is actually being done to get
+  confidence bands on the plotted curve, and add the confidence bands
+  to the plot (or make another plot); and (2) explain how CIs on the
+  parameter estimates are obtained and spew them here.  Daniel
+  basically did it in \texttt{epidemic.Rnw} but without explanation.}
+
+Bear in mind that at each step of this approach, we are making a very
+specific, strong assumptions (when we ``imagine'').  To begin with, it
+is absurd to suggest that KM's approximation \eqref{eq:sech} to the
+solution of the SIR model \eqref{eq:SIR} is a perfect representation
+of reality!  The ODEs themselves are far from realistic, not least
+because they ignore the discrete nature of individuals and the
+stochastic nature of infection and removal events\needref.
+
+
+\djde{explain how least squares is max likelihood assuming the normal
+  observation errors}
 \djde{What is the standard way to get CIs on the parameters and confidence
   bands on the fit from the \texttt{nlsfit} object?}
 \djde{How should we compute CIs for the derived parameters?  Delta
@@ -592,6 +623,104 @@ likely to be much better than fitting the initial condition $I_0$.}
   \end{center}
   \label{tab:Bombay}
 \end{table}
+
+\section{Fitting the ODE}
+
+Until now, we have focussed on fitting KM's approximation
+\eqref{eq:sech} rather than actual solutions of the SIR model
+\eqref{eq:SIR}.  If we had an exact analytical solution of the SIR
+ODE~\eqref{eq:SIR} then we could proceed as above and, replacing the
+approximate analytical expression \eqref{eq:sech} with the exact
+formula.  Since we do not have an exact solution, we must instead rely
+on numerical solutions of the ODE.  In general, fitting numerical
+solutions of ODEs to data introduces significant coding/computational
+challenges, but conceptually the problem is the same as if we did have
+an analytical formula.
+
+The \code{fitode} package\footnote{\code{fitode} is available on CRAN
+  and consequently can be installed easily via
+  \code{install.packages("fitode")}.} does all the computational work
+under the hood, and makes it as easy for a user to fit an ODE to data
+as it was for us above to use \code{nls} to fit an analytical formula.
+We illustrate the use of the package by fitting the SIR
+model~\eqref{eq:SIR} to the Bombay plague epidemic.
+
+We begin by loading the package
+<<load fitode>>=
+library(fitode)
+@ 
+\noindent
+and defining a model object:
+<<sirmortmodel>>=
+SIR_mort_model <- odemodel(
+    name="SIR mortality rate",
+    model=list(
+        S ~ - beta * S * I/N,
+        I ~ beta * S * I/N - gamma * I,
+        R ~ gamma * I
+    ),
+    observation=list(
+        mort ~ ols(mean = gamma * I)
+    ),
+    initial=list(
+        S ~ N * (1 - i0),
+        I ~ N * i0,
+        R ~ 0
+    ),
+    par=c("beta", "gamma", "N", "i0"),
+    link=c(i0="logit")
+)
+@
+
+Searching for starting values through trial and error:
+<<sirmortstart,warning=FALSE,basefig=TRUE>>=
+SIR_mort_start <- c(beta=0.8, gamma=0.4, N=6000, i0=0.001)
+
+ss_SIR_mort <- simulate(SIR_mort_model,
+    parms=SIR_mort_start, times=bombay$week)
+
+plot(bombay)
+lines(ss_SIR_mort$times, ss_SIR_mort$I)
+@
+Fit:
+<<sirmortfit,cache=TRUE,warning=FALSE>>=
+SIR_mort_fit <- fitode(
+    SIR_mort_model,
+    data=bombay,
+    start=SIR_mort_start,
+    tcol="week"
+)
+@
+Plot:
+<<sirmortfitplot,basefig=TRUE>>=
+plot(SIR_mort_fit, level=0.95)
+@
+Very good fit, but unrealistic parameters with mean infectious period of 0.4 days.
+<<sirmortcoef>>=
+coef(SIR_mort_fit)
+@
+What happens if we try to assume a longer (and more realistic) infectious period?
+<<sirmortfit2,cache=TRUE,warning=FALSE>>=
+SIR_mort_fit2 <- fitode(
+    SIR_mort_model,
+    data=bombay,
+    start=SIR_mort_start,
+    fixed=c(gamma=1),
+    tcol="week"
+)
+@
+
+Plot?
+<<>>==
+plot(SIR_mort_fit2)
+@
+Coef?
+<<>>==
+coef(SIR_mort_fit2)
+@
+Very small population size.
+
+
 
 \subsection*{Things to mention}
 
