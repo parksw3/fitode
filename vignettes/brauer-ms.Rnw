@@ -734,7 +734,7 @@ and defining a model object:
 
 \vbox{
 <<sirmortmodel>>=
-SIR_model <- odemodel(
+SIR_model <- odemodel( 
     name = "SIR model",
     model = list(
         S ~ - beta * S * I/N,
@@ -745,12 +745,12 @@ SIR_model <- odemodel(
         mort ~ ols(mean = gamma * I)
     ),
     initial = list(
-        S ~ N * (1 - i0),
+        S ~ N * s0,
         I ~ N * i0,
-        R ~ 0
+        R ~ N * (1 - (s0+i0))
     ),
-    par = c("beta", "gamma", "N", "i0"),
-    link = c(i0 = "logit")
+    par = c("beta", "gamma", "N", "s0", "i0"),
+    link = c(s0 = "logit", i0 = "logit")
 )
 @
 }% end vbox
@@ -761,25 +761,31 @@ SIR_model <- odemodel(
   and set \code{r0 = 1 - (s0+i0)}.}
 
 \noindent
-In the model definition above, \code{model} specifies the vector field
-given by the ODE \eqref{eq:SIR}, \code{observation} specifies that the
-observed data (\code{mort}) are assumed to arise from sampling from
-the normal distribution associated with ordinary least squares
-(\code{ols}) fit [with a mean given by the fitted model curve,
-$\gamma I(t)$, as in equation~\eqref{eq:SIR;R}], the initial
-conditions are expressed as proportions of the total population size
-(\code{N}), which is fixed at the estimated population of Bombay in
-1906 ($10^6$), the parameters to be fitted are $\beta$, $\gamma$, and
-initial proportions $s_0$ and $i_0$, which are to be fitted on the
-logit scale since they are proportions (log links are assumed by
-default, so $\beta$ and $\gamma$ are constrained to be positive).
+In the model definition above:
+\begin{description}
+\item[\code{model}]specifies the vector field given by the ODE \eqref{eq:SIR}, 
+\item[\code{observation}]specifies that the observed data
+  (\code{mort}) are assumed to arise from sampling from the normal
+  distribution associated with an ordinary least squares (\code{ols})
+  fit; the sampled distribution is $\texttt{Normal}(\mu,\sigma)$,
+  where the mean is given by the fitted model curve ($\mu(t)=\gamma I(t)$,
+  equation~\eqref{eq:SIR;R}) and the standard deviation is $\sigma(t)=$\dots
+\item[\code{initial}]conditions are expressed as proportions of the
+  total population size (\code{N}),
+\item[\code{par}]refers to the parameters that are to be fitted:
+  $\beta$, $\gamma$, and initial proportions $s_0$ and $i_0$, which
+  are to fitted via a
+\item[\code{link}]function to the logit scale, since they are
+  proportions; log links are assumed by default, so $\beta$ and
+  $\gamma$ are constrained to be positive automatically.
+\end{description}
 
 \thickredline
 
 Searching for starting values through trial and error:
 <<sirmortstart,warning=FALSE,basefig=TRUE>>=
-SIR_start <- c(beta=0.8, gamma=0.4, N=6000, i0=0.001)
-
+SIR_start <- c(beta=0.8, gamma=0.4, N=10^6, s0=0.05, i0=0.0001)
+ 
 ss_SIR <- simulate(SIR_model,
     parms = SIR_start, times = bombay$week)
 
@@ -792,9 +798,15 @@ SIR_fit <- fitode(
     SIR_model,
     data = bombay,
     start = SIR_start,
+    fixed = c(N = 10^6),
     tcol = "week"
 )
 @
+
+which \code{fixed} at the estimated population of Bombay in 1906
+($10^6$)
+
+
 Plot:
 <<sirmortfitplot,basefig=TRUE>>=
 plot(SIR_fit, level=0.95)
@@ -809,7 +821,7 @@ SIR_fit2 <- fitode(
     SIR_model,
     data = bombay,
     start = SIR_start,
-    fixed = c(gamma = 1),
+    fixed = c(N = 10^6, gamma = 1), # Tg = 1/gamma = 1 week
     tcol = "week"
 )
 @
