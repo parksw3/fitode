@@ -774,14 +774,15 @@ In the model definition above:
   $\gamma$ are constrained to be positive automatically.
 \end{description}
 
-\thickredline
-
-Here, the gradients are defined using the \code{model} argument (using a list of formulas), where the left-hand side (LHS) corresponds to the name of the state variable (e.g,. \code{S} for $dS/dt$) and the right-hand side (RHS) the gradient.
+\swp{I wrote this without realizing that you had already written the thing above. See if you need anything from here and keep it (or take it out). Not sure how much we want to explain the syntax though.}
+\swp{Here, the gradients are defined using the \code{model} argument (using a list of formulas), where the left-hand side (LHS) corresponds to the name of the state variable (e.g,. \code{S} for $dS/dt$) and the right-hand side (RHS) the gradient.
 The \code{observation} argument takes a list of formulas, where the LHS correspond to the data and the RHS correspond to the observation (error) distribution and its parameters---here we write \code{ols(mean = gamma * I)} to perform ordinary least squares where the modeled mean corresponds to $dR/dt=\gamma I$.
 Similarly, the \code{initial} argument takes the initial values for the mode.
 Finally, all model parameters (including initial conditions and parameters of the error distribution) must be listed using the \code{par} argument.
-We note that log links are applied to all model parameters by default---this can be changed using the \code{link} argument as we show later.
+We note that log links are applied to all model parameters by default---this can be changed using the \code{link} argument as we show later.}
 \swp{Do we want to move away from least squares here or not yet?}
+
+\thickredline
 
 We take our previous parameter estimates from \code{nls} as our starting values:
 <<sirmortstart,warning=FALSE,basefig=TRUE>>=
