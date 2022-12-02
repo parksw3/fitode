@@ -722,33 +722,40 @@ and defining a model object:
 SIR_mort_model <- odemodel(
     name="SIR mortality rate",
     model=list(
-        S ~ - beta * S * I/N,
-        I ~ beta * S * I/N - gamma * I,
+        S ~ - beta * S * I,
+        I ~ beta * S * I - gamma * I,
         R ~ gamma * I
     ),
     observation=list(
         mort ~ ols(mean = gamma * I)
     ),
     initial=list(
-        S ~ N * (1 - i0),
-        I ~ N * i0,
+        S ~ S0,
+        I ~ I0,
         R ~ 0
     ),
-    par=c("beta", "gamma", "N", "i0"),
-    link=c(i0="logit")
+    par=c("beta", "gamma", "S0", "I0")
 )
 @
+Here, the gradients are defined using the \code{model} argument (using a list of formulas), where the left-hand side (LHS) corresponds to the name of the state variable (e.g,. \code{S} for $dS/dt$) and the right-hand side (RHS) the gradient.
+The \code{observation} argument takes a list of formulas, where the LHS correspond to the data and the RHS correspond to the observation (error) distribution and its parameters---here we write \code{ols(mean = gamma * I)} to perform ordinary least squares where the modeled mean corresponds to $dR/dt=\gamma I$.
+Similarly, the \code{initial} argument takes the initial values for the mode.
+Finally, all model parameters (including initial conditions and parameters of the error distribution) must be listed using the \code{par} argument.
+We note that log links are applied to all model parameters by default---this can be changed using the \code{link} argument as we show later.
+\swp{Do we want to move away from least squares here or not yet?}
 
-Searching for starting values through trial and error:
+We take our previous parameter estimates from \code{nls} as our starting values:
 <<sirmortstart,warning=FALSE,basefig=TRUE>>=
-SIR_mort_start <- c(beta=0.8, gamma=0.4, N=6000, i0=0.001)
+SIR_mort_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls)
 
 ss_SIR_mort <- simulate(SIR_mort_model,
     parms=SIR_mort_start, times=bombay$week)
 
 plot(bombay)
-lines(ss_SIR_mort$times, ss_SIR_mort$I)
+lines(ss_SIR_mort$times, ss_SIR_mort$I*gamma.nls)
 @
+We already have a pretty good fit.
+
 Fit:
 <<sirmortfit,cache=TRUE,warning=FALSE>>=
 SIR_mort_fit <- fitode(
@@ -762,7 +769,7 @@ Plot:
 <<sirmortfitplot,basefig=TRUE>>=
 plot(SIR_mort_fit, level=0.95)
 @
-Very good fit, but unrealistic parameters with mean infectious period of 0.4 days.
+Very good fit, but unrealistic parameters with mean infectious period of 0.3 days.
 <<sirmortcoef>>=
 coef(SIR_mort_fit)
 @
@@ -779,7 +786,7 @@ SIR_mort_fit2 <- fitode(
 
 Plot?
 <<>>==
-plot(SIR_mort_fit2)
+plot(SIR_mort_fit2, level=0.95)
 @
 Coef?
 <<>>==
