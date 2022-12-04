@@ -204,12 +204,11 @@ Referring to their version of Figure~\ref{fig:Bombay}, \KM
 \cite[p.\,714]{KermMcKe27} argued that ``As at least 80 to 90 per
 cent.\ of the cases reported terminate fatally, the ordinate may be
 taken as approximately representing [$\dbydt{R}$] as a function of
-$t$.''  Since Since (non-human\footnote{\url{https://en.wikipedia.org/wiki/Computer_(occupation)}
-\bmb{will remove this footnote eventually}}) computers did not yet exist, and an exact analytical
-did not yet exist, and an exact analytical
-form for this function could not be found, they proceeded to assume
-\cite[p.\,713]{KermMcKe27} that $\frac{\beta}{\gamma}R(t)\ll1$, which
-yields the approximate analytical form,
+$t$.''  Since (non-human) computers did not yet exist \cite{Camp09},
+and an exact analytical form for this function could not be found,
+they proceeded to assume \cite[p.\,713]{KermMcKe27} that
+$\frac{\beta}{\gamma}R(t)\ll1$, which yields the approximate
+analytical form,
 \begin{linenomath*}
 \begin{equation}\label{eq:sech}
 \ddt{R} \approx a \sech^2{(\omega\,t - \phi)} \,.
@@ -251,18 +250,27 @@ KM column of Table~\ref{tab:Bombay}, and they plotted their
 ``calculated'' curve, which we have reproduced in red in
 Figure~\ref{fig:Bombay}.
 
-The red curve does appear to provide a reasonable fit to the data, but
-\KM \cite{KermMcKe27} gave no indication of how
-their parameter estimates were obtained.  \djde{When was least-squares
-  trajectory matching first done?  Do we think they did that?  or just
-  played with parameter values and fitted by eye?} \swp{It seems unlikely that they had the ability to perform least squares back in 1927... I was able to find least squares SIR and SI3R(!) model fit from 1990 \cite[p.\,51]{kryscio1990modeling} but not sure if there's anything earlier.}  Whatever their
-process, they must have engaged in some sort of \term{trajectory
-  matching}, i.e., adjusting parameter values until the
-model---equation~\eqref{eq:sech} in their case---is, by some measure,
-close to the observed data points.  The most obvious
-metric for this purpose is the Euclidean distance between the model
-curve and the data.  Thus, the \term{objective function} that is
-natural to minimize is
+\subsection{How to fit the model to the data}
+
+The red curve in Figure~\ref{fig:Bombay} does appear to provide a
+reasonable fit to the data, but \KM \cite{KermMcKe27} gave no
+indication of how their parameter estimates were obtained.  \djde{When
+  was least-squares trajectory matching first done?  Do we think they
+  did that?  or just played with parameter values and fitted by eye?}
+\swp{It seems unlikely that they had the ability to perform least
+  squares back in 1927... I was able to find least squares SIR and
+  SI3R(!) model fit from 1990 \cite[p.\,51]{kryscio1990modeling} but
+  not sure if there's anything earlier.  They could have used human
+  computers, as Ben notes.}\djde{According to
+  \href{https://en.wikipedia.org/wiki/Least_squares}{Wikipedia}, the
+  method of least squares goes back to Legendre and Gauss, a century
+  before KM.}  Whatever their process, they must have engaged in some
+sort of \term{trajectory matching}, i.e., adjusting parameter values
+until the model---equation~\eqref{eq:sech} in their case---is, by some
+measure, close to the observed data points.  The most obvious metric
+for this purpose is the Euclidean distance between the model curve and
+the data.  Thus, the \term{objective function} that is natural to
+minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
 \sum_{i=1}^n \big(f(t_i;\boldbeta) - y_i\big)^2 \,,
@@ -291,13 +299,9 @@ KM.parameters <- c(a = 890, omega = 0.2, phi = 3.4)
 nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
               data = fitode::bombay,
               start = KM.parameters)
-(nls.parameters <- coef(nlsfit))
+nls.parameters <- coef(nlsfit)
+print(nls.parameters)
 @
-
-
-\bmb{the \code{(...)} trick for printing the value of an assignment
-  is nice and compact, but might be confusing for naive readers? (i.e.
-  do we want an explicit \code{print()} statement here, and throughout?)}
 
 \noindent
 Above, we chose as our starting guess the fitted parameter values of
@@ -305,8 +309,9 @@ Above, we chose as our starting guess the fitted parameter values of
 squares parameter values differ from KM's by a few percent:
 
 <<percent-diff>>=
-(percent.difference <- 100*(KM.parameters - nls.parameters)
-                           /nls.parameters)
+percent.difference <-
+    100*(KM.parameters - nls.parameters)/nls.parameters
+print(percent.difference)
 @
 
 \noindent
@@ -339,7 +344,7 @@ nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
               data = fitode::bombay,
               start = c(a = a.guess, omega = omega.guess,
                         phi = phi.guess))
-(nls.parameters <- coef(nlsfit))
+print(nls.parameters <- coef(nlsfit))
 @
 
 However, if you experiment with initial guesses, you will find that if
@@ -351,12 +356,14 @@ $\omega=-0.19$, $\phi=-3.48$, which is far from our fitted values and
 illustrates a very important fact: there is \emph{not necessarily a
   unique best fit set of parameters!}  In this case, the alternative
 solution exists because $\sech^2(x)$ is symmetric about the $y$ axis,
-but in general, there can be multiple local minima that cause \code{nls}
-to converge to points that may or may not represent equally good fits to the data.  In general, the potential existence of multiple local optima is something
-that makes fitting models to data hard; you need to be cautious in
-interpreting any fit to which your fitting algorithm has converged.
-\bmb{\cite{raue2013lessons} have some suggestions about how to diagnose
-  multiple optima but this is probably beyond the scope of this paper}
+but in general, there can be multiple local minima that cause
+\code{nls} to converge to points that may or may not represent equally
+good fits to the data.  In general, the potential existence of
+multiple local optima is something that makes fitting models to data
+hard; you need to be cautious in interpreting any fit to which your
+fitting algorithm has converged (Raue \emph{et al.}
+\cite{raue2013lessons} give some suggestions for how to diagnose
+multiple optima).
 
 If you know that your parameters should be in a certain range, then
 you can exclude values outside that range.  For example, to ensure
@@ -378,28 +385,19 @@ Alternatively, you could write
 and fit $A$, $\Omega$, and $\Phi$, which would guarantee positive $a$,
 $\omega$, and $\phi$ without having to constrain the values of the
 fitted parameters.  This last suggestion may just seem like a cute
-trick, but there is more to it than that.  A much broader
-range of optimization algorithms is available for unconstrained fitting;
-numerical parameter values of very small magnitude can also
-lead to numerical instability,
-so it is advantageous to link parameters that must lie in a given range to
-unconstrained parameters that can be fit more easily.  In
-equation~\eqref{eq:loglink}, the \term{link function} that converts
-the parameters to the unconstrained scale is $\log$.  Another common
-link function is logit (the inverse of the logistic function), which
-converts the unit interval $(0,1)$ to $(-\infty,\infty)$, and is
-especially convenient when parameters represent proportions or
-probabilities.
-%%
-\swp{Maybe add this so it doesn't look like we're introducing this for
-no reason: Link functions are implemented in \code{fitode} as we
-demonstrate later.}
-\djde{Good idea.
-  I've added some text along these lines.  I'll revisit this when I've
-  got further with writing the rest of the paper.}
-  \swp{I still wonder if it's a little early to introduce link functions if we're
-not going to use them until much later when we actually use fitode. Or maybe
-the last sentence I suggested helps with that issue a bit.}
+trick, but there is more to it than that.  A much broader range of
+optimization algorithms is available for unconstrained fitting;
+numerical parameter values of very small magnitude can also lead to
+numerical instability, so it is advantageous to link parameters that
+must lie in a given range to unconstrained parameters that can be fit
+more easily.  In equation~\eqref{eq:loglink}, the \term{link function}
+that converts the parameters to the unconstrained scale is $\log$.
+Another common link function is logit (the inverse of the logistic
+function), which converts the unit interval $(0,1)$ to
+$(-\infty,\infty)$, and is especially convenient when parameters
+represent proportions or probabilities.  (Requiring positivity is so
+common that the default setting in \code{fitode} is to use a log link
+when fitting any parameter.)
 
 <<KM-fitted-values, echo=FALSE>>=
 parnames <- c("a", "omega", "phi")
@@ -510,27 +508,27 @@ and the mean intrinsic generation interval \cite{ChamDush15},
 \end{equation}
 \end{linenomath*}
 which is the same as the mean infectious period in this simple model
-\cite{Cham+18}.
+\cite{KrylEarn13,Cham+18}.  Table~\ref{tab:Bombay} lists the values of
+the parameters as estimated by \KM and by us using \code{nls}.
 
-Table~\ref{tab:Bombay} lists the values of the parameters as estimated
-by \KM and by us using \code{nls}.  \swp{The problem is that we're
-  assuming S0 = 1e6 - 1. We can't do this.  We need much lower S0 to
-  fit the data. So by assuming a very large S0, things go crazy.  So
-  we're better off startng with assuming I0 = 1 and assuming the
-  rest. That's the whole point of Bacaer's paper: that the required S0
-  to fit the data is so low that the standard SIR model is actually
-  not appropriate for modeling the bombay epidemic} \djde{I'll return
-  to this after reading Baca\"er \cite{bacaermodel2012}. Meanwhile I
-  will note that Gani and Leach \cite{GaniLeac04} found
-  $\R_0\simeq1.3\pm1.8$ and $\Tg\simeq6.8\pm2.2$ days, for ``modern''
-  pneumonic plague, and based on that $\Tg$ we \cite{Earn+20} found
-  similar $\R_0$ for 17th century plague in London.  Baca\"er
-  \cite{bacaermodel2012} seems to assume (like \KM) that plague in
-  Bombay had a CFP of near 1.  Anyway, the point of the discussion
-  here will be to alert readers to be cautious for all sorts of
-  reasons, and a good fit of a model to data does not necessarily mean
-  that it is fair to make inferences from estimated parameter values.}
-\djde{Note KM's caution about interpreting the param values.}
+\swp{The problem is that we're assuming S0 = 1e6 - 1. We can't do
+  this.  We need much lower S0 to fit the data. So by assuming a very
+  large S0, things go crazy.  So we're better off startng with
+  assuming I0 = 1 and assuming the rest. That's the whole point of
+  Bacaer's paper: that the required S0 to fit the data is so low that
+  the standard SIR model is actually not appropriate for modeling the
+  bombay epidemic} \djde{I'll return to this after reading Baca\"er
+  \cite{bacaermodel2012}. Meanwhile I will note that Gani and Leach
+  \cite{GaniLeac04} found $\R_0\simeq1.3\pm1.8$ and
+  $\Tg\simeq6.8\pm2.2$ days, for ``modern'' pneumonic plague, and
+  based on that $\Tg$ we \cite{Earn+20} found similar $\R_0$ for 17th
+  century plague in London.  Baca\"er \cite{bacaermodel2012} seems to
+  assume (like \KM) that plague in Bombay had a CFP of near 1.
+  Anyway, the point of the discussion here will be to alert readers to
+  be cautious for all sorts of reasons, and a good fit of a model to
+  data does not necessarily mean that it is fair to make inferences
+  from estimated parameter values.}  \djde{Note KM's caution about
+  interpreting the param values.}
 
 <<invert-KM-analytically, echo=FALSE>>=
 invert_params <- function(I0, params) {
@@ -602,11 +600,19 @@ for (p in rownames(cc.delta)) {
 }
 @
 
-The final column of Table~\ref{tab:Bombay} lists 95\% \term{confidence
-  intervals} (CIs) on our \code{nls} parameter estimates.  To arrive
-at these confidence levels, we have employed a standard approach.  We
-imagine that the model \eqref{eq:sech} is a perfect representation of
-reality, and we consider the deviations from the model curve in
+\subsection{Confidence}
+
+To this point, we have addressed only an optimization problem, which
+we solved using the method of nonlinear least squares.  But the final
+column of Table~\ref{tab:Bombay} lists 95\% \term{confidence
+  intervals} (CIs) on our \code{nls} parameter estimates, and the blue
+shaded region in Figure~\ref{fig:Bombay} is a \term{confidence band}
+for the fitted model curve.  Estimating levels of \emph{confidence} in
+our results requires some statistical thinking.
+
+We estimated our CIs using a standard approach.  We imagine that the
+model \eqref{eq:sech} is a perfect representation of reality, and we
+consider the deviations from the model curve in
 Figure~\ref{fig:Bombay} to be observation errors.  We then imagine
 that observation error for each data point is independent and
 identically distributed (iid), and drawn from a normal distribution
@@ -653,6 +659,10 @@ likely to be much better than fitting the initial condition $I_0$.}
       (\code{nls}).
       The $\R_0$ estimates assume the population of Bombay was
       $N=1$ million \cite[p.\,408]{bacaermodel2012}.
+      \djde{Maybe we should list $N$ as a ``specified parameter'' so it
+      is very explicit, rather than just burying it in $\R_0$.
+      We could then list $\beta N$ rather than $\beta$, which would
+      tidy the table and avoid an implicit factor of $1/N$ in $\beta$.}
      %%  (including 95\% confidence intervals).
      %%  Given values of the estimated parameters
      %% $(a,\omega,\phi)$, we specify $I_0$ and derive implied values of the
@@ -709,7 +719,7 @@ likely to be much better than fitting the initial condition $I_0$.}
 Until now, we have focussed on fitting KM's approximation
 \eqref{eq:sech} rather than actual solutions of the SIR model
 \eqref{eq:SIR}.  If we had an exact analytical solution of the SIR
-ODE~\eqref{eq:SIR} then we could proceed as above and, replacing the
+ODE~\eqref{eq:SIR} then we could proceed as above, replacing the
 approximate analytical expression \eqref{eq:sech} with the exact
 formula.  Since we do not have an exact solution, we must instead rely
 on numerical solutions of the ODE.  In general, fitting numerical
