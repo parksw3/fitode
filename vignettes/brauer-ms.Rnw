@@ -868,6 +868,24 @@ threshold, as suggested by \KM, but an example of
 epidemic driven by seasonality.'' \cite{bacaermodel2012}
 \end{quote}
 
+\section{Discussion}
+
+\begin{itemize}
+\item appropriateness of fitting an SIR model to the Bombay plague
+  data; Baca\"er's \cite{bacaermodel2012}, opinion, our issues with
+  his opinion, potential to fit rat-flea-human model with the data
+  that are available.
+\item other types of models that should also be easy to deal with with
+  fitode, e.g., SEIR or fancier compartmental ODEs
+\item what kinds of things would likely cause trouble for fitode?
+\item optimization challenges, where to go if you run into trouble
+\item statistical challenges, where to go for further insights / more
+  advanced approaches
+\item fitting stochastic models, pomp
+\item fitting ABMs
+\item a bit of tribute to Fred
+\end{itemize}
+
 \bibliographystyle{tfs}
 \bibliography{brauer-ms,fitode}
 
