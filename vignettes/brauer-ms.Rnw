@@ -51,7 +51,8 @@
 \usepackage{xspace}
 \newcommand{\KM}{KM\xspace}
 \usepackage{bm} % bold math
-\newcommand{\boldbeta}{\bm{\beta}}
+\newcommand{\betavec}{\bm{\beta}}
+\newcommand{\betavechat}{\bm{\hat\beta}}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \usepackage{xspace}
 \newcommand{\KMcol}{blue\xspace}
@@ -277,14 +278,14 @@ the data.  Thus, the \term{objective function} that is natural to
 minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
-\sum_{i=1}^n \big(f(t_i;\boldbeta) - y_i\big)^2 \,,
+\sum_{i=1}^n \big(f(t_i;\betavec) - y_i\big)^2 \,,
 \end{equation}
 \end{linenomath*}
 where the observed data are the points $\{(t_i,y_i):i=1,\ldots,n\}$,
-$f(t;\boldbeta)$ is the model \eqref{eq:sech}, and the parameter
+$f(t;\betavec)$ is the model \eqref{eq:sech}, and the parameter
 vector for \KM's problem is
-$\boldbeta=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
-respect to $\boldbeta$ would have required some heroic arithmetic
+$\betavec=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
+respect to $\betavec$ would have required some heroic arithmetic
 with a pencil and paper in 1927, but it is a simple task with the
 aid of a computer.
 
@@ -580,6 +581,15 @@ column of Table~\ref{tab:Bombay} lists 95\% \term{confidence
   the fitode confidence band, and is \fitodecol.}  Estimating levels
 of \emph{confidence} in our results requires some statistical
 thinking.
+
+\djde{What we do: Given estimated variances for the parameters, we use
+  the delta method to calculate the variance of $f(t;\betavechat)$ at
+  each observation time $t_i$ and use it to get a confidence band on
+  the fitted curve.}  \djde{Available in \code{fitode} but we not what
+  we doing here: Another posibility would be to use the estimated
+  means and variances for $\betavec$ to define a multivariate normal,
+  sample that many times and run the model, and draw the bands that
+  contain 95\% of the simulations.}
 
 We estimated our CIs using a standard approach.  We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
