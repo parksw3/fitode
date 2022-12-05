@@ -7,6 +7,7 @@ whichpred <- function(pred, which) {
 
 ##' Plot a fitode object
 ##' @aliases plot,fitode-method
+##' @aliases plot.fitode
 ##' @param x fitode object
 ##' @param level the confidence level required
 ##' @param which which to plot
@@ -26,6 +27,9 @@ whichpred <- function(pred, which) {
 ##' @param ... additional arguments to be passed on to the plot function
 ##' @return No return value, called for side effects
 ##' @importFrom bbmle plot
+##' @examples
+##' load(system.file("doc_examples", "SIR_mort.rda", package = "fitode"))
+##' plot(SIR_mort_fit)
 ##' @docType methods
 ##' @exportMethod plot
 setMethod("plot", signature(x="fitode", y="missing"),
@@ -54,7 +58,10 @@ setMethod("plot", signature(x="fitode", y="missing"),
 
         pred <- whichpred(pred, which)
 
-        plot_internal(pred, data, onepage, xlim, ylim, xlabs, ylabs, col.traj, lty.traj, col.conf, lty.conf, add, ...)
+        invisible(
+            plot_internal(pred, data, onepage, xlim, ylim,
+                          xlabs, ylabs, col.traj, lty.traj, col.conf, lty.conf, add, ...)
+        )
     }
 )
 
@@ -176,5 +183,5 @@ plot_internal <- function(pred,
         }
     }
 
-    invisible()
+    invisible(list(pred.df, obs.df))
 }
