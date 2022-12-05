@@ -1,6 +1,8 @@
 ##' Computes estimated trajectories and their confidence intervals (using either
 ##' the delta method or importance sampling).
 ##'
+##' @aliases predict,fitode-method
+##' @aliases predict.fitode
 ##' @title Prediction function for fitode objects
 ##' @param object fitode object
 ##' @param level the confidence level required
@@ -108,6 +110,8 @@ setMethod("predict", "fitode",
 
 ##' Extracts estimated parameters (either on response scales or link scales)
 ##'
+##' @aliases coef,fitode-method
+##' @aliases coef.fitode
 ##' @title Extract model coefficients from fitode objects
 ##' @param object fitode object
 ##' @param type type of coefficients. The default (\code{type=response}) is on the
@@ -129,6 +133,8 @@ setMethod("coef", "fitode",
 
 ##' Extracts variance-covariance matrix (either on response scales or link scales)
 ##'
+##' @aliases vcov,fitode-method
+##' @aliases vcov.fitode
 ##' @title Extract variance-covariance matrix from fitode objects
 ##' @param object fitode object
 ##' @param type type of covariance matrix. The default (\code{type=response}) is on the
@@ -150,6 +156,9 @@ setMethod("vcov", "fitode",
 
 
 ##' Calculates standard error by taking the square root of the diagonal matrix
+##'
+##' @aliases stdEr,fitode-method
+##' @aliases stdEr.fitode
 ##' @title Extract standard error from fitode objects
 ##' @importFrom bbmle stdEr
 ##' @param x fitode object
@@ -162,6 +171,9 @@ setMethod("vcov", "fitode",
 setMethod("stdEr", "fitode", function(x,type=c("response", "links")){sqrt(diag(vcov(x, type)))})
 
 ##' Extract log-likelihood of a fit
+##'
+##' @aliases logLik,fitode-method
+##' @aliases logLik.fitode
 ##' @title Extract log-likelihood
 ##' @param object fitode object
 ##' @return The log-likelihood of the fitode object
@@ -171,6 +183,9 @@ setMethod("logLik", "fitode", function(object){-object@min})
 
 ##' Profile fitode objects
 ##'
+##'
+##' @aliases profile,fitode-method
+##' @aliases profile.fitode
 ##' @param fitted fitted model object
 ##' @importFrom bbmle profile
 ##' @param which which parameter(s) to profile? (integer value)
@@ -197,6 +212,8 @@ setMethod("profile", "fitode",
 ##' Calculate confidence intervals for model parameters and their transformations using
 ##' (1) delta method, (2) profile likelihood, and (3) importance sampling.
 ##'
+##' @aliases confint,fitode-method
+##' @aliases confint.fitode
 ##' @title Calculate confidence intervals from fitode objects for model parameters and their transformations
 ##' @param object fitode object
 ##' @param parm character vector specifying model parameters or list of formuals specifying transformations
@@ -327,6 +344,8 @@ setMethod("confint", "fitode",
 ##' Summarize fitode objects;
 ##' returns estimate, standard error, and confidence intervals
 ##'
+##' @aliases summary,fitode-method
+##' @aliases summary.fitode
 ##' @title Summarize fitode object
 ##' @param object fitode object
 ##' @return The summary of the fitode object
@@ -353,6 +372,8 @@ setMethod("summary","fitode",
 
 ##' Show fitode objects
 ##'
+##' @aliases show,fitode-method
+##' @aliases show.fitode
 ##' @title Show fitode objects
 ##' @param object fitode object
 ##' @return No return value, called for side effects

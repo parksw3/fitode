@@ -6,8 +6,10 @@ whichpred <- function(pred, which) {
 }
 
 ##' Plot a fitode object
+##'
 ##' @aliases plot,fitode-method
 ##' @aliases plot.fitode
+##' @title Plot a fitode object
 ##' @param x fitode object
 ##' @param level the confidence level required
 ##' @param which which to plot
