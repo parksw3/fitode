@@ -40,6 +40,7 @@
 \newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
 \newcommand{\needref}{{\color{orange}[NEED REF]}}
 \newcommand{\term}[1]{{\bfseries\slshape#1}}
+\newcommand{\dt}{{\rm d}t}
 \newcommand{\ddt}[1]{\dfrac{{\rm d}#1}{{\rm d}t}}
 \newcommand{\dbydt}[1]{{\rm d}#1/{\rm d}t}
 \newcommand{\sech}{\,\textrm{sech}}
@@ -216,7 +217,7 @@ $\frac{\beta}{\gamma}R(t)\ll1$, which yields the approximate
 analytical form,
 \begin{linenomath*}
 \begin{equation}\label{eq:sech}
-\ddt{R} \approx a \sech^2{(\omega\,t - \phi)} \,.
+\ddt{R} \approx a \sech^2{(\omega\,t - \phi)}\,.
 \end{equation}
 \end{linenomath*}
 Noting that the basic reproduction number is
@@ -833,6 +834,16 @@ coef(SIR_fit2)
 @
 Very very small $S(0)$.
 
+
+\subsection{Correctly handling weekly mortality}
+
+\begin{linenomath*}
+\begin{equation}
+\int_{t_1}^{t_2} \ddt{R}\,\dt
+= \int_{t_1}^{t_2}  a \sech^2{(\omega\,t - \phi)}\,\dt
+= \frac{a}{\omega}\Big(\tanh{(\omega\,t_2 - \phi)} - \tanh{(\omega\,t_1 - \phi)}\Big)
+\end{equation}
+\end{linenomath*}
 
 \subsection*{Things to mention}
 
