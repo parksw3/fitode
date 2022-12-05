@@ -61,26 +61,26 @@ KM suggested that deaths correspond to $\frac{dR}{dt}$ in the SIR model with fol
 \frac{dR}{dt} = 890 \mathrm{sech}^2(0.2 t - 3.4)
 \end{equation}
 
-<<>>==
+<<>>=
 plot(bombay)
 curve(890 * 1/cosh(0.2 * x - 3.4)^2, add=TRUE)
 @
 
 This gives a pretty good fit.
 
-<<nlsfit>>==
-nlsfit <- nls(mort ~ a/cosh(omega * (week - 1) - phi)^2, data=bombay,
+<<nlsfit>>=
+nlsfit <- nls(mort ~ a/cosh(omega * week - phi)^2, data=bombay,
               start = list(a = 890, omega=0.2, phi=3.4))
 pp <- NULL
 @
 
-Compute prediction errors (slow)
+Compute prediction errors (slow, e.g. 50+ seconds on a modern [2022] workstation)
 <<propagate, message=FALSE, cache=TRUE>>=
 pp <- propagate::predictNLS(nlsfit)
 @
 
 Even better fits:
-<<better_fits>>==
+<<better_fits>>=
 plot(bombay)
 curve(coef(nlsfit)[1] * 1/cosh(coef(nlsfit)[2] * x - coef(nlsfit)[3])^2, add=TRUE)
 if (!is.null(pp)) {
@@ -91,7 +91,7 @@ curve(890 * 1/cosh(0.2 * x - 3.4)^2, add=TRUE, col = 2)
 @
 
 With very similar parameters:
-<<>>==
+<<>>=
 coef(nlsfit)
 @
 
@@ -207,11 +207,11 @@ SIR_mort_fit2 <- fitode(
 @
 
 Plot?
-<<>>==
+<<>>=
 plot(SIR_mort_fit2)
 @
 Coef?
-<<>>==
+<<>>=
 coef(SIR_mort_fit2)
 @
 Very small population size.
@@ -382,7 +382,7 @@ plot(SIR_inc_fit, level=0.95)
 plot(SEIR_inc_fit, level=0.95, col.traj="red", col.conf="red", add=TRUE)
 @
 Nearly identical fits with pretty different parameter values:
-<<compsumm>>==
+<<compsumm>>=
 summary(SIR_inc_fit)
 summary(SEIR_inc_fit)
 @
@@ -436,7 +436,7 @@ Again, incredibly similar fits.
 
 \subsection{Summarize parameter estimates}
 
-<<summarize>>==
+<<summarize>>=
 allsummary <- list(
   SIR_prev_fit,
   SIR_inc_fit,

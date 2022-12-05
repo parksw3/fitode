@@ -4,6 +4,7 @@
 \name{plot,fitode,missing-method}
 \alias{plot,fitode,missing-method}
 \alias{plot,fitode-method}
+\alias{plot.fitode}
 \title{Plot a fitode object}
 \usage{
 \S4method{plot}{fitode,missing}(
@@ -66,4 +67,8 @@ No return value, called for side effects
 }
 \description{
 Plot a fitode object
+}
+\examples{
+load(system.file("doc_examples", "SIR_mort.rda", package = "fitode"))
+plot(SIR_mort_fit)
 }
