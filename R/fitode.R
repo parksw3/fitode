@@ -42,7 +42,12 @@ apply_link <- function(par, linklist, type=c("linkfun", "linkinv", "mu.eta")) {
         filter <- match(names(par), names(linklist$linkinv))
     }
 
-    ff <- linklist[[type]][filter]
+    if (length(par)==1) {
+        ff <- linklist[[type]][1]
+    } else {
+        ff <- linklist[[type]][filter]
+    }
+
     pp <- unlist(Map(function(x, fun) fun(x), x=par, fun=ff))
     names(pp) <- names(ff)
 
@@ -76,7 +81,7 @@ check_link <- function(model, link) {
 fixpar <- function(model, fixed) {
     fixed <- as.list(fixed)
     if (any(!(names(fixed) %in% model@par)))
-        stop("`fixed must be a named vector/list whose names correspond to model parameters")
+        stop("`fixed` must be a named vector/list whose names correspond to model parameters")
 
     tlist <- vector('list', length(fixed))
 
@@ -85,6 +90,9 @@ fixpar <- function(model, fixed) {
     }
 
     par <- model@par[!(model@par %in% names(fixed))]
+
+    if (length(par) == 0)
+        stop("At least one parameter must be estimated")
 
     link <- model@link[!(model@par %in% names(fixed))]
 
