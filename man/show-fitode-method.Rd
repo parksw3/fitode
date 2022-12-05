@@ -3,6 +3,7 @@
 \docType{methods}
 \name{show,fitode-method}
 \alias{show,fitode-method}
+\alias{show.fitode}
 \title{Show fitode objects}
 \usage{
 \S4method{show}{fitode}(object)

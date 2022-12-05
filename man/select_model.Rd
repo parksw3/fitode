@@ -5,7 +5,8 @@
 \title{Select a log-likelihood model}
 \usage{
 select_model(
-  dist = c("ols", "dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1", "dgamma", "dlnorm")
+  dist = c("ols", "dnorm", "dnorm2", "dpois", "dnbinom", "dnbinom1", "dgamma",
+    "dlnorm")
 )
 }
 \arguments{

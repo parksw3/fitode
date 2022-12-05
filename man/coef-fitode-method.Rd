@@ -3,6 +3,7 @@
 \docType{methods}
 \name{coef,fitode-method}
 \alias{coef,fitode-method}
+\alias{coef.fitode}
 \title{Extract model coefficients from fitode objects}
 \usage{
 \S4method{coef}{fitode}(object, type = c("response", "links"))

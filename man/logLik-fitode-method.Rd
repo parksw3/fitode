@@ -3,6 +3,7 @@
 \docType{methods}
 \name{logLik,fitode-method}
 \alias{logLik,fitode-method}
+\alias{logLik.fitode}
 \title{Extract log-likelihood}
 \usage{
 \S4method{logLik}{fitode}(object)

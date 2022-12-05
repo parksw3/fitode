@@ -3,6 +3,7 @@
 \docType{methods}
 \name{predict,fitode-method}
 \alias{predict,fitode-method}
+\alias{predict.fitode}
 \title{Prediction function for fitode objects}
 \usage{
 \S4method{predict}{fitode}(

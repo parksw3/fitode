@@ -3,6 +3,7 @@
 \docType{methods}
 \name{confint,fitode-method}
 \alias{confint,fitode-method}
+\alias{confint.fitode}
 \title{Calculate confidence intervals from fitode objects for model parameters and their transformations}
 \usage{
 \S4method{confint}{fitode}(

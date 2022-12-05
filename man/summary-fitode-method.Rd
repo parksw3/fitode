@@ -3,6 +3,7 @@
 \docType{methods}
 \name{summary,fitode-method}
 \alias{summary,fitode-method}
+\alias{summary.fitode}
 \title{Summarize fitode object}
 \usage{
 \S4method{summary}{fitode}(object)

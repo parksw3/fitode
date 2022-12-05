@@ -2,6 +2,7 @@
 % Please edit documentation in R/fitode-methods.R
 \name{profile,fitode-method}
 \alias{profile,fitode-method}
+\alias{profile.fitode}
 \title{Profile fitode objects}
 \usage{
 \S4method{profile}{fitode}(fitted, which = 1:p, alpha = 0.05, trace = FALSE, ...)
