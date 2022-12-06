@@ -3,6 +3,7 @@
 \docType{methods}
 \name{predict,fitodeMCMC-method}
 \alias{predict,fitodeMCMC-method}
+\alias{predict.fitodeMCMC}
 \title{Prediction function for fitodeMCMC objects}
 \usage{
 \S4method{predict}{fitodeMCMC}(object, level, times, simplify = TRUE)

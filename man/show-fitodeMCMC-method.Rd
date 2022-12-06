@@ -3,6 +3,7 @@
 \docType{methods}
 \name{show,fitodeMCMC-method}
 \alias{show,fitodeMCMC-method}
+\alias{show.fitodeMCMC}
 \title{Show fitodeMCMC object}
 \usage{
 \S4method{show}{fitodeMCMC}(object)

@@ -3,6 +3,7 @@
 \docType{methods}
 \name{summary,fitodeMCMC-method}
 \alias{summary,fitodeMCMC-method}
+\alias{summary.fitodeMCMC}
 \title{Summarize fitodeMCMC object}
 \usage{
 \S4method{summary}{fitodeMCMC}(object)

@@ -3,6 +3,7 @@
 \docType{methods}
 \name{stdEr,fitodeMCMC-method}
 \alias{stdEr,fitodeMCMC-method}
+\alias{stdEr.fitodeMCMC}
 \title{Extract standard error from fitodeMCMC objects}
 \usage{
 \S4method{stdEr}{fitodeMCMC}(x)

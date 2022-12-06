@@ -3,6 +3,7 @@
 \docType{methods}
 \name{coef,fitodeMCMC-method}
 \alias{coef,fitodeMCMC-method}
+\alias{coef.fitodeMCMC}
 \title{Extract model coefficients from fitodeMCMC objects}
 \usage{
 \S4method{coef}{fitodeMCMC}(object)

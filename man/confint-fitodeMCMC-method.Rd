@@ -3,6 +3,7 @@
 \docType{methods}
 \name{confint,fitodeMCMC-method}
 \alias{confint,fitodeMCMC-method}
+\alias{confint.fitodeMCMC}
 \title{Calculate credible intervals from fitodeMCMC objects for model parameters and their transformations}
 \usage{
 \S4method{confint}{fitodeMCMC}(object, parm, level = 0.95)

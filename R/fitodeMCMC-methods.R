@@ -2,6 +2,8 @@
 ##' The estimated trajectories are obtained by taking the median trajectories
 ##' from the posterior samples.
 ##'
+##' @aliases predict,fitodeMCMC-method
+##' @aliases predict.fitodeMCMC
 ##' @title Prediction function for fitodeMCMC objects
 ##' @param object fitodeMCMC object
 ##' @param level the credible level required
@@ -65,6 +67,8 @@ setMethod("predict", "fitodeMCMC",
 
 ##' Extracts estimated parameters (median of the marginal posterior distributions)
 ##'
+##' @aliases coef,fitodeMCMC-method
+##' @aliases coef.fitodeMCMC
 ##' @title Extract model coefficients from fitodeMCMC objects
 ##' @param object fitodeMCMC object
 ##' @return The estimated median coefficients of the fitodeMCMC object
@@ -73,6 +77,8 @@ setMethod("coef", "fitodeMCMC", function(object) object@coef)
 
 ##' Calculates variance-covariance matrix from posterior samples
 ##'
+##' @aliases vcov,fitodeMCMC-method
+##' @aliases vcov.fitodeMCMC
 ##' @title Extract variance-covariance matrix from fitodeMCMC objects
 ##' @param object fitodeMCMC object
 ##' @return The variance-covariance matrix of the fitodeMCMC object
@@ -80,6 +86,9 @@ setMethod("coef", "fitodeMCMC", function(object) object@coef)
 setMethod("vcov", "fitodeMCMC", function(object) object@vcov)
 
 ##' Calculates standard error by taking the square root of the diagonal of the variance-covariance matrix
+##'
+##' @aliases stdEr,fitodeMCMC-method
+##' @aliases stdEr.fitodeMCMC
 ##' @title Extract standard error from fitodeMCMC objects
 ##' @param x fitodeMCMC object
 ##' @return The standard error of the fitodeMCMC object
@@ -90,6 +99,8 @@ setMethod("stdEr", "fitodeMCMC", function(x) sqrt(diag(vcov(x))))
 ##' Calculate credible intervals for model parameters and their transformations
 ##' from posterior samples.
 ##'
+##' @aliases confint,fitodeMCMC-method
+##' @aliases confint.fitodeMCMC
 ##' @title Calculate credible intervals from fitodeMCMC objects for model parameters and their transformations
 ##' @param object fitodeMCMC object
 ##' @param parm character vector specifying model parameters or list of formuals specifying transformations
@@ -137,6 +148,8 @@ setMethod("confint","fitodeMCMC",
 ##' Summarize fitodeMCMC object;
 ##' returns estimate, standard error, credible intervals, effective sample sizes, and gelman-rubin diagnostic
 ##'
+##' @aliases summary,fitodeMCMC-method
+##' @aliases summary.fitodeMCMC
 ##' @title Summarize fitodeMCMC object
 ##' @param object fitodeMCMC object
 ##' @return The summary of the fitodeMCMC object
@@ -165,6 +178,8 @@ setMethod("summary","fitodeMCMC",
 
 ##' Show fitodeMCMC object
 ##'
+##' @aliases show,fitodeMCMC-method
+##' @aliases show.fitodeMCMC
 ##' @title Show fitodeMCMC object
 ##' @param object fitodeMCMC object
 ##' @return No return value, called for side effects
