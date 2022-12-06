@@ -35,3 +35,22 @@ Result of ode fitting based on Markov Chain Monte Carlo (MCMC)
 \item{\code{details}}{a list containing miscellaneous objects for internal uses}
 }}
 
+\section{Methods}{
+
+\describe{
+\item{coef}{\code{signature(object = "fitodeMCMC")}: Extract median of the posterior.}
+\item{confint}{\code{signature(object = "fitodeMCMC")}: Caculate credible intervals
+from the posterior.}
+\item{plot}{\code{signature(object = "fitodeMCMC")}: Plot estimated trajectories
+and the associated confidence intervals.}
+\item{predict}{\code{signature(object = "fitodeMCMC")}: Predict estimated
+trajectories and the associated confidence intervals from the posterior.}
+\item{show}{\code{signature(object = "fitodeMCMC")}: Display object briefly.}
+\item{stdEr}{\code{signature(object = "fitodeMCMC")}: Calculate standard errors
+of the posterior.}
+\item{summary}{\code{signature(object = "fitodeMCMC")}: Generate object summary.}
+\item{vcov}{\code{signature(object = "fitodeMCMC")}: Extract
+variance-covariance matrix of the posterior.}
+}
+}
+

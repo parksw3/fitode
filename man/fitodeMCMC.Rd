@@ -68,3 +68,6 @@ multi-variate time series by MCMC using the Metropolis-Hastings update
 rule. It searches through the parameter space
 on link scales, which can provide more efficient posterior sampling.
 }
+\seealso{
+\code{\link{fitodeMCMC}}
+}

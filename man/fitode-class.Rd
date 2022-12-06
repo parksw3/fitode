@@ -33,6 +33,27 @@ Result of ode fitting based on Maximum Likelihood Estimation
 \item{\code{prior}}{list of priors}
 }}
 
+\section{Methods}{
+
+\describe{
+\item{coef}{\code{signature(object = "fitode")}: Extract coefficients.}
+\item{confint}{\code{signature(object = "fitode")}: Caculate confidence intervals
+from the delta method, profile likelihood, or importance sampling.}
+\item{logLik}{\code{signature(object = "fitode")}: Extract log-likelihood.}
+\item{plot}{\code{signature(object = "fitode")}: Plot estimated trajectories
+and the associated confidence intervals.}
+\item{predict}{\code{signature(object = "fitode")}: Predict estimated
+trajectories and the associated confidence intervals from the delta method
+or importance sampling.}
+\item{profile}{\code{signature(object = "fitode")}: Calculate likelihood profile.}
+\item{show}{\code{signature(object = "fitode")}: Display object briefly.}
+\item{stdEr}{\code{signature(object = "fitode")}: Calculate standard errors.}
+\item{summary}{\code{signature(object = "fitode")}: Generate object summary.}
+\item{vcov}{\code{signature(object = "fitode")}: Extract
+variance-covariance matrix.}
+}
+}
+
 \seealso{
 \code{\link{mle2-class}}
 }

@@ -31,6 +31,7 @@ propfun <- function(chol) {
 ##' @import coda
 ##' @importFrom stats runif median cov as.formula
 ##' @importFrom utils head tail
+##' @seealso \code{\link{fitodeMCMC}}
 ##' @export fitodeMCMC
 fitodeMCMC <- function(model, data,
                        start, tcol="times",

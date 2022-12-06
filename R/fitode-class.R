@@ -96,6 +96,25 @@ setClass(
 ##' @slot link list of link functions for model parameters
 ##' @slot fixed list of fixed parameters
 ##' @slot prior list of priors
+##'
+##' @section Methods:
+##' \describe{
+##' \item{coef}{\code{signature(object = "fitode")}: Extract coefficients.}
+##' \item{confint}{\code{signature(object = "fitode")}: Caculate confidence intervals
+##' from the delta method, profile likelihood, or importance sampling.}
+##' \item{logLik}{\code{signature(object = "fitode")}: Extract log-likelihood.}
+##' \item{plot}{\code{signature(object = "fitode")}: Plot estimated trajectories
+##' and the associated confidence intervals.}
+##' \item{predict}{\code{signature(object = "fitode")}: Predict estimated
+##' trajectories and the associated confidence intervals from the delta method
+##' or importance sampling.}
+##' \item{profile}{\code{signature(object = "fitode")}: Calculate likelihood profile.}
+##' \item{show}{\code{signature(object = "fitode")}: Display object briefly.}
+##' \item{stdEr}{\code{signature(object = "fitode")}: Calculate standard errors.}
+##' \item{summary}{\code{signature(object = "fitode")}: Generate object summary.}
+##' \item{vcov}{\code{signature(object = "fitode")}: Extract
+##' variance-covariance matrix.}
+##' }
 ##' @seealso \code{\link{mle2-class}}
 ##' @exportClass fitode
 setClass("fitode",
@@ -130,6 +149,23 @@ setOldClass("mcmc.list")
 ##' @slot fixed list of fixed parameters
 ##' @slot prior list of priors
 ##' @slot details a list containing miscellaneous objects for internal uses
+##'
+##' @section Methods:
+##' \describe{
+##' \item{coef}{\code{signature(object = "fitodeMCMC")}: Extract median of the posterior.}
+##' \item{confint}{\code{signature(object = "fitodeMCMC")}: Caculate credible intervals
+##' from the posterior.}
+##' \item{plot}{\code{signature(object = "fitodeMCMC")}: Plot estimated trajectories
+##' and the associated confidence intervals.}
+##' \item{predict}{\code{signature(object = "fitodeMCMC")}: Predict estimated
+##' trajectories and the associated confidence intervals from the posterior.}
+##' \item{show}{\code{signature(object = "fitodeMCMC")}: Display object briefly.}
+##' \item{stdEr}{\code{signature(object = "fitodeMCMC")}: Calculate standard errors
+##' of the posterior.}
+##' \item{summary}{\code{signature(object = "fitodeMCMC")}: Generate object summary.}
+##' \item{vcov}{\code{signature(object = "fitodeMCMC")}: Extract
+##' variance-covariance matrix of the posterior.}
+##' }
 ##' @exportClass fitodeMCMC
 setClass("fitodeMCMC",
          slots = c(

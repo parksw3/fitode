@@ -74,5 +74,5 @@ This allows one to use gradient-based optimization algorithms, which can
 provide more robust estimation.
 }
 \seealso{
-\code{\link{mle2}}
+\code{\link{fitode-class}} \code{\link{mle2}}
 }

@@ -140,7 +140,7 @@ fixpar <- function(model, fixed) {
 ##' @importFrom MASS ginv
 ##' @importFrom methods new
 ##' @importFrom stats var
-##' @seealso \code{\link{mle2}}
+##' @seealso \code{\link{fitode-class}} \code{\link{mle2}}
 ##' @export fitode
 fitode <- function(model, data,
                    start, tcol="times",
