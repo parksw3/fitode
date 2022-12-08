@@ -78,10 +78,10 @@
   Brauer}
 
 \author{
-\name{David J.\,D.~Earn\textsuperscript{a}\thanks{CONTACT
-    D.J.D.~Earn. Email: earn@math.mcmaster.ca},
-    Sang Woo Park\textsuperscript{b},
-    and Benjamin M.~Bolker\textsuperscript{a}}
+\name{David J.\,D.~Earn\textsuperscript{a}\thanks{CONTACT D.J.D.~Earn. Email: earn@math.mcmaster.ca. ORCID:
+    0000-0002-7562-1341, Twitter: @David.J.D.Earn},
+    Sang Woo Park\textsuperscript{b}\thanks{S.W.~Park. ORCID 0000-0003-2202-3361, Twitter: @sang\_woo\_park, Mastodon: @sangwoopark@ecoevo.social},
+    and Benjamin M.~Bolker\textsuperscript{a}\thanks{B.M.~Bolker. ORCID: 0000-0002-2127-0443, Twitter: @bolkerb, Mastodon: @bbolker@fediscience.org}}
 \affil{\textsuperscript{a}Department of Mathematics and Statistics,
   McMaster University, Hamilton, Ontario, Canada, L8S 4K1; \textsuperscript{b}Department of Ecology and Evolutionary Biology, Princeton University, Princeton, NJ 08544}
 }
@@ -89,12 +89,6 @@
 \maketitle
 
 \linenumbers
-
-\djde{The \href{https://www.tandfonline.com/action/authorSubmission?show=instructions&journalCode=tjbd20}{author instructions} say ``please also include ORCiDs and social media handles (Facebook, Twitter or LinkedIn)'' but it isn't clear where to put them.}
-
-\bmb{For future reference: ORCID 0000-0002-2127-0443, twitter @bolkerb, Mastodon @bbolker@fediscience.org}
-
-\swp{Mine: ORCID 0000-0003-2202-3361, twitter @sang\_woo\_park, Mastodon @sangwoopark@ecoevo.social}
 
 \bigskip \bigskip
 
