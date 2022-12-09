@@ -851,29 +851,35 @@ Very very small $S(0)$.
 \section{Example for which KM approx is bad}
 
 <<compute stochastic SIR via sirr>>=
-library(sirr)
-R0 <- 5
-N <- 2000
-mm <- create_SIRmodel(R0=R0, N=N)
-ii <- set_inits(mm)
-iii <- ii
-iii[2] <- exp(iii[2])
-names(iii) <- c("S","I","R")
-## FIX: this should not be necessary, but it is a bug in sirr
-##      associated with N != 1.
-mm1 <- create_SIRmodel(R0=R0, N=1)
-sir.det <- compute_SIRts(mm1)
-## get associated params for KM approx:
-a.det <- a_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-omega.det <- omega_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-phi.det <- phi_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-##
-tt <- 0:10
-sir.stoch <- get_ssa_soln(mm, stopcrit = NULL, inits=ii, times=tt)
+if (file.exists("sirstoch.RData")) {
+    load("sirstoch.RData")
+} else {    
+    library(sirr)
+    R0 <- 5
+    N <- 2000
+    mm <- create_SIRmodel(R0=R0, N=N)
+    ii <- set_inits(mm)
+    iii <- ii
+    iii[2] <- exp(iii[2])
+    names(iii) <- c("S","I","R")
+    ## FIX: this should not be necessary, but it is a bug in sirr
+    ##      associated with N != 1.
+    mm1 <- create_SIRmodel(R0=R0, N=1)
+    sir.det <- compute_SIRts(mm1)
+    ## get associated params for KM approx:
+    a.det <- a_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+    omega.det <- omega_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+    phi.det <- phi_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+    ##
+    tt <- 0:10
+    sir.stoch <- get_ssa_soln(mm, stopcrit = NULL, inits=ii, times=tt)
+    save(R0, N, mm, ii, iii, mm1, sir.det, a.det, omega.det, phi.det, tt,
+         sir.stoch, file="sirstoch.RData")
+}
 @ 
 
 Example is a Gillespie simulation (actually \code{adaptive.tau}), with
-$(S_0,I_0,R_0)=(\Sexpr{iii}$, $\R_0=\Sexpr{R0}$,
+$(S_0,I_0,R_0)=(\Sexpr{iii})$, $\R_0=\Sexpr{R0}$,
 $\gamma=\Sexpr{mm$gamma}$.
 
 
@@ -883,6 +889,21 @@ my.blue <- "#377EB8"    # colour-blind friendly blue
 my.green <- "#4DAF4A" # colour-blind friendly green
 my.yellow <- "#FFD92F" # colour-blind friendly yellow
 @ 
+
+
+<<sirstochfit,cache=TRUE,warning=FALSE>>=
+start.stoch <- c(beta=mm$beta, gamma=mm$gamma, 
+                 S0=iii["S"], I0=iii["I"])
+names(start.stoch) <- c("beta","gamma","S0","I0")
+print(start.stoch)
+SIR_stoch_fit <- fitode(
+    SIR_model,
+    data = sir.stoch[,c("time","I")],
+    start = start.stoch,
+    fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
+    tcol = "time"
+)
+@
 
 <<plot_stochastic_SIR>>=
 plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
