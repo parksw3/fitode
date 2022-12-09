@@ -250,6 +250,15 @@ KM column of Table~\ref{tab:Bombay}, and they plotted their
 ``calculated'' curve, which we have reproduced in \KMcol in
 Figure~\ref{fig:Bombay}.
 
+<<functions to compute KM parameters, echo=FALSE>>=
+omega_fun <- function(Reff, gamma, S0, I0)
+    {(gamma/2)*sqrt((Reff-1)^2+(2*I0/S0)*Reff^2)}
+phi_fun <- function(Reff, gamma, S0, I0)
+    {atanh((Reff-1)/(2*omega_fun(Reff,gamma,S0,I0)/gamma))}
+a_fun <- function(Reff, gamma, S0, I0)
+    {(2 * S0/(gamma * Reff^2))*omega_fun(Reff,gamma,S0,I0)^2}
+@ 
+
 \subsection{How to fit the model to the data}
 
 The \KMcol curve in Figure~\ref{fig:Bombay} does appear to provide a
@@ -839,6 +848,55 @@ Very very small $S(0)$.
 \end{equation}
 \end{linenomath*}
 
+\section{Example for which KM approx is bad}
+
+<<compute stochastic SIR via sirr>>=
+library(sirr)
+R0 <- 5
+N <- 2000
+mm <- create_SIRmodel(R0=R0, N=N)
+ii <- set_inits(mm)
+iii <- ii
+iii[2] <- exp(iii[2])
+names(iii) <- c("S","I","R")
+## FIX: this should not be necessary, but it is a bug in sirr
+##      associated with N != 1.
+mm1 <- create_SIRmodel(R0=R0, N=1)
+sir.det <- compute_SIRts(mm1)
+## get associated params for KM approx:
+a.det <- a_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+omega.det <- omega_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+phi.det <- phi_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+##
+tt <- 0:10
+sir.stoch <- get_ssa_soln(mm, stopcrit = NULL, inits=ii, times=tt)
+@ 
+
+Example is a Gillespie simulation (actually \code{adaptive.tau}), with
+$(S_0,I_0,R_0)=(\Sexpr{iii}$, $\R_0=\Sexpr{R0}$,
+$\gamma=\Sexpr{mm$gamma}$.
+
+
+<<colours, echo=FALSE>>=
+my.red <- "#E41A1C"     # colour-blind friendly red
+my.blue <- "#377EB8"    # colour-blind friendly blue
+my.green <- "#4DAF4A" # colour-blind friendly green
+my.yellow <- "#FFD92F" # colour-blind friendly yellow
+@ 
+
+<<plot_stochastic_SIR>>=
+plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
+     xlim=range(tt), ylim=range(sir.stoch$I))
+lines(sir.det$tau, sir.det$I * N, col=my.red, lwd=3)
+lines(sir.stoch$time, sir.stoch$I, lwd=2)
+f <- function(t) KM_approx(t, a=a.det, omega=omega.det, phi=phi.det)
+ttt <- seq(min(tt),max(tt),length=1000)
+fff <- f(ttt)
+lines(ttt,fff, col=my.blue, lwd=2)
+@ 
+
+\section{To Do}
+
 \subsection*{Things to mention}
 
 application of \code{fitsir} to song downloads, and how we
@@ -886,10 +944,6 @@ epidemic driven by seasonality.'' \cite{bacaermodel2012}
 <<Bombay-figure, echo=FALSE, fig.height=5>>=
 f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
 
-my.red <- "#E41A1C"     # colour-blind friendly red
-my.blue <- "#377EB8"    # colour-blind friendly blue
-my.green <- "#4DAF4A" # colour-blind friendly green
-my.yellow <- "#FFD92F" # colour-blind friendly yellow
 col.KM <- my.blue
 col.nls <- my.red
 col.fitode <- my.yellow
