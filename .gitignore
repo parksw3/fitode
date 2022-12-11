@@ -16,3 +16,4 @@ cache
 *.log
 *.pdf
 vignettes/*.tex
+.DS_Store
