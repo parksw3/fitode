@@ -257,7 +257,7 @@ phi_fun <- function(Reff, gamma, S0, I0)
     {atanh((Reff-1)/(2*omega_fun(Reff,gamma,S0,I0)/gamma))}
 a_fun <- function(Reff, gamma, S0, I0)
     {(2 * S0/(gamma * Reff^2))*omega_fun(Reff,gamma,S0,I0)^2}
-@ 
+@
 
 \subsection{How to fit the model to the data}
 
@@ -806,7 +806,7 @@ Confidence band on fit:
 tmax <- 33
 tvals <- seq(1,tmax,length=1000)
 SIR_confband <- predict(SIR_fit, times=tvals, level=0.95)$mort
-@ 
+@
 
 Plot:
 <<sirmortfitplot,basefig=TRUE>>=
@@ -853,7 +853,7 @@ Very very small $S(0)$.
 <<compute stochastic SIR via sirr>>=
 if (file.exists("sirstoch.RData")) {
     load("sirstoch.RData")
-} else {    
+} else {
     library(sirr)
     R0 <- 5
     N <- 2000
@@ -876,7 +876,7 @@ if (file.exists("sirstoch.RData")) {
     save(R0, N, mm, ii, iii, mm1, sir.det, a.det, omega.det, phi.det, tt,
          sir.stoch, file="sirstoch.RData")
 }
-@ 
+@
 
 Example is a Gillespie simulation (actually \code{adaptive.tau}), with
 $(S_0,I_0,R_0)=(\Sexpr{iii})$, $\R_0=\Sexpr{R0}$,
@@ -888,17 +888,20 @@ my.red <- "#E41A1C"     # colour-blind friendly red
 my.blue <- "#377EB8"    # colour-blind friendly blue
 my.green <- "#4DAF4A" # colour-blind friendly green
 my.yellow <- "#FFD92F" # colour-blind friendly yellow
-@ 
-
+@
 
 <<sirstochfit,cache=TRUE,warning=FALSE>>=
-start.stoch <- c(beta=mm$beta, gamma=mm$gamma, 
+start.stoch <- c(beta=mm$beta, gamma=mm$gamma,
                  S0=iii["S"], I0=iii["I"])
 names(start.stoch) <- c("beta","gamma","S0","I0")
 print(start.stoch)
+
+sir.stoch.data <- sir.stoch[,c("time","I")]
+names(sir.stoch.data) <- c("time", "mort")
+
 SIR_stoch_fit <- fitode(
     SIR_model,
-    data = sir.stoch[,c("time","I")],
+    data = sir.stoch.data,
     start = start.stoch,
     fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
     tcol = "time"
@@ -914,7 +917,7 @@ f <- function(t) KM_approx(t, a=a.det, omega=omega.det, phi=phi.det)
 ttt <- seq(min(tt),max(tt),length=1000)
 fff <- f(ttt)
 lines(ttt,fff, col=my.blue, lwd=2)
-@ 
+@
 
 \section{To Do}
 
@@ -1000,7 +1003,7 @@ lines(tvals, KM_approx(tvals, a=a.nls, omega=omega.nls, phi=phi.nls),
       xpd=NA, lwd=lwd, col=col.nls)
 lines(estimate ~ times, data=SIR_confband, col=col.fitode, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
-legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60), 
+legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
        lty=c(NA,"solid","solid","dotted"),
        col=c("black",col.KM,col.nls,col.fitode),
        pch=c(21,NA,NA,NA),
