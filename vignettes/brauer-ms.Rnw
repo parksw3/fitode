@@ -850,9 +850,10 @@ Very very small $S(0)$.
 
 \section{Example for which KM approx is bad}
 
-<<compute stochastic SIR via sirr>>=
-if (file.exists("sirstoch.RData")) {
-    load("sirstoch.RData")
+<<compute-stochastic-SIR-via-sirr>>=
+sirstoch_fn <- system.file("vignette_data", "sirstoch.RData", package = "fitode")
+if (file.exists(sirstoch_fn)) {
+    load(sirstoch_fn)
 } else {
     library(sirr)
     R0 <- 5
