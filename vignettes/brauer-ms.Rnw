@@ -907,6 +907,8 @@ SIR_stoch_fit <- fitode(
     fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
     tcol = "time"
 )
+sss <- predict(SIR_stoch_fit, level=0.95)[[1]]
+summary(SIR_stoch_fit)
 @
 
 <<plot_stochastic_SIR>>=
@@ -918,6 +920,7 @@ f <- function(t) KM_approx(t, a=a.det, omega=omega.det, phi=phi.det)
 ttt <- seq(min(tt),max(tt),length=1000)
 fff <- f(ttt)
 lines(ttt,fff, col=my.blue, lwd=2)
+lines(estimate ~ times, data=sss, col=my.green, lwd=2)
 @
 
 \section{To Do}
