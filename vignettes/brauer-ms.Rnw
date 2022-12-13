@@ -848,7 +848,7 @@ Very very small $S(0)$.
 \end{equation}
 \end{linenomath*}
 
-\section{Example for which KM approx is bad}
+\section{Example for which KM approx is bad (via stochastic SIR)}
 
 <<compute-stochastic-SIR-via-sirr>>=
 sirstoch_fn <- system.file("vignette_data", "sirstoch.RData", package = "fitode")
@@ -923,6 +923,74 @@ lines(ttt,fff, col=my.blue, lwd=2)
 lines(estimate ~ times, data=sss, col=my.green, lwd=2)
 @
 
+\section{Influenza in Philadelphia, October 1918}
+
+<<philapop, echo=TRUE>>=
+## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
+philapop <- data.frame(year = c(1910,1920), population = c(1549008, 1823779))
+##' @param pop data frame
+##' @param year year to interpolate to
+pop_interp <- function( pop, year ) {
+    slope <- (pop[2,2] - pop[1,2])/(pop[2,1] - pop[1,1])
+    out <- round( pop[1,2] + (year-pop[1,1])*slope )
+    return(out)
+}
+philapop1918 <- pop_interp( philapop, 1918 )
+print(philapop1918)
+## reduce this by case fatality proportion so we have
+## the initial susceptible population who will be recorded
+## as a death if they get infected:
+philaS0 <- round(philapop1918 * 0.025)
+print(philaS0)
+@ 
+
+<<read.phila.data>>=
+philadatafile <- "pim_us_phila_city_1918_dy.csv"
+philadata <- read.csv(philadatafile)
+philadata$date <- as.Date(philadata$date)
+names(philadata) <- c("date","mort")
+philadata$time <- lubridate::decimal_date(philadata$date)
+@ 
+
+<<xsummary>>=
+## extended summary
+## FIX: the estimate is OK, but the rest is wrong; use delta method
+xsummary <- function(fit, ...) {
+    ss <- summary(fit, ...)
+    Reff <- ss["S0",]*ss["beta",]/ss["gamma",]
+    return(rbind(ss,Reff))
+}
+@ 
+
+<<phila.fit,cache=TRUE,warning=FALSE>>=
+start.phila <- c(beta=1e-4, gamma=1,
+                 S0=philaS0,
+                 I0=3)
+names(start.phila) <- c("beta","gamma","S0","I0")
+print(start.phila)
+##
+phila_fit <- fitode(
+    SIR_model,
+    data = philadata,
+    start = start.phila,
+    ##fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
+    tcol = "time"
+)
+ppp <- predict(phila_fit, level=0.95)[[1]]
+@ 
+
+<<philasummary>>=
+##summary(phila_fit)
+philaparms <- as.list(xsummary(phila_fit)[,"Estimate"])
+@ 
+
+<<philaKMparms>>=
+## get associated params for KM approx:
+a.phila <- with(philaparms, a_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
+omega.phila <- with(philaparms, omega_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
+phi.phila <- with(philaparms, phi_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
+@ 
+
 \section{To Do}
 
 \subsection*{Things to mention}
@@ -968,10 +1036,8 @@ epidemic driven by seasonality.'' \cite{bacaermodel2012}
 \bibliographystyle{tfs}
 \bibliography{brauer-ms,fitode}
 
-\begin{figure}
-<<Bombay-figure, echo=FALSE, fig.height=5>>=
-f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
-
+<<figfuns, echo=FALSE>>=
+lwd <- 5
 col.KM <- my.blue
 col.nls <- my.red
 col.fitode <- my.yellow
@@ -982,37 +1048,48 @@ transparent_colour <- function(col,alpha=150/255) {
     return(tcol)
 }
 col.fitodeCI <- transparent_colour(col.fitode, alpha=0.4)
-bombay_plot <- function(type = "l", ...) {
-    plot(NA, NA , bty="L", type="n", xlim=c(0,tmax), ylim=c(0,900),
+setup_plot <- function(ymax = 1000, xlab="", ylab="deaths", ...) {
+    plot(NA, NA , bty="L", type="n", ylim=c(0,ymax),
          xaxs="i", yaxs="i", las=1,
          yaxt="n",
-         xlab="weeks", ylab="plague deaths",
+         xlab=xlab, ylab=ylab,
          ...
          )
-    axis(side=2, at=100*(0:9), las=1)
+    axis(side=2, at=100*(0:10), las=1)
 }
-lwd <- 5
-bombay_plot()
-with(SIR_confband,{
-    polygon(
-        x = c(times, rev(times)),
-        y = c(`2.5 %`, rev(`97.5 %`)),
-        col = col.fitodeCI,
-        border = NA,
-        xpd = NA
-    )
-})
+draw_confband <- function(confband, col = col.fitodeCI) {
+    with(confband,{
+        polygon(
+            x = c(times, rev(times)),
+            y = c(`2.5 %`, rev(`97.5 %`)),
+            col = col.fitodeCI,
+            border = NA,
+            xpd = NA
+        )
+    })
+}
+draw_legend <- function(lwd=5, pt.bg="white") {
+    legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
+       lty=c(NA,"solid","solid","dotted"),
+       col=c("black",col.KM,col.nls,col.fitode),
+       pch=c(21,NA,NA,NA),
+       pt.bg=c(pt.bg,NA,NA,NA),
+       legend=c("observed data","KM","nls","fitode"))
+}
+@ 
+
+\begin{figure}
+<<Bombay-figure, echo=FALSE, fig.height=5>>=
+f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
+setup_plot(ymax = 900, xlim=c(0,tmax), 
+         xlab="weeks", ylab="plague deaths")
+draw_confband(SIR_confband)
 lines(tvals, f(tvals), lwd=lwd, xpd=NA, col=col.KM)
 lines(tvals, KM_approx(tvals, a=a.nls, omega=omega.nls, phi=phi.nls),
       xpd=NA, lwd=lwd, col=col.nls)
 lines(estimate ~ times, data=SIR_confband, col=col.fitode, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
-legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
-       lty=c(NA,"solid","solid","dotted"),
-       col=c("black",col.KM,col.nls,col.fitode),
-       pch=c(21,NA,NA,NA),
-       pt.bg=c("white",NA,NA,NA),
-       legend=c("observed data","KM","nls","fitode"))
+draw_legend()
 @
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
@@ -1021,6 +1098,26 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
   curves are based on the KM approximation \eqref{eq:sech}; the
   associated parameter estimates are given in Table~\ref{tab:Bombay}.}
 \label{fig:Bombay}
+\end{figure}
+
+\begin{figure}
+<<phila-figure, echo=FALSE, fig.height=5>>=
+f <- function(t) KM_approx(t, a=a.phila, omega=omega.phila, phi=phi.phila)
+setup_plot(ymax = 800, xlim = range(philadata$time), ylab="daily P&I deaths")
+draw_confband(ppp)
+tvals <- with(philadata, seq(min(time),max(time), length=1000))
+t0 <- min(tvals)
+lines(tvals, f(tvals-t0), lwd=lwd, xpd=NA, col=col.KM)
+lines(estimate ~ times, data=ppp, col=col.fitode, lwd=lwd*0.60, lty="dotted")
+points(mort ~ time, data = philadata, xpd=NA, pch=21, bg="white", lwd=2)
+draw_legend()
+@
+\caption{The main wave of the 1918 influenza epidemic in the city of
+  Philadelphia, 1 September 1918 to 31 December 1918 \cite{Gold+09}.
+  \djde{If we incluce this figure, we'll need another table
+    similar to the Bombay plague table (Table~\ref{tab:Bombay}).}
+}
+\label{fig:phila}
 \end{figure}
 
 \end{document}
