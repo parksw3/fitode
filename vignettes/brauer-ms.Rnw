@@ -1127,6 +1127,9 @@ draw_confband(ppp)
 tvals <- with(philadata, seq(min(time),max(time), length=1000))
 t0 <- min(tvals)
 lines(tvals, f(tvals-t0), lwd=lwd, xpd=NA, col=col.KM)
+lines(tvals, 
+      with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
+      xpd=NA, lwd=lwd, col=col.nls)
 lines(estimate ~ times, data=ppp, col=col.fitode, lwd=lwd*0.60, lty="dotted")
 points(mort ~ time, data = philadata, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
