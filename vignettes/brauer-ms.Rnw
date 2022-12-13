@@ -1000,8 +1000,11 @@ print(KM.start.phila)
 @ 
 
 <<phila.nlsfit>>=
+## shift time to start at 0 before passing to nls
+df <- philadata[,c("time","mort")]
+df[,"time"] <- df[,"time"] - df[1,"time"]
 phila.nlsfit <- nls(mort ~ KM_approx(time, a, omega, phi),
-              data = philadata[,c("time","mort")],
+              data = df,
               start = KM.start.phila)
 phila.nls.parameters <- coef(phila.nlsfit)
 print(phila.nls.parameters)
