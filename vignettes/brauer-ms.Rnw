@@ -985,10 +985,26 @@ philaparms <- as.list(xsummary(phila_fit)[,"Estimate"])
 @ 
 
 <<philaKMparms>>=
-## get associated params for KM approx:
+## get KM approx parms associated with fitode fit:
 a.phila <- with(philaparms, a_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
 omega.phila <- with(philaparms, omega_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
 phi.phila <- with(philaparms, phi_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
+KM.approx.phila <- c(a=a.phila, omega=omega.phila, phi=phi.phila)
+print(KM.approx.phila)
+@ 
+
+<<adjust philaKMparms>>=
+## adjust because above is giving nls problems:
+KM.start.phila <- c(a=300, omega=omega.phila, phi=phi.phila)
+print(KM.start.phila)
+@ 
+
+<<phila.nlsfit>>=
+phila.nlsfit <- nls(mort ~ KM_approx(time, a, omega, phi),
+              data = philadata[,c("time","mort")],
+              start = KM.start.phila)
+phila.nls.parameters <- coef(phila.nlsfit)
+print(phila.nls.parameters)
 @ 
 
 \section{To Do}
