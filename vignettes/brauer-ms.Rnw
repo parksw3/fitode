@@ -942,7 +942,7 @@ print(philapop1918)
 ## as a death if they get infected:
 philaS0 <- round(philapop1918 * 0.025)
 print(philaS0)
-@ 
+@
 
 <<read.phila.data>>=
 philadatafile <- "pim_us_phila_city_1918_dy.csv"
@@ -950,7 +950,7 @@ philadata <- read.csv(philadatafile)
 philadata$date <- as.Date(philadata$date)
 names(philadata) <- c("date","mort")
 philadata$time <- lubridate::decimal_date(philadata$date)
-@ 
+@
 
 <<xsummary>>=
 ## extended summary
@@ -960,7 +960,7 @@ xsummary <- function(fit, ...) {
     Reff <- ss["S0",]*ss["beta",]/ss["gamma",]
     return(rbind(ss,Reff))
 }
-@ 
+@
 
 <<phila.fit,cache=TRUE,warning=FALSE>>=
 start.phila <- c(beta=1e-4, gamma=1,
@@ -977,12 +977,12 @@ phila_fit <- fitode(
     tcol = "time"
 )
 ppp <- predict(phila_fit, level=0.95)[[1]]
-@ 
+@
 
 <<philasummary>>=
 ##summary(phila_fit)
 philaparms <- as.list(xsummary(phila_fit)[,"Estimate"])
-@ 
+@
 
 <<philaKMparms>>=
 ## get KM approx parms associated with fitode fit:
@@ -991,13 +991,13 @@ omega.phila <- with(philaparms, omega_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
 phi.phila <- with(philaparms, phi_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
 KM.approx.phila <- c(a=a.phila, omega=omega.phila, phi=phi.phila)
 print(KM.approx.phila)
-@ 
+@
 
 <<adjust philaKMparms>>=
 ## adjust because above is giving nls problems:
 KM.start.phila <- c(a=300, omega=omega.phila, phi=phi.phila)
 print(KM.start.phila)
-@ 
+@
 
 <<phila.nlsfit>>=
 ## shift time to start at 0 before passing to nls
@@ -1008,7 +1008,7 @@ phila.nlsfit <- nls(mort ~ KM_approx(time, a, omega, phi),
               start = KM.start.phila)
 phila.nls.parameters <- coef(phila.nlsfit)
 print(phila.nls.parameters)
-@ 
+@
 
 \section{To Do}
 
@@ -1095,12 +1095,12 @@ draw_legend <- function(lwd=5, pt.bg="white") {
        pt.bg=c(pt.bg,NA,NA,NA),
        legend=c("observed data","KM","nls","fitode"))
 }
-@ 
+@
 
 \begin{figure}
 <<Bombay-figure, echo=FALSE, fig.height=5>>=
 f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
-setup_plot(ymax = 900, xlim=c(0,tmax), 
+setup_plot(ymax = 900, xlim=c(0,tmax),
          xlab="weeks", ylab="plague deaths")
 draw_confband(SIR_confband)
 lines(tvals, f(tvals), lwd=lwd, xpd=NA, col=col.KM)
@@ -1127,7 +1127,7 @@ draw_confband(ppp)
 tvals <- with(philadata, seq(min(time),max(time), length=1000))
 t0 <- min(tvals)
 lines(tvals, f(tvals-t0), lwd=lwd, xpd=NA, col=col.KM)
-lines(tvals, 
+lines(tvals,
       with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
       xpd=NA, lwd=lwd, col=col.nls)
 lines(estimate ~ times, data=ppp, col=col.fitode, lwd=lwd*0.60, lty="dotted")

@@ -48,3 +48,12 @@
 #' \item{mort}{mortality}
 #' }
 "bombay"
+
+##' 1918 Philadelphia flu data set
+#'
+#' @format A data frame with 122 rows comprising:
+#' \describe{
+#' \item{date}{date}
+#' \item{mort}{mortality}
+#' }
+"phila1918"
