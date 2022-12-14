@@ -945,11 +945,7 @@ print(philaS0)
 @
 
 <<read.phila.data>>=
-philadatafile <- "pim_us_phila_city_1918_dy.csv"
-philadata <- read.csv(philadatafile)
-philadata$date <- as.Date(philadata$date)
-names(philadata) <- c("date","mort")
-philadata$time <- lubridate::decimal_date(philadata$date)
+phila1918$time <- lubridate::decimal_date(phila1918$date)
 @
 
 <<xsummary>>=
@@ -971,7 +967,7 @@ print(start.phila)
 ##
 phila_fit <- fitode(
     SIR_model,
-    data = philadata,
+    data = phila1918,
     start = start.phila,
     ##fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
     tcol = "time"
@@ -1001,7 +997,7 @@ print(KM.start.phila)
 
 <<phila.nlsfit>>=
 ## shift time to start at 0 before passing to nls
-df <- philadata[,c("time","mort")]
+df <- phila1918[,c("time","mort")]
 df[,"time"] <- df[,"time"] - df[1,"time"]
 phila.nlsfit <- nls(mort ~ KM_approx(time, a, omega, phi),
               data = df,
@@ -1122,16 +1118,16 @@ draw_legend()
 \begin{figure}
 <<phila-figure, echo=FALSE, fig.height=5>>=
 f <- function(t) KM_approx(t, a=a.phila, omega=omega.phila, phi=phi.phila)
-setup_plot(ymax = 800, xlim = range(philadata$time), ylab="daily P&I deaths")
+setup_plot(ymax = 800, xlim = range(phila1918$time), ylab="daily P&I deaths")
 draw_confband(ppp)
-tvals <- with(philadata, seq(min(time),max(time), length=1000))
+tvals <- with(phila1918, seq(min(time),max(time), length=1000))
 t0 <- min(tvals)
 lines(tvals, f(tvals-t0), lwd=lwd, xpd=NA, col=col.KM)
 lines(tvals,
       with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
       xpd=NA, lwd=lwd, col=col.nls)
 lines(estimate ~ times, data=ppp, col=col.fitode, lwd=lwd*0.60, lty="dotted")
-points(mort ~ time, data = philadata, xpd=NA, pch=21, bg="white", lwd=2)
+points(mort ~ time, data = phila1918, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
 @
 \caption{The main wave of the 1918 influenza epidemic in the city of
