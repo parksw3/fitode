@@ -273,7 +273,10 @@ indication of how their parameter estimates were obtained.  \djde{When
   computers, as Ben notes.}\djde{According to
   \href{https://en.wikipedia.org/wiki/Least_squares}{Wikipedia}, the
   method of least squares goes back to Legendre and Gauss, a century
-  before KM.}  Whatever their process, they must have engaged in some
+  before KM.}
+  \swp{Ah yes I see. But maybe better to focus on model fitting in
+  the context of epidemic models?}
+  Whatever their process, they must have engaged in some
 sort of \term{trajectory matching}, i.e., adjusting parameter values
 until the model---equation~\eqref{eq:sech} in their case---is, by some
 measure, close to the observed data points.  The most obvious metric
@@ -575,16 +578,24 @@ for (p in rownames(cc.delta)) {
 @
 
 \subsection{Confidence}
+\swp{Uncertainty?}
 
 To this point, we have addressed only an optimization problem, which
-we solved using the method of nonlinear least squares.  But the final
-column of Table~\ref{tab:Bombay} lists 95\% \term{confidence
-  intervals} (CIs) on our \code{nls} parameter estimates, and the
+we solved using the method of nonlinear least squares.
+\swp{But it is important to recognize that parameter estimates are never certain.
+Uncertainties in parameter estimates can be caused by errors in the data
+as well as model misspecification. And some of these uncertainties
+can be captured by \term{confidence intervals} (CIs).
+}
+For example, the final
+column of Table~\ref{tab:Bombay} lists 95\% CIs on our \code{nls}
+parameter estimates, and the
 \nlscol shaded region in Figure~\ref{fig:Bombay} is a \term{confidence
   band} for the fitted model curve.  \djde{currently it is actually
   the fitode confidence band, and is \fitodecol.}  Estimating levels
-of \emph{confidence} in our results requires some statistical
+of \emph{confidence} \swp{uncertainty?} in our results requires some statistical
 thinking.
+\swp{do we want to define what confidence intervals mean?}
 
 \djde{What we do: Given estimated variances for the parameters, we use
   the delta method to calculate the variance of $f(t;\betavechat)$ at
@@ -610,12 +621,23 @@ fitted model curve,\footnote{For a \code{Normal}$(0,\sigma)$
   and $+1.96\,\sigma$.}  which would emphasize the folly in assuming
 the observation error has the same absolute magnitude throughout the
 epidemic (in particular the lower limit would go below zero early and
-late in the epidemic).  Instead, we \djde{Ben, can you please: (1)
+late in the epidemic).
+\djde{Ben, can you please: (1)
   fill in a brief description of what is actually being done to get
   confidence bands on the plotted curve, and add the confidence bands
   to the plot (or make another plot); and (2) explain how CIs on the
   parameter estimates are obtained and spew them here.  Daniel
   basically did it in \code{epidemic.Rnw} but without explanation.}
+\swp{Here's my stab at it:}
+ However, this method of drawing confidence bands ignore uncertainties
+associated with parameter estimates.
+In doing so, we need to first estimate the \term{variance covariance matrix} for our parameter estimates
+to characterize their uncertainties---this can be done by inverting the Hessian matrix
+of the negative log-likelihood function
+(also known as the \term{Fisher information matrix}) at its minimum.
+\swp{do we have to mention that profile likelihoods are a thing but are
+probably too complicated?}
+
 
 Bear in mind that at each step of this approach, we are making a very
 specific, strong assumptions (when we ``imagine'').  To begin with, it
