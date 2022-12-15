@@ -810,30 +810,19 @@ SIR_model <- odemodel(
 \noindent
 In the model definition above:
 \begin{description}
-\item[\code{model}]specifies the vector field given by the ODE \eqref{eq:SIR},
+\item[\code{model}]specifies the vector field given by the ODE \eqref{eq:SIR}.
 \item[\code{observation}]specifies that the observed data
   (\code{mort}) are assumed to arise from sampling from the normal
   distribution associated with an ordinary least squares (\code{ols})
   fit; the sampled distribution is $\texttt{Normal}(\mu,\sigma)$,
   where the mean is given by the fitted model curve ($\mu(t)=\gamma I(t)$,
-  equation~\eqref{eq:SIR;R}) and the standard deviation is $\sigma(t)=$\dots
-\item[\code{initial}]conditions are expressed as proportions of the
-  total population size (\code{N}),
+  equation~\eqref{eq:SIR;R}) and the standard deviation is set to the
+  residual standard deviation $\sigma(t)=\sqrt{\sum_{i=1}^n \big(f(t_i;\betavec) - y_i\big)^2/(n-1)}$,
+\item[\code{initial}]conditions are expressed as the number of individuals.
 \item[\code{par}]refers to the parameters that are to be fitted:
-  $\beta$, $\gamma$, and initial proportions $s_0$ and $i_0$, which
-  are to fitted via a
-\item[\code{link}]function to the logit scale, since they are
-  proportions; log links are assumed by default, so $\beta$ and
-  $\gamma$ are constrained to be positive automatically.
+  $\beta$, $\gamma$, and initial conditions $S(0)$ and $I(0)$, which
+  are to be fitted via the \code{fitode} function.
 \end{description}
-
-\swp{I wrote this without realizing that you had already written the thing above. See if you need anything from here and keep it (or take it out). Not sure how much we want to explain the syntax though.}
-\swp{Here, the gradients are defined using the \code{model} argument (using a list of formulas), where the left-hand side (LHS) corresponds to the name of the state variable (e.g,. \code{S} for $dS/dt$) and the right-hand side (RHS) the gradient.
-The \code{observation} argument takes a list of formulas, where the LHS correspond to the data and the RHS correspond to the observation (error) distribution and its parameters---here we write \code{ols(mean = gamma * I)} to perform ordinary least squares where the modeled mean corresponds to $dR/dt=\gamma I$.
-Similarly, the \code{initial} argument takes the initial values for the mode.
-Finally, all model parameters (including initial conditions and parameters of the error distribution) must be listed using the \code{par} argument.
-We note that log links are applied to all model parameters by default---this can be changed using the \code{link} argument as we show later.}
-\swp{Do we want to move away from least squares here or not yet?}
 
 \thickredline
 
