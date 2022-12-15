@@ -629,15 +629,23 @@ late in the epidemic).
   parameter estimates are obtained and spew them here.  Daniel
   basically did it in \code{epidemic.Rnw} but without explanation.}
 \swp{Here's my stab at it:}
- However, this method of drawing confidence bands ignore uncertainties
-associated with parameter estimates.
-In doing so, we need to first estimate the \term{variance covariance matrix} for our parameter estimates
+ However, this na\"ive method of drawing confidence bands ignore uncertainties
+associated with other parameter estimates (in this case, $\betavec = (\beta; \gamma; I(0); S(0))$).
+In doing so, we need to first estimate the \term{variance covariance matrix} $\mathrm{Cov}(\betavec)$ for our parameter estimates
 to characterize their uncertainties---this can be done by inverting the Hessian matrix
 of the negative log-likelihood function
 (also known as the \term{Fisher information matrix}) at its minimum.
-\swp{do we have to mention that profile likelihoods are a thing but are
-probably too complicated?}
-
+Then, the Delta method allows us to approximate the variance covariance matrix
+of any non-linear transfomration of parameters $g(\betavec)$, such as the basic reproduction number or the mortality trajectory \cite{Bolk08}:
+\begin{linenomath*}
+\begin{equation}
+\mathrm{Var}(g(\betavec)) \approx \nabla g(\betavec)^T \cdot \mathrm{Cov}(\betavec) \cdot \nabla g(\betavec)
+\end{equation}
+\end{linenomath*}
+Calculating the gradient $\nabla g(\betavec)$ is tricky when $g$ is a solution of an ODE model---this requires sensitivity equations to be simultaneously solved alongside the main differential equations \cite{raue2013lessons}.
+We can then take the square root of the estimated variance to obtain the standard error ($\mathrm{SE}$) and calculate approximate confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to $g(\betavec)$.
+\swp{we might want to mention that profile likelihoods are a thing but are
+probably too complicated for this paper and especially for trajectories?}
 
 Bear in mind that at each step of this approach, we are making a very
 specific, strong assumptions (when we ``imagine'').  To begin with, it
