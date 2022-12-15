@@ -577,6 +577,34 @@ for (p in rownames(cc.delta)) {
 }
 @
 
+<<delta-method-band, echo=FALSE>>==
+traj_express <- expression(a * 1/cosh(omega*t - phi)^2)
+
+traj_ci <- function(t,
+                    parameters,
+                    vcov,
+                    level=0.95) {
+    traj <- eval(deriv(traj_express, c("a", "omega", "phi")), c(as.list(parameters), t=t))
+
+    traj_dgdx <- attr(traj, "gradient")
+
+    est_vcov <- traj_dgdx %*% vcov %*% t(traj_dgdx)
+    est_err <- sqrt(diag(est_vcov))
+    ll <- (1-level)/2
+    z <- -qnorm(ll)
+
+    dd <- data.frame(
+        times=t,
+        estimate=traj,
+        lwr=traj-est_err*z,
+        upr=traj+est_err*z
+    )
+    names(dd)[3:4] <- c(paste(100*ll, "%"), paste(100*(1-ll), "%"))
+
+    dd
+}
+@
+
 \subsection{Confidence}
 \swp{Uncertainty?}
 
@@ -592,7 +620,7 @@ column of Table~\ref{tab:Bombay} lists 95\% CIs on our \code{nls}
 parameter estimates, and the
 \nlscol shaded region in Figure~\ref{fig:Bombay} is a \term{confidence
   band} for the fitted model curve.  \djde{currently it is actually
-  the fitode confidence band, and is \fitodecol.}  Estimating levels
+  the fitode confidence band, and is \fitodecol.} \swp{I fixed.}  Estimating levels
 of \emph{confidence} \swp{uncertainty?} in our results requires some statistical
 thinking.
 \swp{do we want to define what confidence intervals mean?}
@@ -1093,6 +1121,7 @@ transparent_colour <- function(col,alpha=150/255) {
     return(tcol)
 }
 col.fitodeCI <- transparent_colour(col.fitode, alpha=0.4)
+col.nlsCI <- transparent_colour(col.nls, alpha=0.4)
 setup_plot <- function(ymax = 1000, xlab="", ylab="deaths", ...) {
     plot(NA, NA , bty="L", type="n", ylim=c(0,ymax),
          xaxs="i", yaxs="i", las=1,
@@ -1107,7 +1136,7 @@ draw_confband <- function(confband, col = col.fitodeCI) {
         polygon(
             x = c(times, rev(times)),
             y = c(`2.5 %`, rev(`97.5 %`)),
-            col = col.fitodeCI,
+            col = col,
             border = NA,
             xpd = NA
         )
@@ -1125,13 +1154,14 @@ draw_legend <- function(lwd=5, pt.bg="white") {
 
 \begin{figure}
 <<Bombay-figure, echo=FALSE, fig.height=5>>=
-f <- function(t) KM_approx(t, a=a.KM, omega=omega.KM, phi=phi.KM)
+tvals <- seq(0, tmax, length.out=1000)
 setup_plot(ymax = 900, xlim=c(0,tmax),
          xlab="weeks", ylab="plague deaths")
-draw_confband(SIR_confband)
-lines(tvals, f(tvals), lwd=lwd, xpd=NA, col=col.KM)
-lines(tvals, KM_approx(tvals, a=a.nls, omega=omega.nls, phi=phi.nls),
-      xpd=NA, lwd=lwd, col=col.nls)
+draw_confband(traj_ci(tvals, nls.parameters, vcov(nlsfit)), col=col.nlsCI)
+curve(KM_approx(x, a=a.KM, omega=omega.KM, phi=phi.KM), from=0, to=tmax, n=1000, add=TRUE,
+      lwd=lwd, xpd=NA, col=col.KM)
+curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=1000, add=TRUE,
+      lwd=lwd, xpd=NA, col=col.nls)
 lines(estimate ~ times, data=SIR_confband, col=col.fitode, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
