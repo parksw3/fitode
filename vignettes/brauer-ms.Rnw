@@ -63,7 +63,7 @@
 \usepackage{multirow}   % for tables
 %\usepackage{subfig}
 \usepackage{tabularx}   % pretty tables
-\usepackage{tabularray} % allows rowsep via tblr environment
+% \usepackage{tabularray} % allows rowsep via tblr environment
 %% table details
 \renewcommand{\arraystretch}{1.5} % more interline spacing
 %% https://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
