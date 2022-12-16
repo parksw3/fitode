@@ -605,25 +605,22 @@ traj_ci <- function(t,
 }
 @
 
-\subsection{Confidence}
-\swp{Uncertainty?}
+\subsection{Uncertainty}
 
-To this point, we have addressed only an optimization problem, which
-we solved using the method of nonlinear least squares.
-\swp{But it is important to recognize that parameter estimates are never certain.
-Uncertainties in parameter estimates can be caused by errors in the data
-as well as model misspecification. And some of these uncertainties
-can be captured by \term{confidence intervals} (CIs).
-}
-For example, the final
-column of Table~\ref{tab:Bombay} lists 95\% CIs on our \code{nls}
-parameter estimates, and the
-\nlscol shaded region in Figure~\ref{fig:Bombay} is a \term{confidence
-  band} for the fitted model curve.  \djde{currently it is actually
-  the fitode confidence band, and is \fitodecol.} \swp{I fixed.}  Estimating levels
-of \emph{confidence} \swp{uncertainty?} in our results requires some statistical
-thinking.
-\swp{do we want to define what confidence intervals mean?}
+To this point, we have addressed only an optimization problem.  We
+solved it using the method of nonlinear least squares, which yields
+estimates of the values of the parameters of the model
+\eqref{eq:sech}.  But our best estimates are just that:
+\emph{estimates}, not exact values of the parameters.
+
+To quantify uncertainty in our estimates, we need a statistical
+framework.  The typical output of such a framework is a
+\term{confidence interval} (CI) within which our best estimate lies.
+For example, the final column of Table~\ref{tab:Bombay} lists 95\% CIs
+on our \code{nls} parameter estimates, and the \nlscol shaded region
+in Figure~\ref{fig:Bombay} is a 95\% \term{confidence band} for the
+fitted model curve.  \djde{We should probably also include the fitode
+  confidence band in \fitodecol as I had as a placeholder before.}
 
 \djde{What we do: Given estimated variances for the parameters, we use
   the delta method to calculate the variance of $f(t;\betavechat)$ at
@@ -634,8 +631,9 @@ thinking.
   sample that many times and run the model, and draw the bands that
   contain 95\% of the simulations.}
 
-We estimated our CIs using a standard approach.  We imagine that the
-model \eqref{eq:sech} is a perfect representation of reality, and we
+We estimated our CIs using a standard approach: We imagine that the
+model \eqref{eq:sech} is a perfect representation of
+reality\djde{maybe discuss model misspecification later}, and we
 consider the deviations from the model curve in
 Figure~\ref{fig:Bombay} to be observation errors.  We then imagine
 that observation error for each data point is independent and
@@ -650,6 +648,10 @@ fitted model curve,\footnote{For a \code{Normal}$(0,\sigma)$
 the observation error has the same absolute magnitude throughout the
 epidemic (in particular the lower limit would go below zero early and
 late in the epidemic).
+
+\djde{we need to get across that the delta method is a generalization
+  of $\Delta f \approx f'(x)\Delta x$}
+
 \djde{Ben, can you please: (1)
   fill in a brief description of what is actually being done to get
   confidence bands on the plotted curve, and add the confidence bands
