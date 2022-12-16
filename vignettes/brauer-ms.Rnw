@@ -59,6 +59,7 @@
 \newcommand{\KMcol}{blue\xspace}
 \newcommand{\nlscol}{red\xspace}
 \newcommand{\fitodecol}{yellow\xspace}
+\newcommand{\Pop}{{\mathbb{P}}}
 %% tables
 \usepackage{multirow}   % for tables
 %\usepackage{subfig}
@@ -631,7 +632,8 @@ fitted model curve.  \djde{We should probably also include the fitode
   sample that many times and run the model, and draw the bands that
   contain 95\% of the simulations.}
 
-We estimated our CIs using a standard approach: We imagine that the
+One standard way to derive a confidence band is the following:
+We imagine that the
 model \eqref{eq:sech} is a perfect representation of
 reality\djde{maybe discuss model misspecification later}, and we
 consider the deviations from the model curve in
@@ -648,6 +650,22 @@ fitted model curve,\footnote{For a \code{Normal}$(0,\sigma)$
 the observation error has the same absolute magnitude throughout the
 epidemic (in particular the lower limit would go below zero early and
 late in the epidemic).
+
+\thickredline
+
+\djde{we should explain the likelihood for the above, which will 
+motivate other discussion} the probability
+of observing the given data is
+%%
+\begin{linenomath*}
+\begin{equation}\label{eq:leastsquares}
+\Pop(\text{data} | \text{model})
+=
+\prod_{i=1}^n \exp\left(-\frac{\big(f(t_i;\betavec) - y_i\big)^2}{2\sigma^2}\right)
+\,,
+\end{equation}
+\end{linenomath*}
+%%
 
 \djde{we need to get across that the delta method is a generalization
   of $\Delta f \approx f'(x)\Delta x$}
