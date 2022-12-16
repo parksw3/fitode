@@ -1011,13 +1011,15 @@ start.stoch <- c(beta=mm$beta, gamma=mm$gamma,
 names(start.stoch) <- c("beta","gamma","S0","I0")
 print(start.stoch)
 
-sir.stoch.data <- sir.stoch[,c("time","I")]
-names(sir.stoch.data) <- c("time", "mort")
+sir.stoch.data <- data.frame(
+    time=0:10,
+    mort=c(NA, diff(sir.stoch$R[!duplicated(ceiling(sir.stoch$time), fromLast = TRUE)]))
+)
 
 SIR_stoch_fit <- fitode(
-    SIR_model,
+    SIR_model_nb,
     data = sir.stoch.data,
-    start = start.stoch,
+    start = c(start.stoch, phi=10),
     fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
     tcol = "time"
 )
@@ -1025,20 +1027,7 @@ sss <- predict(SIR_stoch_fit, level=0.95)[[1]]
 summary(SIR_stoch_fit)
 @
 
-<<plot_stochastic_SIR>>=
-plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
-     xlim=range(tt), ylim=range(sir.stoch$I))
-lines(sir.det$tau, sir.det$I * N, col=my.red, lwd=3)
-lines(sir.stoch$time, sir.stoch$I, lwd=2)
-f <- function(t) KM_approx(t, a=a.det, omega=omega.det, phi=phi.det)
-ttt <- seq(min(tt),max(tt),length=1000)
-fff <- f(ttt)
-lines(ttt,fff, col=my.blue, lwd=2)
-lines(estimate ~ times, data=sss, col=my.green, lwd=2)
-@
-
 \section{Influenza in Philadelphia, October 1918}
-
 <<philapop, echo=TRUE>>=
 ## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
 philapop <- data.frame(year = c(1910,1920), population = c(1549008, 1823779))
@@ -1059,7 +1048,16 @@ print(philaS0)
 @
 
 <<read.phila.data>>=
-phila1918$time <- lubridate::decimal_date(phila1918$date)
+## we have to cut the data when we're using nbinom
+## beacuse there are long trailing zeroes..
+## same with the beginning
+phila1918a <- phila1918[as.Date("1918-09-10") < phila1918$date & phila1918$date < as.Date("1918-11-18"),]
+phila1918b <- data.frame(
+    date=c(as.Date("1918-09-09"), phila1918a$date),
+    mort=c(NA, phila1918a$mort)
+)
+
+phila1918b$time <- lubridate::decimal_date(phila1918b$date)
 @
 
 <<xsummary>>=
@@ -1073,17 +1071,19 @@ xsummary <- function(fit, ...) {
 @
 
 <<phila.fit,cache=TRUE,warning=FALSE>>=
-start.phila <- c(beta=1e-4, gamma=1,
-                 S0=philaS0,
-                 I0=3)
-names(start.phila) <- c("beta","gamma","S0","I0")
+## time is in the unit of years
+## so gamma=52 corresponds to a mean of 1 week
+## I picked not-so-random starting values by hand
+start.phila <- c(beta=4e-3, gamma=52*2,
+                 S0=philaS0*0.9,
+                 I0=3, phi=50)
+names(start.phila) <- c("beta","gamma","S0","I0", "phi")
 print(start.phila)
-##
+
 phila_fit <- fitode(
-    SIR_model,
-    data = phila1918,
+    SIR_model_nb,
+    data = phila1918b,
     start = start.phila,
-    ##fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
     tcol = "time"
 )
 ppp <- predict(phila_fit, level=0.95)[[1]]
@@ -1111,7 +1111,7 @@ print(KM.start.phila)
 
 <<phila.nlsfit>>=
 ## shift time to start at 0 before passing to nls
-df <- phila1918[,c("time","mort")]
+df <- phila1918b[,c("time","mort")]
 df[,"time"] <- df[,"time"] - df[1,"time"]
 phila.nlsfit <- nls(mort ~ KM_approx(time, a, omega, phi),
               data = df,
@@ -1178,6 +1178,7 @@ transparent_colour <- function(col,alpha=150/255) {
     return(tcol)
 }
 col.fitodeCI <- transparent_colour(col.fitode.ols, alpha=0.4)
+col.fitodenbCI <- transparent_colour(col.fitode.nb, alpha=0.4)
 col.nlsCI <- transparent_colour(col.nls, alpha=0.4)
 setup_plot <- function(xlab="", ylab="deaths",
                        at=100*(0:10), ...) {
@@ -1225,8 +1226,9 @@ points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
 
 setup_plot(ylim=c(5, 1000), xlim=c(0,tmax),
-         xlab="weeks", ylab="plague deaths", log="y",
+         xlab="weeks", ylab="plague deaths",
          at=c(25, 50, 100, 200, 400, 800))
+draw_confband(SIR_nb_confband, col=col.fitodenbCI)
 lines(estimate ~ times, data=SIR_nb_confband, col=col.fitode.nb, lwd=lwd)
 lines(estimate ~ times, data=SIR_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
@@ -1247,11 +1249,34 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
 \end{figure}
 
 \begin{figure}
+<<plot_stochastic_SIR>>=
+plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
+     xlim=range(tt), ylim=range(sir.stoch$I))
+draw_confband(sss, col=col.fitodenbCI)
+lines(sir.det$tau, 1 * sir.det$I * N, col=my.red, lwd=lwd) ## dR/dt
+curve(KM_approx(x, a=a.det, omega=omega.det, phi=phi.det), from=0, to=tmax, n=1000, add=TRUE,
+      xpd=NA, col=my.blue, lwd=lwd)
+lines(estimate ~ times, data=sss, col=my.green, lwd=lwd)
+points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
+legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
+       lty=c(NA,"solid","solid","solid"),
+       col=c("black",my.blue, my.red, my.green),
+       pch=c(21,NA,NA,NA),
+       pt.bg=c("white",NA,NA,NA),
+       legend=c("simulated data","KM","deterministic solution", "fitode (nbinom)"))
+@
+\caption{
+Deterministic fits to a stochastic SIR simulation.
+}
+\label{fig:stoch}
+\end{figure}
+
+\begin{figure}
 <<phila-figure, echo=FALSE, fig.height=5>>=
 f <- function(t) KM_approx(t, a=a.phila, omega=omega.phila, phi=phi.phila)
-setup_plot(ylim = c(0, 800), xlim = range(phila1918$time), ylab="daily P&I deaths")
+setup_plot(ylim = c(0, 800), xlim = range(phila1918b$time), ylab="daily P&I deaths")
 draw_confband(ppp)
-tvals <- with(phila1918, seq(min(time),max(time), length=1000))
+tvals <- with(phila1918b, seq(min(time),max(time), length=1000))
 t0 <- min(tvals)
 lines(tvals, f(tvals-t0), lwd=lwd, xpd=NA, col=col.KM)
 lines(tvals,
