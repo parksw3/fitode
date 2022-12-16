@@ -59,7 +59,7 @@
 \newcommand{\KMcol}{blue\xspace}
 \newcommand{\nlscol}{red\xspace}
 \newcommand{\fitodecol}{yellow\xspace}
-\newcommand{\Pop}{{\mathbb{P}}}
+\newcommand{\Pop}{{\mathbb{P}}} % probability operator
 %% tables
 \usepackage{multirow}   % for tables
 %\usepackage{subfig}
@@ -655,13 +655,15 @@ late in the epidemic).
 
 \djde{we should explain the likelihood for the above, which will 
 motivate other discussion} the probability
-of observing the given data is
+of observing the data $\{y_i\}$ is
 %%
 \begin{linenomath*}
-\begin{equation}\label{eq:leastsquares}
-\Pop(\text{data} | \text{model})
+\begin{equation}\label{eq:prob.data.given.model}
+\Pop(\text{data} \mid \text{model})
 =
-\prod_{i=1}^n \exp\left(-\frac{\big(f(t_i;\betavec) - y_i\big)^2}{2\sigma^2}\right)
+\prod_{i=1}^n 
+\frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\left(-\frac{\big(f(t_i;\betavec) - y_i\big)^2}{2\sigma^2}\right)
 \,,
 \end{equation}
 \end{linenomath*}
