@@ -887,6 +887,7 @@ Very very small $S(0)$.
 
 \subsection{Correctly handling weekly mortality}
 
+\swp{I don't think it's worth pursuing KM approx any further... we're trying to show how to fit an ODE, not KM approximation.}
 \begin{linenomath*}
 \begin{equation}
 \int_{t_1}^{t_2} \ddt{R}\,\dt
@@ -922,7 +923,7 @@ SIR_model_nb <- odemodel(
 
 We need to add an extra row to fit the diff model:
 
-<<sirmortfit_correct, cache=TRUE>>=
+<<sirmortfit_correct, cache=TRUE, warning=FALSE>>=
 bombay2 <- rbind(
     c(times=bombay$week[1] -
           diff(bombay$week)[1], mort=NA),
@@ -1156,7 +1157,7 @@ transparent_colour <- function(col,alpha=150/255) {
     tcol <- rgb(v["red"],v["green"],v["blue"],alpha=alpha,maxColorValue = 255)
     return(tcol)
 }
-col.fitodeCI <- transparent_colour(col.fitode, alpha=0.4)
+col.fitodeCI <- transparent_colour(col.fitode.ols, alpha=0.4)
 col.nlsCI <- transparent_colour(col.nls, alpha=0.4)
 setup_plot <- function(xlab="", ylab="deaths",
                        at=100*(0:10), ...) {
@@ -1192,7 +1193,7 @@ draw_legend <- function(lwd=5, pt.bg="white") {
 \begin{figure}
 <<Bombay-figure, echo=FALSE, fig.height=5, fig.show="hold", out.width="50%">>=
 tvals <- seq(0, tmax, length.out=1000)
-setup_plot(ylim = c(0, 900), xlim=c(0,tmax),
+setup_plot(ylim = c(0, 1000), xlim=c(0,tmax),
          xlab="weeks", ylab="plague deaths")
 draw_confband(traj_ci(tvals, nls.parameters, vcov(nlsfit)), col=col.nlsCI)
 curve(KM_approx(x, a=a.KM, omega=omega.KM, phi=phi.KM), from=0, to=tmax, n=1000, add=TRUE,
@@ -1203,10 +1204,10 @@ lines(estimate ~ times, data=SIR_confband, col=col.fitode.ols, lwd=lwd*0.60, lty
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
 
-setup_plot(ylim=c(5, 900), xlim=c(0,tmax),
+setup_plot(ylim=c(5, 1000), xlim=c(0,tmax),
          xlab="weeks", ylab="plague deaths", log="y",
          at=c(25, 50, 100, 200, 400, 800))
-lines(estimate ~ times, data=SIR_nb_confband, col=col.fitode.nb, lwd=lwd*0.60)
+lines(estimate ~ times, data=SIR_nb_confband, col=col.fitode.nb, lwd=lwd)
 lines(estimate ~ times, data=SIR_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
@@ -1228,7 +1229,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
 \begin{figure}
 <<phila-figure, echo=FALSE, fig.height=5>>=
 f <- function(t) KM_approx(t, a=a.phila, omega=omega.phila, phi=phi.phila)
-setup_plot(ymax = 800, xlim = range(phila1918$time), ylab="daily P&I deaths")
+setup_plot(ylim = c(0, 800), xlim = range(phila1918$time), ylab="daily P&I deaths")
 draw_confband(ppp)
 tvals <- with(phila1918, seq(min(time),max(time), length=1000))
 t0 <- min(tvals)
