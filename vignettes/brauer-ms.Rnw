@@ -895,6 +895,52 @@ Very very small $S(0)$.
 \end{equation}
 \end{linenomath*}
 
+\swp{We should introduce nbinom here too. I think we can introduce both at the same time (instead of showing two or three separate fits)}
+
+\swp{\code{diffname} argument is used to tell fitode which state variable needs to be 'diff'-ed.}
+
+<<sirmortmodel_correct>>=
+SIR_model_nb <- odemodel(
+    name="SIR model",
+    model=list(
+        S ~ - beta * S * I,
+        I ~ beta * S * I - gamma * I,
+        R ~ gamma * I
+    ),
+    observation = list(
+        mort ~ dnbinom(mu = R, size=phi)
+    ),
+    initial=list(
+        S ~ S0,
+        I ~ I0,
+        R ~ 0
+    ),
+    diffnames="R",
+    par=c("beta", "gamma", "S0", "I0", "phi"),
+)
+@
+
+We need to add an extra row to fit the diff model:
+
+<<sirmortfit_correct, cache=TRUE>>=
+bombay2 <- rbind(
+    c(times=bombay$week[1] -
+          diff(bombay$week)[1], mort=NA),
+    bombay
+)
+
+SIR_start_nb <- c(coef(SIR_fit), phi=10)
+
+SIR_fit_nb <- fitode(
+    SIR_model_nb,
+    data = bombay2,
+    start = SIR_start_nb,
+    tcol = "week"
+)
+
+SIR_nb_confband <- predict(SIR_fit_nb, level=0.95)$mort
+@
+
 \section{Example for which KM approx is bad (via stochastic SIR)}
 
 <<compute-stochastic-SIR-via-sirr>>=
@@ -1102,7 +1148,8 @@ epidemic driven by seasonality.'' \cite{bacaermodel2012}
 lwd <- 5
 col.KM <- my.blue
 col.nls <- my.red
-col.fitode <- my.yellow
+col.fitode.ols <- my.yellow
+col.fitode.nb <- my.green
 transparent_colour <- function(col,alpha=150/255) {
     alpha <- round(alpha * 255)
     v <- col2rgb(col)[,1] # color as rgb vector
@@ -1111,14 +1158,15 @@ transparent_colour <- function(col,alpha=150/255) {
 }
 col.fitodeCI <- transparent_colour(col.fitode, alpha=0.4)
 col.nlsCI <- transparent_colour(col.nls, alpha=0.4)
-setup_plot <- function(ymax = 1000, xlab="", ylab="deaths", ...) {
-    plot(NA, NA , bty="L", type="n", ylim=c(0,ymax),
+setup_plot <- function(xlab="", ylab="deaths",
+                       at=100*(0:10), ...) {
+    plot(NA, NA , bty="L", type="n",
          xaxs="i", yaxs="i", las=1,
          yaxt="n",
          xlab=xlab, ylab=ylab,
          ...
          )
-    axis(side=2, at=100*(0:10), las=1)
+    axis(side=2, at=at, las=1)
 }
 draw_confband <- function(confband, col = col.fitodeCI) {
     with(confband,{
@@ -1134,26 +1182,39 @@ draw_confband <- function(confband, col = col.fitodeCI) {
 draw_legend <- function(lwd=5, pt.bg="white") {
     legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
        lty=c(NA,"solid","solid","dotted"),
-       col=c("black",col.KM,col.nls,col.fitode),
+       col=c("black",col.KM,col.nls,col.fitode.ols),
        pch=c(21,NA,NA,NA),
        pt.bg=c(pt.bg,NA,NA,NA),
-       legend=c("observed data","KM","nls","fitode"))
+       legend=c("observed data","KM","nls","fitode (ols)"))
 }
 @
 
 \begin{figure}
-<<Bombay-figure, echo=FALSE, fig.height=5>>=
+<<Bombay-figure, echo=FALSE, fig.height=5, fig.show="hold", out.width="50%">>=
 tvals <- seq(0, tmax, length.out=1000)
-setup_plot(ymax = 900, xlim=c(0,tmax),
+setup_plot(ylim = c(0, 900), xlim=c(0,tmax),
          xlab="weeks", ylab="plague deaths")
 draw_confband(traj_ci(tvals, nls.parameters, vcov(nlsfit)), col=col.nlsCI)
 curve(KM_approx(x, a=a.KM, omega=omega.KM, phi=phi.KM), from=0, to=tmax, n=1000, add=TRUE,
       lwd=lwd, xpd=NA, col=col.KM)
 curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=1000, add=TRUE,
       lwd=lwd, xpd=NA, col=col.nls)
-lines(estimate ~ times, data=SIR_confband, col=col.fitode, lwd=lwd*0.60, lty="dotted")
+lines(estimate ~ times, data=SIR_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
+
+setup_plot(ylim=c(5, 900), xlim=c(0,tmax),
+         xlab="weeks", ylab="plague deaths", log="y",
+         at=c(25, 50, 100, 200, 400, 800))
+lines(estimate ~ times, data=SIR_nb_confband, col=col.fitode.nb, lwd=lwd*0.60)
+lines(estimate ~ times, data=SIR_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
+points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
+legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
+       lty=c(NA,"solid","dotted"),
+       col=c("black",col.fitode.nb,col.fitode.ols),
+       pch=c(21,NA,NA),
+       pt.bg=c("white",NA,NA),
+       legend=c("observed data","fitode (nbinom)","fitode (ols)"))
 @
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
@@ -1175,7 +1236,7 @@ lines(tvals, f(tvals-t0), lwd=lwd, xpd=NA, col=col.KM)
 lines(tvals,
       with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
       xpd=NA, lwd=lwd, col=col.nls)
-lines(estimate ~ times, data=ppp, col=col.fitode, lwd=lwd*0.60, lty="dotted")
+lines(estimate ~ times, data=ppp, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
 points(mort ~ time, data = phila1918, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
 @
