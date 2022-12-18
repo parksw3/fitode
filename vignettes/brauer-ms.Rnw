@@ -52,14 +52,15 @@
 \usepackage{xspace}
 \newcommand{\KM}{KM\xspace}
 \usepackage{bm} % bold math
-\newcommand{\betavec}{\bm{\beta}}
-\newcommand{\betavechat}{\bm{\hat\beta}}
+\newcommand{\betavec}{{\bm{\beta}}}
+\newcommand{\betavechat}{{\bm{\hat\beta}}}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \usepackage{xspace}
 \newcommand{\KMcol}{blue\xspace}
 \newcommand{\nlscol}{red\xspace}
 \newcommand{\fitodecol}{yellow\xspace}
 \newcommand{\Pop}{{\mathbb{P}}} % probability operator
+\newcommand{\lik}{{\mathcal L}}
 %% tables
 \usepackage{multirow}   % for tables
 %\usepackage{subfig}
@@ -651,23 +652,75 @@ the observation error has the same absolute magnitude throughout the
 epidemic (in particular the lower limit would go below zero early and
 late in the epidemic).
 
-\thickredline
-
-\djde{we should explain the likelihood for the above, which will 
-motivate other discussion} the probability
-of observing the data $\{y_i\}$ is
+To do better, it will help to think about the probability
+of observing the data $\{y_i\}$ assuming normal errors as above, i.e.,
 %%
 \begin{linenomath*}
 \begin{equation}\label{eq:prob.data.given.model}
 \Pop(\text{data} \mid \text{model})
 =
 \prod_{i=1}^n 
-\frac{1}{\sqrt{2\pi\sigma^2}}
-\exp\left(-\frac{\big(f(t_i;\betavec) - y_i\big)^2}{2\sigma^2}\right)
+\left[\frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\left(-\frac{\big(f(t_i;\betavec) - y_i\big)^2}{2\sigma^2} \right) \Delta{f}
+\right]
 \,,
 \end{equation}
 \end{linenomath*}
 %%
+But this isn't what we actually want. What we're given is the data,
+not the model.  We're trying to say something about how likely our
+\emph{proposed} model is given the data that \emph{were} observed. One
+way to get at this is to use Bayes rule, which tells us that
+\begin{linenomath*}
+\begin{equation}\label{eq:BayesRule}
+\Pop(\text{model} \mid \text{data})
+= \dfrac{\Pop(\text{data} \mid \text{model})\cdot\Pop(\text{model})}{\Pop(\text{data})}
+\,.
+\end{equation}
+\end{linenomath*}
+The probability of the data is not known to us, but it can't depend on
+the values of the parameters of the model that we happen to be
+proposing, so we can think of $\Pop(\text{data})$ as a nuisance
+constant in equation~\eqref{eq:BayesRule}.  Consequently, if we ignore it,
+we still have a function that tells us something about how likely it is
+that our model is good.  With this motivation, we define the
+\term{likelihood} (not probability) of the model given the data to be
+\begin{linenomath*}
+\begin{equation}\label{eq:lik}
+\lik(\text{model} \mid \text{data})
+= \Pop (\text{data} \mid \text{model}) \cdot \Pop(\text{model})\,.
+\end{equation}
+\end{linenomath*}
+If we have no prior information about the values of the model
+parameters then $\Pop(\text{model})$ can be considered another
+nuisance constant that we can ignore.  In that situation, maximizing
+$\lik$ with respect to $\betavec$ or, equivalently, minimizing the
+negative log-likelihood
+\begin{linenomath*}
+\begin{equation}\label{eq:negloglik}
+\min_\betavec\Big(-\log{\lik}\Big) = \min_\betavec\Big( 
+\sum_{i=1}^n \big(f(t_i;\betavec) - y_i\big)^2 
+\;+\; \text{constant}
+\Big)
+\end{equation}
+\end{linenomath*}
+yields an estimate, say $\betavechat$, that---lo and behold---agrees
+exactly with the least squares solution above!  The standard way of
+expressing this is to say that the least squares solution
+$\betavechat$ is the \term{maximum likelihood estimate} (MLE) of
+$\betavec$, under the assumption of normal observation errors in the
+time series.
+
+Having developed the idea of maximum likelihood, we can do better than
+the na\"ive approach by making a more realistic assumption about the
+error distribution and/or taking advantage of any prior knowledge we
+have that might affect our notion of the most likely parameter values
+(and consequently \emph{not} ignoring $\Pop(\text{model})$ and instead
+specifying it as a probability distribution on the model's
+parameters).  We will then end up with a different likelihood function
+to maximize, but the basic idea is the same.
+
+\thickredline
 
 \djde{we need to get across that the delta method is a generalization
   of $\Delta f \approx f'(x)\Delta x$}
