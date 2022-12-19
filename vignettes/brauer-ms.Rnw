@@ -61,6 +61,7 @@
 \newcommand{\fitodecol}{yellow\xspace}
 \newcommand{\Pop}{{\mathbb{P}}} % probability operator
 \newcommand{\lik}{{\mathcal L}}
+\newcommand{\transpose}{{\textsf{T}}}
 %% tables
 \usepackage{multirow}   % for tables
 %\usepackage{subfig}
@@ -361,6 +362,9 @@ nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
 print(nls.parameters <- coef(nlsfit))
 @
 
+\djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is
+likely to be much better than fitting the initial condition $I_0$.}
+
 However, if you experiment with initial guesses, you will find that if
 you make a sufficiently \emph{bad} guess, then \code{nls} will fail.
 For example, starting from $a=2000$, $\tpeak=5$, and $\omega=0.1$
@@ -624,15 +628,6 @@ in Figure~\ref{fig:Bombay} is a 95\% \term{confidence band} for the
 fitted model curve.  \djde{We should probably also include the fitode
   confidence band in \fitodecol as I had as a placeholder before.}
 
-\djde{What we do: Given estimated variances for the parameters, we use
-  the delta method to calculate the variance of $f(t;\betavechat)$ at
-  each observation time $t_i$ and use it to get a confidence band on
-  the fitted curve.}  \djde{Available in \code{fitode} but we not what
-  we doing here: Another posibility would be to use the estimated
-  means and variances for $\betavec$ to define a multivariate normal,
-  sample that many times and run the model, and draw the bands that
-  contain 95\% of the simulations.}
-
 One standard way to derive a confidence band is the following:
 We imagine that the
 model \eqref{eq:sech} is a perfect representation of
@@ -651,6 +646,17 @@ fitted model curve,\footnote{For a \code{Normal}$(0,\sigma)$
 the observation error has the same absolute magnitude throughout the
 epidemic (in particular the lower limit would go below zero early and
 late in the epidemic).
+
+Bear in mind that at each step of this approach, we are making a very
+specific, strong assumptions (when we ``imagine'').  To begin with, it
+is absurd to suggest that KM's approximation \eqref{eq:sech} to the
+solution of the SIR model \eqref{eq:SIR} is a perfect representation
+of reality!  The ODEs themselves are far from realistic, not least
+because they ignore the discrete nature of individuals and the
+stochastic nature of infection and removal events\needref.
+Nevertheless, we will continue to focus on estimating uncertainty in
+parameter estimates for a given model, since it will be necessary even
+if we ignore uncertainty in the specification of the model itself.
 
 To do better, it will help to think about the probability of observing
 data $\{y_i\}$ assuming normal errors as above, i.e.,
@@ -751,8 +757,9 @@ obtain CIs on the MLE $\betavechat$.  A relatively simple approach is
 to use the the shape of $\log{\lik(\betavec)}$ in the vicinity of
 $\betavechat$ to infer parameter values of a multivariate normal
 distribution for $\betavec$.  Near $\betavechat$, the shape of
-$\log{\lik}$ is determined by its \term{Hessian matrix} (also known as
-the \term{Fisher information matrix}), and the inverse of this matrix
+$\log{\lik}$ is determined by its \term{Hessian matrix} (the matrix
+of second order partial derivatives of $\log{\lik}$, also known as
+the \term{Fisher information matrix}), and the inverse of the Hessian
 is the \term{variance-covariance matrix} $\mathrm{Cov}(\betavec)$ that
 specifies the desired multi-variate normal with mean $\betavechat$.
 \djde{What is a simple way to explain why the inverse of the Hessian
@@ -762,64 +769,71 @@ From the multi-variate normal, we can calculate CIs on each of the
 components of $\betavechat$ by\djde{explain\dots}.  Then to obtain CIs
 on functions of the fitted parameters (e.g., $\R_0$ or $\gamma$ if our
 model is KM's approximation \eqref{eq:sech}), we build on the idea
-that if the error in a variable $x$ is $\Delta x$, then the associated
-error in a (differentiable) function $f(x)$ is
-$\Delta{f}\approx f'(x)\Delta{x}$.  The \term{Delta Method}
-\cite{Dorf38,VerH12}
-allows us to approximate the variance-covariance matrix
-of any non-linear transformation of parameters $g(\betavec)$ \cite{Bolk08}:
+that if the error in a parameter $a$ is $\Delta a$, then the associated
+error in a (differentiable) function $g(a)$ is
+$\Delta{g}\approx g'(a)\Delta{a}$.  Given a nonlinear function $g(\betavec)$
+of the parameters, the \term{Delta Method}
+\cite{Dorf38,VerH12} expands $\textrm{Var}(g(\betavec))$ to first
+order about $\betavechat$, which gives us the variance-covariance matrix
+of $g(\betavec)$ \cite{Bolk08}.  In particular, the variance of
+$g(\betavec)$ is
 \begin{linenomath*}
-\begin{equation}
-\mathrm{Var}(g(\betavec)) \approx \nabla g(\betavec)^{\textsf{T}} \cdot \mathrm{Cov}(\betavec) \cdot \nabla g(\betavec)
-\end{equation}
+\begin{subequations}\label{eq:DeltaMethod}
+\begin{align}
+\mathrm{Var}(g(\betavec))
+&\approx 
+\mathrm{Var}\big[g(\betavechat) 
+   + (\nabla g)(\betavechat)\cdot(\betavec-\betavechat)\big] \\
+&=
+\mathrm{Var}\big[(\nabla g)(\betavechat)\cdot(\betavec-\betavechat)\big] \\
+&= 
+\mathbb{E}\big[\big((\nabla g)(\betavechat)\cdot(\betavec-\betavechat)\big)^2\big] \\
+&= 
+\,\mathbb{E}\big[
+(\nabla g)(\betavechat)^\transpose
+  (\betavec-\betavechat)
+  (\betavec-\betavechat)^\transpose
+  (\nabla g)(\betavechat) 
+  \big]\,
+\\
+&= 
+(\nabla g)(\betavechat)^\transpose
+\,\mathbb{E}\big[
+  (\betavec-\betavechat)
+  (\betavec-\betavechat)^\transpose
+  \big]\,
+(\nabla g)(\betavechat) \\
+&= 
+(\nabla g)(\betavechat)^\transpose
+\,\textrm{Cov}(\betavec)\,
+(\nabla g)(\betavechat)
+\end{align}
+\end{subequations}
 \end{linenomath*}
-\djde{works not only for derived parameters such as $\R_0$, but also
-  for the trajectory itself... because $f(t_i,\betavec)$ is just a
-  function of the parameters...  hence confidence band on the
-  trajectory}
+We can then take the square root of the estimated variance to obtain the standard error ($\mathrm{SE}$) and calculate approximate confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to $g(\betavechat)$.
 
-\thickredline
+Given a fit of KM's approximation \eqref{eq:sech} to the time series
+data, which yields $\betavechat=(\hat{a},\hat{\omega},\hat{\phi})$, we
+can apply the Delta method \eqref{eq:DeltaMethod} to the nonlinear
+relationships \eqref{eq:invertparams} to obtain CIs on
+$g(\betavechat)=(\hat{\Reff}, \hat{\gamma},\hat{S_0})$.  This is
+precisely how we obtained the CIs on the derived parameters listed in
+Table~\ref{tab:Bombay}.  Perhaps less obviously, we can also use the
+Delta method to obtain CIs on the fitted trajectory at each
+observation time $t_i$ (and hence obtain a confidence band) by
+considering $g(\betavec)=f(t_i;\betavec)$.  This is how we obtained
+the pink confidence band shown in Figure~\ref{fig:Bombay}.
 
-Calculating the gradient $\nabla g(\betavec)$ is tricky when $g$ is a solution of an ODE model---this requires sensitivity equations to be simultaneously solved alongside the main differential equations \cite{raue2013lessons}.
-We can then take the square root of the estimated variance to obtain the standard error ($\mathrm{SE}$) and calculate approximate confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to $g(\betavec)$.
+\djde{Available in \code{fitode} but we not what we doing here:
+  Another posibility would be to use the estimated means and variances
+  for $\betavec$ to define a multivariate normal, sample that many
+  times and run the model, and draw the bands that contain 95\% of the
+  simulations.}
+
 \swp{we might want to mention that profile likelihoods are a thing but are
 probably too complicated for this paper and especially for trajectories?}
-
-\thickredline
-
-\djde{Ben, can you please: (1)
-  fill in a brief description of what is actually being done to get
-  confidence bands on the plotted curve, and add the confidence bands
-  to the plot (or make another plot); and (2) explain how CIs on the
-  parameter estimates are obtained and spew them here.  Daniel
-  basically did it in \code{epidemic.Rnw} but without explanation.}
-\swp{Here's my stab at it:}
- However, this na\"ive method of drawing confidence bands ignore uncertainties
-associated with other parameter estimates (in this case, $\betavec = (\beta; \gamma; I(0); S(0))$).
-In doing so, we need to first estimate the \term{variance covariance matrix} $\mathrm{Cov}(\betavec)$ for our parameter estimates
-to characterize their uncertainties---this can be done by inverting the Hessian matrix
-of the negative log-likelihood function
-(also known as the \term{Fisher information matrix}) at its minimum.
-Then, the Delta method 
-
-Bear in mind that at each step of this approach, we are making a very
-specific, strong assumptions (when we ``imagine'').  To begin with, it
-is absurd to suggest that KM's approximation \eqref{eq:sech} to the
-solution of the SIR model \eqref{eq:SIR} is a perfect representation
-of reality!  The ODEs themselves are far from realistic, not least
-because they ignore the discrete nature of individuals and the
-stochastic nature of infection and removal events\needref.
-
-
-\djde{explain how least squares is max likelihood assuming the normal
-  observation errors}
-\djde{What is the standard way to get CIs on the parameters and confidence
-  bands on the fit from the \code{nlsfit} object?}
-\djde{How should we compute CIs for the derived parameters?  Delta
-  method?}
-
-\djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is
-likely to be much better than fitting the initial condition $I_0$.}
+\djde{mentioning profile likelihoods in passing, with a reference, 
+  would be good; we could add that here}
 
 \begin{table}
   \begin{center}
@@ -841,7 +855,7 @@ likely to be much better than fitting the initial condition $I_0$.}
      %% The horizontal line separates parameters that are directly
      %% estimated from those that are derived from the estimated
      %% parameters.
-}
+}\label{tab:Bombay}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
@@ -881,10 +895,16 @@ likely to be much better than fitting the initial condition $I_0$.}
       & \Sexpr{signif(10^6*Reff.nls/S0.nls,dig)} & \Sexpr{ci_fmt("R0", cc.delta)}
   \end{tabular}
   \end{center}
-  \label{tab:Bombay}
 \end{table}
 
 \section{Fitting the ODE}
+
+\thickredline
+
+\djde{moved from above: this comment from Daniel needs to go in this section:}
+ Calculating the gradient $\nabla g(\betavec)$ is tricky when $g$ is a solution of an ODE model---this requires sensitivity equations to be simultaneously solved alongside the main differential equations \cite{raue2013lessons}.
+
+\thickredline
 
 Until now, we have focussed on fitting KM's approximation
 \eqref{eq:sech} rather than actual solutions of the SIR model
