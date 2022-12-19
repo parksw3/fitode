@@ -60,7 +60,7 @@
 \newcommand{\nlscol}{red\xspace}
 \newcommand{\fitodecol}{yellow\xspace}
 \newcommand{\Pop}{{\mathbb{P}}} % probability operator
-\newcommand{\lik}{{\ell}}
+\newcommand{\lik}{{\mathcal L}}
 %% tables
 \usepackage{multirow}   % for tables
 %\usepackage{subfig}
@@ -706,7 +706,7 @@ $\lik$ with respect to $\betavec$ or, equivalently, minimizing the
 negative log-likelihood
 \begin{linenomath*}
 \begin{equation}\label{eq:negloglik}
-\min_\betavec\Big(\!-\log{\lik}\Big) = \min_\betavec\Big( 
+\min_\betavec\big(\!\!-\log{\lik(\betavec)}\big) = \min_\betavec\Big( 
 \sum_{i=1}^n \big(f(t_i;\betavec) - y_i\big)^2 
 \;+\; \text{constant}
 \Big)
@@ -719,11 +719,11 @@ solution $\betavechat$ is the \term{maximum likelihood estimate} (MLE)
 of $\betavec$, under the assumption of normal observation errors in
 the time series.
 
-Having developed the idea of maximum likelihood, we can do better than
-the na\"ive approach by making a more realistic assumption about the
-error distribution and/or taking advantage of any prior knowledge we
-have that might affect our notion of the most likely parameter values
-(i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
+Having introduced the idea of maximum likelihood, we can do better
+than the na\"ive approach by making a more realistic assumption about
+the error distribution and/or taking advantage of any prior knowledge
+we have that might affect our notion of the most likely parameter
+values (i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
 specifying it as a probability distribution on the model's
 parameters).  We will then end up with a different likelihood function
 to maximize, and obtain a different $\betavechat$, but the basic idea
@@ -733,10 +733,59 @@ So what is a better assumption about the observation error distribution,
 and how do we get both better confidence bands on the the model fit
 and CIs on the estimated parameter values $\betavechat$?
 
+Our data are actually counts of deaths (or cases in other contexts),
+so the observation error distribution can't really be normal (and it
+is the assumption of normality that leads to a lower limit of the
+confidence band on the fitted model being negative when the time
+series is near zero).  We could assume a Poisson error
+distribution\djde{with mean\dots}, but typical observations have
+variance greater than the mean (which are equal for a Poisson
+distribution).  The negative binomial distribution can be considered
+an overdispersed Poisson, which makes it a good choice.  \djde{Ben,
+  please feel free to give a more principled justification, and to
+  explain how the neg binom dispersion parameter would enter the
+  likelihood function if we wanted to fit it.}
+
+Regardless of the form of the likelihood function, we can use it to
+obtain CIs on the MLE $\betavechat$.  A relatively simple approach is
+to use the the shape of $\log{\lik(\betavec)}$ in the vicinity of
+$\betavechat$ to infer parameter values of a multivariate normal
+distribution for $\betavec$.  Near $\betavechat$, the shape of
+$\log{\lik}$ is determined by its \term{Hessian matrix} (also known as
+the \term{Fisher information matrix}), and the inverse of this matrix
+is the \term{variance-covariance matrix} $\mathrm{Cov}(\betavec)$ that
+specifies the desired multi-variate normal with mean $\betavechat$.
+\djde{What is a simple way to explain why the inverse of the Hessian
+  is the cov matrix for the parameters?}
+
+From the multi-variate normal, we can calculate CIs on each of the
+components of $\betavechat$ by\djde{explain\dots}.  Then to obtain CIs
+on functions of the fitted parameters (e.g., $\R_0$ or $\gamma$ if our
+model is KM's approximation \eqref{eq:sech}), we build on the idea
+that if the error in a variable $x$ is $\Delta x$, then the associated
+error in a (differentiable) function $f(x)$ is
+$\Delta{f}\approx f'(x)\Delta{x}$.  The \term{Delta Method}
+\cite{Dorf38,VerH12}
+allows us to approximate the variance-covariance matrix
+of any non-linear transformation of parameters $g(\betavec)$ \cite{Bolk08}:
+\begin{linenomath*}
+\begin{equation}
+\mathrm{Var}(g(\betavec)) \approx \nabla g(\betavec)^{\textsf{T}} \cdot \mathrm{Cov}(\betavec) \cdot \nabla g(\betavec)
+\end{equation}
+\end{linenomath*}
+\djde{works not only for derived parameters such as $\R_0$, but also
+  for the trajectory itself... because $f(t_i,\betavec)$ is just a
+  function of the parameters...  hence confidence band on the
+  trajectory}
+
 \thickredline
 
-\djde{we need to get across that the delta method is a generalization
-  of $\Delta f \approx f'(x)\Delta x$}
+Calculating the gradient $\nabla g(\betavec)$ is tricky when $g$ is a solution of an ODE model---this requires sensitivity equations to be simultaneously solved alongside the main differential equations \cite{raue2013lessons}.
+We can then take the square root of the estimated variance to obtain the standard error ($\mathrm{SE}$) and calculate approximate confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to $g(\betavec)$.
+\swp{we might want to mention that profile likelihoods are a thing but are
+probably too complicated for this paper and especially for trajectories?}
+
+\thickredline
 
 \djde{Ben, can you please: (1)
   fill in a brief description of what is actually being done to get
@@ -751,17 +800,7 @@ In doing so, we need to first estimate the \term{variance covariance matrix} $\m
 to characterize their uncertainties---this can be done by inverting the Hessian matrix
 of the negative log-likelihood function
 (also known as the \term{Fisher information matrix}) at its minimum.
-Then, the Delta method allows us to approximate the variance covariance matrix
-of any non-linear transfomration of parameters $g(\betavec)$, such as the basic reproduction number or the mortality trajectory \cite{Bolk08}:
-\begin{linenomath*}
-\begin{equation}
-\mathrm{Var}(g(\betavec)) \approx \nabla g(\betavec)^{\textsf{T}} \cdot \mathrm{Cov}(\betavec) \cdot \nabla g(\betavec)
-\end{equation}
-\end{linenomath*}
-Calculating the gradient $\nabla g(\betavec)$ is tricky when $g$ is a solution of an ODE model---this requires sensitivity equations to be simultaneously solved alongside the main differential equations \cite{raue2013lessons}.
-We can then take the square root of the estimated variance to obtain the standard error ($\mathrm{SE}$) and calculate approximate confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to $g(\betavec)$.
-\swp{we might want to mention that profile likelihoods are a thing but are
-probably too complicated for this paper and especially for trajectories?}
+Then, the Delta method 
 
 Bear in mind that at each step of this approach, we are making a very
 specific, strong assumptions (when we ``imagine'').  To begin with, it
