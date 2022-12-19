@@ -628,11 +628,9 @@ in Figure~\ref{fig:Bombay} is a 95\% \term{confidence band} for the
 fitted model curve.  \djde{We should probably also include the fitode
   confidence band in \fitodecol as I had as a placeholder before.}
 
-One standard way to derive a confidence band is the following:
-We imagine that the
-model \eqref{eq:sech} is a perfect representation of
-reality\djde{maybe discuss model misspecification later}, and we
-consider the deviations from the model curve in
+One standard way to derive a confidence band is the following: We
+imagine that the model \eqref{eq:sech} is a perfect representation of
+reality, and we consider the deviations from the model curve in
 Figure~\ref{fig:Bombay} to be observation errors.  We then imagine
 that observation error for each data point is independent and
 identically distributed (iid), and drawn from a normal distribution
@@ -903,6 +901,7 @@ probably too complicated for this paper and especially for trajectories?}
 
 \djde{moved from above: this comment from Daniel needs to go in this section:}
  Calculating the gradient $\nabla g(\betavec)$ is tricky when $g$ is a solution of an ODE model---this requires sensitivity equations to be simultaneously solved alongside the main differential equations \cite{raue2013lessons}.
+\djde{We will need to explain what the sensitivity equations are.}
 
 \thickredline
 
