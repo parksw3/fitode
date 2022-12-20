@@ -62,6 +62,8 @@
 \newcommand{\Pop}{{\mathbb{P}}} % probability operator
 \newcommand{\lik}{{\mathcal L}}
 \newcommand{\transpose}{{\textsf{T}}}
+%% BMB: can decide whether this should be \mathrm{Norm} or \cal{N} or ...
+\newcommand{\normdist}{\ensuremath\mathrm{Normal}}
 %% tables
 \usepackage{multirow}   % for tables
 %\usepackage{subfig}
@@ -73,6 +75,17 @@
 \usepackage{ragged2e}
 %%\usepackage{array} % for m{...}
 
+
+<<setup, echo=FALSE, include=FALSE>>=
+## set default base-graphics plotting options
+knitr::knit_hooks$set(basefig=function(before, options, envir) {
+                   if (before) {
+                       oldpar <- par(bty="l",las=1)
+                       on.exit(par(oldpar))
+                   } else { }
+})
+knitr::opts_chunk$set(error = FALSE)
+@ 
 \begin{document}
 
 \articletype{ORIGINAL ARTICLE}% Specify the article type or omit as appropriate
@@ -433,10 +446,31 @@ for (p in parnames) {
 }
 tpeak.nls <- with(as.list(nls.parameters), signif(phi / omega,dig))
 cc <- suppressMessages(confint(nlsfit))
-ci_fmt  <- function(p, cc) (format(cc[p,], digits = 2)
+## would like to use built-in knitr/Sexpr{} magic but ...
+## from https://stackoverflow.com/questions/8366324/r-sweave-formatting-numbers-with-sexpr-in-scientific-notation
+format_sn0 <- function(x, digits = dig,
+                      max_ord = 2,
+                      ensuremath = TRUE) {
+    
+    if (x==0) return("0")
+    ord <- floor(log(abs(x), 10))
+    if (abs(ord) <= abs(max_ord)) return(as.character(signif(x, dig)))
+    x <- x / 10^ord
+    x <- signif(x, digits=dig)
+    r <- sprintf("%s\\times 10^{%s}", x, ord)
+    if (ensuremath) r <- sprintf("\\ensuremath{%s}", r)
+    return(r)
+}
+format_sn <- Vectorize(format_sn0,
+                       vectorize.args = "x")
+## format_sn <- knitr::knit_hooks$get("inline")
+ci_fmt  <- function(p, cc, sn = TRUE, ...) {
+    ffun <- if (sn) format_sn else format
+    ( ffun(cc[p,], ...)
     |> paste(collapse = ", ")
     |> sprintf(fmt = "(%s)")
-)
+    )
+}
 for (p in parnames) {
     assign(paste0(p,".lwr"), cc[p, "2.5%"])
     assign(paste0(p,".upr"), cc[p, "97.5%"])
@@ -496,7 +530,7 @@ the parameters as estimated by \KM and by us using \code{nls}.
 
 \swp{The problem is that we're assuming S0 = 1e6 - 1. We can't do
   this.  We need much lower S0 to fit the data. So by assuming a very
-  large S0, things go crazy.  So we're better off startng with
+  large S0, things go crazy.  So we're better off starting with
   assuming I0 = 1 and assuming the rest. That's the whole point of
   Bacaer's paper: that the required S0 to fit the data is so low that
   the standard SIR model is actually not appropriate for modeling the
@@ -634,16 +668,27 @@ reality, and we consider the deviations from the model curve in
 Figure~\ref{fig:Bombay} to be observation errors.  We then imagine
 that observation error for each data point is independent and
 identically distributed (iid), and drawn from a normal distribution
-with zero mean and the same standard deviation $\sigma$ equal to the
+with zero mean and standard deviation $\sigma$ equal to the
 standard deviation of the residuals (the differences between the model
 curve and the observed data).  With this assumption, we could
 na\"ively draw confidence bands by adding $\pm1.96\,\sigma$ to our
-fitted model curve,\footnote{For a \code{Normal}$(0,\sigma)$
+fitted model curve,\footnote{For a $\normdist(0,\sigma)$
   distribution, 95\% of the probability lies between $-1.96\,\sigma$
   and $+1.96\,\sigma$.}  which would emphasize the folly in assuming
 the observation error has the same absolute magnitude throughout the
 epidemic (in particular the lower limit would go below zero early and
 late in the epidemic).
+\bmb{From my point of view this is a little bit weird because it is the
+  \emph{opposite} of what is traditionally done in statistics. A \emph{confidence interval}
+  on the predictions takes only uncertainty in the parameters into account;
+  a \emph{prediction interval} accounts for both parametric uncertainty and
+  residual error/observation uncertainty (in traditional/simple approaches, we
+  don't consider stochastic processes at all, so parametric uncertainty and
+  residual error are the only components of uncertainty). What you're suggesting here,
+  taking account only of the residual error, isn't something I've ever seen anyone
+  do. That's not to say that we can't proceed this way, but it seems weird. Also,
+  opening the can of worms of model misspecification at this point also seems dangerous;
+  I'd rather come back to it in a later part of the discussion.}
 
 Bear in mind that at each step of this approach, we are making a very
 specific, strong assumptions (when we ``imagine'').  To begin with, it
@@ -722,14 +767,27 @@ standard way of expressing this is to say that the least squares
 solution $\thetavechat$ is the \term{maximum likelihood estimate} (MLE)
 of $\thetavec$, under the assumption of normal observation errors in
 the time series.
-
+\bmb{I feel like we can introduce the idea of likelihood and maximum
+  likelihood without presenting Bayes' rule. The justification for likelihood-based
+  inference is most often presented heuristically rather than formally
+  (i.e. we don't say ``here's Bayes' rule, we don't want to go full Bayesian,
+  but here's something else we can do'' --- instead ``it is reasonable
+  to suppose that parameter choices that maximize the probability of observing
+  the data are `good' in some sense''). More generally, I think we can say
+  ``this is how it's typically done'' and give a reference without getting too
+  far into the weeds.}
+  
 Having introduced the idea of maximum likelihood, we can do better
 than the na\"ive approach by making a more realistic assumption about
 the error distribution and/or taking advantage of any prior knowledge
 we have that might affect our notion of the most likely parameter
 values (i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
 specifying it as a probability distribution on the model's
-parameters).  We will then end up with a different likelihood function
+parameters).
+\bmb{I don't mind talking about priors if we're actually going to cover them,
+  but I feel like it might make more sense to introduce them later, starting as
+  a way to regularize/make optimization more robust.}
+We will then end up with a different likelihood function
 to maximize, and obtain a different $\thetavechat$, but the basic idea
 is the same.
 
@@ -737,35 +795,40 @@ So what is a better assumption about the observation error distribution,
 and how do we get both better confidence bands on the the model fit
 and CIs on the estimated parameter values $\thetavechat$?
 
-Our data are actually counts of deaths (or cases in other contexts),
-so the observation error distribution can't really be normal (and it
-is the assumption of normality that leads to a lower limit of the
-confidence band on the fitted model being negative when the time
-series is near zero).  We could assume a Poisson error distribution
+Our data are actually non-negative, discrete counts of deaths (or cases in other contexts),
+so the observation error distribution can't really follow a continuous, real-valued Normal distribution
+(in our previous example, the assumption of normality is allowing the lower limit of the
+confidence band on the fitted model to drop below zero when the number of deaths is small).  We could assume a Poisson error distribution
 with mean equal to the fitted model trajectory
 [equation~\eqref{eq:SIR;R}], but typical observations have variance
-greater than the mean (which are equal for a Poisson distribution).
+greater than the mean (the variance is equal to the mean for a Poisson distribution).
 The negative binomial distribution can be considered an overdispersed
 Poisson, which makes it a good choice.  \djde{Ben, please feel free to
   give a more principled justification, and to explain how the neg
   binom dispersion parameter would enter the likelihood function if we
-  wanted to fit it.}
+  wanted to fit it.} 
 
 Regardless of the form of the likelihood function, we can use it to
 obtain CIs on the MLE $\thetavechat$.  A relatively simple approach is
-to use the the shape of $\log{\lik(\thetavec)}$ in the vicinity of
+to use the the curvature of $\log{\lik(\thetavec)}$ at
 $\thetavechat$ to infer parameter values of a multivariate normal
-distribution for $\thetavec$.  Near $\thetavechat$, the shape of
-$\log{\lik}$ is determined by its \term{Hessian matrix} (the matrix
+distribution for $\thetavec$.  At $\thetavechat$, the shape of
+$\log{\lik}$ is described by its \term{Hessian matrix} (the matrix
 of second order partial derivatives of $\log{\lik}$, also known as
 the \term{Fisher information matrix}), and the inverse of the Hessian
 is the \term{variance-covariance matrix} $\mathrm{Cov}(\thetavec)$ that
-specifies the desired multi-variate normal with mean $\thetavechat$.
+specifies the desired multivariate normal with mean $\thetavechat$.
 \djde{What is a simple way to explain why the inverse of the Hessian
   is the cov matrix for the parameters?}
+\bmb{I don't think we can do this simply - we could point to
+  \citep{Bolk08} for a heuristic explanation or \cite{Wassermanall2010}
+  for a rigorous (if terse) explanation}
 
-From the multi-variate normal, we can calculate CIs on each of the
-components of $\thetavechat$ by\djde{explain\dots}.  Then to obtain CIs
+The diagonal elements of $\mathrm{Cov}(\thetavec)$ are the (estimated)
+variances of the parameter estimates, so we can take
+their (positive) square roots to get the standard error (SE) and
+compute approximate 95\% confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to $g(\thetavechat)$.
+To obtain CIs
 on functions of the fitted parameters (e.g., $\R_0$ or $\gamma$ if our
 model is KM's approximation \eqref{eq:sech}), we build on the idea
 that if the error in a parameter $a$ is $\Delta a$, then the associated
@@ -809,7 +872,8 @@ $g(\thetavec)$ is
 \end{align}
 \end{subequations}
 \end{linenomath*}
-We can then take the square root of the estimated variance to obtain the standard error ($\mathrm{SE}$) and calculate approximate confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to $g(\thetavechat)$.
+We can again get the confidence intervals by taking square roots and computing
+$g(\thetavechat) \pm1.96\,\mathrm{SE}$.
 
 Given a fit of KM's approximation \eqref{eq:sech} to the time series
 data, which yields $\thetavechat=(\hat{a},\hat{\omega},\hat{\phi})$, we
@@ -824,7 +888,7 @@ considering $g(\thetavec)=f(t_i;\thetavec)$.  This is how we obtained
 the pink confidence band shown in Figure~\ref{fig:Bombay}.
 
 \djde{Available in \code{fitode} but we not what we doing here:
-  Another posibility would be to use the estimated means and variances
+  Another possibility would be to use the estimated means and variances
   for $\thetavec$ to define a multivariate normal, sample that many
   times and run the model, and draw the bands that contain 95\% of the
   simulations.}
@@ -836,7 +900,7 @@ probably too complicated for this paper and especially for trajectories?}
 
 \section{Fitting the ODE}
 
-Until now, we have focussed on fitting KM's approximation
+Until now, we have focused on fitting KM's approximation
 \eqref{eq:sech} rather than actual solutions of the SIR model
 \eqref{eq:SIR}.  If we had an exact analytical solution of the SIR
 ODE~\eqref{eq:SIR} then we could proceed as above, replacing the
@@ -850,11 +914,10 @@ an analytical formula.  We can still use the Delta method
 gradient $(\nabla g)(\thetavec)$ is not straightforward if $g$ is a
 numerical solution of an ODE; \term{sensitivity equations} must be
 simultaneously solved alongside the main differential equations
-\cite{raue2013lessons}.  \djde{We will need to explain what the
-  sensitivity equations are, at least in a footnote.}
+\cite{raue2013lessons}\footnote{Sensitivity equations are an auxiliary set of ODEs that define the time derivatives of the derivatives of the state variables with respect to the parameters (i.e. $\frac{d}{dt}\left(\frac{dx(t,\theta)}{d\theta}\right)$). They can easily be derived using the chain rule; by solving them in parallel with the main set of ODEs, we get a computationally efficient and numerically stable way to calculate the overall gradients of the log-likelihood with respect to the parameters. \bmb{this explanation can go in the main text if that seems more appropriate}}
 
 The \code{fitode} package\footnote{\code{fitode} is available on CRAN
-  and consequently can be installed easily via
+  and consequently can be installed via
   \code{install.packages("fitode")}.} does all the computational work
 under the hood, and makes it as easy for a user to fit an ODE to data
 as it was for us above to use \code{nls} to fit an analytical formula.
@@ -897,7 +960,7 @@ In the model definition above:
 \item[\code{observation}]specifies that the observed data
   (\code{mort}) are assumed to arise from sampling from the normal
   distribution associated with an ordinary least squares (\code{ols})
-  fit; the sampled distribution is $\texttt{Normal}(\mu,\sigma)$,
+  fit; the sampled distribution is $\normdist(\mu,\sigma)$,
   where the mean is given by the fitted model trajectory [equation~\eqref{eq:SIR;R}],
 \begin{linenomath*}
 \begin{equation}
@@ -911,12 +974,13 @@ residual standard deviation,
 \sigma(t)=\sqrt{\frac{1}{n-1}\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2} \,.
 \end{equation}
 \end{linenomath*}
-\item[\code{initial}]conditions are expressed a numbers of individuals.
+\item[\code{initial}]conditions are expressed as numbers of individuals.
 \item[\code{par}]refers to the parameters that are to be fitted:
   $\beta$, $\gamma$, and initial conditions $S(0)$ and $I(0)$.
 \end{description}
 
-We take our previous parameter estimates from \code{nls} as our starting values:
+We take our previous parameter estimates from \code{nls} as our starting values (we plot the results of integrating the ODEs for these parameters to make sure they give a reasonable solution):
+
 <<sirmortstart,warning=FALSE,basefig=TRUE>>=
 SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls)
 
@@ -965,11 +1029,11 @@ SIR_fit2 <- fitode(
 @
 
 Plot?
-<<>>==
+<<plot-sir-fit2>>==
 plot(SIR_fit2, level=0.95)
 @
 Coef?
-<<>>==
+<<coef-sir-fit2>>==
 coef(SIR_fit2)
 @
 Very very small $S(0)$.
@@ -1117,16 +1181,19 @@ philaS0 <- round(philapop1918 * 0.025)
 print(philaS0)
 @
 
+\bmb{using \code{subset}/\code{transform} below,
+  avoiding tidyverse. Could be marginally cleaner/more
+  compact with tidyverse \ldots}
 <<read.phila.data>>=
 ## we have to cut the data when we're using nbinom
-## beacuse there are long trailing zeroes..
+## because there are long trailing zeroes..
 ## same with the beginning
-phila1918a <- phila1918[as.Date("1918-09-10") < phila1918$date & phila1918$date < as.Date("1918-11-18"),]
-phila1918b <- data.frame(
-    date=c(as.Date("1918-09-09"), phila1918a$date),
-    mort=c(NA, phila1918a$mort)
+phila1918a <- subset(phila1918, as.Date("1918-09-10") < date &
+                                date < as.Date("1918-11-18"))
+phila1918b <- transform(phila1918a,
+    date=c(as.Date("1918-09-09"), date),
+    mort=c(NA, mort)
 )
-
 phila1918b$time <- lubridate::decimal_date(phila1918b$date)
 @
 
@@ -1143,7 +1210,7 @@ xsummary <- function(fit, ...) {
 <<phila.fit,cache=TRUE,warning=FALSE>>=
 ## time is in the unit of years
 ## so gamma=52 corresponds to a mean of 1 week
-## I picked not-so-random starting values by hand
+## not-so-random starting values chosen by hand
 start.phila <- c(beta=4e-3, gamma=52*2,
                  S0=philaS0*0.9,
                  I0=3, phi=50)
@@ -1281,6 +1348,11 @@ draw_legend <- function(lwd=5, pt.bg="white") {
 }
 @
 
+<<testing, include=FALSE, results = "hide">>=
+format_sn0(cc["a", 1])
+ci_fmt("a", cc)
+@ 
+
 \begin{table}
   \begin{center}
     \caption{Parameters of \KM's \cite{KermMcKe27} approximation
@@ -1331,7 +1403,7 @@ draw_legend <- function(lwd=5, pt.bg="white") {
     removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & \Sexpr{ci_fmt("gamma", cc.delta)} \\
     initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
-      \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta)} \\
+      \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta, max_ord = 6)} \\
     transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{beta.KM} & \Sexpr{beta.nls} & \Sexpr{ci_fmt("beta", cc.delta)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
@@ -1398,7 +1470,8 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
        legend=c("simulated data","KM","deterministic solution", "fitode (nbinom)"))
 @
 \caption{
-Deterministic fits to a stochastic SIR simulation.
+  Deterministic fits to a stochastic SIR simulation.
+  \bmb{These are very wonky, I haven't tried to figure out why yet \ldots}
 }
 \label{fig:stoch}
 \end{figure}
@@ -1415,13 +1488,14 @@ lines(tvals,
       with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
       xpd=NA, lwd=lwd, col=col.nls)
 lines(estimate ~ times, data=ppp, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
-points(mort ~ time, data = phila1918, xpd=NA, pch=21, bg="white", lwd=2)
+points(mort ~ time,
+       data = phila1918b, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
 @
 \caption{The main wave of the 1918 influenza epidemic in the city of
   Philadelphia, 1 September 1918 to 31 December 1918 \cite{Gold+09}.
-  \djde{If we incluce this figure, we'll need another table
-    similar to the Bombay plague table (Table~\ref{tab:Bombay}).}
+  \djde{If we include this figure, we'll need another table
+    similar to the Bombay plague table (Table~\ref{tab:Bombay}).} \bmb{something weird happened to the scaling of the KM results ... ??}
 }
 \label{fig:phila}
 \end{figure}
