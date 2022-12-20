@@ -52,8 +52,8 @@
 \usepackage{xspace}
 \newcommand{\KM}{KM\xspace}
 \usepackage{bm} % bold math
-\newcommand{\betavec}{{\bm{\beta}}}
-\newcommand{\betavechat}{{\bm{\hat\beta}}}
+\newcommand{\thetavec}{{\bm{\theta}}}
+\newcommand{\thetavechat}{{\bm{\hat\theta}}}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \usepackage{xspace}
 \newcommand{\KMcol}{blue\xspace}
@@ -288,14 +288,14 @@ the data.  Thus, the \term{objective function} that is natural to
 minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
-\sum_{i=1}^n \big(f(t_i;\betavec) - y_i\big)^2 \,,
+\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2 \,,
 \end{equation}
 \end{linenomath*}
 where the observed data are the points $\{(t_i,y_i):i=1,\ldots,n\}$,
-$f(t;\betavec)$ is the model \eqref{eq:sech}, and the parameter
+$f(t;\thetavec)$ is the model \eqref{eq:sech}, and the parameter
 vector for \KM's problem is
-$\betavec=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
-respect to $\betavec$ would have required some heroic arithmetic
+$\thetavec=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
+respect to $\thetavec$ would have required some heroic arithmetic
 with a pencil and paper in 1927, but it is a simple task with the
 aid of a computer.
 
@@ -665,7 +665,7 @@ data $\{y_i\}$ assuming normal errors as above, i.e.,
 =
 \prod_{i=1}^n 
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
-\exp\left(-\frac{\big(f(t_i;\betavec) - y_i\big)^2}{2\sigma^2} \right) \Delta{y_i}
+\exp\left(-\frac{\big(f(t_i;\thetavec) - y_i\big)^2}{2\sigma^2} \right) \Delta{y_i}
 \right]
 \,,
 \end{equation}
@@ -699,28 +699,28 @@ that our model is good.  With this motivation, we define the
 i.e.,
 \begin{linenomath*}
 \begin{equation}\label{eq:lik}
-\lik(\betavec)
-= \Pop (\{y_i\} \mid \betavec) \cdot \Pop(\betavec)\,.
+\lik(\thetavec)
+= \Pop (\{y_i\} \mid \thetavec) \cdot \Pop(\thetavec)\,.
 \end{equation}
 \end{linenomath*}
 If we have no prior information about the values of the model
 parameters then $\Pop(\text{model})$ can be considered another
 nuisance constant that we can ignore.  In that situation, maximizing
-$\lik$ with respect to $\betavec$ or, equivalently, minimizing the
+$\lik$ with respect to $\thetavec$ or, equivalently, minimizing the
 negative log-likelihood
 \begin{linenomath*}
 \begin{equation}\label{eq:negloglik}
-\min_\betavec\big(\!\!-\log{\lik(\betavec)}\big) = \min_\betavec\Big( 
-\sum_{i=1}^n \big(f(t_i;\betavec) - y_i\big)^2 
+\min_\thetavec\big(\!\!-\log{\lik(\thetavec)}\big) = \min_\thetavec\Big( 
+\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2 
 \;+\; \text{constant}
 \Big)
 \end{equation}
 \end{linenomath*}
-yields an estimate, say $\betavechat$, that---lo and behold---agrees
+yields an estimate, say $\thetavechat$, that---lo and behold---agrees
 exactly with \eqref{eq:leastsquares}, the least squares solution!  The
 standard way of expressing this is to say that the least squares
-solution $\betavechat$ is the \term{maximum likelihood estimate} (MLE)
-of $\betavec$, under the assumption of normal observation errors in
+solution $\thetavechat$ is the \term{maximum likelihood estimate} (MLE)
+of $\thetavec$, under the assumption of normal observation errors in
 the time series.
 
 Having introduced the idea of maximum likelihood, we can do better
@@ -730,12 +730,12 @@ we have that might affect our notion of the most likely parameter
 values (i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
 specifying it as a probability distribution on the model's
 parameters).  We will then end up with a different likelihood function
-to maximize, and obtain a different $\betavechat$, but the basic idea
+to maximize, and obtain a different $\thetavechat$, but the basic idea
 is the same.
 
 So what is a better assumption about the observation error distribution,
 and how do we get both better confidence bands on the the model fit
-and CIs on the estimated parameter values $\betavechat$?
+and CIs on the estimated parameter values $\thetavechat$?
 
 Our data are actually counts of deaths (or cases in other contexts),
 so the observation error distribution can't really be normal (and it
@@ -752,80 +752,80 @@ Poisson, which makes it a good choice.  \djde{Ben, please feel free to
   wanted to fit it.}
 
 Regardless of the form of the likelihood function, we can use it to
-obtain CIs on the MLE $\betavechat$.  A relatively simple approach is
-to use the the shape of $\log{\lik(\betavec)}$ in the vicinity of
-$\betavechat$ to infer parameter values of a multivariate normal
-distribution for $\betavec$.  Near $\betavechat$, the shape of
+obtain CIs on the MLE $\thetavechat$.  A relatively simple approach is
+to use the the shape of $\log{\lik(\thetavec)}$ in the vicinity of
+$\thetavechat$ to infer parameter values of a multivariate normal
+distribution for $\thetavec$.  Near $\thetavechat$, the shape of
 $\log{\lik}$ is determined by its \term{Hessian matrix} (the matrix
 of second order partial derivatives of $\log{\lik}$, also known as
 the \term{Fisher information matrix}), and the inverse of the Hessian
-is the \term{variance-covariance matrix} $\mathrm{Cov}(\betavec)$ that
-specifies the desired multi-variate normal with mean $\betavechat$.
+is the \term{variance-covariance matrix} $\mathrm{Cov}(\thetavec)$ that
+specifies the desired multi-variate normal with mean $\thetavechat$.
 \djde{What is a simple way to explain why the inverse of the Hessian
   is the cov matrix for the parameters?}
 
 From the multi-variate normal, we can calculate CIs on each of the
-components of $\betavechat$ by\djde{explain\dots}.  Then to obtain CIs
+components of $\thetavechat$ by\djde{explain\dots}.  Then to obtain CIs
 on functions of the fitted parameters (e.g., $\R_0$ or $\gamma$ if our
 model is KM's approximation \eqref{eq:sech}), we build on the idea
 that if the error in a parameter $a$ is $\Delta a$, then the associated
 error in a (differentiable) function $g(a)$ is
-$\Delta{g}\approx g'(a)\Delta{a}$.  Given a nonlinear function $g(\betavec)$
+$\Delta{g}\approx g'(a)\Delta{a}$.  Given a nonlinear function $g(\thetavec)$
 of the parameters, the \term{Delta Method}
-\cite{Dorf38,VerH12} expands $\textrm{Var}(g(\betavec))$ to first
-order about $\betavechat$, which gives us the variance-covariance matrix
-of $g(\betavec)$ \cite{Bolk08}.  In particular, the variance of
-$g(\betavec)$ is
+\cite{Dorf38,VerH12} expands $\textrm{Var}(g(\thetavec))$ to first
+order about $\thetavechat$, which gives us the variance-covariance matrix
+of $g(\thetavec)$ \cite{Bolk08}.  In particular, the variance of
+$g(\thetavec)$ is
 \begin{linenomath*}
 \begin{subequations}\label{eq:DeltaMethod}
 \begin{align}
-\mathrm{Var}(g(\betavec))
+\mathrm{Var}(g(\thetavec))
 &\approx 
-\mathrm{Var}\big[g(\betavechat) 
-   + (\nabla g)(\betavechat)\cdot(\betavec-\betavechat)\big] \\
+\mathrm{Var}\big[g(\thetavechat) 
+   + (\nabla g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big] \\
 &=
-\mathrm{Var}\big[(\nabla g)(\betavechat)\cdot(\betavec-\betavechat)\big] \\
+\mathrm{Var}\big[(\nabla g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big] \\
 &= 
-\mathbb{E}\big[\big((\nabla g)(\betavechat)\cdot(\betavec-\betavechat)\big)^2\big] \\
+\mathbb{E}\big[\big((\nabla g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big)^2\big] \\
 &= 
 \,\mathbb{E}\big[
-(\nabla g)(\betavechat)^\transpose
-  (\betavec-\betavechat)
-  (\betavec-\betavechat)^\transpose
-  (\nabla g)(\betavechat) 
+(\nabla g)(\thetavechat)^\transpose
+  (\thetavec-\thetavechat)
+  (\thetavec-\thetavechat)^\transpose
+  (\nabla g)(\thetavechat) 
   \big]\,
 \\
 &= 
-(\nabla g)(\betavechat)^\transpose
+(\nabla g)(\thetavechat)^\transpose
 \,\mathbb{E}\big[
-  (\betavec-\betavechat)
-  (\betavec-\betavechat)^\transpose
+  (\thetavec-\thetavechat)
+  (\thetavec-\thetavechat)^\transpose
   \big]\,
-(\nabla g)(\betavechat) \\
+(\nabla g)(\thetavechat) \\
 &= 
-(\nabla g)(\betavechat)^\transpose
-\,\textrm{Cov}(\betavec)\,
-(\nabla g)(\betavechat)
+(\nabla g)(\thetavechat)^\transpose
+\,\textrm{Cov}(\thetavec)\,
+(\nabla g)(\thetavechat)
 \end{align}
 \end{subequations}
 \end{linenomath*}
-We can then take the square root of the estimated variance to obtain the standard error ($\mathrm{SE}$) and calculate approximate confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to $g(\betavechat)$.
+We can then take the square root of the estimated variance to obtain the standard error ($\mathrm{SE}$) and calculate approximate confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to $g(\thetavechat)$.
 
 Given a fit of KM's approximation \eqref{eq:sech} to the time series
-data, which yields $\betavechat=(\hat{a},\hat{\omega},\hat{\phi})$, we
+data, which yields $\thetavechat=(\hat{a},\hat{\omega},\hat{\phi})$, we
 can apply the Delta method \eqref{eq:DeltaMethod} to the nonlinear
 relationships \eqref{eq:invertparams} to obtain CIs on
-$g(\betavechat)=(\hat{\Reff}, \hat{\gamma},\hat{S_0})$.  This is
+$g(\thetavechat)=(\hat{\Reff}, \hat{\gamma},\hat{S_0})$.  This is
 precisely how we obtained the CIs on the derived parameters listed in
 Table~\ref{tab:Bombay}.  Perhaps less obviously, we can also use the
 Delta method to obtain CIs on the fitted trajectory at each
 observation time $t_i$ (and hence obtain a confidence band) by
-considering $g(\betavec)=f(t_i;\betavec)$.  This is how we obtained
+considering $g(\thetavec)=f(t_i;\thetavec)$.  This is how we obtained
 the pink confidence band shown in Figure~\ref{fig:Bombay}.
 
 \djde{Available in \code{fitode} but we not what we doing here:
   Another posibility would be to use the estimated means and variances
-  for $\betavec$ to define a multivariate normal, sample that many
+  for $\thetavec$ to define a multivariate normal, sample that many
   times and run the model, and draw the bands that contain 95\% of the
   simulations.}
 
@@ -847,7 +847,7 @@ solutions of ODEs to data introduces significant coding/computational
 challenges, but conceptually the problem is the same as if we did have
 an analytical formula.  We can still use the Delta method
 \eqref{eq:DeltaMethod} to estimate uncertainty, but calculating the
-gradient $(\nabla g)(\betavec)$ is not straightforward if $g$ is a
+gradient $(\nabla g)(\thetavec)$ is not straightforward if $g$ is a
 numerical solution of an ODE; \term{sensitivity equations} must be
 simultaneously solved alongside the main differential equations
 \cite{raue2013lessons}.  \djde{We will need to explain what the
@@ -908,7 +908,7 @@ and the standard deviation is set to the
 residual standard deviation,
 \begin{linenomath*}
 \begin{equation}
-\sigma(t)=\sqrt{\frac{1}{n-1}\sum_{i=1}^n \big(f(t_i;\betavec) - y_i\big)^2} \,.
+\sigma(t)=\sqrt{\frac{1}{n-1}\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2} \,.
 \end{equation}
 \end{linenomath*}
 \item[\code{initial}]conditions are expressed a numbers of individuals.
