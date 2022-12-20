@@ -651,7 +651,7 @@ is absurd to suggest that KM's approximation \eqref{eq:sech} to the
 solution of the SIR model \eqref{eq:SIR} is a perfect representation
 of reality!  The ODEs themselves are far from realistic, not least
 because they ignore the discrete nature of individuals and the
-stochastic nature of infection and removal events\needref.
+stochastic nature of infection and removal events \cite{Bart60,AndeBrit00b}.
 Nevertheless, we will continue to focus on estimating uncertainty in
 parameter estimates for a given model, since it will be necessary even
 if we ignore uncertainty in the specification of the model itself.
@@ -741,14 +741,15 @@ Our data are actually counts of deaths (or cases in other contexts),
 so the observation error distribution can't really be normal (and it
 is the assumption of normality that leads to a lower limit of the
 confidence band on the fitted model being negative when the time
-series is near zero).  We could assume a Poisson error
-distribution\djde{with mean\dots}, but typical observations have
-variance greater than the mean (which are equal for a Poisson
-distribution).  The negative binomial distribution can be considered
-an overdispersed Poisson, which makes it a good choice.  \djde{Ben,
-  please feel free to give a more principled justification, and to
-  explain how the neg binom dispersion parameter would enter the
-  likelihood function if we wanted to fit it.}
+series is near zero).  We could assume a Poisson error distribution
+with mean equal to the fitted model trajectory
+[equation~\eqref{eq:SIR;R}], but typical observations have variance
+greater than the mean (which are equal for a Poisson distribution).
+The negative binomial distribution can be considered an overdispersed
+Poisson, which makes it a good choice.  \djde{Ben, please feel free to
+  give a more principled justification, and to explain how the neg
+  binom dispersion parameter would enter the likelihood function if we
+  wanted to fit it.}
 
 Regardless of the form of the likelihood function, we can use it to
 obtain CIs on the MLE $\betavechat$.  A relatively simple approach is
@@ -831,79 +832,9 @@ the pink confidence band shown in Figure~\ref{fig:Bombay}.
 \swp{we might want to mention that profile likelihoods are a thing but are
 probably too complicated for this paper and especially for trajectories?}
 \djde{mentioning profile likelihoods in passing, with a reference, 
-  would be good; we could add that here}
-
-\begin{table}
-  \begin{center}
-    \caption{Parameters of \KM's \cite{KermMcKe27} approximation
-      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, as estimated by
-      them \cite{KermMcKe27} and by us using nonlinear least squares
-      (\code{nls}).
-      The $\R_0$ estimates assume the population of Bombay was
-      $N=1$ million \cite[p.\,408]{bacaermodel2012}.
-      \djde{Maybe we should list $N$ as a ``specified parameter'' so it
-      is very explicit, rather than just burying it in $\R_0$.
-      We could then list $\beta N$ rather than $\beta$, which would
-      tidy the table and avoid an implicit factor of $1/N$ in $\beta$.}
-     %%  (including 95\% confidence intervals).
-     %%  Given values of the estimated parameters
-     %% $(a,\omega,\phi)$, we specify $I_0$ and derive implied values of the
-     %%  original parameters using equation~\eqref{eq:invertparams}.
-     %%
-     %% The horizontal line separates parameters that are directly
-     %% estimated from those that are derived from the estimated
-     %% parameters.
-}\label{tab:Bombay}
-    \medskip
-    %% making use of ragged2e and array packages:
-    \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c | c | c c}
-    \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
-    & \bfseries KM & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
-    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{a.KM} &
-      \Sexpr{signif(a.nls,dig)} & \Sexpr{ci_fmt("a", cc)} \\
-    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} & \Sexpr{ci_fmt("omega", cc)} \\
-    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.KM} &
-      \Sexpr{signif(phi.nls,dig)} & \Sexpr{ci_fmt("phi", cc)} \\
-    %%
-    \noalign{\vspace{10pt}}
-    \bfseries Specified\break parameter \\\hline
-    initial prevalence & $I_0$ & -- & -- &
-      \Sexpr{I0.KM} & \Sexpr{I0.nls} & -- \\
-    %%
-    \noalign{\vspace{10pt}}
-    \bfseries Derived\break parameter \\\hline
-    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
-      \Sexpr{tpeak.KM} & \Sexpr{tpeak.nls} & \Sexpr{ci_fmt("tpeak", cc.delta)} \\
-    effective reproduction number & $\Reff$
-      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
-      \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & \Sexpr{ci_fmt("Reff", cc.delta)} \\
-    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & \Sexpr{ci_fmt("gamma", cc.delta)} \\
-    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
-      \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta)} \\
-    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{beta.KM} & \Sexpr{beta.nls} & \Sexpr{ci_fmt("beta", cc.delta)} \\
-    mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
-      \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta)} \\
-    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
-      \Sexpr{signif(10^6*Reff.KM/S0.KM,dig)}
-      & \Sexpr{signif(10^6*Reff.nls/S0.nls,dig)} & \Sexpr{ci_fmt("R0", cc.delta)}
-  \end{tabular}
-  \end{center}
-\end{table}
+  would be good; we could add that here or in the Discussion.}
 
 \section{Fitting the ODE}
-
-\thickredline
-
-\djde{moved from above: this comment from Daniel needs to go in this section:}
- Calculating the gradient $\nabla g(\betavec)$ is tricky when $g$ is a solution of an ODE model---this requires sensitivity equations to be simultaneously solved alongside the main differential equations \cite{raue2013lessons}.
-\djde{We will need to explain what the sensitivity equations are.}
-
-\thickredline
 
 Until now, we have focussed on fitting KM's approximation
 \eqref{eq:sech} rather than actual solutions of the SIR model
@@ -914,7 +845,13 @@ formula.  Since we do not have an exact solution, we must instead rely
 on numerical solutions of the ODE.  In general, fitting numerical
 solutions of ODEs to data introduces significant coding/computational
 challenges, but conceptually the problem is the same as if we did have
-an analytical formula.
+an analytical formula.  We can still use the Delta method
+\eqref{eq:DeltaMethod} to estimate uncertainty, but calculating the
+gradient $(\nabla g)(\betavec)$ is not straightforward if $g$ is a
+numerical solution of an ODE; \term{sensitivity equations} must be
+simultaneously solved alongside the main differential equations
+\cite{raue2013lessons}.  \djde{We will need to explain what the
+  sensitivity equations are, at least in a footnote.}
 
 The \code{fitode} package\footnote{\code{fitode} is available on CRAN
   and consequently can be installed easily via
@@ -961,16 +898,23 @@ In the model definition above:
   (\code{mort}) are assumed to arise from sampling from the normal
   distribution associated with an ordinary least squares (\code{ols})
   fit; the sampled distribution is $\texttt{Normal}(\mu,\sigma)$,
-  where the mean is given by the fitted model curve ($\mu(t)=\gamma I(t)$,
-  equation~\eqref{eq:SIR;R}) and the standard deviation is set to the
-  residual standard deviation $\sigma(t)=\sqrt{\sum_{i=1}^n \big(f(t_i;\betavec) - y_i\big)^2/(n-1)}$,
-\item[\code{initial}]conditions are expressed as the number of individuals.
+  where the mean is given by the fitted model trajectory [equation~\eqref{eq:SIR;R}],
+\begin{linenomath*}
+\begin{equation}
+  \mu(t) = \gamma I(t) \,,
+\end{equation}
+\end{linenomath*}
+and the standard deviation is set to the
+residual standard deviation,
+\begin{linenomath*}
+\begin{equation}
+\sigma(t)=\sqrt{\frac{1}{n-1}\sum_{i=1}^n \big(f(t_i;\betavec) - y_i\big)^2} \,.
+\end{equation}
+\end{linenomath*}
+\item[\code{initial}]conditions are expressed a numbers of individuals.
 \item[\code{par}]refers to the parameters that are to be fitted:
-  $\beta$, $\gamma$, and initial conditions $S(0)$ and $I(0)$, which
-  are to be fitted via the \code{fitode} function.
+  $\beta$, $\gamma$, and initial conditions $S(0)$ and $I(0)$.
 \end{description}
-
-\thickredline
 
 We take our previous parameter estimates from \code{nls} as our starting values:
 <<sirmortstart,warning=FALSE,basefig=TRUE>>=
@@ -1336,6 +1280,68 @@ draw_legend <- function(lwd=5, pt.bg="white") {
        legend=c("observed data","KM","nls","fitode (ols)"))
 }
 @
+
+\begin{table}
+  \begin{center}
+    \caption{Parameters of \KM's \cite{KermMcKe27} approximation
+      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, as estimated by
+      them \cite{KermMcKe27} and by us using nonlinear least squares
+      (\code{nls}).
+      The $\R_0$ estimates assume the population of Bombay was
+      $N=1$ million \cite[p.\,408]{bacaermodel2012}.
+      \djde{Maybe we should list $N$ as a ``specified parameter'' so it
+      is very explicit, rather than just burying it in $\R_0$.
+      We could then list $\beta N$ rather than $\beta$, which would
+      tidy the table and avoid an implicit factor of $1/N$ in $\beta$.}
+     %%  (including 95\% confidence intervals).
+     %%  Given values of the estimated parameters
+     %% $(a,\omega,\phi)$, we specify $I_0$ and derive implied values of the
+     %%  original parameters using equation~\eqref{eq:invertparams}.
+     %%
+     %% The horizontal line separates parameters that are directly
+     %% estimated from those that are derived from the estimated
+     %% parameters.
+}\label{tab:Bombay}
+    \medskip
+    %% making use of ragged2e and array packages:
+    \RaggedRight
+  \begin{tabular}{ m{3cm} | c | c | c | c | c c}
+    \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
+    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
+    & \bfseries KM & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
+    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{a.KM} &
+      \Sexpr{signif(a.nls,dig)} & \Sexpr{ci_fmt("a", cc)} \\
+    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
+      \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} & \Sexpr{ci_fmt("omega", cc)} \\
+    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.KM} &
+      \Sexpr{signif(phi.nls,dig)} & \Sexpr{ci_fmt("phi", cc)} \\
+    %%
+    \noalign{\vspace{10pt}}
+    \bfseries Specified\break parameter \\\hline
+    initial prevalence & $I_0$ & -- & -- &
+      \Sexpr{I0.KM} & \Sexpr{I0.nls} & -- \\
+    %%
+    \noalign{\vspace{10pt}}
+    \bfseries Derived\break parameter \\\hline
+    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
+      \Sexpr{tpeak.KM} & \Sexpr{tpeak.nls} & \Sexpr{ci_fmt("tpeak", cc.delta)} \\
+    effective reproduction number & $\Reff$
+      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
+      \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & \Sexpr{ci_fmt("Reff", cc.delta)} \\
+    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
+      \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & \Sexpr{ci_fmt("gamma", cc.delta)} \\
+    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
+      \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta)} \\
+    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{weeks}}$ &
+      \Sexpr{beta.KM} & \Sexpr{beta.nls} & \Sexpr{ci_fmt("beta", cc.delta)} \\
+    mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
+      \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta)} \\
+    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
+      \Sexpr{signif(10^6*Reff.KM/S0.KM,dig)}
+      & \Sexpr{signif(10^6*Reff.nls/S0.nls,dig)} & \Sexpr{ci_fmt("R0", cc.delta)}
+  \end{tabular}
+  \end{center}
+\end{table}
 
 \begin{figure}
 <<Bombay-figure, echo=FALSE, fig.height=5, fig.show="hold", out.width="50%">>=
