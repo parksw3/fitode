@@ -262,7 +262,7 @@ a_fun <- function(Reff, gamma, S0, I0)
     {(2 * S0/(gamma * Reff^2))*omega_fun(Reff,gamma,S0,I0)^2}
 @
 
-\subsection{How to fit the model to the data}
+\section{How to fit the model to the data}
 
 The \KMcol curve in Figure~\ref{fig:Bombay} does appear to provide a
 reasonable fit to the data, but \KM \cite{KermMcKe27} gave no
@@ -611,7 +611,7 @@ traj_ci <- function(t,
 }
 @
 
-\subsection{Uncertainty}
+\section{Uncertainty}
 
 To this point, we have addressed only an optimization problem.  We
 solved it using the method of nonlinear least squares, which yields
