@@ -30,6 +30,7 @@
 \newtheorem{notation}{Notation}
 
 %% DE preamable
+\usepackage{pdflscape} % landscape mode that rotates page (unlike lscape)
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{lineno}\renewcommand\thelinenumber{\color{gray}\arabic{linenumber}}
@@ -62,6 +63,8 @@
 \newcommand{\Pop}{{\mathbb{P}}} % probability operator
 \newcommand{\lik}{{\mathcal L}}
 \newcommand{\transpose}{{\textsf{T}}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 %% BMB: can decide whether this should be \mathrm{Norm} or \cal{N} or ...
 \newcommand{\normdist}{\ensuremath\mathrm{Normal}}
 %% tables
@@ -662,47 +665,19 @@ in Figure~\ref{fig:Bombay} is a 95\% \term{confidence band} for the
 fitted model curve.  \djde{We should probably also include the fitode
   confidence band in \fitodecol as I had as a placeholder before.}
 
-One standard way to derive a confidence band is the following: We
-imagine that the model \eqref{eq:sech} is a perfect representation of
-reality, and we consider the deviations from the model curve in
+\thickredline
+
+To estimate CIs, it will help to think about the probability of
+observing the data $\{y_i\}$.  We imagine that the model
+\eqref{eq:sech} is a perfect representation of reality, and we
+consider the deviations from the model curve in
 Figure~\ref{fig:Bombay} to be observation errors.  We then imagine
 that observation error for each data point is independent and
 identically distributed (iid), and drawn from a normal distribution
-with zero mean and standard deviation $\sigma$ equal to the
-standard deviation of the residuals (the differences between the model
-curve and the observed data).  With this assumption, we could
-na\"ively draw confidence bands by adding $\pm1.96\,\sigma$ to our
-fitted model curve,\footnote{For a $\normdist(0,\sigma)$
-  distribution, 95\% of the probability lies between $-1.96\,\sigma$
-  and $+1.96\,\sigma$.}  which would emphasize the folly in assuming
-the observation error has the same absolute magnitude throughout the
-epidemic (in particular the lower limit would go below zero early and
-late in the epidemic).
-\bmb{From my point of view this is a little bit weird because it is the
-  \emph{opposite} of what is traditionally done in statistics. A \emph{confidence interval}
-  on the predictions takes only uncertainty in the parameters into account;
-  a \emph{prediction interval} accounts for both parametric uncertainty and
-  residual error/observation uncertainty (in traditional/simple approaches, we
-  don't consider stochastic processes at all, so parametric uncertainty and
-  residual error are the only components of uncertainty). What you're suggesting here,
-  taking account only of the residual error, isn't something I've ever seen anyone
-  do. That's not to say that we can't proceed this way, but it seems weird. Also,
-  opening the can of worms of model misspecification at this point also seems dangerous;
-  I'd rather come back to it in a later part of the discussion.}
-
-Bear in mind that at each step of this approach, we are making a very
-specific, strong assumptions (when we ``imagine'').  To begin with, it
-is absurd to suggest that KM's approximation \eqref{eq:sech} to the
-solution of the SIR model \eqref{eq:SIR} is a perfect representation
-of reality!  The ODEs themselves are far from realistic, not least
-because they ignore the discrete nature of individuals and the
-stochastic nature of infection and removal events \cite{Bart60,AndeBrit00b}.
-Nevertheless, we will continue to focus on estimating uncertainty in
-parameter estimates for a given model, since it will be necessary even
-if we ignore uncertainty in the specification of the model itself.
-
-To do better, it will help to think about the probability of observing
-data $\{y_i\}$ assuming normal errors as above, i.e.,
+with zero mean and standard deviation $\sigma$ equal to the standard
+deviation of the residuals (the differences between the model curve
+and the observed data).  Then the probablity of the data given the
+model is
 %%
 \begin{linenomath*}
 \begin{equation}\label{eq:prob.data.given.model}
@@ -718,95 +693,105 @@ data $\{y_i\}$ assuming normal errors as above, i.e.,
 %%
 But this isn't what we actually want. What we're given is the data,
 not the model.  We're trying to say something about how likely our
-\emph{proposed} model is, given the data that \emph{were}
-observed. One way to get at this is to use Bayes rule for conditional
-probabilities, which tells us that
-\begin{linenomath*}
-\begin{equation}\label{eq:BayesRule}
-\Pop(\text{model} \mid \text{data})
-= \dfrac{\Pop(\text{data} \mid \text{model})\cdot\Pop(\text{model})}{\Pop(\text{data})}
-\,.
-\end{equation}
-\end{linenomath*}
-The probability of the data is not known to us, but it can't depend on
-the values of the parameters of the model that we happen to be
-proposing, so we can think of $\Pop(\text{data})$ as a nuisance
-constant in equation~\eqref{eq:BayesRule}.  Consequently, if we ignore it,
-we still have a function that tells us something about how likely it is
-that our model is good.  With this motivation, we define the
-\term{likelihood} (not probability) of the model given the data to be
-\begin{linenomath*}
-\begin{equation}\label{eq:lik.generic}
-\lik(\text{model} \mid \text{data})
-= \Pop (\text{data} \mid \text{model}) \cdot \Pop(\text{model})\,.
-\end{equation}
-\end{linenomath*}
-i.e.,
+\emph{proposed} model is, given the data that \emph{were} observed.
+The typical way forward is to shift to a heuristic argument: it is
+reasonable to consider parameter values that maximize the probability
+of observing the data to be ``best'' or ``most likely'', so let's
+simply \emph{define} the \term{likelihood} $\lik$ of a set of
+parameter values $\thetavec$ to \emph{be} the probability of the data
+given $\thetavec$,\bmb{I think we can say ``this is how it's typically
+  done'' and give a reference without getting too far into the
+  weeds.}\djde{Can you add whatever ref(s) you think are best here?}
 \begin{linenomath*}
 \begin{equation}\label{eq:lik}
 \lik(\thetavec)
-= \Pop (\{y_i\} \mid \thetavec) \cdot \Pop(\thetavec)\,.
+= \Pop (\{y_i\} \mid \thetavec) \,.
 \end{equation}
 \end{linenomath*}
-If we have no prior information about the values of the model
-parameters then $\Pop(\text{model})$ can be considered another
-nuisance constant that we can ignore.  In that situation, maximizing
-$\lik$ with respect to $\thetavec$ or, equivalently, minimizing the
-negative log-likelihood
+Maximizing $\lik$ with respect to $\thetavec$ or, equivalently,
+minimizing the negative log-likelihood,
+yields an estimate,
 \begin{linenomath*}
-\begin{equation}\label{eq:negloglik}
-\min_\thetavec\big(\!\!-\log{\lik(\thetavec)}\big) = \min_\thetavec\Big( 
+\begin{subequations}\label{eq:negloglik}
+\begin{align}
+\thetavechat
+&= \argmax_\thetavec \lik(\thetavec) \\
+&= \argmin_\thetavec \big(\!\!-\log{\lik(\thetavec)}\big) \\
+&= \argmin_\thetavec\Big( 
 \sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2 
 \;+\; \text{constant}
-\Big)
+\Big) \\
+&= \argmin_\thetavec\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2
+ \,,
+\end{align}
+\end{subequations}
+\end{linenomath*}
+which---lo and behold---agrees exactly with \eqref{eq:leastsquares},
+the least squares solution!  The standard way of expressing this is to
+say that the least squares solution $\thetavechat$ is the
+\term{maximum likelihood estimate} (MLE) of $\thetavec$, under the
+assumption of normal observation errors in the time series.
+  
+Having introduced the idea of maximum likelihood, we can do better by
+making a more realistic assumption about the error distribution.  We
+will then end up with a different likelihood function to maximize, and
+obtain a different $\thetavechat$, but the basic idea is the same.
+
+So what is a better assumption about the observation error
+distribution, and how can we use the likelihood function to estimate
+uncertainty in $\thetavechat$ and obtain confidence bands on the
+fitted trajectory?
+
+Our data are actually non-negative, discrete counts of deaths (or
+cases in other contexts), so the observation error distribution can't
+really follow a continuous, real-valued Normal distribution (in our
+previous example, the assumption of normality is allowing the lower
+limit of the confidence band on the fitted model to drop below zero
+when the number of deaths is small).  We could assume a Poisson error
+distribution with mean equal to the fitted model trajectory
+[equation~\eqref{eq:SIR;R}], but typical observations have variance
+greater than the mean (the variance is equal to the mean for a Poisson
+distribution).  The negative binomial distribution can be considered
+an overdispersed Poisson, which makes it a good choice.
+
+The probability mass function for the negative binomial distribution
+is
+\begin{linenomath*}
+\begin{equation}
+\texttt{NB}(k;r,p) = \frac{\Gamma(k+r)}{k!\Gamma(r)}
+(1-p)^k p^r \,,\qquad k=0,1,2,\ldots,
 \end{equation}
 \end{linenomath*}
-yields an estimate, say $\thetavechat$, that---lo and behold---agrees
-exactly with \eqref{eq:leastsquares}, the least squares solution!  The
-standard way of expressing this is to say that the least squares
-solution $\thetavechat$ is the \term{maximum likelihood estimate} (MLE)
-of $\thetavec$, under the assumption of normal observation errors in
-the time series.
-\bmb{I feel like we can introduce the idea of likelihood and maximum
-  likelihood without presenting Bayes' rule. The justification for likelihood-based
-  inference is most often presented heuristically rather than formally
-  (i.e. we don't say ``here's Bayes' rule, we don't want to go full Bayesian,
-  but here's something else we can do'' --- instead ``it is reasonable
-  to suppose that parameter choices that maximize the probability of observing
-  the data are `good' in some sense''). More generally, I think we can say
-  ``this is how it's typically done'' and give a reference without getting too
-  far into the weeds.}
-  
-Having introduced the idea of maximum likelihood, we can do better
-than the na\"ive approach by making a more realistic assumption about
-the error distribution and/or taking advantage of any prior knowledge
-we have that might affect our notion of the most likely parameter
-values (i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
-specifying it as a probability distribution on the model's
-parameters).
-\bmb{I don't mind talking about priors if we're actually going to cover them,
-  but I feel like it might make more sense to introduce them later, starting as
-  a way to regularize/make optimization more robust.}
-We will then end up with a different likelihood function
-to maximize, and obtain a different $\thetavechat$, but the basic idea
-is the same.
-
-So what is a better assumption about the observation error distribution,
-and how do we get both better confidence bands on the the model fit
-and CIs on the estimated parameter values $\thetavechat$?
-
-Our data are actually non-negative, discrete counts of deaths (or cases in other contexts),
-so the observation error distribution can't really follow a continuous, real-valued Normal distribution
-(in our previous example, the assumption of normality is allowing the lower limit of the
-confidence band on the fitted model to drop below zero when the number of deaths is small).  We could assume a Poisson error distribution
-with mean equal to the fitted model trajectory
-[equation~\eqref{eq:SIR;R}], but typical observations have variance
-greater than the mean (the variance is equal to the mean for a Poisson distribution).
-The negative binomial distribution can be considered an overdispersed
-Poisson, which makes it a good choice.  \djde{Ben, please feel free to
-  give a more principled justification, and to explain how the neg
-  binom dispersion parameter would enter the likelihood function if we
-  wanted to fit it.} 
+where the parameters $\thetavec=(r,p)$ are related to the mean $\mu$
+and variance $\sigma^2$ via
+\begin{linenomath*}
+\begin{equation}
+r = \frac{\mu^2}{\sigma^2-\mu}\,,
+\qquad
+p = \frac{\sigma^2 - \mu}{\sigma^2} \,.
+\end{equation}
+\end{linenomath*}
+The maximum likelihood estimate is, therefore,
+\begin{linenomath*}
+\begin{subequations}\label{eq:negbinomMLE}
+\begin{align}
+\thetavechat
+&= \argmin_\thetavec \sum_{i=1}^n \Big(\!\!
+-y_i \log\big(1-p_i\big) - 
+               r_i
+               \log{p_i}
+               \Big)
+ \,, \\
+p_i &= \frac{\sigma^2-f(t_i;\thetavec)}{\sigma^2} \\
+r_i &= \frac{f(t_i;\thetavec)^2}{\sigma^2-f(t_i;\thetavec)}
+\end{align}
+\end{subequations}
+\end{linenomath*}
+where, as for the likelihood associated with Normal errors, we assume
+$\sigma$ is computed as the variance of the residuals across the full
+time series.\djde{Is that what's done, or is $\sigma^2$ added to
+  $\thetavec$ as a parameter to fit?  or even $\sigma_i^2$ for each
+  i?}
 
 Regardless of the form of the likelihood function, we can use it to
 obtain CIs on the MLE $\thetavechat$.  A relatively simple approach is
@@ -1281,6 +1266,144 @@ threshold, as suggested by \KM, but an example of
 epidemic driven by seasonality.'' \cite{bacaermodel2012}
 \end{quote}
 
+\subsection{DJDE's weird idea of introducing na\"ive confidence bands
+  via residual errors only}
+
+One standard way to derive a confidence band is the following: We
+imagine that the model \eqref{eq:sech} is a perfect representation of
+reality, and we consider the deviations from the model curve in
+Figure~\ref{fig:Bombay} to be observation errors.  We then imagine
+that observation error for each data point is independent and
+identically distributed (iid), and drawn from a normal distribution
+with zero mean and standard deviation $\sigma$ equal to the
+standard deviation of the residuals (the differences between the model
+curve and the observed data).  With this assumption, we could
+na\"ively draw confidence bands by adding $\pm1.96\,\sigma$ to our
+fitted model curve,\footnote{For a $\normdist(0,\sigma)$
+  distribution, 95\% of the probability lies between $-1.96\,\sigma$
+  and $+1.96\,\sigma$.}  which would emphasize the folly in assuming
+the observation error has the same absolute magnitude throughout the
+epidemic (in particular the lower limit would go below zero early and
+late in the epidemic).
+\bmb{From my point of view this is a little bit weird because it is the
+  \emph{opposite} of what is traditionally done in statistics. A \emph{confidence interval}
+  on the predictions takes only uncertainty in the parameters into account;
+  a \emph{prediction interval} accounts for both parametric uncertainty and
+  residual error/observation uncertainty (in traditional/simple approaches, we
+  don't consider stochastic processes at all, so parametric uncertainty and
+  residual error are the only components of uncertainty). What you're suggesting here,
+  taking account only of the residual error, isn't something I've ever seen anyone
+  do. That's not to say that we can't proceed this way, but it seems weird. Also,
+  opening the can of worms of model misspecification at this point also seems dangerous;
+  I'd rather come back to it in a later part of the discussion.}
+
+\subsection*{Model misspecification}
+
+Bear in mind that at each step of this approach, we are making a very
+specific, strong assumptions (when we ``imagine'').  To begin with, it
+is absurd to suggest that KM's approximation \eqref{eq:sech} to the
+solution of the SIR model \eqref{eq:SIR} is a perfect representation
+of reality!  The ODEs themselves are far from realistic, not least
+because they ignore the discrete nature of individuals and the
+stochastic nature of infection and removal events \cite{Bart60,AndeBrit00b}.
+Nevertheless, we will continue to focus on estimating uncertainty in
+parameter estimates for a given model, since it will be necessary even
+if we ignore uncertainty in the specification of the model itself.
+
+\subsection*{DJDE's pseudo-Bayesian introduction to maximum likelihood}
+
+One way to get at this is to use Bayes rule for conditional
+probabilities, which tells us that
+\begin{linenomath*}
+\begin{equation}\label{eq:BayesRule}
+\Pop(\text{model} \mid \text{data})
+= \dfrac{\Pop(\text{data} \mid \text{model})\cdot\Pop(\text{model})}{\Pop(\text{data})}
+\,.
+\end{equation}
+\end{linenomath*}
+The probability of the data is not known to us, but it can't depend on
+the values of the parameters of the model that we happen to be
+proposing, so we can think of $\Pop(\text{data})$ as a nuisance
+constant in equation~\eqref{eq:BayesRule}.  Consequently, if we ignore it,
+we still have a function that tells us something about how likely it is
+that our model is good.  With this motivation, we define the
+\term{likelihood} (not probability) of the model given the data to be
+\begin{linenomath*}
+\begin{equation}\label{eq:lik.generic}
+\lik(\text{model} \mid \text{data})
+= \Pop (\text{data} \mid \text{model}) \cdot \Pop(\text{model})\,.
+\end{equation}
+\end{linenomath*}
+i.e.,
+\begin{linenomath*}
+\begin{equation}\label{eq:likB}
+\lik(\thetavec)
+= \Pop (\{y_i\} \mid \thetavec) \cdot \Pop(\thetavec)\,.
+\end{equation}
+\end{linenomath*}
+If we have no prior information about the values of the model
+parameters then $\Pop(\text{model})$ can be considered another
+nuisance constant that we can ignore.  In that situation, maximizing
+$\lik$ with respect to $\thetavec$ or, equivalently, minimizing the
+negative log-likelihood
+\begin{linenomath*}
+\begin{equation}\label{eq:negloglikB}
+\min_\thetavec\big(\!\!-\log{\lik(\thetavec)}\big) = \min_\thetavec\Big( 
+\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2 
+\;+\; \text{constant}
+\Big)
+\end{equation}
+\end{linenomath*}
+yields an estimate, say $\thetavechat$, that---lo and behold---agrees
+exactly with \eqref{eq:leastsquares}, the least squares solution!  The
+standard way of expressing this is to say that the least squares
+solution $\thetavechat$ is the \term{maximum likelihood estimate} (MLE)
+of $\thetavec$, under the assumption of normal observation errors in
+the time series.
+\bmb{I feel like we can introduce the idea of likelihood and maximum
+  likelihood without presenting Bayes' rule. The justification for likelihood-based
+  inference is most often presented heuristically rather than formally
+  (i.e. we don't say ``here's Bayes' rule, we don't want to go full Bayesian,
+  but here's something else we can do'' --- instead ``it is reasonable
+  to suppose that parameter choices that maximize the probability of observing
+  the data are `good' in some sense''). More generally, I think we can say
+  ``this is how it's typically done'' and give a reference without getting too
+  far into the weeds.}
+  
+Having introduced the idea of maximum likelihood, we can do better
+than the na\"ive approach by making a more realistic assumption about
+the error distribution and/or taking advantage of any prior knowledge
+we have that might affect our notion of the most likely parameter
+values (i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
+specifying it as a probability distribution on the model's
+parameters).
+\bmb{I don't mind talking about priors if we're actually going to cover them,
+  but I feel like it might make more sense to introduce them later, starting as
+  a way to regularize/make optimization more robust.}
+We will then end up with a different likelihood function
+to maximize, and obtain a different $\thetavechat$, but the basic idea
+is the same.
+
+So what is a better assumption about the observation error distribution,
+and how do we get both better confidence bands on the the model fit
+and CIs on the estimated parameter values $\thetavechat$?
+
+\section*{Priors}
+
+Having introduced the idea of maximum likelihood, we can do better
+than the na\"ive approach by making a more realistic assumption about
+the error distribution and/or taking advantage of any prior knowledge
+we have that might affect our notion of the most likely parameter
+values (i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
+specifying it as a probability distribution on the model's
+parameters).
+\bmb{I don't mind talking about priors if we're actually going to cover them,
+  but I feel like it might make more sense to introduce them later, starting as
+  a way to regularize/make optimization more robust.}
+We will then end up with a different likelihood function
+to maximize, and obtain a different $\thetavechat$, but the basic idea
+is the same.
+
 \section{Discussion}
 
 \begin{itemize}
@@ -1353,6 +1476,7 @@ format_sn0(cc["a", 1])
 ci_fmt("a", cc)
 @ 
 
+\begin{landscape}
 \begin{table}
   \begin{center}
     \caption{Parameters of \KM's \cite{KermMcKe27} approximation
@@ -1414,6 +1538,7 @@ ci_fmt("a", cc)
   \end{tabular}
   \end{center}
 \end{table}
+\end{landscape}
 
 \begin{figure}
 <<Bombay-figure, echo=FALSE, fig.height=5, fig.show="hold", out.width="50%">>=
