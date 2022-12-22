@@ -665,8 +665,6 @@ in Figure~\ref{fig:Bombay} is a 95\% \term{confidence band} for the
 fitted model curve.  \djde{We should probably also include the fitode
   confidence band in \fitodecol as I had as a placeholder before.}
 
-\thickredline
-
 To estimate CIs, it will help to think about the probability of
 observing the data $\{y_i\}$.  We imagine that the model
 \eqref{eq:sech} is a perfect representation of reality, and we
@@ -776,14 +774,16 @@ The maximum likelihood estimate is, therefore,
 \begin{subequations}\label{eq:negbinomMLE}
 \begin{align}
 \thetavechat
-&= \argmin_\thetavec \sum_{i=1}^n \Big(\!\!
--y_i \log\big(1-p_i\big) - 
-               r_i
-               \log{p_i}
+&= \argmin_\thetavec 
+               \sum_{i=1}^n \Big(\!\!
+               -\log\Gamma\big(y_i+r_i(\thetavec)\big)
+               +\log\Gamma\big(r_i(\thetavec)\big)
+               -y_i \log\big(1-p_i(\thetavec)\big)
+               -r_i(\thetavec)\log{p_i(\thetavec)}
                \Big)
  \,, \\
-p_i &= \frac{\sigma^2-f(t_i;\thetavec)}{\sigma^2} \\
-r_i &= \frac{f(t_i;\thetavec)^2}{\sigma^2-f(t_i;\thetavec)}
+p_i(\thetavec) &= \frac{\sigma^2-f(t_i;\thetavec)}{\sigma^2} \\
+r_i(\thetavec) &= \frac{f(t_i;\thetavec)^2}{\sigma^2-f(t_i;\thetavec)}
 \end{align}
 \end{subequations}
 \end{linenomath*}
@@ -795,19 +795,18 @@ time series.\djde{Is that what's done, or is $\sigma^2$ added to
 
 Regardless of the form of the likelihood function, we can use it to
 obtain CIs on the MLE $\thetavechat$.  A relatively simple approach is
-to use the the curvature of $\log{\lik(\thetavec)}$ at
-$\thetavechat$ to infer parameter values of a multivariate normal
-distribution for $\thetavec$.  At $\thetavechat$, the shape of
-$\log{\lik}$ is described by its \term{Hessian matrix} (the matrix
-of second order partial derivatives of $\log{\lik}$, also known as
-the \term{Fisher information matrix}), and the inverse of the Hessian
-is the \term{variance-covariance matrix} $\mathrm{Cov}(\thetavec)$ that
+to use the the curvature of $\log{\lik(\thetavec)}$ at $\thetavechat$
+to infer parameter values of a multivariate normal distribution for
+$\thetavec$.  At $\thetavechat$, the shape of $\log{\lik}$ is
+described by its \term{Hessian matrix} (the matrix of second order
+partial derivatives of $\log{\lik}$, also known as the \term{Fisher
+  information matrix}), and the inverse of the Hessian is the
+\term{variance-covariance matrix} $\mathrm{Cov}(\thetavec)$ that
 specifies the desired multivariate normal with mean $\thetavechat$.
-\djde{What is a simple way to explain why the inverse of the Hessian
-  is the cov matrix for the parameters?}
-\bmb{I don't think we can do this simply - we could point to
-  \citep{Bolk08} for a heuristic explanation or \cite{Wassermanall2010}
-  for a rigorous (if terse) explanation}
+This fact is, admittedly, not obvious!  See \citep[\S6.5]{Bolk08} for
+a heuristic explanation or \cite{Wassermanall2010} for a rigorous (if
+terse) explanation.\djde{It would be nice to be more self-containedt
+han this, if we can think of a useful way of doing so.}
 
 The diagonal elements of $\mathrm{Cov}(\thetavec)$ are the (estimated)
 variances of the parameter estimates, so we can take
