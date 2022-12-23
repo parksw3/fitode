@@ -660,18 +660,19 @@ To quantify uncertainty in our estimates, we need a statistical
 framework.  The typical output of such a framework is a
 \term{confidence interval} (CI) within which our best estimate lies.
 For example, the final column of Table~\ref{tab:Bombay} lists 95\% CIs
-on our \code{nls} parameter estimates, and the \nlscol shaded region
-in Figure~\ref{fig:Bombay} is a 95\% \term{confidence band} for the
-fitted model curve.  \djde{We should probably also include the fitode
-  confidence band in \fitodecol as I had as a placeholder before.}
+on our \code{nls} parameter estimates, and the pink shaded region in
+Figure~\ref{fig:Bombay} is a 95\% \term{confidence band}, which shows
+CIs for each point of the fitted model curve.  \djde{We should
+  probably also include the fitode confidence band in \fitodecol as I
+  had as a placeholder before.}
 
-To estimate CIs, it will help to think about the probability of
-observing the data $\{y_i\}$.  We imagine that the model
-\eqref{eq:sech} is a perfect representation of reality, and we
+To understand how to estimate CIs, it will help to think about the
+probability of observing the data $\{y_i\}$.  We imagine that the
+model \eqref{eq:sech} is a perfect representation of reality, and we
 consider the deviations from the model curve in
 Figure~\ref{fig:Bombay} to be observation errors.  We then imagine
 that observation error for each data point is independent and
-identically distributed (iid), and drawn from a normal distribution
+identically distributed (iid), and drawn from a Normal distribution
 with zero mean and standard deviation $\sigma$ equal to the standard
 deviation of the residuals (the differences between the model curve
 and the observed data).  Then the probablity of the data given the
@@ -728,7 +729,7 @@ which---lo and behold---agrees exactly with \eqref{eq:leastsquares},
 the least squares solution!  The standard way of expressing this is to
 say that the least squares solution $\thetavechat$ is the
 \term{maximum likelihood estimate} (MLE) of $\thetavec$, under the
-assumption of normal observation errors in the time series.
+assumption of Normal observation errors in the time series.
   
 Having introduced the idea of maximum likelihood, we can do better by
 making a more realistic assumption about the error distribution.  We
@@ -737,27 +738,23 @@ obtain a different $\thetavechat$, but the basic idea is the same.
 
 So what is a better assumption about the observation error
 distribution, and how can we use the likelihood function to estimate
-uncertainty in $\thetavechat$ and obtain confidence bands on the
-fitted trajectory?
+uncertainty in $\thetavechat$ and on the fitted trajectory?
 
 Our data are actually non-negative, discrete counts of deaths (or
 cases in other contexts), so the observation error distribution can't
-really follow a continuous, real-valued Normal distribution (in our
-previous example, the assumption of normality is allowing the lower
-limit of the confidence band on the fitted model to drop below zero
-when the number of deaths is small).  We could assume a Poisson error
-distribution with mean equal to the fitted model trajectory
-[equation~\eqref{eq:SIR;R}], but typical observations have variance
-greater than the mean (the variance is equal to the mean for a Poisson
-distribution).  The negative binomial distribution can be considered
-an overdispersed Poisson, which makes it a good choice.
+really follow a continuous, real-valued Normal distribution.  We could
+assume a Poisson error distribution with mean equal to the fitted
+model trajectory [equation~\eqref{eq:SIR;R}], but typical observations
+have variance greater than the mean (the variance is equal to the mean
+for a Poisson distribution).  The negative binomial distribution can
+be considered an overdispersed Poisson, which makes it a good choice.
 
 The probability mass function for the negative binomial distribution
-is
+(for counts $k=0,1,2,\ldots$) is
 \begin{linenomath*}
 \begin{equation}
 \texttt{NB}(k;r,p) = \frac{\Gamma(k+r)}{k!\Gamma(r)}
-(1-p)^k p^r \,,\qquad k=0,1,2,\ldots,
+(1-p)^k p^r \,,
 \end{equation}
 \end{linenomath*}
 where the parameters $\thetavec=(r,p)$ are related to the mean $\mu$
@@ -774,21 +771,21 @@ The maximum likelihood estimate is, therefore,
 \begin{subequations}\label{eq:negbinomMLE}
 \begin{align}
 \thetavechat
-&= \argmin_\thetavec 
-               \sum_{i=1}^n \Big(\!\!
+&= \argmin_\thetavec\sum_{i=1}^n \Big(\!\!
                -\log\Gamma\big(y_i+r_i(\thetavec)\big)
-               +\log\Gamma\big(r_i(\thetavec)\big)
-               -y_i \log\big(1-p_i(\thetavec)\big)
-               -r_i(\thetavec)\log{p_i(\thetavec)}
+               +\log\Gamma\big(r_i(\thetavec)\big) \nonumber \\
+               &\hspace{3cm}
+                 -y_i \log\big(1-p_i(\thetavec)\big)
+                 -r_i(\thetavec)\log{p_i(\thetavec)}
                \Big)
  \,, \\
-p_i(\thetavec) &= \frac{\sigma^2-f(t_i;\thetavec)}{\sigma^2} \\
-r_i(\thetavec) &= \frac{f(t_i;\thetavec)^2}{\sigma^2-f(t_i;\thetavec)}
+p_i(\thetavec) &= \frac{\sigma^2-f(t_i;\thetavec)}{\sigma^2} \,,\\
+r_i(\thetavec) &= \frac{f(t_i;\thetavec)^2}{\sigma^2-f(t_i;\thetavec)}\,,
 \end{align}
 \end{subequations}
 \end{linenomath*}
 where, as for the likelihood associated with Normal errors, we assume
-$\sigma$ is computed as the variance of the residuals across the full
+$\sigma^2$ is computed as the variance of the residuals across the full
 time series.\djde{Is that what's done, or is $\sigma^2$ added to
   $\thetavec$ as a parameter to fit?  or even $\sigma_i^2$ for each
   i?}
@@ -796,33 +793,34 @@ time series.\djde{Is that what's done, or is $\sigma^2$ added to
 Regardless of the form of the likelihood function, we can use it to
 obtain CIs on the MLE $\thetavechat$.  A relatively simple approach is
 to use the the curvature of $\log{\lik(\thetavec)}$ at $\thetavechat$
-to infer parameter values of a multivariate normal distribution for
+to infer parameter values of a multivariate Normal distribution for
 $\thetavec$.  At $\thetavechat$, the shape of $\log{\lik}$ is
 described by its \term{Hessian matrix} (the matrix of second order
 partial derivatives of $\log{\lik}$, also known as the \term{Fisher
   information matrix}), and the inverse of the Hessian is the
-\term{variance-covariance matrix} $\mathrm{Cov}(\thetavec)$ that
-specifies the desired multivariate normal with mean $\thetavechat$.
-This fact is, admittedly, not obvious!  See \citep[\S6.5]{Bolk08} for
-a heuristic explanation or \cite{Wassermanall2010} for a rigorous (if
-terse) explanation.\djde{It would be nice to be more self-containedt
-han this, if we can think of a useful way of doing so.}
+\term{variance-covariance matrix}$\mathrm{Cov}(\thetavec)$ that
+specifies the desired multivariate Normal with mean $\thetavechat$.
+This relationship between $\mathrm{Cov}(\thetavec)$ and the Hessian of
+$\log{\lik}$ is, admittedly, not obvious!  See \citep[\S6.5]{Bolk08}
+for a heuristic explanation or \cite{Wassermanall2010} for a rigorous
+(if terse) explanation.\djde{It would be nice to be more
+  self-contained than this, if we can think of a useful way of doing
+  so.  Can you give a section or page number in Wasserman?}
 
 The diagonal elements of $\mathrm{Cov}(\thetavec)$ are the (estimated)
-variances of the parameter estimates, so we can take
-their (positive) square roots to get the standard error (SE) and
-compute approximate 95\% confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to $g(\thetavechat)$.
-To obtain CIs
-on functions of the fitted parameters (e.g., $\R_0$ or $\gamma$ if our
-model is KM's approximation \eqref{eq:sech}), we build on the idea
-that if the error in a parameter $a$ is $\Delta a$, then the associated
-error in a (differentiable) function $g(a)$ is
-$\Delta{g}\approx g'(a)\Delta{a}$.  Given a nonlinear function $g(\thetavec)$
-of the parameters, the \term{Delta Method}
-\cite{Dorf38,VerH12} expands $\textrm{Var}(g(\thetavec))$ to first
-order about $\thetavechat$, which gives us the variance-covariance matrix
-of $g(\thetavec)$ \cite{Bolk08}.  In particular, the variance of
-$g(\thetavec)$ is
+variances of the parameter estimates, so we can take their (positive)
+square roots to get the standard error (SE) and compute approximate
+95\% confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to
+$\thetavechat$.  To obtain CIs on functions of the fitted parameters
+(e.g., $\R_0$ or $\gamma$ if our model is KM's approximation
+\eqref{eq:sech}), we build on the idea that if the error in a
+parameter $a$ is $\Delta a$, then the associated error in a
+(differentiable) function $g(a)$ is $\Delta{g}\approx g'(a)\Delta{a}$.
+Given a (smooth) nonlinear function $g(\thetavec)$ of the parameters,
+the \term{Delta Method} \cite{Dorf38,VerH12} expands
+$\textrm{Var}(g(\thetavec))$ to first order about $\thetavechat$,
+which gives us the variance-covariance matrix of $g(\thetavec)$
+\cite{Bolk08}.  In particular, the variance of $g(\thetavec)$ is
 \begin{linenomath*}
 \begin{subequations}\label{eq:DeltaMethod}
 \begin{align}
@@ -856,7 +854,7 @@ $g(\thetavec)$ is
 \end{align}
 \end{subequations}
 \end{linenomath*}
-We can again get the confidence intervals by taking square roots and computing
+We can again get the CIs by taking square roots and computing
 $g(\thetavechat) \pm1.96\,\mathrm{SE}$.
 
 Given a fit of KM's approximation \eqref{eq:sech} to the time series
@@ -873,7 +871,7 @@ the pink confidence band shown in Figure~\ref{fig:Bombay}.
 
 \djde{Available in \code{fitode} but we not what we doing here:
   Another possibility would be to use the estimated means and variances
-  for $\thetavec$ to define a multivariate normal, sample that many
+  for $\thetavec$ to define a multivariate Normal, sample that many
   times and run the model, and draw the bands that contain 95\% of the
   simulations.}
 
@@ -942,7 +940,7 @@ In the model definition above:
 \begin{description}
 \item[\code{model}]specifies the vector field given by the ODE \eqref{eq:SIR}.
 \item[\code{observation}]specifies that the observed data
-  (\code{mort}) are assumed to arise from sampling from the normal
+  (\code{mort}) are assumed to arise from sampling from the Normal
   distribution associated with an ordinary least squares (\code{ols})
   fit; the sampled distribution is $\normdist(\mu,\sigma)$,
   where the mean is given by the fitted model trajectory [equation~\eqref{eq:SIR;R}],
@@ -1273,7 +1271,7 @@ imagine that the model \eqref{eq:sech} is a perfect representation of
 reality, and we consider the deviations from the model curve in
 Figure~\ref{fig:Bombay} to be observation errors.  We then imagine
 that observation error for each data point is independent and
-identically distributed (iid), and drawn from a normal distribution
+identically distributed (iid), and drawn from a Normal distribution
 with zero mean and standard deviation $\sigma$ equal to the
 standard deviation of the residuals (the differences between the model
 curve and the observed data).  With this assumption, we could
@@ -1357,7 +1355,7 @@ yields an estimate, say $\thetavechat$, that---lo and behold---agrees
 exactly with \eqref{eq:leastsquares}, the least squares solution!  The
 standard way of expressing this is to say that the least squares
 solution $\thetavechat$ is the \term{maximum likelihood estimate} (MLE)
-of $\thetavec$, under the assumption of normal observation errors in
+of $\thetavec$, under the assumption of Normal observation errors in
 the time series.
 \bmb{I feel like we can introduce the idea of likelihood and maximum
   likelihood without presenting Bayes' rule. The justification for likelihood-based
@@ -1386,6 +1384,10 @@ is the same.
 So what is a better assumption about the observation error distribution,
 and how do we get both better confidence bands on the the model fit
 and CIs on the estimated parameter values $\thetavechat$?
+
+(in our previous example, the assumption of normality is allowing the
+lower limit of the confidence band on the fitted model to drop below
+zero when the number of deaths is small)
 
 \section*{Priors}
 
