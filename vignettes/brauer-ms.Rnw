@@ -975,6 +975,8 @@ SIR_model <- odemodel(
 In the model definition above:
 \begin{description}
 \item[\code{model}]specifies the vector field given by the ODE \eqref{eq:SIR}.
+\swp{Since we've already introduced likelihood, can we get rid of ols fits hereafter? Can we
+start with nbinom? Or do you think we still want to compare ols with nbinom?}
 \item[\code{observation}]specifies that the observed data
   (\code{mort}) are assumed to arise from sampling from the Normal
   distribution associated with an ordinary least squares (\code{ols})
