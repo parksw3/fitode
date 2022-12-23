@@ -896,7 +896,17 @@ an analytical formula.  We can still use the Delta method
 gradient $(\nabla g)(\thetavec)$ is not straightforward if $g$ is a
 numerical solution of an ODE; \term{sensitivity equations} must be
 simultaneously solved alongside the main differential equations
-\cite{raue2013lessons}\footnote{Sensitivity equations are an auxiliary set of ODEs that define the time derivatives of the derivatives of the state variables with respect to the parameters (i.e. $\frac{d}{dt}\left(\frac{dx(t,\theta)}{d\theta}\right)$). They can easily be derived using the chain rule; by solving them in parallel with the main set of ODEs, we get a computationally efficient and numerically stable way to calculate the overall gradients of the log-likelihood with respect to the parameters. \bmb{this explanation can go in the main text if that seems more appropriate}}
+\cite{raue2013lessons}.\footnote{Sensitivity equations are an
+  auxiliary set of ODEs that define the time derivatives of the
+  derivatives of the state variables with respect to the parameters,
+  i.e.,
+  $\frac{\rm d}{{\rm d}t}\left(\frac{{\rm d}x(t,\theta)}{{\rm
+        d}\theta}\right)$. They can easily be derived using the chain
+  rule; by solving them in parallel with the main set of ODEs, we get
+  a computationally efficient and numerically stable way to calculate
+  the overall gradients of the log-likelihood with respect to the
+  parameters. \bmb{this explanation can go in the main text if that
+    seems more appropriate}}
 
 The \code{fitode} package\footnote{\code{fitode} is available on CRAN
   and consequently can be installed via
