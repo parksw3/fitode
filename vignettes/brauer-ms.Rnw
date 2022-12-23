@@ -88,7 +88,7 @@ knitr::knit_hooks$set(basefig=function(before, options, envir) {
                    } else { }
 })
 knitr::opts_chunk$set(error = FALSE)
-@ 
+@
 \begin{document}
 
 \articletype{ORIGINAL ARTICLE}% Specify the article type or omit as appropriate
@@ -454,7 +454,7 @@ cc <- suppressMessages(confint(nlsfit))
 format_sn0 <- function(x, digits = dig,
                       max_ord = 2,
                       ensuremath = TRUE) {
-    
+
     if (x==0) return("0")
     ord <- floor(log(abs(x), 10))
     if (abs(ord) <= abs(max_ord)) return(as.character(signif(x, dig)))
@@ -682,7 +682,7 @@ model is
 \begin{equation}\label{eq:prob.data.given.model}
 \Pop(\text{data} \mid \text{model})
 =
-\prod_{i=1}^n 
+\prod_{i=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
 \exp\left(-\frac{\big(f(t_i;\thetavec) - y_i\big)^2}{2\sigma^2} \right) \Delta{y_i}
 \right]
@@ -691,7 +691,14 @@ model is
 \end{linenomath*}
 %%
 But this isn't what we actually want. What we're given is the data,
-not the model.  We're trying to say something about how likely our
+not the model.  \swp{this is a bit confusing to me. It's true that we're given the
+data but the likelihood is exactly equal to the probability of data
+given model (just a notational difference). Even
+in Ben's book, he wrote: ``Our goodness-of-fit metrics will be
+based on the likelihood, the probability of seeing the data we
+actually collected given a particular model.'' So maybe better
+to skip some of the details below?}
+We're trying to say something about how likely our
 \emph{proposed} model is, given the data that \emph{were} observed.
 The typical way forward is to shift to a heuristic argument: it is
 reasonable to consider parameter values that maximize the probability
@@ -701,6 +708,7 @@ parameter values $\thetavec$ to \emph{be} the probability of the data
 given $\thetavec$,\bmb{I think we can say ``this is how it's typically
   done'' and give a reference without getting too far into the
   weeds.}\djde{Can you add whatever ref(s) you think are best here?}
+  \swp{Ben's book seems good enough to me.}
 \begin{linenomath*}
 \begin{equation}\label{eq:lik}
 \lik(\thetavec)
@@ -716,8 +724,8 @@ yields an estimate,
 \thetavechat
 &= \argmax_\thetavec \lik(\thetavec) \\
 &= \argmin_\thetavec \big(\!\!-\log{\lik(\thetavec)}\big) \\
-&= \argmin_\thetavec\Big( 
-\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2 
+&= \argmin_\thetavec\Big(
+\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2
 \;+\; \text{constant}
 \Big) \\
 &= \argmin_\thetavec\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2
@@ -729,8 +737,8 @@ which---lo and behold---agrees exactly with \eqref{eq:leastsquares},
 the least squares solution!  The standard way of expressing this is to
 say that the least squares solution $\thetavechat$ is the
 \term{maximum likelihood estimate} (MLE) of $\thetavec$, under the
-assumption of Normal observation errors in the time series.
-  
+assumption of \swp{independent} Normal observation errors in the time series.
+
 Having introduced the idea of maximum likelihood, we can do better by
 making a more realistic assumption about the error distribution.  We
 will then end up with a different likelihood function to maximize, and
@@ -741,13 +749,24 @@ distribution, and how can we use the likelihood function to estimate
 uncertainty in $\thetavechat$ and on the fitted trajectory?
 
 Our data are actually non-negative, discrete counts of deaths (or
-cases in other contexts), so the observation error distribution can't
-really follow a continuous, real-valued Normal distribution.  We could
+cases in other \swp{epidemiological} contexts), so the observation error distribution can't
+really follow a continuous, real-valued Normal distribution.
+\swp{I find this s. slightly awkward because a lot of people,
+including someone like Aaron King, treat discrete counts using continuous
+distributions (but also adding some clever things on top of it so that
+it's not totally crazy to keep cont distributions). Maybe it's better to say
+that we want to respect the data structure? At the end, we're just making
+assumptions about what the observation error distribution might be...}
+For example, we could
 assume a Poisson error distribution with mean equal to the fitted
-model trajectory [equation~\eqref{eq:SIR;R}], but typical observations
-have variance greater than the mean (the variance is equal to the mean
-for a Poisson distribution).  The negative binomial distribution can
-be considered an overdispersed Poisson, which makes it a good choice.
+model trajectory [equation~\eqref{eq:SIR;R}]. This is convenient
+because it does not require an extra parameter to be estimated.
+But typical observation errors are \term{overdispersed}, meaning that
+the variance greater than the mean (the variance is equal to the mean
+for a Poisson distribution), and ignoring the overdispersion can
+lead to underestimation of uncertainty. The negative binomial distribution can
+be considered an overdispersed Poisson, which makes it a good choice \citep{linden2011using}.
+
 
 The probability mass function for the negative binomial distribution
 (for counts $k=0,1,2,\ldots$) is
@@ -789,19 +808,22 @@ $\sigma^2$ is computed as the variance of the residuals across the full
 time series.\djde{Is that what's done, or is $\sigma^2$ added to
   $\thetavec$ as a parameter to fit?  or even $\sigma_i^2$ for each
   i?}
+\swp{It is what's done. There's a version where $\sigma^2$ is added
+to $\thetavec$ but it is not used when we call the ols function. $\sigma_i^2$
+doesn't make sense because we have one residual per $i$.}
 
 Regardless of the form of the likelihood function, we can use it to
 obtain CIs on the MLE $\thetavechat$.  A relatively simple approach is
-to use the the curvature of $\log{\lik(\thetavec)}$ at $\thetavechat$
+to use the the curvature of $-\log{\lik(\thetavec)}$ at $\thetavechat$
 to infer parameter values of a multivariate Normal distribution for
-$\thetavec$.  At $\thetavechat$, the shape of $\log{\lik}$ is
+$\thetavec$.  At $\thetavechat$, the shape of $-\log{\lik}$ is
 described by its \term{Hessian matrix} (the matrix of second order
-partial derivatives of $\log{\lik}$, also known as the \term{Fisher
+partial derivatives of $-\log{\lik}$, also known as the \term{Fisher
   information matrix}), and the inverse of the Hessian is the
-\term{variance-covariance matrix}$\mathrm{Cov}(\thetavec)$ that
+\term{variance-covariance matrix} $\mathrm{Cov}(\thetavec)$ that
 specifies the desired multivariate Normal with mean $\thetavechat$.
 This relationship between $\mathrm{Cov}(\thetavec)$ and the Hessian of
-$\log{\lik}$ is, admittedly, not obvious!  See \citep[\S6.5]{Bolk08}
+$-\log{\lik}$ is, admittedly, not obvious!  See \citep[\S6.5]{Bolk08}
 for a heuristic explanation or \cite{Wassermanall2010} for a rigorous
 (if terse) explanation.\djde{It would be nice to be more
   self-contained than this, if we can think of a useful way of doing
@@ -825,29 +847,29 @@ which gives us the variance-covariance matrix of $g(\thetavec)$
 \begin{subequations}\label{eq:DeltaMethod}
 \begin{align}
 \mathrm{Var}(g(\thetavec))
-&\approx 
-\mathrm{Var}\big[g(\thetavechat) 
+&\approx
+\mathrm{Var}\big[g(\thetavechat)
    + (\nabla g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big] \\
 &=
 \mathrm{Var}\big[(\nabla g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big] \\
-&= 
+&=
 \mathbb{E}\big[\big((\nabla g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big)^2\big] \\
-&= 
+&=
 \,\mathbb{E}\big[
 (\nabla g)(\thetavechat)^\transpose
   (\thetavec-\thetavechat)
   (\thetavec-\thetavechat)^\transpose
-  (\nabla g)(\thetavechat) 
+  (\nabla g)(\thetavechat)
   \big]\,
 \\
-&= 
+&=
 (\nabla g)(\thetavechat)^\transpose
 \,\mathbb{E}\big[
   (\thetavec-\thetavechat)
   (\thetavec-\thetavechat)^\transpose
   \big]\,
 (\nabla g)(\thetavechat) \\
-&= 
+&=
 (\nabla g)(\thetavechat)^\transpose
 \,\textrm{Cov}(\thetavec)\,
 (\nabla g)(\thetavechat)
@@ -874,10 +896,14 @@ the pink confidence band shown in Figure~\ref{fig:Bombay}.
   for $\thetavec$ to define a multivariate Normal, sample that many
   times and run the model, and draw the bands that contain 95\% of the
   simulations.}
+  \swp{This is not what we actually do in fitode. We do something called
+  importance sampling where we draw from multivariate normal and then
+  do some weighting... probably a bit too much to explain in this paper
+  because we have to go all the way to metropolis hastings..}
 
 \swp{we might want to mention that profile likelihoods are a thing but are
 probably too complicated for this paper and especially for trajectories?}
-\djde{mentioning profile likelihoods in passing, with a reference, 
+\djde{mentioning profile likelihoods in passing, with a reference,
   would be good; we could add that here or in the Discussion.}
 
 \section{Fitting the ODE}
@@ -1355,8 +1381,8 @@ $\lik$ with respect to $\thetavec$ or, equivalently, minimizing the
 negative log-likelihood
 \begin{linenomath*}
 \begin{equation}\label{eq:negloglikB}
-\min_\thetavec\big(\!\!-\log{\lik(\thetavec)}\big) = \min_\thetavec\Big( 
-\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2 
+\min_\thetavec\big(\!\!-\log{\lik(\thetavec)}\big) = \min_\thetavec\Big(
+\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2
 \;+\; \text{constant}
 \Big)
 \end{equation}
@@ -1376,7 +1402,7 @@ the time series.
   the data are `good' in some sense''). More generally, I think we can say
   ``this is how it's typically done'' and give a reference without getting too
   far into the weeds.}
-  
+
 Having introduced the idea of maximum likelihood, we can do better
 than the na\"ive approach by making a more realistic assumption about
 the error distribution and/or taking advantage of any prior knowledge
@@ -1485,7 +1511,7 @@ draw_legend <- function(lwd=5, pt.bg="white") {
 <<testing, include=FALSE, results = "hide">>=
 format_sn0(cc["a", 1])
 ci_fmt("a", cc)
-@ 
+@
 
 \begin{landscape}
 \begin{table}
