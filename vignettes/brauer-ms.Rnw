@@ -665,6 +665,8 @@ Figure~\ref{fig:Bombay} is a 95\% \term{confidence band}, which shows
 CIs for each point of the fitted model curve.  \djde{We should
   probably also include the fitode confidence band in \fitodecol as I
   had as a placeholder before.}
+  \swp{I tried and it overlaps almost perfectly with KM CBs so we can't
+  tell...}
 
 To understand how to estimate CIs, it will help to think about the
 probability of observing the data $\{y_i\}$.  We imagine that the
@@ -1204,15 +1206,17 @@ print(philaS0)
 \bmb{using \code{subset}/\code{transform} below,
   avoiding tidyverse. Could be marginally cleaner/more
   compact with tidyverse \ldots}
+  \swp{transform doesn't let us add an extra row...
+  so switching back...}
 <<read.phila.data>>=
 ## we have to cut the data when we're using nbinom
 ## because there are long trailing zeroes..
 ## same with the beginning
 phila1918a <- subset(phila1918, as.Date("1918-09-10") < date &
                                 date < as.Date("1918-11-18"))
-phila1918b <- transform(phila1918a,
-    date=c(as.Date("1918-09-09"), date),
-    mort=c(NA, mort)
+phila1918b <- data.frame(
+    date=c(as.Date("1918-09-10"), phila1918a$date),
+    mort=c(NA, phila1918a$mort)
 )
 phila1918b$time <- lubridate::decimal_date(phila1918b$date)
 @
@@ -1262,7 +1266,7 @@ print(KM.approx.phila)
 
 <<adjust philaKMparms>>=
 ## adjust because above is giving nls problems:
-KM.start.phila <- c(a=300, omega=omega.phila, phi=phi.phila)
+KM.start.phila <- c(a=a.phila, omega=omega.phila, phi=phi.phila)
 print(KM.start.phila)
 @
 
@@ -1585,6 +1589,7 @@ tvals <- seq(0, tmax, length.out=1000)
 setup_plot(ylim = c(0, 1000), xlim=c(0,tmax),
          xlab="weeks", ylab="plague deaths")
 draw_confband(traj_ci(tvals, nls.parameters, vcov(nlsfit)), col=col.nlsCI)
+# draw_confband(SIR_confband, col=col.fitodeCI) ## nearly identical to nls CIs...
 curve(KM_approx(x, a=a.KM, omega=omega.KM, phi=phi.KM), from=0, to=tmax, n=1000, add=TRUE,
       lwd=lwd, xpd=NA, col=col.KM)
 curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=1000, add=TRUE,
@@ -1647,7 +1652,9 @@ setup_plot(ylim = c(0, 800), xlim = range(phila1918b$time), ylab="daily P&I deat
 draw_confband(ppp)
 tvals <- with(phila1918b, seq(min(time),max(time), length=1000))
 t0 <- min(tvals)
-lines(tvals, f(tvals-t0), lwd=lwd, xpd=NA, col=col.KM)
+## scaling philadelphia down???
+## FIXME
+lines(tvals, f(tvals-t0)/365, lwd=lwd, xpd=NA, col=col.KM)
 lines(tvals,
       with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
       xpd=NA, lwd=lwd, col=col.nls)
@@ -1660,6 +1667,7 @@ draw_legend()
   Philadelphia, 1 September 1918 to 31 December 1918 \cite{Gold+09}.
   \djde{If we include this figure, we'll need another table
     similar to the Bombay plague table (Table~\ref{tab:Bombay}).} \bmb{something weird happened to the scaling of the KM results ... ??}
+    \swp{I think I know why. We're looking at daily deaths but the KM approximation is in the unit of 1/year (same unit as $a$, which has the same unit as $\gamma$). So we have to divide by 365 to get to the unit of 1/day.}
 }
 \label{fig:phila}
 \end{figure}
