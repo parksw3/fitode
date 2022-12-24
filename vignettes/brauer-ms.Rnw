@@ -914,8 +914,7 @@ challenges, but conceptually the problem is the same as if we did have
 an analytical formula.  We can still use the Delta method
 \eqref{eq:DeltaMethod} to estimate uncertainty, but calculating the
 gradient $(\nabla g)(\thetavec)$ is not straightforward if $g$ is a
-numerical solution of an ODE; \term{sensitivity equations} must be
-simultaneously solved alongside the main differential equations
+numerical solution of an ODE; we must simultaneously solve a set of \term{sensitivity equations} alongside the main differential equations
 \cite{raue2013lessons}.\footnote{Sensitivity equations are an
   auxiliary set of ODEs that define the time derivatives of the
   derivatives of the state variables with respect to the parameters,
@@ -930,9 +929,9 @@ simultaneously solved alongside the main differential equations
 
 The \code{fitode} package\footnote{\code{fitode} is available on CRAN
   and consequently can be installed via
-  \code{install.packages("fitode")}.} does all the computational work
+  \code{install.packages("fitode")}.} does all of this computational work
 under the hood, and makes it as easy for a user to fit an ODE to data
-as it was for us above to use \code{nls} to fit an analytical formula.
+as it was for us to use \code{nls} above to fit a curve based on an analytical formula.
 We illustrate the use of the package by fitting the SIR
 model~\eqref{eq:SIR} to the Bombay plague epidemic.
 
@@ -970,18 +969,21 @@ In the model definition above:
 \begin{description}
 \item[\code{model}]specifies the vector field given by the ODE \eqref{eq:SIR}.
 \swp{Since we've already introduced likelihood, can we get rid of ols fits hereafter? Can we
-start with nbinom? Or do you think we still want to compare ols with nbinom?}
+  start with nbinom? Or do you think we still want to compare ols with nbinom?}
+\bmb{I think it would be nice to compare, but we might be able to minimize the actual amount of code (e.g. say in passing ``OLS was fitted by using \code{ols} as the response distribution'', although that would miss the explanation of profiling out $\sigma$ \ldots)}
 \item[\code{observation}]specifies that the observed data
   (\code{mort}) are assumed to arise from sampling from the Normal
   distribution associated with an ordinary least squares (\code{ols})
   fit; the sampled distribution is $\normdist(\mu,\sigma)$,
-  where the mean is given by the fitted model trajectory [equation~\eqref{eq:SIR;R}],
+  where the mean is given by the fitted model trajectory [equation~\eqref{eq:SIR;R}]
 \begin{linenomath*}
 \begin{equation}
-  \mu(t) = \gamma I(t) \,,
+  \mu(t) = \gamma I(t) \,
 \end{equation}
 \end{linenomath*}
-and the standard deviation is set to the
+(we use $\gamma I$ to match the trajectory because this is the
+rate at which removals (deaths) occur).
+The standard deviation is set to the
 residual standard deviation,
 \begin{linenomath*}
 \begin{equation}
@@ -993,7 +995,7 @@ residual standard deviation,
   $\beta$, $\gamma$, and initial conditions $S(0)$ and $I(0)$.
 \end{description}
 
-We take our previous parameter estimates from \code{nls} as our starting values (we plot the results of integrating the ODEs for these parameters to make sure they give a reasonable solution):
+We take our previous parameter estimates from \code{nls} as our starting values (we first plot the results of integrating the ODEs for these parameters to make sure they give a reasonable solution):
 
 <<sirmortstart,warning=FALSE,basefig=TRUE>>=
 SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls)
@@ -1027,11 +1029,12 @@ Plot:
 <<sirmortfitplot,basefig=TRUE>>=
 plot(SIR_fit, level=0.95)
 @
-Very good fit, but unrealistic parameters with mean infectious period of 0.3 days.
+The fit is very good, but the estimated parameters are unrealistic, with a mean infectious period ($1/\gamma$) of 0.3 days.
 <<sirmortcoef>>=
 coef(SIR_fit)
 @
-What happens if we try to assume a longer (and more realistic) infectious period?
+What happens if we force the infectious period to be more realistic (longer: i.e., fix a smaller value of $\gamma$)?
+
 <<sirmortfit2,cache=TRUE,warning=FALSE>>=
 SIR_fit2 <- fitode(
     SIR_model,
@@ -1050,8 +1053,11 @@ Coef?
 <<coef-sir-fit2>>==
 coef(SIR_fit2)
 @
-Very very small $S(0)$.
 
+The fitted curve still looks good, but now the estimated effective
+population size \bmb{do we use this terminology? should we?} $S(0)$ is unrealistically small.
+
+\bmb{There's some interesting stuff here (non-identifiability/sensitivity/possible inappropriateness of simple SIR for Bombay) but needs more integration/discussion?}
 
 \subsection{Correctly handling weekly mortality}
 
@@ -1153,7 +1159,7 @@ my.green <- "#4DAF4A" # colour-blind friendly green
 my.yellow <- "#FFD92F" # colour-blind friendly yellow
 @
 
-<<sirstochfit,cache=TRUE,warning=FALSE>>=
+<<sirstochfit, cache=TRUE, warning=FALSE>>=
 start.stoch <- c(beta=mm$beta, gamma=mm$gamma,
                  S0=iii["S"], I0=iii["I"])
 names(start.stoch) <- c("beta","gamma","S0","I0")
@@ -1161,7 +1167,8 @@ print(start.stoch)
 
 sir.stoch.data <- data.frame(
     time=0:10,
-    mort=c(NA, diff(sir.stoch$R[!duplicated(ceiling(sir.stoch$time), fromLast = TRUE)]))
+    mort=c(NA, diff(sir.stoch$R[!duplicated(ceiling(sir.stoch$time),
+                                            fromLast = TRUE)]))
 )
 
 SIR_stoch_fit <- fitode(
@@ -1195,11 +1202,6 @@ philaS0 <- round(philapop1918 * 0.025)
 print(philaS0)
 @
 
-\bmb{using \code{subset}/\code{transform} below,
-  avoiding tidyverse. Could be marginally cleaner/more
-  compact with tidyverse \ldots}
-  \swp{transform doesn't let us add an extra row...
-  so switching back...}
 <<read.phila.data>>=
 ## we have to cut the data when we're using nbinom
 ## because there are long trailing zeroes..
@@ -1517,6 +1519,7 @@ ci_fmt("a", cc)
       is very explicit, rather than just burying it in $\R_0$.
       We could then list $\beta N$ rather than $\beta$, which would
       tidy the table and avoid an implicit factor of $1/N$ in $\beta$.}
+      \bmb{that seems useful, but the slightly weird thing is that the interpretation of $\beta$ can get tricky if the FOI is scaled as $\beta I/N$ but $S(0) < N$ \ldots}
      %%  (including 95\% confidence intervals).
      %%  Given values of the estimated parameters
      %% $(a,\omega,\phi)$, we specify $I_0$ and derive implied values of the
@@ -1625,7 +1628,7 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
 @
 \caption{
   Deterministic fits to a stochastic SIR simulation.
-  \bmb{These are very wonky, I haven't tried to figure out why yet \ldots}
+  \bmb{These are better than they were, but \ldots although I understand that fitode will give a sharp set of predictions (1) we'll need to explain that (I've thought about making a sensible smooth prediction curve for incidence, but it's a can of worms); (2) why do the deterministic and KM curves look time-shifted?}
 }
 \label{fig:stoch}
 \end{figure}
@@ -1651,8 +1654,7 @@ draw_legend()
 \caption{The main wave of the 1918 influenza epidemic in the city of
   Philadelphia, 1 September 1918 to 31 December 1918 \cite{Gold+09}.
   \djde{If we include this figure, we'll need another table
-    similar to the Bombay plague table (Table~\ref{tab:Bombay}).} \bmb{something weird happened to the scaling of the KM results ... ??}
-    \swp{I think I know why. We're looking at daily deaths but the KM approximation is in the unit of 1/year (same unit as $a$, which has the same unit as $\gamma$). So we have to divide by 365 to get to the unit of 1/day.}
+    similar to the Bombay plague table (Table~\ref{tab:Bombay}).} 
 }
 \label{fig:phila}
 \end{figure}
