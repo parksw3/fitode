@@ -100,9 +100,10 @@ knitr::opts_chunk$set(error = FALSE)
 \name{David J.\,D.~Earn\textsuperscript{a}\thanks{CONTACT D.J.D.~Earn. Email: earn@math.mcmaster.ca. ORCID:
     0000-0002-7562-1341, Twitter: @David.J.D.Earn},
     Sang Woo Park\textsuperscript{b}\thanks{S.W.~Park. ORCID 0000-0003-2202-3361, Twitter: @sang\_woo\_park, Mastodon: @sangwoopark@ecoevo.social},
-    and Benjamin M.~Bolker\textsuperscript{a}\thanks{B.M.~Bolker. ORCID: 0000-0002-2127-0443, Twitter: @bolkerb, Mastodon: @bbolker@fediscience.org}}
+    and Benjamin M.~Bolker\textsuperscript{a,c}\thanks{B.M.~Bolker. ORCID: 0000-0002-2127-0443, Twitter: @bolkerb, Mastodon: @bbolker@fediscience.org}}
 \affil{\textsuperscript{a}Department of Mathematics and Statistics,
-  McMaster University, Hamilton, Ontario, Canada, L8S 4K1; \textsuperscript{b}Department of Ecology and Evolutionary Biology, Princeton University, Princeton, NJ 08544}
+  McMaster University, Hamilton, Ontario, Canada, L8S 4K1; \textsuperscript{b}Department of Ecology and Evolutionary Biology, Princeton University, Princeton, NJ 08544; \textsuperscript{c}Department of Biology,
+  McMaster University, Hamilton, Ontario, Canada, L8S 4K1}
 }
 
 \maketitle
@@ -122,7 +123,7 @@ knitr::opts_chunk$set(error = FALSE)
     equations to observed time series.  Here, we use the package
   (\code{fitode}) to provide a brief tutorial introduction to
   fitting compartmental epidemic models to a single observed time
-  series.  We assume that, similar to Fred, the reader is familiar
+  series.  We assume that, similar to Fred \bmb{``like Fred''?}, the reader is familiar
   with dynamical systems from a mathematical perspective, but has
   little or no experience with statistical methodology or optimization
   techniques.
@@ -171,9 +172,6 @@ has grown exponentially, there has been increasing interest in
 \term{agent-based models}, which represent each individual as
 a separate unit that can have unique properties \cite{eubank2004modelling}.
 
-\bmb{I would normally object to ``exponentially'' on pedantic grounds but here it's
-actually justified \ldots}
-
 Throughout the history of the subject, and regardless of the modelling
 frameworks they have exploited, mathematical epidemiologists have
 frequently attempted to fit---or at least to compare---their models to
@@ -209,7 +207,7 @@ model fitting to Fred and others like him, i.e., individuals who are
 comfortable with mathematical analysis of ODEs but have little or no
 experience with statistics and parameter estimation.  Unfortunately,
 we have lost the opportunity to present our work to Fred, but it seems
-fitting (!) \bmb{cute}  to present such a tutorial in this volume dedicated to
+fitting (!) to present such a tutorial in this volume dedicated to
 Fred's memory.
 
 \section{Kermack and McKendrick's fit}
@@ -300,7 +298,7 @@ sort of \term{trajectory matching}, i.e., adjusting parameter values
 until the model---equation~\eqref{eq:sech} in their case---is, by some
 measure, close to the observed data points.  The most obvious metric
 for this purpose is the Euclidean distance between the model curve and
-the data.  Thus, the \term{objective function} that is natural to
+the data.  Thus, the natural \term{objective function} to
 minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
@@ -339,6 +337,7 @@ Above, we chose as our starting guess the fitted parameter values of
 \KM (see Table~\ref{tab:Bombay}).  The least
 squares parameter values differ from KM's by a few percent:
 
+\bmb{do we need this demonstration, or could we just point to Table~1 and let the reader eyeball for themselves?}
 <<percent-diff>>=
 percent.difference <-
     100*(KM.parameters - nls.parameters)/nls.parameters
@@ -351,11 +350,11 @@ Figure~\ref{fig:Bombay}.
 
 Starting from someone else's fit is not a great way to test the
 method, but fortunately the least squares fit for this problem is not
-very sensitive to the initial guess.  While not necessary for this
-problem, to make a reasonable initial guess, it can help to think
+very sensitive to the initial guess.  To make a reasonable initial guess,
+it often helps to think
 about the meaning of parameters.  For example, in the case of
 equation~\eqref{eq:sech}, it is useful to note that $a$ is the maximum
-of the function~\eqref{eq:sech}, and if write $\omega t - \phi$ as
+of the function, and if write $\omega t - \phi$ as
 $\omega(t-\tpeak)$ then
 \begin{linenomath*}
   \begin{equation}\label{eq:tpeak}
@@ -363,12 +362,16 @@ $\omega(t-\tpeak)$ then
   \end{equation}
 \end{linenomath*}
 is the time at which the maximum occurs; both $a$ and $\tpeak$ can be
-guessed approximately by looking at the plotted observed data, and a
+guessed approximately by looking at the plotted data, and a
 very rough guess is sufficient to converge on the same fit:
+
+\bmb{can we come up with a similar geometric intuition for $\omega$?
+  Wild guess of 1 is OK here and will be OK \emph{when parameters have
+  a reasonable scaling}, but \ldots}
 
 <<nls-bombay-2>>=
 a.guess <- 1000    # crude "by eye" estimate of peak value
-tpeak.guess <- 15  # crude "by eye" estimate of peak time
+tpeak.guess <- 15  # ... and of peak time
 omega.guess <- 1   # wild guess
 phi.guess <- omega.guess * tpeak.guess
 nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
@@ -391,13 +394,14 @@ illustrates a very important fact: there is \emph{not necessarily a
   unique best fit set of parameters!}  In this case, the alternative
 solution exists because $\sech^2(x)$ is symmetric about the $y$ axis,
 but in general, there can be multiple local minima that cause
-\code{nls} to converge to points that may or may not represent equally
-good fits to the data.  In general, the potential existence of
-multiple local optima is something that makes fitting models to data
-hard; you need to be cautious in interpreting any fit to which your
-fitting algorithm has converged (Raue \emph{et al.}
-\cite{raue2013lessons} give some suggestions for how to diagnose
-multiple optima).
+nonlinear optimizers to converge to points that may or may not represent equally
+good fits to the data.  The potential existence of
+multiple local optima makes fitting models to data
+hard; you need to be cautious, and use common sense,
+in interpreting the solutions found by your software (always
+plot the solutions! Raue \emph{et al.}
+\cite{raue2013lessons} give suggestions for how to diagnose
+and handle multiple optima).
 
 If you know that your parameters should be in a certain range, then
 you can exclude values outside that range.  For example, to ensure
@@ -484,8 +488,7 @@ If we accept our fit as satisfactory, what can we infer about the
 dynamics of plague that KM were attempting to capture with the SIR
 model \eqref{eq:SIR}?  We need to convert the parameters of KM's
 approximation \eqref{eq:sechparams} back to the original parameters
-that are directly related to the mechanism of disease spread that the
-model formalizes (i.e., $\beta$ and $\gamma$, and initial conditions
+that are directly related to the mechanism of disease spread formalized by the model (i.e., $\beta$ and $\gamma$, and initial conditions
 $S_0$ and $I_0$).
 
 \FloatBarrier
@@ -512,7 +515,7 @@ analytically\footnote{In (common) situations in which
 Since there are four original parameters ($\beta$, $\gamma$, $S_0$,
 $I_0$) and only three parameters in \KM's approximation
 \eqref{eq:sech} ($a$, $\omega$, $\phi$), one of the four original
-parameters needs to be specified separately, and above we have taken
+parameters needs to be specified separately; above we have taken
 this to be the initial prevalence $I_0$.  From
 equation~\eqref{eq:invertparams}, we can compute the transmission
 rate,
@@ -654,7 +657,7 @@ To this point, we have addressed only an optimization problem.  We
 solved it using the method of nonlinear least squares, which yields
 estimates of the values of the parameters of the model
 \eqref{eq:sech}.  But our best estimates are just that:
-\emph{estimates}, not exact values of the parameters.
+\emph{estimates}, not known values of the parameters.
 
 To quantify uncertainty in our estimates, we need a statistical
 framework.  The typical output of such a framework is a
@@ -668,7 +671,7 @@ CIs for each point of the fitted model curve.  \djde{We should
   \swp{I tried and it overlaps almost perfectly with KM CBs so we can't
   tell...}
 
-To understand how to estimate CIs, it will help to think about the
+To understand how to estimate CIs, we will start by thinking about the
 probability of observing the data $\{y_i\}$.  We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
 consider the deviations from the model curve in
@@ -677,7 +680,7 @@ that observation error for each data point is independent and
 identically distributed (iid), and drawn from a Normal distribution
 with zero mean and standard deviation $\sigma$ equal to the standard
 deviation of the residuals (the differences between the model curve
-and the observed data).  Then the probablity of the data given the
+and the observed data).  Then the probability of the data given the
 model is
 %%
 \begin{linenomath*}
@@ -688,29 +691,17 @@ model is
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
 \exp\left(-\frac{\big(f(t_i;\thetavec) - y_i\big)^2}{2\sigma^2} \right) \Delta{y_i}
 \right]
-\,,
+\,.
 \end{equation}
 \end{linenomath*}
 %%
-But this isn't what we actually want. What we're given is the data,
-not the model.  \swp{this is a bit confusing to me. It's true that we're given the
-data but the likelihood is exactly equal to the probability of data
-given model (just a notational difference). Even
-in Ben's book, he wrote: ``Our goodness-of-fit metrics will be
-based on the likelihood, the probability of seeing the data we
-actually collected given a particular model.'' So maybe better
-to skip some of the details below?}
-We're trying to say something about how likely our
-\emph{proposed} model is, given the data that \emph{were} observed.
-The typical way forward is to shift to a heuristic argument: it is
-reasonable to consider parameter values that maximize the probability
-of observing the data to be ``best'' or ``most likely'', so let's
-simply \emph{define} the \term{likelihood} $\lik$ of a set of
-parameter values $\thetavec$ to \emph{be} the probability of the data
-given $\thetavec$,\bmb{I think we can say ``this is how it's typically
-  done'' and give a reference without getting too far into the
-  weeds.}\djde{Can you add whatever ref(s) you think are best here?}
-  \swp{Ben's book seems good enough to me.}
+
+Using these assumptions we can adopt a \emph{maximum likelihood} framework,
+where we consider parameter values that maximize the probability
+of observing the data (\ref{eq:prob.data.given.model}) to be the best
+\cite{Bolk08}.
+We define the \term{likelihood} $\lik$ of a set of
+parameter values $\thetavec$ as
 \begin{linenomath*}
 \begin{equation}\label{eq:lik}
 \lik(\thetavec)
@@ -739,7 +730,8 @@ which---lo and behold---agrees exactly with \eqref{eq:leastsquares},
 the least squares solution!  The standard way of expressing this is to
 say that the least squares solution $\thetavechat$ is the
 \term{maximum likelihood estimate} (MLE) of $\thetavec$, under the
-assumption of \swp{independent} Normal observation errors in the time series.
+assumption of independent, identically distributed
+(i.e. mean-zero, constant-variance) Normal observation errors in the time series.
 
 Having introduced the idea of maximum likelihood, we can do better by
 making a more realistic assumption about the error distribution.  We
@@ -751,68 +743,66 @@ distribution, and how can we use the likelihood function to estimate
 uncertainty in $\thetavechat$ and on the fitted trajectory?
 
 Our data are actually non-negative, discrete counts of deaths (or
-cases in other \swp{epidemiological} contexts), so the observation error distribution can't
-really follow a continuous, real-valued Normal distribution.
-\swp{I find this s. slightly awkward because a lot of people,
-including someone like Aaron King, treat discrete counts using continuous
-distributions (but also adding some clever things on top of it so that
-it's not totally crazy to keep cont distributions). Maybe it's better to say
-that we want to respect the data structure? At the end, we're just making
-assumptions about what the observation error distribution might be...}
-For example, we could
-assume a Poisson error distribution with mean equal to the fitted
-model trajectory [equation~\eqref{eq:SIR;R}]. This is convenient
-because it does not require an extra parameter to be estimated.
-But typical observation errors are \term{overdispersed}, meaning that
-the variance greater than the mean (the variance is equal to the mean
-for a Poisson distribution), and ignoring the overdispersion can
-lead to underestimation of uncertainty. The negative binomial distribution can
-be considered an overdispersed Poisson, which makes it a good choice \citep{linden2011using}.
+cases in other epidemiological contexts),
+so a continuous, real-valued Normal distribution is
+somewhat unrealistic. More importantly, we expect (and can see
+in the plots of our fitted curves) that the
+magnitude of error in the observations will vary over the course of
+the epidemic; the error might be $\pm 2$ at the beginning of the
+epidemic when mortality is low and $\pm 50$ at the peak.
 
+We could address both of these problems by using a 
+Poisson distribution of observations with mean equal to the fitted
+model trajectory [equation~\eqref{eq:SIR;R}]. This handles
+discrete observations and allows the variance to change as a function
+of the mean. However, the Poisson distribution assumes
+\term{equidispersion} --- the variance is equal to the mean --- while
+typical observation errors are \term{overdispersed}, meaning that
+the variance greater than the mean. Ignoring overdispersion
+will underestimate the uncertainty in the parameters and lead
+to overly narrow confidence intervals on parameters and predictions.
+The negative binomial distribution is one way to generalize
+the Poisson to allow for overdispersion \citep{linden2011using}.
 
 The probability mass function for the negative binomial distribution
-(for counts $k=0,1,2,\ldots$) is
+(for counts $x=0,1,2,\ldots$) is
 \begin{linenomath*}
 \begin{equation}
-\texttt{NB}(k;r,p) = \frac{\Gamma(k+r)}{k!\Gamma(r)}
-(1-p)^k p^r \,,
+  \texttt{NB}(x;\mu,k) =
+  \frac{\Gamma(k+x)}{\Gamma(k) x!}
+  \left(\frac{k}{k+\mu}\right)^k
+  \left(\frac{\mu}{k+\mu}\right)^x \,
 \end{equation}
 \end{linenomath*}
-where the parameters $\thetavec=(r,p)$ are related to the mean $\mu$
-and variance $\sigma^2$ via
-\begin{linenomath*}
-\begin{equation}
-r = \frac{\mu^2}{\sigma^2-\mu}\,,
-\qquad
-p = \frac{\sigma^2 - \mu}{\sigma^2} \,.
-\end{equation}
-\end{linenomath*}
+where the predicted variance of a particular observation
+is given by $\mu_i (1+\mu_i/k)$.
 The maximum likelihood estimate is, therefore,
 \begin{linenomath*}
-\begin{subequations}\label{eq:negbinomMLE}
-\begin{align}
-\thetavechat
-&= \argmin_\thetavec\sum_{i=1}^n \Big(\!\!
-               -\log\Gamma\big(y_i+r_i(\thetavec)\big)
-               +\log\Gamma\big(r_i(\thetavec)\big) \nonumber \\
-               &\hspace{3cm}
-                 -y_i \log\big(1-p_i(\thetavec)\big)
-                 -r_i(\thetavec)\log{p_i(\thetavec)}
-               \Big)
- \,, \\
-p_i(\thetavec) &= \frac{\sigma^2-f(t_i;\thetavec)}{\sigma^2} \,,\\
-r_i(\thetavec) &= \frac{f(t_i;\thetavec)^2}{\sigma^2-f(t_i;\thetavec)}\,,
-\end{align}
-\end{subequations}
+  \begin{equation}
+\label{eq:negbinomMLE}
+\begin{split}
+ \thetavechat
+ &= \argmin_\thetavec\sum_{i=1}^n \Big(\!\!
+                -\log\Gamma\big(y_i+k\big)
+                +\log\Gamma(k) + \log(x!) \\
+                &\hspace{3cm} 
+                -k \log\left(\frac{k}{k+\mu_i(\thetavec)}\right)
+                -y_i \log\left(\frac{\mu_i(\thetavec)}{k+\mu_i(\thetavec)}\right)
+                \Big)
+  \,,
+\end{split}
+  \end{equation}
 \end{linenomath*}
-where, as for the likelihood associated with Normal errors, we assume
-$\sigma^2$ is computed as the variance of the residuals across the full
-time series.\djde{Is that what's done, or is $\sigma^2$ added to
-  $\thetavec$ as a parameter to fit?  or even $\sigma_i^2$ for each
-  i?}
-\swp{It is what's done. There's a version where $\sigma^2$ is added
-to $\thetavec$ but it is not used when we call the ols function. $\sigma_i^2$
-doesn't make sense because we have one residual per $i$.}
+with  $\mu_i(\thetavec) = f(t_i;\thetavec)$.
+
+%% where, as for the likelihood associated with Normal errors, we assume
+%% $\sigma^2$ is computed as the variance of the residuals across the full
+%% time series.\djde{Is that what's done, or is $\sigma^2$ added to
+%%   $\thetavec$ as a parameter to fit?  or even $\sigma_i^2$ for each
+%%   i?}
+%% \swp{It is what's done. There's a version where $\sigma^2$ is added
+%% to $\thetavec$ but it is not used when we call the ols function. $\sigma_i^2$
+%% doesn't make sense because we have one residual per $i$.}
 
 Regardless of the form of the likelihood function, we can use it to
 obtain CIs on the MLE $\thetavechat$.  A relatively simple approach is
@@ -830,6 +820,8 @@ for a heuristic explanation or \cite{Wassermanall2010} for a rigorous
 (if terse) explanation.\djde{It would be nice to be more
   self-contained than this, if we can think of a useful way of doing
   so.  Can you give a section or page number in Wasserman?}
+\bmb{probably chapter 9 ``Parametric Inference''. SpringerLink via McMaster
+  \href{https://link-springer-com.libaccess.lib.mcmaster.ca/book/10.1007/978-0-387-21736-9}{won't give me sufficient access to see exactly what's in there}}
 
 The diagonal elements of $\mathrm{Cov}(\thetavec)$ are the (estimated)
 variances of the parameter estimates, so we can take their (positive)
@@ -878,7 +870,7 @@ which gives us the variance-covariance matrix of $g(\thetavec)$
 \end{align}
 \end{subequations}
 \end{linenomath*}
-We can again get the CIs by taking square roots and computing
+We can again get the 95\% CIs by taking square roots and computing
 $g(\thetavechat) \pm1.96\,\mathrm{SE}$.
 
 Given a fit of KM's approximation \eqref{eq:sech} to the time series
@@ -1397,20 +1389,13 @@ yields an estimate, say $\thetavechat$, that---lo and behold---agrees
 exactly with \eqref{eq:leastsquares}, the least squares solution!  The
 standard way of expressing this is to say that the least squares
 solution $\thetavechat$ is the \term{maximum likelihood estimate} (MLE)
-of $\thetavec$, under the assumption of Normal observation errors in
+of $\thetavec$, under the assumption of independent,
+identically distributed (i.e. mean-zero, constant-$\sigma$)
+Normal observation errors in
 the time series.
-\bmb{I feel like we can introduce the idea of likelihood and maximum
-  likelihood without presenting Bayes' rule. The justification for likelihood-based
-  inference is most often presented heuristically rather than formally
-  (i.e. we don't say ``here's Bayes' rule, we don't want to go full Bayesian,
-  but here's something else we can do'' --- instead ``it is reasonable
-  to suppose that parameter choices that maximize the probability of observing
-  the data are `good' in some sense''). More generally, I think we can say
-  ``this is how it's typically done'' and give a reference without getting too
-  far into the weeds.}
 
-Having introduced the idea of maximum likelihood, we can do better
-than the na\"ive approach by making a more realistic assumption about
+Having introduced the maximum likelihood framework, we can improve
+our estimates by making a more realistic assumption about
 the error distribution and/or taking advantage of any prior knowledge
 we have that might affect our notion of the most likely parameter
 values (i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
