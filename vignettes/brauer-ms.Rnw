@@ -370,9 +370,9 @@ very rough guess is sufficient to converge on the same fit:
     a reasonable scaling}, but \ldots} \djde{Assuming $I_0/S_0\ll1$,
   $\omega\sim1/2$ the initial growth rate, so it can be approximated
   easily by plotting the data on a log scale and estimating the slope
-  (and dividing by 2).  That's not as trivial as guessing a and tp
-  from looking at the time series, but does seem preferable to a wild
-  guess.}
+  (and dividing by 2).  That's not as trivial as guessing $a$ and
+  $\tpeak$ from looking at the time series, but does seem preferable
+  to a wild guess.}
 
 <<nls-bombay-2>>=
 a.guess <- 1000    # crude "by eye" estimate of peak value
@@ -490,7 +490,7 @@ for (p in parnames) {
 @
 
 If we accept our fit as satisfactory, what can we infer about the
-dynamics of plague that KM were attempting to capture with the SIR
+dynamics of plague that \KM were attempting to capture with the SIR
 model \eqref{eq:SIR}?  We need to convert the parameters of KM's
 approximation \eqref{eq:sechparams} back to the original parameters
 that are directly related to the mechanism of disease spread formalized by the model (i.e., $\beta$ and $\gamma$, and initial conditions
@@ -655,6 +655,32 @@ traj_ci <- function(t,
     dd
 }
 @
+
+\subsection{Correctly handling weekly mortality}
+
+\swp{I don't think it's worth pursuing KM approx any further... we're
+  trying to show how to fit an ODE, not KM approximation.}\djde{That's
+  not my perspective.  We're trying to show how to fit a model to
+  data for people who haven't a clue, and I think it is nice to
+  show how easy it would have been for KM to do this right.}
+
+Something we have glossed over is that approximating weekly mortality
+(what is observed) by $\dbydt{R}$ is unnecessary.  A better estimate
+of weekly mortality reported at time $t_i$ would be to take
+\begin{linenomath*}
+  \begin{align}\label{eq:sechcorrect}
+f(t_i;\thetavec) &=
+\int_{t_{i-1}}^{t_i} \ddt{R}\,\dt \nonumber\\
+&= \int_{t_{i-1}}^{t_i}  a \sech^2{(\omega\,t - \phi)}\,\dt \nonumber \\
+&= \frac{a}{\omega}\Big(\tanh{(\omega\,t_i - \phi)} 
+  - \tanh{(\omega\,t_{i-1} - \phi)}\Big) \,.
+\end{align}
+\end{linenomath*}
+We have not done this because \KM didn't, \djde{Did Baca\"er
+  \cite{bacaermodel2012} discuss this?} and we wanted to compare our
+fits to theirs.  However, there is no question that we should really
+be fitting to weekly aggregations, and we do this below when fitting
+to the ODEs directly.
 
 \section{Uncertainty}
 
@@ -1076,16 +1102,7 @@ population size \bmb{do we use this terminology? should we?} $S(0)$ is unrealist
 
 \bmb{There's some interesting stuff here (non-identifiability/sensitivity/possible inappropriateness of simple SIR for Bombay) but needs more integration/discussion?}
 
-\subsection{Correctly handling weekly mortality}
-
-\swp{I don't think it's worth pursuing KM approx any further... we're trying to show how to fit an ODE, not KM approximation.}
-\begin{linenomath*}
-\begin{equation}
-\int_{t_1}^{t_2} \ddt{R}\,\dt
-= \int_{t_1}^{t_2}  a \sech^2{(\omega\,t - \phi)}\,\dt
-= \frac{a}{\omega}\Big(\tanh{(\omega\,t_2 - \phi)} - \tanh{(\omega\,t_1 - \phi)}\Big)
-\end{equation}
-\end{linenomath*}
+\djde{moved KM weekly mortality comment up}
 
 \swp{We should introduce nbinom here too. I think we can introduce both at the same time (instead of showing two or three separate fits)}
 
