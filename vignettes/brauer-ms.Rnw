@@ -367,7 +367,12 @@ very rough guess is sufficient to converge on the same fit:
 
 \bmb{can we come up with a similar geometric intuition for $\omega$?
   Wild guess of 1 is OK here and will be OK \emph{when parameters have
-  a reasonable scaling}, but \ldots}
+    a reasonable scaling}, but \ldots} \djde{Assuming $I_0/S_0\ll1$,
+  $\omega\sim1/2$ the initial growth rate, so it can be approximated
+  easily by plotting the data on a log scale and estimating the slope
+  (and dividing by 2).  That's not as trivial as guessing a and tp
+  from looking at the time series, but does seem preferable to a wild
+  guess.}
 
 <<nls-bombay-2>>=
 a.guess <- 1000    # crude "by eye" estimate of peak value
