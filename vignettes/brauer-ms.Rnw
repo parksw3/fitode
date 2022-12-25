@@ -971,6 +971,18 @@ In the model definition above:
 \swp{Since we've already introduced likelihood, can we get rid of ols fits hereafter? Can we
   start with nbinom? Or do you think we still want to compare ols with nbinom?}
 \bmb{I think it would be nice to compare, but we might be able to minimize the actual amount of code (e.g. say in passing ``OLS was fitted by using \code{ols} as the response distribution'', although that would miss the explanation of profiling out $\sigma$ \ldots)}
+\djde{We can just give the nbinom code but say we also fitted
+  with \code{ols}, i.e., changing the {\tt\hlkwc{observation}}
+  list to: {\tt
+%%\begin{alltt}
+  \hlstd{mort} 
+  %%\hlopt{~} %% FIX: this comes out blank, hence:
+  {\color{black}\~{}}
+  \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{=
+    gamma} \hlopt{*} \hlstd{I)}
+%%\end{alltt}
+}
+}
 \item[\code{observation}]specifies that the observed data
   (\code{mort}) are assumed to arise from sampling from the Normal
   distribution associated with an ordinary least squares (\code{ols})
