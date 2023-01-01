@@ -1660,10 +1660,14 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
        pt.bg=c("white",NA,NA,NA),
        legend=c("simulated data","KM","deterministic solution", "fitode (nbinom)"))
 @
-\caption{
-  Deterministic fits to a stochastic SIR simulation.
-  \bmb{These are better than they were, but \ldots although I understand that fitode will give a sharp set of predictions (1) we'll need to explain that (I've thought about making a sensible smooth prediction curve for incidence, but it's a can of worms); (2) why do the deterministic and KM curves look time-shifted?}
-}
+\caption{ Deterministic fits to a stochastic SIR simulation.
+  \bmb{These are better than they were, but \ldots although I
+    understand that fitode will give a sharp set of predictions (1)
+    we'll need to explain that (I've thought about making a sensible
+    smooth prediction curve for incidence, but it's a can of worms);
+    (2) why do the deterministic and KM curves look
+    time-shifted?}\djde{The time shift is stochastic time to tipping
+    point -- it's just one realization and happens to take off}}
 \label{fig:stoch}
 \end{figure}
 
