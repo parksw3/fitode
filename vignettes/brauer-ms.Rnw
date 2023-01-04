@@ -338,6 +338,7 @@ Above, we chose as our starting guess the fitted parameter values of
 squares parameter values differ from KM's by a few percent:
 
 \bmb{do we need this demonstration, or could we just point to Table~1 and let the reader eyeball for themselves?}
+\swp{I don't think we need this demonstration.}
 <<percent-diff>>=
 percent.difference <-
     100*(KM.parameters - nls.parameters)/nls.parameters
@@ -663,6 +664,8 @@ traj_ci <- function(t,
   not my perspective.  We're trying to show how to fit a model to
   data for people who haven't a clue, and I think it is nice to
   show how easy it would have been for KM to do this right.}
+\swp{OK. That seems fine. But we should divide up the equation below to say
+that we want to integral. And then say that for KM, integral of dR/dt is so and so.}
 
 Something we have glossed over is that approximating weekly mortality
 (what is observed) by $\dbydt{R}$ is unnecessary.  A better estimate
@@ -670,14 +673,15 @@ of weekly mortality reported at time $t_i$ would be to take
 \begin{linenomath*}
   \begin{align}\label{eq:sechcorrect}
 f(t_i;\thetavec) &=
-\int_{t_{i-1}}^{t_i} \ddt{R}\,\dt \nonumber\\
-&= \int_{t_{i-1}}^{t_i}  a \sech^2{(\omega\,t - \phi)}\,\dt \nonumber \\
-&= \frac{a}{\omega}\Big(\tanh{(\omega\,t_i - \phi)} 
+\int_{t_{i-1}}^{t_i} \ddt{R}\,\dt \\ \label{eq:correct.mortality}
+&= \int_{t_{i-1}}^{t_i}  a \sech^2{(\omega\,t - \phi)}\,\dt \\
+&= \frac{a}{\omega}\Big(\tanh{(\omega\,t_i - \phi)}
   - \tanh{(\omega\,t_{i-1} - \phi)}\Big) \,.
 \end{align}
 \end{linenomath*}
 We have not done this because \KM didn't, \djde{Did Baca\"er
-  \cite{bacaermodel2012} discuss this?} and we wanted to compare our
+  \cite{bacaermodel2012} discuss this?}\swp{no}
+  and we wanted to compare our
 fits to theirs.  However, there is no question that we should really
 be fitting to weekly aggregations, and we do this below when fitting
 to the ODEs directly.
@@ -782,7 +786,7 @@ magnitude of error in the observations will vary over the course of
 the epidemic; the error might be $\pm 2$ at the beginning of the
 epidemic when mortality is low and $\pm 50$ at the peak.
 
-We could address both of these problems by using a 
+We could address both of these problems by using a
 Poisson distribution of observations with mean equal to the fitted
 model trajectory [equation~\eqref{eq:SIR;R}]. This handles
 discrete observations and allows the variance to change as a function
@@ -816,7 +820,7 @@ The maximum likelihood estimate is, therefore,
  &= \argmin_\thetavec\sum_{i=1}^n \Big(\!\!
                 -\log\Gamma\big(y_i+k\big)
                 +\log\Gamma(k) + \log(x!) \\
-                &\hspace{3cm} 
+                &\hspace{3cm}
                 -k \log\left(\frac{k}{k+\mu_i(\thetavec)}\right)
                 -y_i \log\left(\frac{\mu_i(\thetavec)}{k+\mu_i(\thetavec)}\right)
                 \Big)
@@ -974,7 +978,7 @@ library(fitode)
 and defining a model object:
 
 \vbox{
-<<sirmortmodel>>=
+<<sirmortmodel_correct>>=
 SIR_model <- odemodel(
     name="SIR model",
     model=list(
@@ -983,30 +987,28 @@ SIR_model <- odemodel(
         R ~ gamma * I
     ),
     observation = list(
-        mort ~ ols(mean = gamma * I)
+        mort ~ dnbinom(mu = R, size=k)
     ),
+    diffnames="R",
     initial=list(
         S ~ S0,
         I ~ I0,
         R ~ 0
     ),
-    par=c("beta", "gamma", "S0", "I0")
+    par=c("beta", "gamma", "S0", "I0", "k")
 )
 @
 }% end vbox
-
 \noindent
 In the model definition above:
 \begin{description}
 \item[\code{model}]specifies the vector field given by the ODE \eqref{eq:SIR}.
-\swp{Since we've already introduced likelihood, can we get rid of ols fits hereafter? Can we
-  start with nbinom? Or do you think we still want to compare ols with nbinom?}
 \bmb{I think it would be nice to compare, but we might be able to minimize the actual amount of code (e.g. say in passing ``OLS was fitted by using \code{ols} as the response distribution'', although that would miss the explanation of profiling out $\sigma$ \ldots)}
 \djde{We can just give the nbinom code but say we also fitted
   with \code{ols}, i.e., changing the {\tt\hlkwc{observation}}
   list to: {\tt
 %%\begin{alltt}
-  \hlstd{mort} 
+  \hlstd{mort}
   %%\hlopt{~} %% FIX: this comes out blank, hence:
   {\color{black}\~{}}
   \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{=
@@ -1014,57 +1016,73 @@ In the model definition above:
 %%\end{alltt}
 }
 }
+\swp{Rewrote some parts here to reflect nbinom implementation + correct mortality handling}
 \item[\code{observation}]specifies that the observed data
-  (\code{mort}) are assumed to arise from sampling from the Normal
-  distribution associated with an ordinary least squares (\code{ols})
-  fit; the sampled distribution is $\normdist(\mu,\sigma)$,
-  where the mean is given by the fitted model trajectory [equation~\eqref{eq:SIR;R}]
+  (\code{mort}) are assumed to arise from sampling from the negative binomial
+  distribution with a dispersion parameter of $k$ (\code{dnbinom}); the
+  mean of the distribution is given by the fitted model trajectory [equation~\eqref{eq:correct.mortality}]
 \begin{linenomath*}
 \begin{equation}
-  \mu(t) = \gamma I(t) \,
+  \mu(t) = \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
 \end{equation}
 \end{linenomath*}
-(we use $\gamma I$ to match the trajectory because this is the
-rate at which removals (deaths) occur).
-The standard deviation is set to the
-residual standard deviation,
-\begin{linenomath*}
-\begin{equation}
-\sigma(t)=\sqrt{\frac{1}{n-1}\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2} \,.
-\end{equation}
-\end{linenomath*}
+which is equal to $R(t_i) - R(t_{i-1})$. This is implemented by using the
+\code{diffnames} argument to specify the state variable, for which consecutive differences
+need to be calculated and returned (instead of its raw value). Ordinary least squares
+can be implemented by simply changing the \code{observation} to \code{ols(mean = R)}
 \item[\code{initial}]conditions are expressed as numbers of individuals.
 \item[\code{par}]refers to the parameters that are to be fitted:
-  $\beta$, $\gamma$, and initial conditions $S(0)$ and $I(0)$.
+  $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
 \end{description}
-
-We take our previous parameter estimates from \code{nls} as our starting values (we first plot the results of integrating the ODEs for these parameters to make sure they give a reasonable solution):
+We take our previous parameter estimates from \code{nls} as our starting values (we first plot the results of integrating the ODEs for these parameters to make sure they give a reasonable solution).
+\swp{Note that we still have to assign a parameter value for $k$ even though it is not used for simulating the SIR model.}
 
 <<sirmortstart,warning=FALSE,basefig=TRUE>>=
-SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls)
+SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
 
 ss_SIR <- simulate(SIR_model,
     parms=SIR_start, times=bombay$week)
 
 plot(bombay)
-lines(ss_SIR$times, ss_SIR$I*gamma.nls)
+lines(ss_SIR$times, ss_SIR$R)
 @
-We already have a pretty good fit.
+We already have a pretty good fit. Note that \code{fitode} returns \code{NA} at
+$t=1$ because we are starting from $t=1$, meaning that $R(2) - R(1)$ is the first
+value we can calculate. So we have to add an extra column to the data set when we're
+actually doing the fit:
+
+<<sirmortfit_data, cache=TRUE, warning=FALSE>>=
+bombay2 <- rbind(
+    c(times=bombay$week[1] -
+          diff(bombay$week)[1], mort=NA),
+    bombay
+)
+@
 
 Fit:
 <<sirmortfit,cache=TRUE,warning=FALSE>>=
 SIR_fit <- fitode(
     SIR_model,
-    data = bombay,
+    data = bombay2,
     start = SIR_start,
     tcol = "week"
 )
 @
 
+<<sirmortfitcoef>>==
+bombay.fitode.nb.coef <- coef(SIR_fit)
+bombay.fitode.nb.ci <- confint(SIR_fit)[,-1]
+bombay.fitode.nb.beta <- bombay.fitode.nb.coef[1]
+bombay.fitode.nb.gamma <- bombay.fitode.nb.coef[2]
+bombay.fitode.nb.S0 <- bombay.fitode.nb.coef[3]
+bombay.fitode.nb.I0 <- bombay.fitode.nb.coef[4]
+bombay.fitode.nb.k <- bombay.fitode.nb.coef[5]
+@
+
 Confidence band on fit:
 <<confband>>=
 tmax <- 33
-tvals <- seq(1,tmax,length=1000)
+tvals <- 1:tmax
 SIR_confband <- predict(SIR_fit, times=tvals, level=0.95)$mort
 @
 
@@ -1081,15 +1099,16 @@ What happens if we force the infectious period to be more realistic (longer: i.e
 <<sirmortfit2,cache=TRUE,warning=FALSE>>=
 SIR_fit2 <- fitode(
     SIR_model,
-    data = bombay,
+    data = bombay2,
     start = SIR_start,
     fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
     tcol = "week"
 )
 @
 
-Plot?
-<<plot-sir-fit2>>==
+Plot? \swp{This is broken because fitode is having trouble calculating vcov... probably because there are issues with
+identifiability and the curvature is weird}
+<<plot-sir-fit2, eval=FALSE>>==
 plot(SIR_fit2, level=0.95)
 @
 Coef?
@@ -1099,17 +1118,15 @@ coef(SIR_fit2)
 
 The fitted curve still looks good, but now the estimated effective
 population size \bmb{do we use this terminology? should we?} $S(0)$ is unrealistically small.
+\swp{I don't like this term. We should just call it susceptible population size or something...}
 
 \bmb{There's some interesting stuff here (non-identifiability/sensitivity/possible inappropriateness of simple SIR for Bombay) but needs more integration/discussion?}
+\swp{We noticed non-identifiability back when we were working on fitsir. We could spend more time talking about this and show likelihood surfaces? or not?}
 
 \djde{moved KM weekly mortality comment up}
 
-\swp{We should introduce nbinom here too. I think we can introduce both at the same time (instead of showing two or three separate fits)}
-
-\swp{\code{diffname} argument is used to tell fitode which state variable needs to be 'diff'-ed.}
-
-<<sirmortmodel_correct>>=
-SIR_model_nb <- odemodel(
+<<sirmortmodel, echo=FALSE>>=
+SIR_model_ols <- odemodel(
     name="SIR model",
     model=list(
         S ~ - beta * S * I,
@@ -1117,37 +1134,32 @@ SIR_model_nb <- odemodel(
         R ~ gamma * I
     ),
     observation = list(
-        mort ~ dnbinom(mu = R, size=phi)
+        mort ~ ols(mean = R)
     ),
     initial=list(
         S ~ S0,
         I ~ I0,
         R ~ 0
     ),
-    diffnames="R",
-    par=c("beta", "gamma", "S0", "I0", "phi"),
+    par=c("beta", "gamma", "S0", "I0"),
+    diffnames="R"
 )
 @
 
-We need to add an extra row to fit the diff model:
-
 <<sirmortfit_correct, cache=TRUE, warning=FALSE>>=
-bombay2 <- rbind(
-    c(times=bombay$week[1] -
-          diff(bombay$week)[1], mort=NA),
-    bombay
-)
+SIR_start_ols <- coef(SIR_fit)[-5]
 
-SIR_start_nb <- c(coef(SIR_fit), phi=10)
-
-SIR_fit_nb <- fitode(
-    SIR_model_nb,
+SIR_fit_ols <- fitode(
+    SIR_model_ols,
     data = bombay2,
-    start = SIR_start_nb,
+    start = SIR_start_ols,
     tcol = "week"
 )
+@
 
-SIR_nb_confband <- predict(SIR_fit_nb, level=0.95)$mort
+\swp{This is also broken. Having trouble calculating vcov...}
+<<sirmortfit_ols_confband, eval=FALSE>>==
+SIR_ols_confband <- predict(SIR_fit_ols, level=0.95)$mort
 @
 
 \section{Example for which KM approx is bad (via stochastic SIR)}
@@ -1493,16 +1505,16 @@ is the same.
 lwd <- 5
 col.KM <- my.blue
 col.nls <- my.red
-col.fitode.ols <- my.yellow
-col.fitode.nb <- my.green
+col.fitode.nb <- my.yellow
+col.fitode.ols <- my.green
 transparent_colour <- function(col,alpha=150/255) {
     alpha <- round(alpha * 255)
     v <- col2rgb(col)[,1] # color as rgb vector
     tcol <- rgb(v["red"],v["green"],v["blue"],alpha=alpha,maxColorValue = 255)
     return(tcol)
 }
-col.fitodeCI <- transparent_colour(col.fitode.ols, alpha=0.4)
 col.fitodenbCI <- transparent_colour(col.fitode.nb, alpha=0.4)
+col.fitodeCI <- transparent_colour(col.fitode.ols, alpha=0.4)
 col.nlsCI <- transparent_colour(col.nls, alpha=0.4)
 setup_plot <- function(xlab="", ylab="deaths",
                        at=100*(0:10), ...) {
@@ -1514,7 +1526,7 @@ setup_plot <- function(xlab="", ylab="deaths",
          )
     axis(side=2, at=at, las=1)
 }
-draw_confband <- function(confband, col = col.fitodeCI) {
+draw_confband <- function(confband, col = col.fitodenbCI) {
     with(confband,{
         polygon(
             x = c(times, rev(times)),
@@ -1528,10 +1540,10 @@ draw_confband <- function(confband, col = col.fitodeCI) {
 draw_legend <- function(lwd=5, pt.bg="white") {
     legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
        lty=c(NA,"solid","solid","dotted"),
-       col=c("black",col.KM,col.nls,col.fitode.ols),
+       col=c("black",col.KM,col.nls,col.fitode.nb),
        pch=c(21,NA,NA,NA),
        pt.bg=c(pt.bg,NA,NA,NA),
-       legend=c("observed data","KM","nls","fitode (ols)"))
+       legend=c("observed data","KM","nls","fitode (nbinom)"))
 }
 @
 
@@ -1605,6 +1617,36 @@ ci_fmt("a", cc)
 \end{table}
 \end{landscape}
 
+
+\begin{landscape}
+\begin{table}
+  \begin{center}
+    \caption{Parameters of \code{fitode} fits of the SIR model \eqref{eq:SIR} to Bombay data.
+      The $\R_0$ estimates assume the population of Bombay was
+      $N=1$ million \cite[p.\,408]{bacaermodel2012}.
+}\label{tab:bombay.fitode}
+    \medskip
+    %% making use of ragged2e and array packages:
+    \RaggedRight
+  \begin{tabular}{ m{3cm} | c | c | c c | c c}
+    \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
+    & {\footnotesize\bfseries units}
+    & \bfseries \code{dnbinom} & \bfseries 95\% CI & \bfseries \code{ols} & \bfseries 95\% CI \\\hline
+    transmission rate & $\beta$ & $\frac{1}{\textrm{weeks}}$ &
+      \Sexpr{bombay.fitode.nb.beta} & \Sexpr{ci_fmt("beta", bombay.fitode.nb.ci)}  & ?? & ?? \\
+    removal rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ &
+      \Sexpr{bombay.fitode.nb.gamma} & \Sexpr{ci_fmt("gamma", bombay.fitode.nb.ci)}  & ?? & ?? \\
+    initial\break susceptibles & $S_0$& -- &
+      \Sexpr{as.integer(bombay.fitode.nb.S0)} & \Sexpr{ci_fmt("S0", bombay.fitode.nb.ci, max_ord = 6)} & ?? & ?? \\
+      initial prevalence & $I_0$ & -- &
+      \Sexpr{bombay.fitode.nb.I0} & \Sexpr{ci_fmt("I0", bombay.fitode.nb.ci)} & ?? & ?? \\
+      overdispersion\break parameter & $k$ & -- &
+      \Sexpr{bombay.fitode.nb.k} & \Sexpr{ci_fmt("k", bombay.fitode.nb.ci)} & ?? & ?? \\
+  \end{tabular}
+  \end{center}
+\end{table}
+\end{landscape}
+
 \begin{figure}
 <<Bombay-figure, echo=FALSE, fig.height=5, fig.show="hold", out.width="50%">>=
 tvals <- seq(0, tmax, length.out=1000)
@@ -1616,16 +1658,16 @@ curve(KM_approx(x, a=a.KM, omega=omega.KM, phi=phi.KM), from=0, to=tmax, n=1000,
       lwd=lwd, xpd=NA, col=col.KM)
 curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=1000, add=TRUE,
       lwd=lwd, xpd=NA, col=col.nls)
-lines(estimate ~ times, data=SIR_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
+lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
 
 setup_plot(ylim=c(5, 1000), xlim=c(0,tmax),
          xlab="weeks", ylab="plague deaths",
          at=c(25, 50, 100, 200, 400, 800))
-draw_confband(SIR_nb_confband, col=col.fitodenbCI)
-lines(estimate ~ times, data=SIR_nb_confband, col=col.fitode.nb, lwd=lwd)
-lines(estimate ~ times, data=SIR_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
+draw_confband(SIR_confband, col=col.fitodenbCI)
+lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd)
+# lines(estimate ~ times, data=SIR_ols_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
        lty=c(NA,"solid","dotted"),
@@ -1651,14 +1693,9 @@ draw_confband(sss, col=col.fitodenbCI)
 lines(sir.det$tau, 1 * sir.det$I * N, col=my.red, lwd=lwd) ## dR/dt
 curve(KM_approx(x, a=a.det, omega=omega.det, phi=phi.det), from=0, to=tmax, n=1000, add=TRUE,
       xpd=NA, col=my.blue, lwd=lwd)
-lines(estimate ~ times, data=sss, col=my.green, lwd=lwd)
+lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
 points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
-legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
-       lty=c(NA,"solid","solid","solid"),
-       col=c("black",my.blue, my.red, my.green),
-       pch=c(21,NA,NA,NA),
-       pt.bg=c("white",NA,NA,NA),
-       legend=c("simulated data","KM","deterministic solution", "fitode (nbinom)"))
+draw_legend()
 @
 \caption{ Deterministic fits to a stochastic SIR simulation.
   \bmb{These are better than they were, but \ldots although I
@@ -1678,13 +1715,11 @@ setup_plot(ylim = c(0, 800), xlim = range(phila1918b$time), ylab="daily P&I deat
 draw_confband(ppp)
 tvals <- with(phila1918b, seq(min(time),max(time), length=1000))
 t0 <- min(tvals)
-## scaling philadelphia down???
-## FIXME
 lines(tvals, f(tvals-t0)/365, lwd=lwd, xpd=NA, col=col.KM)
 lines(tvals,
       with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
       xpd=NA, lwd=lwd, col=col.nls)
-lines(estimate ~ times, data=ppp, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
+lines(estimate ~ times, data=ppp, col=col.fitode.nb, lwd=lwd*0.60, lty="dotted")
 points(mort ~ time,
        data = phila1918b, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
@@ -1692,7 +1727,7 @@ draw_legend()
 \caption{The main wave of the 1918 influenza epidemic in the city of
   Philadelphia, 1 September 1918 to 31 December 1918 \cite{Gold+09}.
   \djde{If we include this figure, we'll need another table
-    similar to the Bombay plague table (Table~\ref{tab:Bombay}).} 
+    similar to the Bombay plague table (Table~\ref{tab:Bombay}).}
 }
 \label{fig:phila}
 \end{figure}
