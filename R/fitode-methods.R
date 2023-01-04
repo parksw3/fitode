@@ -73,7 +73,7 @@ setMethod("predict", "fitode",
 
                     fitted.vcov <- vcov(object, "links")
                     if(any(diag(fitted.vcov < 0)))
-                        warning("At least one entries in diag(vcov) is negative. Confidence interval will be accurate.")
+                        warning("At least one entries in diag(vcov) is negative. Confidence interval will not be accurate.")
 
                     tmp <- vector('list', length(expr))
 
