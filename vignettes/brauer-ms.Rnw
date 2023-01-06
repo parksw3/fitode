@@ -1546,6 +1546,10 @@ format_sn0(cc["a", 1])
 ci_fmt("a", cc)
 @
 
+<<>>==
+print(a.KM)
+@
+
 \begin{landscape}
 \begin{table}
   \begin{center}
@@ -1627,15 +1631,13 @@ ci_fmt("a", cc)
     & {\footnotesize\bfseries units}
     & \bfseries \code{dnbinom} & \bfseries 95\% CI & \bfseries \code{ols} & \bfseries 95\% CI \\\hline
     transmission rate & $\beta$ & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{bombay.fitode.nb.beta} & \Sexpr{ci_fmt("beta", bombay.fitode.nb.ci)}  & ?? & ?? \\
-    removal rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{bombay.fitode.nb.gamma} & \Sexpr{ci_fmt("gamma", bombay.fitode.nb.ci)}  & ?? & ?? \\
+      \Sexpr{beta.bombay.fitode.nb} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.nb)}  & ?? & ?? \\
     initial\break susceptibles & $S_0$& -- &
-      \Sexpr{as.integer(bombay.fitode.nb.S0)} & \Sexpr{ci_fmt("S0", bombay.fitode.nb.ci, max_ord = 6)} & ?? & ?? \\
+      \Sexpr{as.integer(S0.bombay.fitode.nb)} & \Sexpr{ci_fmt("S0", ci.bombay.fitode.nb, max_ord = 6)} & ?? & ?? \\
       initial prevalence & $I_0$ & -- &
-      \Sexpr{bombay.fitode.nb.I0} & \Sexpr{ci_fmt("I0", bombay.fitode.nb.ci)} & ?? & ?? \\
+      \Sexpr{I0.bombay.fitode.nb} & \Sexpr{ci_fmt("I0", ci.bombay.fitode.nb)} & ?? & ?? \\
       overdispersion\break parameter & $k$ & -- &
-      \Sexpr{bombay.fitode.nb.k} & \Sexpr{ci_fmt("k", bombay.fitode.nb.ci)} & ?? & ?? \\
+      \Sexpr{k.bombay.fitode.nb} & \Sexpr{ci_fmt("k", ci.bombay.fitode.nb)} & ?? & ?? \\
   \end{tabular}
   \end{center}
 \end{table}
