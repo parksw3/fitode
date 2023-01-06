@@ -1069,6 +1069,15 @@ ci.bombay.fitode.nb <- confint(SIR_fit)[,-1]
 assignfun(coef.bombay.fitode.nb, ".bombay.fitode.nb")
 @
 
+Confint on derived parameers:
+<<sirmortconfint>>==
+ci.derived.bombay.fitode.nb <- confint(SIR_fit,
+        parm=list(
+            Reff~beta*S0/gamma.nls,
+            R0~beta*N.KM/gamma.nls
+        ))
+@
+
 Confidence band on fit:
 <<confband>>=
 tmax <- 33
@@ -1229,6 +1238,12 @@ sss <- predict(SIR_stoch_fit, level=0.95)[[1]]
 summary(SIR_stoch_fit)
 @
 
+<<stochestassign>>==
+coef.stoch.fitode <- coef(SIR_stoch_fit)
+ci.stoch.fitode <- confint(SIR_stoch_fit)[,-1]
+assignfun(coef.stoch.fitode, ".stoch.fitode")
+@
+
 \section{Influenza in Philadelphia, October 1918}
 <<philapop, echo=TRUE>>=
 ## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
@@ -1289,6 +1304,12 @@ phila_fit <- fitode(
     tcol = "time"
 )
 ppp <- predict(phila_fit, level=0.95)[[1]]
+@
+
+<<stochestassign>>==
+coef.phila.fitode <- coef(phila_fit)
+ci.phila.fitode <- confint(phila_fit)[,-1]
+assignfun(coef.phila.fitode, ".phila.fitode")
 @
 
 <<philasummary>>=
@@ -1633,14 +1654,14 @@ print(a.KM)
     %% making use of ragged2e and array packages:
     \RaggedRight
   \begin{tabular}{ m{3cm} | c | c | c c | c c}
-  \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
+  \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
     & \bfseries \code{dnbinom} & \bfseries 95\% CI & \bfseries \code{ols} & \bfseries 95\% CI \\\hline
     recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{gamma.nls} &
       -- & \Sexpr{gamma.nls} & -- \\
     %%
     \noalign{\vspace{10pt}}
-    \bfseries Assumed\break parameter \\\hline
+    \bfseries Estimated\break parameter \\\hline
     transmission rate & $\beta$ & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{beta.bombay.fitode.nb} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.nb)}  & \Sexpr{beta.bombay.fitode.ols} & ?? \\
     initial\break susceptibles & $S_0$& -- &
@@ -1686,8 +1707,38 @@ points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 \label{fig:Bombay}
 \end{figure}
 
+\begin{landscape}
+\begin{table}
+  \begin{center}
+    \caption{Parameters of \code{fitode} fits of the SIR model \eqref{eq:SIR} to a stochastic SIR simulation.
+}\label{tab:stoch.fitode}
+    \medskip
+    %% making use of ragged2e and array packages:
+    \RaggedRight
+  \begin{tabular}{ m{3cm} | c | c | c c}
+  \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
+    & {\footnotesize\bfseries units}
+    & \bfseries \code{dnbinom} & \bfseries 95\% CI \\\hline
+    recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & 1 &
+      -- \\
+    %%
+    \noalign{\vspace{10pt}}
+    \bfseries Estimated\break parameter \\\hline
+    transmission rate & $\beta$ & $\frac{1}{\textrm{weeks}}$ &
+      \Sexpr{beta.stoch.fitode} & \Sexpr{ci_fmt("beta", ci.stoch.fitode)} \\
+    initial\break susceptibles & $S_0$& -- &
+      \Sexpr{as.integer(S0.stoch.fitode)} & \Sexpr{ci_fmt("S0", ci.stoch.fitode, max_ord = 6)}\\
+      initial prevalence & $I_0$ & -- &
+      \Sexpr{I0.stoch.fitode} & \Sexpr{ci_fmt("I0", ci.stoch.fitode)}\\
+      overdispersion\break parameter & $k$ & -- &
+      \Sexpr{k.stoch.fitode} & \Sexpr{ci_fmt("k", ci.stoch.fitode)}\\
+  \end{tabular}
+  \end{center}
+\end{table}
+\end{landscape}
+
 \begin{figure}
-<<plot_stochastic_SIR>>=
+<<plot_stochastic_SIR, echo=FALSE>>=
 plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
      xlim=range(tt), ylim=range(sir.stoch.data$mort, na.rm=TRUE))
 draw_confband(sss, col=col.fitodenbCI)
@@ -1713,6 +1764,33 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
     point -- it's just one realization and happens to take off}}
 \label{fig:stoch}
 \end{figure}
+
+\begin{landscape}
+\begin{table}
+  \begin{center}
+    \caption{Parameters of \code{fitode} fits of the SIR model \eqref{eq:SIR} to Philadelphia flu epidemic.
+}\label{tab:phila.fitode}
+    \medskip
+    %% making use of ragged2e and array packages:
+    \RaggedRight
+  \begin{tabular}{ m{3cm} | c | c | c c}
+  \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
+    & {\footnotesize\bfseries units}
+    & \bfseries \code{dnbinom} & \bfseries 95\% CI \\\hline
+    transmission rate & $\beta$ & $\frac{1}{\textrm{weeks}}$ &
+      \Sexpr{beta.stoch.fitode} & \Sexpr{ci_fmt("beta", ci.stoch.fitode)} \\
+      recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & 1 &
+      -- \\
+    initial\break susceptibles & $S_0$& -- &
+      \Sexpr{as.integer(S0.stoch.fitode)} & \Sexpr{ci_fmt("S0", ci.stoch.fitode, max_ord = 6)}\\
+      initial prevalence & $I_0$ & -- &
+      \Sexpr{I0.stoch.fitode} & \Sexpr{ci_fmt("I0", ci.stoch.fitode)}\\
+      overdispersion\break parameter & $k$ & -- &
+      \Sexpr{k.stoch.fitode} & \Sexpr{ci_fmt("k", ci.stoch.fitode)}\\
+  \end{tabular}
+  \end{center}
+\end{table}
+\end{landscape}
 
 \begin{figure}
 <<phila-figure, echo=FALSE, fig.height=5>>=
