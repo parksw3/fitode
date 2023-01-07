@@ -1168,6 +1168,45 @@ assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
 SIR_ols_confband <- predict(SIR_fit_ols, level=0.95)$mort
 @
 
+Trying to understand what's going on:
+<<bombay_likelihood_fit, cache=TRUE>>==
+if (file.exists("bombay-likelihood.rda")) {
+    load("bombay-likelihood.rda")
+} else {
+    nfits <- 100
+    gammavec <- seq(1, 28, length.out=nfits)
+    loglikvec <- rep(NA, nfits)
+    fitlist <- vector('list', length(gammavec))
+
+    for (i in 1:nfits) {
+        if (i==1) {
+            start_ll <- coef(SIR_fit2)
+        } else {
+            start_ll <- coef(fitlist[[which.max(loglikvec[1:(i-1)])]])
+        }
+
+        fitlist[[i]] <- try(fitode(
+            SIR_model,
+            data = bombay2,
+            start = start_ll,
+            fixed = list(gamma=gammavec[i]),
+            tcol = "week"
+        ))
+
+        if (!inherits(fitlist[[i]], "try-error")) {
+            loglikvec[i] <- logLik(fitlist[[i]])
+        }
+    }
+}
+@
+
+<<bombay_likelihood_plot, cache=TRUE>>==
+plot(gammavec, loglikvec,
+     xlab="gamma (1/week)",
+     ylab="log likelihood",
+     ylim=c(-140, -135.5))
+@
+
 \section{Example for which KM approx is bad (via stochastic SIR)}
 
 <<compute-stochastic-SIR-via-sirr>>=
@@ -1306,7 +1345,7 @@ phila_fit <- fitode(
 ppp <- predict(phila_fit, level=0.95)[[1]]
 @
 
-<<stochestassign>>==
+<<philaassign>>==
 coef.phila.fitode <- coef(phila_fit)
 ci.phila.fitode <- confint(phila_fit)[,-1]
 assignfun(coef.phila.fitode, ".phila.fitode")
