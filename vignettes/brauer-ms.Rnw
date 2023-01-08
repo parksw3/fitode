@@ -1197,6 +1197,7 @@ if (file.exists("bombay-likelihood.rda")) {
             loglikvec[i] <- logLik(fitlist[[i]])
         }
     }
+    save("gammavec", "loglikvec", "fitlist", file="bombay-likelihood.rda")
 }
 @
 
