@@ -1367,7 +1367,7 @@ Confint on derived parameers:
 ci.derived.phila.fitode <- confint(phila_fit,
         parm=list(
             Reff~beta*S0/gamma,
-            R0~beta*philapop1918/gamma,
+            R0~beta*philaS0/gamma,
             Tg~1/gamma
         ))
 assignfun(ci.derived.phila.fitode[,1], ".phila.fitode")
@@ -1403,11 +1403,11 @@ print(phila.nls.parameters)
 @
 
 <<philanlsR0>>==
-cc.phila.delta <- KMcifun(phila.nlsfit, I0=I0.phila.fitode, N=philapop1918)
+cc.phila.delta <- KMcifun(phila.nlsfit, I0=I0.phila.fitode, N=philaS0)
 orig.params.phila <- invert_params(I0=I0.phila.fitode, coef(phila.nlsfit))
 orig.params.phila <- signif(orig.params.phila,dig)
 assignfun(orig.params.phila, text = ".phila.nls")
-R0.phila.nls <- Reff.phila.nls/S0.phila.nls*philapop1918
+R0.phila.nls <- Reff.phila.nls/S0.phila.nls*philaS0
 @
 
 \section{To Do}
