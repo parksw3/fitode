@@ -444,7 +444,6 @@ common that the default setting in \code{fitode} is to use a log link
 when fitting any parameter.)
 
 <<KM-fitted-values, echo=FALSE>>=
-parnames <- c("a", "omega", "phi")
 dig <- 3 # number of significant digits for printing
 assignfun <- function(par,
                       text=".KM") {
@@ -565,12 +564,13 @@ the parameters as estimated by \KM and by us using \code{nls}.
 <<invert-KM-analytically, echo=FALSE>>=
 invert_params <- function(I0, params) {
     with(as.list(params), {
+        tpeak <- phi / omega
         Reff <- (1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2
 	q <- (Reff-1)/tanh(phi)
 	gamma <- 2 * omega/q ## gamma has a unit of 1/week
 	S0 <- 2 * Reff * I0 * sinh(phi)^2/(Reff - 1)^2
 	beta <- Reff * gamma/S0
-	c(Reff=Reff, S0=S0, gamma=gamma, Tg=1/gamma, beta=beta)
+	c(tpeak=tpeak, Reff=Reff, S0=S0, gamma=gamma, Tg=1/gamma, beta=beta)
     })
 }
 N.KM <- 10^6
@@ -597,27 +597,34 @@ convert_express <- list(
     R0=expression((((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) - 1)^2/(2 * I0 * sinh(phi)^2)*N)
 )
 
-##dg/dx
-dgdx <- sapply(convert_express, function(x) {
-    dd <- deriv(x, c("a", "omega", "phi"))
-    ee <- eval(dd, c(as.list(nls.parameters), I0=I0.KM, N=N.KM))
-    attr(ee, "gradient")
-})
+KMcifun <- function(fit,
+                    I0,
+                    N) {
+    param <- coef(fit)
+    ##dg/dx
+    dgdx <- sapply(convert_express, function(x) {
+        dd <- deriv(x, c("a", "omega", "phi"))
+        ee <- eval(dd, c(as.list(param), I0=I0, N=N))
+        attr(ee, "gradient")
+    })
 
-vcov <- vcov(nlsfit)
-est_vcov <- t(dgdx) %*% vcov %*% dgdx
-est_err <- sqrt(diag(est_vcov))
-est_par <- c(tpeak=tpeak.nls, Reff=Reff.nls, gamma=gamma.nls, S0=S0.nls, beta=beta.nls, Tg=Tg.nls, R0=R0.nls)
-z <- -qnorm((1-0.95)/2)
+    vcov <- vcov(fit)
+    est_vcov <- t(dgdx) %*% vcov %*% dgdx
+    est_err <- sqrt(diag(est_vcov))
+    est_par <- sapply(convert_express, eval, c(as.list(param), I0=I0, N=N))
+    z <- -qnorm((1-0.95)/2)
 
-cc.delta <- matrix(
-    c(est_par - z * est_err, est_par + z * est_err),
-    ncol=2,
-    dimnames=list(
-        c("tpeak", "Reff", "gamma", "S0", "beta", "Tg", "R0"),
-        c("2.5%", "97.5%")
+    matrix(
+        c(est_par - z * est_err, est_par + z * est_err),
+        ncol=2,
+        dimnames=list(
+            c("tpeak", "Reff", "gamma", "S0", "beta", "Tg", "R0"),
+            c("2.5%", "97.5%")
+        )
     )
-)
+}
+
+cc.delta <- KMcifun(nlsfit, I0=I0.KM, N=N.KM)
 assignfun(cc.delta[,"2.5%"], text=".lwr")
 assignfun(cc.delta[,"97.5%"], text=".upr")
 @
@@ -1074,8 +1081,10 @@ Confint on derived parameers:
 ci.derived.bombay.fitode.nb <- confint(SIR_fit,
         parm=list(
             Reff~beta*S0/gamma.nls,
-            R0~beta*N.KM/gamma.nls
+            R0~beta*N.KM/gamma.nls,
+            Tg~1/gamma.nls
         ))
+assignfun(ci.derived.bombay.fitode.nb[,1], ".bombay.fitode.nb")
 @
 
 Confidence band on fit:
@@ -1284,6 +1293,16 @@ ci.stoch.fitode <- confint(SIR_stoch_fit)[,-1]
 assignfun(coef.stoch.fitode, ".stoch.fitode")
 @
 
+Confint on derived parameers:
+<<sirstochconfint>>==
+ci.derived.stoch.fitode <- confint(SIR_stoch_fit,
+        parm=list(
+            Reff~beta*S0/1,
+            R0~beta*2000/1
+        ))
+assignfun(ci.derived.stoch.fitode[,1], ".stoch.fitode")
+@
+
 \section{Influenza in Philadelphia, October 1918}
 <<philapop, echo=TRUE>>=
 ## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
@@ -1317,16 +1336,6 @@ phila1918b <- data.frame(
 phila1918b$time <- lubridate::decimal_date(phila1918b$date)
 @
 
-<<xsummary>>=
-## extended summary
-## FIX: the estimate is OK, but the rest is wrong; use delta method
-xsummary <- function(fit, ...) {
-    ss <- summary(fit, ...)
-    Reff <- ss["S0",]*ss["beta",]/ss["gamma",]
-    return(rbind(ss,Reff))
-}
-@
-
 <<phila.fit,cache=TRUE,warning=FALSE>>=
 ## time is in the unit of years
 ## so gamma=52 corresponds to a mean of 1 week
@@ -1352,9 +1361,17 @@ ci.phila.fitode <- confint(phila_fit)[,-1]
 assignfun(coef.phila.fitode, ".phila.fitode")
 @
 
-<<philasummary>>=
-##summary(phila_fit)
-philaparms <- as.list(xsummary(phila_fit)[,"Estimate"])
+
+Confint on derived parameers:
+<<sirphilaconfint>>==
+ci.derived.phila.fitode <- confint(phila_fit,
+        parm=list(
+            Reff~beta*S0/gamma,
+            R0~beta*philapop1918/gamma,
+            Tg~1/gamma
+        ))
+assignfun(ci.derived.phila.fitode[,1], ".phila.fitode")
+philaparms <- as.list(c(coef.phila.fitode, ci.derived.phila.fitode[,1]))
 @
 
 <<philaKMparms>>=
@@ -1380,7 +1397,17 @@ phila.nlsfit <- nls(mort ~ KM_approx(time, a, omega, phi),
               data = df,
               start = KM.start.phila)
 phila.nls.parameters <- coef(phila.nlsfit)
+ci.phila.nls <- confint(phila.nlsfit)
+assignfun(phila.nls.parameters, ".phila.nls")
 print(phila.nls.parameters)
+@
+
+<<philanlsR0>>==
+cc.phila.delta <- KMcifun(phila.nlsfit, I0=I0.phila.fitode, N=philapop1918)
+orig.params.phila <- invert_params(I0=I0.phila.fitode, coef(phila.nlsfit))
+orig.params.phila <- signif(orig.params.phila,dig)
+assignfun(orig.params.phila, text = ".phila.nls")
+R0.phila.nls <- Reff.phila.nls/S0.phila.nls*philapop1918
 @
 
 \section{To Do}
@@ -1645,14 +1672,14 @@ print(a.KM)
     %% making use of ragged2e and array packages:
     \RaggedRight
   \begin{tabular}{ m{3cm} | c | c | c | c | c c}
-    \bfseries Assumed\break parameter \\\hline
+  \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
+    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
+    & \bfseries KM & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
     initial prevalence & $I_0$ & -- & -- &
       \Sexpr{I0.KM} & \Sexpr{I0.nls} & -- \\
     %%
     \noalign{\vspace{10pt}}
-    \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
-    & \bfseries KM & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
+    \bfseries Estimated\break parameter \\\hline
     peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{a.KM} &
       \Sexpr{signif(a.nls,dig)} & \Sexpr{ci_fmt("a", cc)} \\
     outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
@@ -1710,6 +1737,15 @@ print(a.KM)
       \Sexpr{I0.bombay.fitode.nb} & \Sexpr{ci_fmt("I0", ci.bombay.fitode.nb)} & \Sexpr{I0.bombay.fitode.ols} & ?? \\
       overdispersion\break parameter & $k$ & -- &
       \Sexpr{k.bombay.fitode.nb} & \Sexpr{ci_fmt("k", ci.bombay.fitode.nb)} & -- & -- \\
+      \noalign{\vspace{10pt}}
+      \bfseries Derived\break parameter \\\hline
+      effective reproduction number & $\Reff$ & -- &
+      \Sexpr{Reff.bombay.fitode.nb} &  \Sexpr{ci_fmt("Reff", ci.derived.bombay.fitode.nb[,-1])} & -- & -- \\
+      mean generation interval & $\Tg$ & days &
+      \Sexpr{signif(7*Tg.bombay.fitode.nb,dig)} & \Sexpr{ci_fmt("Tg", 7*ci.derived.bombay.fitode.nb[,-1])} & -- & -- \\
+    basic reproduction number & $\R_0$ & -- &
+      \Sexpr{signif(R0.bombay.fitode.nb,dig)}
+      &  \Sexpr{ci_fmt("R0", ci.derived.bombay.fitode.nb[,-1])} & -- & --
   \end{tabular}
   \end{center}
 \end{table}
@@ -1772,6 +1808,13 @@ points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
       \Sexpr{I0.stoch.fitode} & \Sexpr{ci_fmt("I0", ci.stoch.fitode)}\\
       overdispersion\break parameter & $k$ & -- &
       \Sexpr{k.stoch.fitode} & \Sexpr{ci_fmt("k", ci.stoch.fitode)}\\
+      \noalign{\vspace{10pt}}
+      \bfseries Derived\break parameter \\\hline
+      effective reproduction number & $\Reff$ & -- &
+      \Sexpr{Reff.stoch.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.stoch.fitode[,-1])} \\
+    basic reproduction number & $\R_0$ & -- &
+      \Sexpr{signif(R0.stoch.fitode,dig)}
+      &  \Sexpr{ci_fmt("R0", ci.derived.stoch.fitode[,-1])}
   \end{tabular}
   \end{center}
 \end{table}
@@ -1817,20 +1860,83 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
   \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
     & \bfseries \code{dnbinom} & \bfseries 95\% CI \\\hline
-    transmission rate & $\beta$ & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{beta.stoch.fitode} & \Sexpr{ci_fmt("beta", ci.stoch.fitode)} \\
-      recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & 1 &
+    transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{beta.phila.fitode} & \Sexpr{ci_fmt("beta", ci.phila.fitode)} \\
+      recovery rate & $\gamma$ & $\frac{1}{\textrm{years}}$ & \Sexpr{gamma.phila.fitode} &
       -- \\
     initial\break susceptibles & $S_0$& -- &
-      \Sexpr{as.integer(S0.stoch.fitode)} & \Sexpr{ci_fmt("S0", ci.stoch.fitode, max_ord = 6)}\\
+      \Sexpr{as.integer(S0.phila.fitode)} & \Sexpr{ci_fmt("S0", ci.phila.fitode, max_ord = 6)}\\
       initial prevalence & $I_0$ & -- &
-      \Sexpr{I0.stoch.fitode} & \Sexpr{ci_fmt("I0", ci.stoch.fitode)}\\
+      \Sexpr{I0.phila.fitode} & \Sexpr{ci_fmt("I0", ci.phila.fitode)}\\
       overdispersion\break parameter & $k$ & -- &
-      \Sexpr{k.stoch.fitode} & \Sexpr{ci_fmt("k", ci.stoch.fitode)}\\
+      \Sexpr{k.phila.fitode} & \Sexpr{ci_fmt("k", ci.phila.fitode)}\\
+      \noalign{\vspace{10pt}}
+      \bfseries Derived\break parameter \\\hline
+      effective reproduction number & $\Reff$ & -- &
+      \Sexpr{Reff.phila.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.phila.fitode[,-1])} \\
+      mean generation interval & $\Tg$ & years &
+      \Sexpr{signif(7*Tg.phila.fitode,dig)} & \Sexpr{ci_fmt("Tg", 7*ci.derived.phila.fitode[,-1])} \\
+    basic reproduction number & $\R_0$ & -- &
+      \Sexpr{signif(R0.phila.fitode,dig)}
+      &  \Sexpr{ci_fmt("R0", ci.derived.phila.fitode[,-1])}
   \end{tabular}
   \end{center}
 \end{table}
 \end{landscape}
+
+
+\begin{landscape}
+\begin{table}
+  \begin{center}
+    \caption{Parameter estimates for the Philadelphia epidemic
+        of \KM's \cite{KermMcKe27} approximation
+      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}
+      using nonlinear least squares
+      (\code{nls}).
+      The $\R_0$ estimates assume the population of Philadelphia
+      in 1918 is....
+}\label{tab:philanls}
+    \medskip
+    %% making use of ragged2e and array packages:
+    \RaggedRight
+  \begin{tabular}{ m{3cm} | c | c | c | c c}
+    \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
+    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
+    & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
+    initial prevalence & $I_0$ & -- & -- &
+      \Sexpr{I0.phila.fitode} & -- \\
+    %%
+    \noalign{\vspace{10pt}}
+    \bfseries Estimated\break parameter \\\hline
+    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{signif(a.phila.nls,dig)} & \Sexpr{ci_fmt("a", ci.phila.nls)} \\
+    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{signif(omega.phila.nls,dig-1)} & \Sexpr{ci_fmt("omega", ci.phila.nls)} \\
+    outbreak centre & $\phi$ & \eqref{eq:phi} & -- &
+      \Sexpr{signif(phi.phila.nls,dig)} & \Sexpr{ci_fmt("phi", ci.phila.nls)} \\
+    \noalign{\vspace{10pt}}
+    \bfseries Derived\break parameter \\\hline
+    peak time & $\tpeak$ & \eqref{eq:tpeak} & years &
+      \Sexpr{tpeak.phila.nls} & \Sexpr{ci_fmt("tpeak", cc.phila.delta)} \\
+    effective reproduction number & $\Reff$
+      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
+      \Sexpr{Reff.phila.nls} & \Sexpr{ci_fmt("Reff", cc.phila.delta)} \\
+    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{gamma.phila.nls} & \Sexpr{ci_fmt("gamma", cc.phila.delta)} \\
+    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
+       \Sexpr{as.integer(S0.phila.nls)} & \Sexpr{ci_fmt("S0", cc.phila.delta, max_ord = 6)} \\
+    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
+       \Sexpr{beta.phila.nls} & \Sexpr{ci_fmt("beta", cc.phila.delta)} \\
+    mean generation interval & $\Tg$ & \eqref{eq:Tg} & years &
+      \Sexpr{signif(Tg.phila.nls,dig)} & \Sexpr{ci_fmt("Tg", cc.phila.delta)} \\
+    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
+       \Sexpr{signif(R0.phila.nls,dig)} & \Sexpr{ci_fmt("R0", cc.phila.delta)}
+  \end{tabular}
+  \end{center}
+\end{table}
+\end{landscape}
+
+
 
 \begin{figure}
 <<phila-figure, echo=FALSE, fig.height=5>>=
