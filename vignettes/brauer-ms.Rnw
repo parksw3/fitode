@@ -118,15 +118,14 @@ knitr::opts_chunk$set(error = FALSE)
   infectious disease transmission models to real public health
   problems.  He was curious to know how one goes about fitting
   dynamical models to data, and why it can be hard.  Initially in
-  response to Fred's questions, we developed a user-friendly
-  \code{R} package that facilitates fitting ordinary differential
-    equations to observed time series.  Here, we use the package
-  (\code{fitode}) to provide a brief tutorial introduction to
-  fitting compartmental epidemic models to a single observed time
-  series.  We assume that, similar to Fred \bmb{``like Fred''?}, the reader is familiar
-  with dynamical systems from a mathematical perspective, but has
-  little or no experience with statistical methodology or optimization
-  techniques.
+  response to Fred's questions, we developed a user-friendly \code{R}
+  package that facilitates fitting ordinary differential equations to
+  observed time series.  Here, we use the package (\code{fitode}) to
+  provide a brief tutorial introduction to fitting compartmental
+  epidemic models to a single observed time series.  We assume that,
+  like Fred, the reader is familiar with dynamical systems from a
+  mathematical perspective, but has limited experience (if any) with
+  statistical methodology or optimization techniques.
 \end{abstract}
 
 \begin{keywords}
@@ -186,11 +185,7 @@ models are used for the development and analysis of policy options for
 infectious disease management \cite{elderd2006uncertainty}, a
 challenge that has absorbed the attention of many mathematical
 epidemiologists during the course of the present COVID-19 pandemic
-\cite{Hill+21}.
-\swp{Can't find appropriate papers to cite here...}
-\djde{I added the only one that came to mind.  There are probably
-other articles of this type commenting on modelling working for
-PH during the pandemic.}
+\cite{Broo+21,Hill+21,Nixo+22}.
 
 While visiting the University of British Columbia in 2014--2015, one
 of us (DE) had many conversations with Fred Brauer about epidemic
@@ -214,7 +209,7 @@ Fred's memory.
 
 We begin by revisiting \KM's \cite{KermMcKe27}
 application of their SIR model \eqref{eq:SIR} to the epidemic of
-plague in Bombay in 1905--1906.  The observed data (black dots in
+plague in Bombay in 1905--1906.  The observed data (dots in
 Figure~\ref{fig:Bombay}) were weekly numbers of deaths from plague.
 
 Referring to their version of Figure~\ref{fig:Bombay}, \KM
@@ -231,14 +226,14 @@ analytical form,
 \ddt{R} \approx a \sech^2{(\omega\,t - \phi)}\,.
 \end{equation}
 \end{linenomath*}
-Noting that the basic reproduction number is
+Noting that the \term{basic reproduction number} is
 \begin{linenomath*}
 \begin{equation}\label{eq:R0def}
 \R_0 = \frac{N\beta}{\gamma} \,,
 \end{equation}
 \end{linenomath*}
 where $N$ is the total population size,
-and hence the effective reproduction number at time $t=0$
+and hence the \term{effective reproduction number} at time $t=0$
 is
 \begin{linenomath*}
 \begin{equation}\label{eq:Reffdef}
@@ -280,20 +275,8 @@ a_fun <- function(Reff, gamma, S0, I0)
 
 The \KMcol curve in Figure~\ref{fig:Bombay} does appear to provide a
 reasonable fit to the data, but \KM \cite{KermMcKe27} gave no
-indication of how their parameter estimates were obtained.  \djde{When
-  was least-squares trajectory matching first done?  Do we think they
-  did that?  or just played with parameter values and fitted by eye?}
-\swp{It seems unlikely that they had the ability to perform least
-  squares back in 1927... I was able to find least squares SIR and
-  SI3R(!) model fit from 1990 \cite[p.\,51]{kryscio1990modeling} but
-  not sure if there's anything earlier.  They could have used human
-  computers, as Ben notes.}\djde{According to
-  \href{https://en.wikipedia.org/wiki/Least_squares}{Wikipedia}, the
-  method of least squares goes back to Legendre and Gauss, a century
-  before KM.}
-  \swp{Ah yes I see. But maybe better to focus on model fitting in
-  the context of epidemic models?}
-  Whatever their process, they must have engaged in some
+indication of how their parameter estimates were obtained.  
+Whatever their process, they must have engaged in some
 sort of \term{trajectory matching}, i.e., adjusting parameter values
 until the model---equation~\eqref{eq:sech} in their case---is, by some
 measure, close to the observed data points.  The most obvious metric
@@ -311,7 +294,7 @@ vector for \KM's problem is
 $\thetavec=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
 respect to $\thetavec$ would have required some heroic arithmetic
 with a pencil and paper in 1927, but it is a simple task with the
-aid of a computer.
+aid of a modern computer.
 
 In the following segment of R code, we fit equation \eqref{eq:sech} to
 the Bombay plague data (which are included in the \code{fitode}
@@ -334,20 +317,9 @@ print(nls.parameters)
 
 \noindent
 Above, we chose as our starting guess the fitted parameter values of
-\KM (see Table~\ref{tab:Bombay}).  The least
-squares parameter values differ from KM's by a few percent:
-
-\bmb{do we need this demonstration, or could we just point to Table~1 and let the reader eyeball for themselves?}
-\swp{I don't think we need this demonstration.}
-<<percent-diff>>=
-percent.difference <-
-    100*(KM.parameters - nls.parameters)/nls.parameters
-print(percent.difference)
-@
-
-\noindent
-Our least squares fitted function is shown in \nlscol in
-Figure~\ref{fig:Bombay}.
+\KM.  Our least squares parameter values differ from KM's by a few
+percent (see Table~\ref{tab:Bombay}).  The least squares fitted
+function is shown in \nlscol in Figure~\ref{fig:Bombay}.
 
 Starting from someone else's fit is not a great way to test the
 method, but fortunately the least squares fit for this problem is not
@@ -362,23 +334,20 @@ $\omega(t-\tpeak)$ then
     \tpeak = \frac{\phi}{\omega}
   \end{equation}
 \end{linenomath*}
-is the time at which the maximum occurs; both $a$ and $\tpeak$ can be
-guessed approximately by looking at the plotted data, and a
-very rough guess is sufficient to converge on the same fit:
-
-\bmb{can we come up with a similar geometric intuition for $\omega$?
-  Wild guess of 1 is OK here and will be OK \emph{when parameters have
-    a reasonable scaling}, but \ldots} \djde{Assuming $I_0/S_0\ll1$,
-  $\omega\sim1/2$ the initial growth rate, so it can be approximated
-  easily by plotting the data on a log scale and estimating the slope
-  (and dividing by 2).  That's not as trivial as guessing $a$ and
-  $\tpeak$ from looking at the time series, but does seem preferable
-  to a wild guess.}
+is the \term{peak time} (at which the maximum occurs); both $a$ and
+$\tpeak$ can be guessed approximately by looking at the plotted data.
+Assuming $I_0/S_0\ll1$, $\omega$ is half the initial exponential
+growth rate, so it can be approximated easily by plotting the data on
+a log scale, estimating the initial slope, and dividing by 2.
+\djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is likely to be
+  much better than fitting the initial condition $I_0$.  Is this worth
+  commenting on?}  Very rough guesses for $a$, $\tpeak$ and $\omega$
+are sufficient to converge on the same fit:
 
 <<nls-bombay-2>>=
-a.guess <- 1000    # crude "by eye" estimate of peak value
-tpeak.guess <- 15  # ... and of peak time
-omega.guess <- 1   # wild guess
+a.guess <- 1000    # crude "by eye" estimate of peak value,
+tpeak.guess <- 15  # peak time,
+omega.guess <- 1   # and half the initial growth rate
 phi.guess <- omega.guess * tpeak.guess
 nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
               data = fitode::bombay,
@@ -387,9 +356,7 @@ nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
 print(nls.parameters <- coef(nlsfit))
 @
 
-\djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is
-likely to be much better than fitting the initial condition $I_0$.}
-
+\noindent
 However, if you experiment with initial guesses, you will find that if
 you make a sufficiently \emph{bad} guess, then \code{nls} will fail.
 For example, starting from $a=2000$, $\tpeak=5$, and $\omega=0.1$
@@ -514,8 +481,8 @@ analytically\footnote{In (common) situations in which
   \Reff &= \frac{1}{2}\bigg( 1 +
           \sqrt{1 + \frac{4\,\omega\,I_0 \sinh\!{(2\phi)}}{a}}\bigg) \,,
           \label{eq:Reff} \\
-  \gamma &= \frac{2\,\omega\tanh{\phi}}{\Reff-1} \label{eq:gamma} \\
-  S_0 &= \frac{2\,\Reff\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} % Bacaer eq. (3)
+  \gamma &= \frac{2\,\omega\tanh{\phi}}{\Reff-1} \,, \label{eq:gamma} \\
+  S_0 &= \frac{2\,\Reff\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} \,. % Bacaer eq. (3)
       \label{eq:S0}
 \end{align}
 \end{subequations}
@@ -541,25 +508,6 @@ and the mean intrinsic generation interval \cite{ChamDush15},
 which is the same as the mean infectious period in this simple model
 \cite{KrylEarn13,Cham+18}.  Table~\ref{tab:Bombay} lists the values of
 the parameters as estimated by \KM and by us using \code{nls}.
-
-\swp{The problem is that we're assuming S0 = 1e6 - 1. We can't do
-  this.  We need much lower S0 to fit the data. So by assuming a very
-  large S0, things go crazy.  So we're better off starting with
-  assuming I0 = 1 and assuming the rest. That's the whole point of
-  Bacaer's paper: that the required S0 to fit the data is so low that
-  the standard SIR model is actually not appropriate for modeling the
-  bombay epidemic} \djde{I'll return to this after reading Baca\"er
-  \cite{bacaermodel2012}. Meanwhile I will note that Gani and Leach
-  \cite{GaniLeac04} found $\R_0\simeq1.3\pm1.8$ and
-  $\Tg\simeq6.8\pm2.2$ days, for ``modern'' pneumonic plague, and
-  based on that $\Tg$ we \cite{Earn+20} found similar $\R_0$ for 17th
-  century plague in London.  Baca\"er \cite{bacaermodel2012} seems to
-  assume (like \KM) that plague in Bombay had a CFP of near 1.
-  Anyway, the point of the discussion here will be to alert readers to
-  be cautious for all sorts of reasons, and a good fit of a model to
-  data does not necessarily mean that it is fair to make inferences
-  from estimated parameter values.}  \djde{Note KM's caution about
-  interpreting the param values.}
 
 <<invert-KM-analytically, echo=FALSE>>=
 invert_params <- function(I0, params) {
@@ -657,27 +605,22 @@ traj_ci <- function(t,
 }
 @
 
-\subsection{Correctly handling weekly mortality}
-
-\swp{I don't think it's worth pursuing KM approx any further... we're
-  trying to show how to fit an ODE, not KM approximation.}\djde{That's
-  not my perspective.  We're trying to show how to fit a model to
-  data for people who haven't a clue, and I think it is nice to
-  show how easy it would have been for KM to do this right.}
-\swp{OK. That seems fine. But we should divide up the equation below to say
-that we want to integral. And then say that for KM, integral of dR/dt is so and so.}
+\paragraph*{Correctly handling weekly mortality.}
 
 Something we have glossed over is that approximating weekly mortality
-(what is observed) by $\dbydt{R}$ is unnecessary.  A better estimate
-of weekly mortality reported at time $t_i$ would be to take
+(what is observed) by $\dbydt{R}$ \eqref{eq:sech} is unnecessary.  A
+better estimate of weekly mortality reported at time $t_i$ would be to
+take
 \begin{linenomath*}
-  \begin{align}\label{eq:sechcorrect}
-f(t_i;\thetavec) &=
-\int_{t_{i-1}}^{t_i} \ddt{R}\,\dt \\ \label{eq:correct.mortality}
-&= \int_{t_{i-1}}^{t_i}  a \sech^2{(\omega\,t - \phi)}\,\dt \\
-&= \frac{a}{\omega}\Big(\tanh{(\omega\,t_i - \phi)}
-  - \tanh{(\omega\,t_{i-1} - \phi)}\Big) \,.
-\end{align}
+  \begin{subequations}
+    \begin{align}\label{eq:sechcorrect}
+      f(t_i;\thetavec) &=
+                         \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt \\ \label{eq:correct.mortality}
+                       &= \int_{t_{i-1}}^{t_i}  a \sech^2{(\omega\,t - \phi)}\,\dt \\
+                       &= \frac{a}{\omega}\Big(\tanh{(\omega\,t_i - \phi)}
+                         - \tanh{(\omega\,t_{i-1} - \phi)}\Big) \,.
+    \end{align}
+  \end{subequations}
 \end{linenomath*}
 We have not done this because \KM didn't, \djde{Did Baca\"er
   \cite{bacaermodel2012} discuss this?}\swp{no}
@@ -1586,6 +1529,29 @@ is the same.
 \item fitting ABMs
 \item a bit of tribute to Fred
 \end{itemize}
+
+\subsection{Comments moved from elsewhere that might be helpful in Discussion}
+
+We chose to fix $I_0$ rather than the (known) population size
+($N\simeq10^6$).  \swp{The problem is that we're assuming S0 = 1e6 -
+  1. We can't do this.  We need much lower S0 to fit the data. So by
+  assuming a very large S0, things go crazy.  So we're better off
+  starting with assuming I0 = 1 and assuming the rest. That's the
+  whole point of Bacaer's paper: that the required S0 to fit the data
+  is so low that the standard SIR model is actually not appropriate
+  for modeling the bombay epidemic} \djde{I'll return to this after
+  reading Baca\"er \cite{bacaermodel2012}. Meanwhile I will note that
+  Gani and Leach \cite{GaniLeac04} found $\R_0\simeq1.3\pm1.8$ and
+  $\Tg\simeq6.8\pm2.2$ days, for ``modern'' pneumonic plague, and
+  based on that $\Tg$ we \cite{Earn+20} found similar $\R_0$ for 17th
+  century plague in London.  Baca\"er \cite{bacaermodel2012} seems to
+  assume (like \KM) that plague in Bombay had a CFP of near 1.
+  Anyway, the point of the discussion here will be to alert readers to
+  be cautious for all sorts of reasons, and a good fit of a model to
+  data does not necessarily mean that it is fair to make inferences
+  from estimated parameter values.}  \djde{Note KM's caution about
+  interpreting the param values.}
+
 
 \bibliographystyle{tfs}
 \bibliography{brauer-ms,fitode}
