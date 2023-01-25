@@ -1682,10 +1682,11 @@ print(a.KM)
 \begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Parameters of \code{fitode} fits of the SIR model \eqref{eq:SIR} to Bombay data.
-      The $\R_0$ estimates assume the population of Bombay was
-      $N=1$ million \cite[p.\,408]{bacaermodel2012}.
-}\label{tab:bombay.fitode}
+    \caption{Parameter estimates from \code{fitode} fits of the SIR
+      model \eqref{eq:SIR} to the Bombay plague data (see
+      Figure~\ref{fig:Bombay}).  The $\R_0$ estimates assume the
+      population of Bombay was $N=1$ million
+      \cite[p.\,408]{bacaermodel2012}.}\label{tab:bombay.fitode}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
@@ -1721,12 +1722,14 @@ print(a.KM)
 \end{landscape}
 
 \begin{figure}
-<<Bombay-figure, echo=FALSE, fig.height=5, fig.show="hold", out.width="50%">>=
+\centering
+<<Bombay-figure, echo=FALSE, fig.height=5, fig.show="hold", out.width="95%">>=
 tvals <- seq(0, tmax, length.out=1000)
 setup_plot(ylim = c(0, 1000), xlim=c(0,tmax),
          xlab="weeks", ylab="plague deaths")
 draw_confband(traj_ci(tvals, nls.parameters, vcov(nlsfit)), col=col.nlsCI)
-draw_confband(SIR_confband, col=col.fitodenbCI)
+##DE: skipping fitode confband because there is too much overlap:
+##draw_confband(SIR_confband, col=col.fitodenbCI)
 curve(KM_approx(x, a=a.KM, omega=omega.KM, phi=phi.KM), from=0, to=tmax, n=1000, add=TRUE,
       lwd=lwd, xpd=NA, col=col.KM)
 curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=1000, add=TRUE,
@@ -1735,28 +1738,46 @@ lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd*0.60, lty=
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
 
-setup_plot(ylim=c(5, 1000), xlim=c(0,tmax),
-         xlab="weeks", ylab="plague deaths",
-         at=c(25, 50, 100, 200, 400, 800))
+setup_plot(ylim=c(0, 1000), xlim=c(0,tmax), #DE: ymin was 5, not sure why
+         xlab="weeks", ylab="plague deaths"
+         ##, at=c(25, 50, 100, 200, 400, 800)
+         )
 draw_confband(SIR_confband, col=col.fitodenbCI)
 lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd)
-# lines(estimate ~ times, data=SIR_ols_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
+curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=250, add=TRUE,
+      lwd=lwd*0.60, xpd=NA, col=col.nls, lty="dotted")
+## lines(estimate ~ times, data=SIR_ols_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 @
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
-    (black dots) were digitized from \cite[Table~IX, p.\,753]{jhyg1907}
-  The fitted
-  curves are based on the KM approximation \eqref{eq:sech}; the
-  associated parameter estimates are given in Table~\ref{tab:Bombay}.}
+  (dots) were digitized from \cite[Table~IX, p.\,753]{jhyg1907}.
+  \emph{Top panel:} The blue and red curves show the \KM approximation
+  \eqref{eq:sech}, as fitted by \KM (blue) and by us using \code{nls}
+  (red, with pink confidence band).  The associated parameter
+  estimates are given in Table~\ref{tab:Bombay}.  The dotted yellow
+  curve shows the \code{fitode} fit, for which the associated
+  parameter estimates are given Table~\ref{tab:bombay.fitode}.
+  \emph{Bottom panel:} The yellow curve is identical to the yellow
+  dotted curve in the top panel, and the yellow band shows the
+  \code{fitode} confidence band.  The dotted red curve is identical to
+  the solid red curve in the top panel.  We have separated the two
+  panels because the confidence band overlap would make the plots
+  difficult to interpret.\djde{We need a legend in the bottom panel.}
+  \djde{Ben's comment in the caption to Figure~\ref{fig:stoch} applies
+    here too.  We need to explain why the \code{fitode} estimate and
+    confidence band is jagged, or make it smooth (which I realize is
+    easy for the estimate and a can of worms for the confidence
+    band).}  }
 \label{fig:Bombay}
 \end{figure}
 
 \begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Parameters of \code{fitode} fits of the SIR model \eqref{eq:SIR} to a stochastic SIR simulation.
-}\label{tab:stoch.fitode}
+    \caption{Parameter estimates from \code{fitode} fits of the SIR
+      model \eqref{eq:SIR} to a stochastic SIR simulation (see
+      Figure~\ref{fig:stoch}).}\label{tab:stoch.fitode}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
@@ -1820,8 +1841,11 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
 \begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Parameters of \code{fitode} fits of the SIR model \eqref{eq:SIR} to Philadelphia flu epidemic.
-}\label{tab:phila.fitode}
+    \caption{Parameter estimates from \code{fitode} fits
+      of the SIR model \eqref{eq:SIR} to reported
+      pneumonia and influenza mortality during the main
+      wave of the 1918 influenza pandemic in the city
+      of Philadelphia.}\label{tab:phila.fitode}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
@@ -1857,14 +1881,12 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
 \begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Parameter estimates for the Philadelphia epidemic
-        of \KM's \cite{KermMcKe27} approximation
-      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}
-      using nonlinear least squares
-      (\code{nls}).
-      The $\R_0$ estimates assume the population of Philadelphia
-      in 1918 is....
-}\label{tab:philanls}
+    \caption{Parameter estimates for the 1918 influenza epidemic in
+      Philadelphia, based on \KM's \cite{KermMcKe27} approximation
+      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, using nonlinear
+      least squares (\code{nls}).  The $\R_0$ estimates assume the
+      population of Philadelphia in 1918 was\dots
+    See Figure~\ref{fig:phila}.}\label{tab:philanls}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
