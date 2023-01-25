@@ -607,10 +607,15 @@ traj_ci <- function(t,
 
 \paragraph*{Correctly handling weekly mortality.}
 
-Something we have glossed over is that approximating weekly mortality
-(what is observed) by $\dbydt{R}$ \eqref{eq:sech} is unnecessary.  A
-better estimate of weekly mortality reported at time $t_i$ would be to
-take
+Something we have glossed over is that we have fitted observed weekly
+mortality to the \emph{instantaneous} rate, $\dbydt{R}$
+\eqref{eq:sech}, which is not observed.  We did this because it is
+what \KM did, and we wanted to be able to compare formal nonlinear
+least squares fits to \KM's results\footnote{In his reanalysis of
+  \KM's results, Baca\"er \cite{bacaermodel2012} also retained this
+  conceptual error.}.  Weekly mortality reported at time $t_i$ should
+really be modelled as the aggregation of $\dbydt{R}$ over the
+preceding week, i.e., it would be better to define
 \begin{linenomath*}
   \begin{subequations}
     \begin{align}\label{eq:sechcorrect}
@@ -622,12 +627,10 @@ take
     \end{align}
   \end{subequations}
 \end{linenomath*}
-We have not done this because \KM didn't, \djde{Did Baca\"er
-  \cite{bacaermodel2012} discuss this?}\swp{no}
-  and we wanted to compare our
-fits to theirs.  However, there is no question that we should really
-be fitting to weekly aggregations, and we do this below when fitting
-to the ODEs directly.
+Indeed, whether we are fitting to mortality or incidence or another
+instantaneous rate, we should be integrating over the observation
+interval, which is precisely what we do below when fitting to the ODEs
+directly.
 
 \section{Uncertainty}
 
