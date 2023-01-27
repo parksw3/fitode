@@ -645,12 +645,8 @@ framework.  The typical output of such a framework is a
 \term{confidence interval} (CI) within which our best estimate lies.
 For example, the final column of Table~\ref{tab:Bombay} lists 95\% CIs
 on our \code{nls} parameter estimates, and the pink shaded region in
-Figure~\ref{fig:Bombay} is a 95\% \term{confidence band}, which shows
-CIs for each point of the fitted model curve.  \djde{We should
-  probably also include the fitode confidence band in \fitodecol as I
-  had as a placeholder before.}
-  \swp{I tried and it overlaps almost perfectly with KM CBs so we can't
-  tell...}
+the top panel of Figure~\ref{fig:Bombay} is a 95\% \term{confidence
+  band}, which shows CIs for each point of the fitted model curve.
 
 To understand how to estimate CIs, we will start by thinking about the
 probability of observing the data $\{y_i\}$.  We imagine that the
@@ -712,7 +708,7 @@ the least squares solution!  The standard way of expressing this is to
 say that the least squares solution $\thetavechat$ is the
 \term{maximum likelihood estimate} (MLE) of $\thetavec$, under the
 assumption of independent, identically distributed
-(i.e. mean-zero, constant-variance) Normal observation errors in the time series.
+(i.e., mean-zero, constant-variance) Normal observation errors in the time series.
 
 Having introduced the idea of maximum likelihood, we can do better by
 making a more realistic assumption about the error distribution.  We
@@ -737,16 +733,16 @@ Poisson distribution of observations with mean equal to the fitted
 model trajectory [equation~\eqref{eq:SIR;R}]. This handles
 discrete observations and allows the variance to change as a function
 of the mean. However, the Poisson distribution assumes
-\term{equidispersion} --- the variance is equal to the mean --- while
+\term{equidispersion}---the variance is equal to the mean---while
 typical observation errors are \term{overdispersed}, meaning that
-the variance greater than the mean. Ignoring overdispersion
+the variance is greater than the mean. Ignoring overdispersion
 will underestimate the uncertainty in the parameters and lead
 to overly narrow confidence intervals on parameters and predictions.
 The negative binomial distribution is one way to generalize
 the Poisson to allow for overdispersion \citep{linden2011using}.
 
-The probability mass function for the negative binomial distribution
-(for counts $x=0,1,2,\ldots$) is
+The probability mass function for the \term{negative binomial
+  distribution} (for counts $x=0,1,2,\ldots$) is
 \begin{linenomath*}
 \begin{equation}
   \texttt{NB}(x;\mu,k) =
@@ -804,6 +800,7 @@ for a heuristic explanation or \cite{Wassermanall2010} for a rigorous
 \bmb{probably chapter 9 ``Parametric Inference''. SpringerLink via McMaster
   \href{https://link-springer-com.libaccess.lib.mcmaster.ca/book/10.1007/978-0-387-21736-9}{won't give me sufficient access to see exactly what's in there}}
 
+\hypertarget{DeltaMethod}{}
 The diagonal elements of $\mathrm{Cov}(\thetavec)$ are the (estimated)
 variances of the parameter estimates, so we can take their (positive)
 square roots to get the standard error (SE) and compute approximate
@@ -865,21 +862,6 @@ Delta method to obtain CIs on the fitted trajectory at each
 observation time $t_i$ (and hence obtain a confidence band) by
 considering $g(\thetavec)=f(t_i;\thetavec)$.  This is how we obtained
 the pink confidence band shown in Figure~\ref{fig:Bombay}.
-
-\djde{Available in \code{fitode} but we not what we doing here:
-  Another possibility would be to use the estimated means and variances
-  for $\thetavec$ to define a multivariate Normal, sample that many
-  times and run the model, and draw the bands that contain 95\% of the
-  simulations.}
-  \swp{This is not what we actually do in fitode. We do something called
-  importance sampling where we draw from multivariate normal and then
-  do some weighting... probably a bit too much to explain in this paper
-  because we have to go all the way to metropolis hastings..}
-
-\swp{we might want to mention that profile likelihoods are a thing but are
-probably too complicated for this paper and especially for trajectories?}
-\djde{mentioning profile likelihoods in passing, with a reference,
-  would be good; we could add that here or in the Discussion.}
 
 \section{Fitting the ODE}
 
@@ -1554,6 +1536,24 @@ We chose to fix $I_0$ rather than the (known) population size
   data does not necessarily mean that it is fair to make inferences
   from estimated parameter values.}  \djde{Note KM's caution about
   interpreting the param values.}
+
+Alternatives to the \hyperlink{DeltaMethod}{Delta Method}.
+\djde{Available in \code{fitode} but we not what we doing here:
+  Another possibility would be to use the estimated means and variances
+  for $\thetavec$ to define a multivariate Normal, sample that many
+  times and run the model, and draw the bands that contain 95\% of the
+  simulations.}
+  \swp{This is not what we actually do in fitode. We do something called
+  importance sampling where we draw from multivariate normal and then
+  do some weighting... probably a bit too much to explain in this paper
+  because we have to go all the way to metropolis hastings..}
+
+\swp{we might want to mention that profile likelihoods are a thing but are
+probably too complicated for this paper and especially for trajectories?}
+\djde{mentioning profile likelihoods in passing, with a reference,
+  would be good; we could add that here or in the Discussion.}
+
+
 
 
 \bibliographystyle{tfs}
