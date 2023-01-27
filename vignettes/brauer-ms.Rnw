@@ -617,10 +617,11 @@ least squares fits to \KM's results\footnote{In his reanalysis of
 really be modelled as the aggregation of $\dbydt{R}$ over the
 preceding week, i.e., it would be better to define
 \begin{linenomath*}
-  \begin{subequations}
-    \begin{align}\label{eq:sechcorrect}
+  \begin{subequations}\label{eq:sechcorrect}
+    \begin{align}
       f(t_i;\thetavec) &=
-                         \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt \\ \label{eq:correct.mortality}
+                         \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt 
+\label{eq:correct.mortality} \\
                        &= \int_{t_{i-1}}^{t_i}  a \sech^2{(\omega\,t - \phi)}\,\dt \\
                        &= \frac{a}{\omega}\Big(\tanh{(\omega\,t_i - \phi)}
                          - \tanh{(\omega\,t_{i-1} - \phi)}\Big) \,.
@@ -744,7 +745,7 @@ the Poisson to allow for overdispersion \citep{linden2011using}.
 The probability mass function for the \term{negative binomial
   distribution} (for counts $x=0,1,2,\ldots$) is
 \begin{linenomath*}
-\begin{equation}
+\begin{equation}\label{eq:NB}
   \texttt{NB}(x;\mu,k) =
   \frac{\Gamma(k+x)}{\Gamma(k) x!}
   \left(\frac{k}{k+\mu}\right)^k
@@ -877,18 +878,20 @@ challenges, but conceptually the problem is the same as if we did have
 an analytical formula.  We can still use the Delta method
 \eqref{eq:DeltaMethod} to estimate uncertainty, but calculating the
 gradient $(\nabla g)(\thetavec)$ is not straightforward if $g$ is a
-numerical solution of an ODE; we must simultaneously solve a set of \term{sensitivity equations} alongside the main differential equations
-\cite{raue2013lessons}.\footnote{Sensitivity equations are an
-  auxiliary set of ODEs that define the time derivatives of the
-  derivatives of the state variables with respect to the parameters,
-  i.e.,
-  $\frac{\rm d}{{\rm d}t}\left(\frac{{\rm d}x(t,\theta)}{{\rm
-        d}\theta}\right)$. They can easily be derived using the chain
-  rule; by solving them in parallel with the main set of ODEs, we get
-  a computationally efficient and numerically stable way to calculate
-  the overall gradients of the log-likelihood with respect to the
-  parameters. \bmb{this explanation can go in the main text if that
-    seems more appropriate}}
+numerical solution of an ODE; we must simultaneously solve a set of
+\term{sensitivity equations} alongside the main differential equations
+\cite{raue2013lessons}. Sensitivity equations are an auxiliary set of
+ODEs that define the time derivatives of the derivatives of the state
+variables with respect to the parameters, i.e.,
+$\frac{\rm d}{{\rm d}t}\big(\frac{\partial
+  x(t,\theta_i)}{\partial\theta_i}\big)$, where $\theta_i$ refers to
+the components of $\thetavec$\djde{Ben, I changed total derivative wrt
+  $\theta$ to partial derivative wrt $\theta_i$, which made more sense
+  to me, but I haven't looked at the reference.}. They can easily be
+derived using the chain rule; by solving them in parallel with the
+main set of ODEs, we get a computationally efficient and numerically
+stable way to calculate the overall gradients of the log-likelihood
+with respect to the parameters.
 
 The \code{fitode} package\footnote{\code{fitode} is available on CRAN
   and consequently can be installed via
@@ -946,18 +949,24 @@ In the model definition above:
 }
 \swp{Rewrote some parts here to reflect nbinom implementation + correct mortality handling}
 \item[\code{observation}]specifies that the observed data
-  (\code{mort}) are assumed to arise from sampling from the negative binomial
-  distribution with a dispersion parameter of $k$ (\code{dnbinom}); the
-  mean of the distribution is given by the fitted model trajectory [equation~\eqref{eq:correct.mortality}]
+  (\code{mort}) are assumed to arise from sampling from the negative
+  binomial distribution [\code{dnbinom}, equation~\eqref{eq:NB}] with
+  a dispersion parameter $k$; the mean of the distribution is given by
+  the fitted model trajectory [equation~\eqref{eq:correct.mortality}],
 \begin{linenomath*}
 \begin{equation}
   \mu(t) = \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
+  = R(t_i) - R(t_{i-1})
+ \,,
 \end{equation}
 \end{linenomath*}
-which is equal to $R(t_i) - R(t_{i-1})$. This is implemented by using the
-\code{diffnames} argument to specify the state variable, for which consecutive differences
-need to be calculated and returned (instead of its raw value). Ordinary least squares
-can be implemented by simply changing the \code{observation} to \code{ols(mean = R)}
+\thickredline
+Fitting to such differences is implemented by using the
+\code{diffnames} argument to specify the state variable for which
+consecutive differences are to be used (so, if the focal variable is
+$R$ then \code{fitode} fits to $R(t_i) - R(t_{i-1})$ rather than
+$R(t_i)$).  Ordinary least squares can be implemented by simply
+changing the \code{observation} argument to \code{ols(mean = R)}.
 \item[\code{initial}]conditions are expressed as numbers of individuals.
 \item[\code{par}]refers to the parameters that are to be fitted:
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
