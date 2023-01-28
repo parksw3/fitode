@@ -918,7 +918,7 @@ SIR_model <- odemodel(
         R ~ gamma * I
     ),
     observation = list(
-        mort ~ dnbinom(mu = R, size=k)
+        mort ~ dnbinom(mu = R, size = k)
     ),
     diffnames="R",
     initial=list(
@@ -934,24 +934,10 @@ SIR_model <- odemodel(
 In the model definition above:
 \begin{description}
 \item[\code{model}]specifies the vector field given by the ODE \eqref{eq:SIR}.
-\bmb{I think it would be nice to compare, but we might be able to minimize the actual amount of code (e.g. say in passing ``OLS was fitted by using \code{ols} as the response distribution'', although that would miss the explanation of profiling out $\sigma$ \ldots)}
-\djde{We can just give the nbinom code but say we also fitted
-  with \code{ols}, i.e., changing the {\tt\hlkwc{observation}}
-  list to: {\tt
-%%\begin{alltt}
-  \hlstd{mort}
-  %%\hlopt{~} %% FIX: this comes out blank, hence:
-  {\color{black}\~{}}
-  \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{=
-    gamma} \hlopt{*} \hlstd{I)}
-%%\end{alltt}
-}
-}
-\swp{Rewrote some parts here to reflect nbinom implementation + correct mortality handling}
 \item[\code{observation}]specifies that the observed data
   (\code{mort}) are assumed to arise from sampling from the negative
   binomial distribution [\code{dnbinom}, equation~\eqref{eq:NB}] with
-  a dispersion parameter $k$; the mean of the distribution is given by
+  overdispersion parameter $k$; the mean of the distribution is given by
   the fitted model trajectory [equation~\eqref{eq:correct.mortality}],
 \begin{linenomath*}
 \begin{equation}
@@ -960,19 +946,25 @@ In the model definition above:
  \,,
 \end{equation}
 \end{linenomath*}
-\thickredline
 Fitting to such differences is implemented by using the
 \code{diffnames} argument to specify the state variable for which
 consecutive differences are to be used (so, if the focal variable is
 $R$ then \code{fitode} fits to $R(t_i) - R(t_{i-1})$ rather than
 $R(t_i)$).  Ordinary least squares can be implemented by simply
-changing the \code{observation} argument to \code{ols(mean = R)}.
+changing the \code{observation} argument to 
+{\tt
+  \hlstd{mort}
+  \!\!{\color{black}\~{}}\!\!
+  \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{= R)}
+}
 \item[\code{initial}]conditions are expressed as numbers of individuals.
 \item[\code{par}]refers to the parameters that are to be fitted:
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
 \end{description}
 We take our previous parameter estimates from \code{nls} as our starting values (we first plot the results of integrating the ODEs for these parameters to make sure they give a reasonable solution).
 \swp{Note that we still have to assign a parameter value for $k$ even though it is not used for simulating the SIR model.}
+
+\thickredline
 
 <<sirmortstart,warning=FALSE,basefig=TRUE>>=
 SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
