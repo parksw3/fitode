@@ -893,13 +893,14 @@ main set of ODEs, we get a computationally efficient and numerically
 stable way to calculate the overall gradients of the log-likelihood
 with respect to the parameters.
 
-The \code{fitode} package\footnote{\code{fitode} is available on CRAN
-  and consequently can be installed via
-  \code{install.packages("fitode")}.} does all of this computational work
-under the hood, and makes it as easy for a user to fit an ODE to data
-as it was for us to use \code{nls} above to fit a curve based on an analytical formula.
-We illustrate the use of the package by fitting the SIR
-model~\eqref{eq:SIR} to the Bombay plague epidemic.
+The \code{fitode} package\footnote{\code{fitode} is available on
+  \href{https://cran.r-project.org/}{CRAN}and consequently can be
+  installed via \code{install.packages("fitode")}.} does all of this
+computational work under the hood, and makes it as easy for a user to
+fit an ODE to data as it was for us to use \code{nls} above to fit a
+curve based on an analytical formula.  We illustrate the use of the
+package by fitting the SIR model~\eqref{eq:SIR} to the Bombay plague
+epidemic.
 
 We begin by loading the package
 <<load fitode, message=FALSE>>=
@@ -961,6 +962,8 @@ changing the \code{observation} argument to
 \item[\code{par}]refers to the parameters that are to be fitted:
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
 \end{description}
+To start the fitting procedure, we need initial guesses for the give parameters.
+
 We take our previous parameter estimates from \code{nls} as our starting values (we first plot the results of integrating the ODEs for these parameters to make sure they give a reasonable solution).
 \swp{Note that we still have to assign a parameter value for $k$ even though it is not used for simulating the SIR model.}
 
