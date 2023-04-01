@@ -118,15 +118,14 @@ knitr::opts_chunk$set(error = FALSE)
   infectious disease transmission models to real public health
   problems.  He was curious to know how one goes about fitting
   dynamical models to data, and why it can be hard.  Initially in
-  response to Fred's questions, we developed a user-friendly
-  \code{R} package that facilitates fitting ordinary differential
-    equations to observed time series.  Here, we use the package
-  (\code{fitode}) to provide a brief tutorial introduction to
-  fitting compartmental epidemic models to a single observed time
-  series.  We assume that, similar to Fred \bmb{``like Fred''?}, the reader is familiar
-  with dynamical systems from a mathematical perspective, but has
-  little or no experience with statistical methodology or optimization
-  techniques.
+  response to Fred's questions, we developed a user-friendly \code{R}
+  package that facilitates fitting ordinary differential equations to
+  observed time series.  Here, we use the package (\code{fitode}) to
+  provide a brief tutorial introduction to fitting compartmental
+  epidemic models to a single observed time series.  We assume that,
+  like Fred, the reader is familiar with dynamical systems from a
+  mathematical perspective, but has limited experience (if any) with
+  statistical methodology or optimization techniques.
 \end{abstract}
 
 \begin{keywords}
@@ -186,11 +185,7 @@ models are used for the development and analysis of policy options for
 infectious disease management \cite{elderd2006uncertainty}, a
 challenge that has absorbed the attention of many mathematical
 epidemiologists during the course of the present COVID-19 pandemic
-\cite{Hill+21}.
-\swp{Can't find appropriate papers to cite here...}
-\djde{I added the only one that came to mind.  There are probably
-other articles of this type commenting on modelling working for
-PH during the pandemic.}
+\cite{Broo+21,Hill+21,Nixo+22}.
 
 While visiting the University of British Columbia in 2014--2015, one
 of us (DE) had many conversations with Fred Brauer about epidemic
@@ -214,7 +209,7 @@ Fred's memory.
 
 We begin by revisiting \KM's \cite{KermMcKe27}
 application of their SIR model \eqref{eq:SIR} to the epidemic of
-plague in Bombay in 1905--1906.  The observed data (black dots in
+plague in Bombay in 1905--1906.  The observed data (dots in
 Figure~\ref{fig:Bombay}) were weekly numbers of deaths from plague.
 
 Referring to their version of Figure~\ref{fig:Bombay}, \KM
@@ -231,14 +226,14 @@ analytical form,
 \ddt{R} \approx a \sech^2{(\omega\,t - \phi)}\,.
 \end{equation}
 \end{linenomath*}
-Noting that the basic reproduction number is
+Noting that the \term{basic reproduction number} is
 \begin{linenomath*}
 \begin{equation}\label{eq:R0def}
 \R_0 = \frac{N\beta}{\gamma} \,,
 \end{equation}
 \end{linenomath*}
 where $N$ is the total population size,
-and hence the effective reproduction number at time $t=0$
+and hence the \term{effective reproduction number} at time $t=0$
 is
 \begin{linenomath*}
 \begin{equation}\label{eq:Reffdef}
@@ -280,20 +275,8 @@ a_fun <- function(Reff, gamma, S0, I0)
 
 The \KMcol curve in Figure~\ref{fig:Bombay} does appear to provide a
 reasonable fit to the data, but \KM \cite{KermMcKe27} gave no
-indication of how their parameter estimates were obtained.  \djde{When
-  was least-squares trajectory matching first done?  Do we think they
-  did that?  or just played with parameter values and fitted by eye?}
-\swp{It seems unlikely that they had the ability to perform least
-  squares back in 1927... I was able to find least squares SIR and
-  SI3R(!) model fit from 1990 \cite[p.\,51]{kryscio1990modeling} but
-  not sure if there's anything earlier.  They could have used human
-  computers, as Ben notes.}\djde{According to
-  \href{https://en.wikipedia.org/wiki/Least_squares}{Wikipedia}, the
-  method of least squares goes back to Legendre and Gauss, a century
-  before KM.}
-  \swp{Ah yes I see. But maybe better to focus on model fitting in
-  the context of epidemic models?}
-  Whatever their process, they must have engaged in some
+indication of how their parameter estimates were obtained.
+Whatever their process, they must have engaged in some
 sort of \term{trajectory matching}, i.e., adjusting parameter values
 until the model---equation~\eqref{eq:sech} in their case---is, by some
 measure, close to the observed data points.  The most obvious metric
@@ -311,7 +294,7 @@ vector for \KM's problem is
 $\thetavec=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
 respect to $\thetavec$ would have required some heroic arithmetic
 with a pencil and paper in 1927, but it is a simple task with the
-aid of a computer.
+aid of a modern computer.
 
 In the following segment of R code, we fit equation \eqref{eq:sech} to
 the Bombay plague data (which are included in the \code{fitode}
@@ -334,20 +317,9 @@ print(nls.parameters)
 
 \noindent
 Above, we chose as our starting guess the fitted parameter values of
-\KM (see Table~\ref{tab:Bombay}).  The least
-squares parameter values differ from KM's by a few percent:
-
-\bmb{do we need this demonstration, or could we just point to Table~1 and let the reader eyeball for themselves?}
-\swp{I don't think we need this demonstration.}
-<<percent-diff>>=
-percent.difference <-
-    100*(KM.parameters - nls.parameters)/nls.parameters
-print(percent.difference)
-@
-
-\noindent
-Our least squares fitted function is shown in \nlscol in
-Figure~\ref{fig:Bombay}.
+\KM.  Our least squares parameter values differ from KM's by a few
+percent (see Table~\ref{tab:Bombay}).  The least squares fitted
+function is shown in \nlscol in Figure~\ref{fig:Bombay}.
 
 Starting from someone else's fit is not a great way to test the
 method, but fortunately the least squares fit for this problem is not
@@ -362,23 +334,20 @@ $\omega(t-\tpeak)$ then
     \tpeak = \frac{\phi}{\omega}
   \end{equation}
 \end{linenomath*}
-is the time at which the maximum occurs; both $a$ and $\tpeak$ can be
-guessed approximately by looking at the plotted data, and a
-very rough guess is sufficient to converge on the same fit:
-
-\bmb{can we come up with a similar geometric intuition for $\omega$?
-  Wild guess of 1 is OK here and will be OK \emph{when parameters have
-    a reasonable scaling}, but \ldots} \djde{Assuming $I_0/S_0\ll1$,
-  $\omega\sim1/2$ the initial growth rate, so it can be approximated
-  easily by plotting the data on a log scale and estimating the slope
-  (and dividing by 2).  That's not as trivial as guessing $a$ and
-  $\tpeak$ from looking at the time series, but does seem preferable
-  to a wild guess.}
+is the \term{peak time} (at which the maximum occurs); both $a$ and
+$\tpeak$ can be guessed approximately by looking at the plotted data.
+Assuming $I_0/S_0\ll1$, $\omega$ is half the initial exponential
+growth rate, so it can be approximated easily by plotting the data on
+a log scale, estimating the initial slope, and dividing by 2.
+\djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is likely to be
+  much better than fitting the initial condition $I_0$.  Is this worth
+  commenting on?}  Very rough guesses for $a$, $\tpeak$ and $\omega$
+are sufficient to converge on the same fit:
 
 <<nls-bombay-2>>=
-a.guess <- 1000    # crude "by eye" estimate of peak value
-tpeak.guess <- 15  # ... and of peak time
-omega.guess <- 1   # wild guess
+a.guess <- 1000    # crude "by eye" estimate of peak value,
+tpeak.guess <- 15  # peak time,
+omega.guess <- 1   # and half the initial growth rate
 phi.guess <- omega.guess * tpeak.guess
 nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
               data = fitode::bombay,
@@ -387,9 +356,7 @@ nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
 print(nls.parameters <- coef(nlsfit))
 @
 
-\djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is
-likely to be much better than fitting the initial condition $I_0$.}
-
+\noindent
 However, if you experiment with initial guesses, you will find that if
 you make a sufficiently \emph{bad} guess, then \code{nls} will fail.
 For example, starting from $a=2000$, $\tpeak=5$, and $\omega=0.1$
@@ -514,8 +481,8 @@ analytically\footnote{In (common) situations in which
   \Reff &= \frac{1}{2}\bigg( 1 +
           \sqrt{1 + \frac{4\,\omega\,I_0 \sinh\!{(2\phi)}}{a}}\bigg) \,,
           \label{eq:Reff} \\
-  \gamma &= \frac{2\,\omega\tanh{\phi}}{\Reff-1} \label{eq:gamma} \\
-  S_0 &= \frac{2\,\Reff\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} % Bacaer eq. (3)
+  \gamma &= \frac{2\,\omega\tanh{\phi}}{\Reff-1} \,, \label{eq:gamma} \\
+  S_0 &= \frac{2\,\Reff\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} \,. % Bacaer eq. (3)
       \label{eq:S0}
 \end{align}
 \end{subequations}
@@ -541,25 +508,6 @@ and the mean intrinsic generation interval \cite{ChamDush15},
 which is the same as the mean infectious period in this simple model
 \cite{KrylEarn13,Cham+18}.  Table~\ref{tab:Bombay} lists the values of
 the parameters as estimated by \KM and by us using \code{nls}.
-
-\swp{The problem is that we're assuming S0 = 1e6 - 1. We can't do
-  this.  We need much lower S0 to fit the data. So by assuming a very
-  large S0, things go crazy.  So we're better off starting with
-  assuming I0 = 1 and assuming the rest. That's the whole point of
-  Bacaer's paper: that the required S0 to fit the data is so low that
-  the standard SIR model is actually not appropriate for modeling the
-  bombay epidemic} \djde{I'll return to this after reading Baca\"er
-  \cite{bacaermodel2012}. Meanwhile I will note that Gani and Leach
-  \cite{GaniLeac04} found $\R_0\simeq1.3\pm1.8$ and
-  $\Tg\simeq6.8\pm2.2$ days, for ``modern'' pneumonic plague, and
-  based on that $\Tg$ we \cite{Earn+20} found similar $\R_0$ for 17th
-  century plague in London.  Baca\"er \cite{bacaermodel2012} seems to
-  assume (like \KM) that plague in Bombay had a CFP of near 1.
-  Anyway, the point of the discussion here will be to alert readers to
-  be cautious for all sorts of reasons, and a good fit of a model to
-  data does not necessarily mean that it is fair to make inferences
-  from estimated parameter values.}  \djde{Note KM's caution about
-  interpreting the param values.}
 
 <<invert-KM-analytically, echo=FALSE>>=
 invert_params <- function(I0, params) {
@@ -657,34 +605,33 @@ traj_ci <- function(t,
 }
 @
 
-\subsection{Correctly handling weekly mortality}
+\paragraph*{Correctly handling weekly mortality.}
 
-\swp{I don't think it's worth pursuing KM approx any further... we're
-  trying to show how to fit an ODE, not KM approximation.}\djde{That's
-  not my perspective.  We're trying to show how to fit a model to
-  data for people who haven't a clue, and I think it is nice to
-  show how easy it would have been for KM to do this right.}
-\swp{OK. That seems fine. But we should divide up the equation below to say
-that we want to integral. And then say that for KM, integral of dR/dt is so and so.}
-
-Something we have glossed over is that approximating weekly mortality
-(what is observed) by $\dbydt{R}$ is unnecessary.  A better estimate
-of weekly mortality reported at time $t_i$ would be to take
+Something we have glossed over is that we have fitted observed weekly
+mortality to the \emph{instantaneous} rate, $\dbydt{R}$
+\eqref{eq:sech}, which is not observed.  We did this because it is
+what \KM did, and we wanted to be able to compare formal nonlinear
+least squares fits to \KM's results\footnote{In his reanalysis of
+  \KM's results, Baca\"er \cite{bacaermodel2012} also retained this
+  conceptual error.}.  Weekly mortality reported at time $t_i$ should
+really be modelled as the aggregation of $\dbydt{R}$ over the
+preceding week, i.e., it would be better to define
 \begin{linenomath*}
-  \begin{align}\label{eq:sechcorrect}
-f(t_i;\thetavec) &=
-\int_{t_{i-1}}^{t_i} \ddt{R}\,\dt \\ \label{eq:correct.mortality}
-&= \int_{t_{i-1}}^{t_i}  a \sech^2{(\omega\,t - \phi)}\,\dt \\
-&= \frac{a}{\omega}\Big(\tanh{(\omega\,t_i - \phi)}
-  - \tanh{(\omega\,t_{i-1} - \phi)}\Big) \,.
-\end{align}
+  \begin{subequations}\label{eq:sechcorrect}
+    \begin{align}
+      f(t_i;\thetavec) &=
+                         \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
+\label{eq:correct.mortality} \\
+                       &= \int_{t_{i-1}}^{t_i}  a \sech^2{(\omega\,t - \phi)}\,\dt \\
+                       &= \frac{a}{\omega}\Big(\tanh{(\omega\,t_i - \phi)}
+                         - \tanh{(\omega\,t_{i-1} - \phi)}\Big) \,.
+    \end{align}
+  \end{subequations}
 \end{linenomath*}
-We have not done this because \KM didn't, \djde{Did Baca\"er
-  \cite{bacaermodel2012} discuss this?}\swp{no}
-  and we wanted to compare our
-fits to theirs.  However, there is no question that we should really
-be fitting to weekly aggregations, and we do this below when fitting
-to the ODEs directly.
+Indeed, whether we are fitting to mortality or incidence or another
+instantaneous rate, we should be integrating over the observation
+interval, which is precisely what we do below when fitting to the ODEs
+directly.
 
 \section{Uncertainty}
 
@@ -699,12 +646,8 @@ framework.  The typical output of such a framework is a
 \term{confidence interval} (CI) within which our best estimate lies.
 For example, the final column of Table~\ref{tab:Bombay} lists 95\% CIs
 on our \code{nls} parameter estimates, and the pink shaded region in
-Figure~\ref{fig:Bombay} is a 95\% \term{confidence band}, which shows
-CIs for each point of the fitted model curve.  \djde{We should
-  probably also include the fitode confidence band in \fitodecol as I
-  had as a placeholder before.}
-  \swp{I tried and it overlaps almost perfectly with KM CBs so we can't
-  tell...}
+the top panel of Figure~\ref{fig:Bombay} is a 95\% \term{confidence
+  band}, which shows CIs for each point of the fitted model curve.
 
 To understand how to estimate CIs, we will start by thinking about the
 probability of observing the data $\{y_i\}$.  We imagine that the
@@ -766,7 +709,7 @@ the least squares solution!  The standard way of expressing this is to
 say that the least squares solution $\thetavechat$ is the
 \term{maximum likelihood estimate} (MLE) of $\thetavec$, under the
 assumption of independent, identically distributed
-(i.e. mean-zero, constant-variance) Normal observation errors in the time series.
+(i.e., mean-zero, constant-variance) Normal observation errors in the time series.
 
 Having introduced the idea of maximum likelihood, we can do better by
 making a more realistic assumption about the error distribution.  We
@@ -791,18 +734,18 @@ Poisson distribution of observations with mean equal to the fitted
 model trajectory [equation~\eqref{eq:SIR;R}]. This handles
 discrete observations and allows the variance to change as a function
 of the mean. However, the Poisson distribution assumes
-\term{equidispersion} --- the variance is equal to the mean --- while
+\term{equidispersion}---the variance is equal to the mean---while
 typical observation errors are \term{overdispersed}, meaning that
-the variance greater than the mean. Ignoring overdispersion
+the variance is greater than the mean. Ignoring overdispersion
 will underestimate the uncertainty in the parameters and lead
 to overly narrow confidence intervals on parameters and predictions.
 The negative binomial distribution is one way to generalize
 the Poisson to allow for overdispersion \citep{linden2011using}.
 
-The probability mass function for the negative binomial distribution
-(for counts $x=0,1,2,\ldots$) is
+The probability mass function for the \term{negative binomial
+  distribution} (for counts $x=0,1,2,\ldots$) is
 \begin{linenomath*}
-\begin{equation}
+\begin{equation}\label{eq:NB}
   \texttt{NB}(x;\mu,k) =
   \frac{\Gamma(k+x)}{\Gamma(k) x!}
   \left(\frac{k}{k+\mu}\right)^k
@@ -858,6 +801,7 @@ for a heuristic explanation or \cite{Wassermanall2010} for a rigorous
 \bmb{probably chapter 9 ``Parametric Inference''. SpringerLink via McMaster
   \href{https://link-springer-com.libaccess.lib.mcmaster.ca/book/10.1007/978-0-387-21736-9}{won't give me sufficient access to see exactly what's in there}}
 
+\hypertarget{DeltaMethod}{}
 The diagonal elements of $\mathrm{Cov}(\thetavec)$ are the (estimated)
 variances of the parameter estimates, so we can take their (positive)
 square roots to get the standard error (SE) and compute approximate
@@ -920,21 +864,6 @@ observation time $t_i$ (and hence obtain a confidence band) by
 considering $g(\thetavec)=f(t_i;\thetavec)$.  This is how we obtained
 the pink confidence band shown in Figure~\ref{fig:Bombay}.
 
-\djde{Available in \code{fitode} but we not what we doing here:
-  Another possibility would be to use the estimated means and variances
-  for $\thetavec$ to define a multivariate Normal, sample that many
-  times and run the model, and draw the bands that contain 95\% of the
-  simulations.}
-  \swp{This is not what we actually do in fitode. We do something called
-  importance sampling where we draw from multivariate normal and then
-  do some weighting... probably a bit too much to explain in this paper
-  because we have to go all the way to metropolis hastings..}
-
-\swp{we might want to mention that profile likelihoods are a thing but are
-probably too complicated for this paper and especially for trajectories?}
-\djde{mentioning profile likelihoods in passing, with a reference,
-  would be good; we could add that here or in the Discussion.}
-
 \section{Fitting the ODE}
 
 Until now, we have focused on fitting KM's approximation
@@ -949,26 +878,29 @@ challenges, but conceptually the problem is the same as if we did have
 an analytical formula.  We can still use the Delta method
 \eqref{eq:DeltaMethod} to estimate uncertainty, but calculating the
 gradient $(\nabla g)(\thetavec)$ is not straightforward if $g$ is a
-numerical solution of an ODE; we must simultaneously solve a set of \term{sensitivity equations} alongside the main differential equations
-\cite{raue2013lessons}.\footnote{Sensitivity equations are an
-  auxiliary set of ODEs that define the time derivatives of the
-  derivatives of the state variables with respect to the parameters,
-  i.e.,
-  $\frac{\rm d}{{\rm d}t}\left(\frac{{\rm d}x(t,\theta)}{{\rm
-        d}\theta}\right)$. They can easily be derived using the chain
-  rule; by solving them in parallel with the main set of ODEs, we get
-  a computationally efficient and numerically stable way to calculate
-  the overall gradients of the log-likelihood with respect to the
-  parameters. \bmb{this explanation can go in the main text if that
-    seems more appropriate}}
+numerical solution of an ODE; we must simultaneously solve a set of
+\term{sensitivity equations} alongside the main differential equations
+\cite{raue2013lessons}. Sensitivity equations are an auxiliary set of
+ODEs that define the time derivatives of the derivatives of the state
+variables with respect to the parameters, i.e.,
+$\frac{\rm d}{{\rm d}t}\big(\frac{\partial
+  x(t,\theta_i)}{\partial\theta_i}\big)$, where $\theta_i$ refers to
+the components of $\thetavec$\djde{Ben, I changed total derivative wrt
+  $\theta$ to partial derivative wrt $\theta_i$, which made more sense
+  to me, but I haven't looked at the reference.}. They can easily be
+derived using the chain rule; by solving them in parallel with the
+main set of ODEs, we get a computationally efficient and numerically
+stable way to calculate the overall gradients of the log-likelihood
+with respect to the parameters.
 
-The \code{fitode} package\footnote{\code{fitode} is available on CRAN
-  and consequently can be installed via
-  \code{install.packages("fitode")}.} does all of this computational work
-under the hood, and makes it as easy for a user to fit an ODE to data
-as it was for us to use \code{nls} above to fit a curve based on an analytical formula.
-We illustrate the use of the package by fitting the SIR
-model~\eqref{eq:SIR} to the Bombay plague epidemic.
+The \code{fitode} package\footnote{\code{fitode} is available on
+  \href{https://cran.r-project.org/}{CRAN}and consequently can be
+  installed via \code{install.packages("fitode")}.} does all of this
+computational work under the hood, and makes it as easy for a user to
+fit an ODE to data as it was for us to use \code{nls} above to fit a
+curve based on an analytical formula.  We illustrate the use of the
+package by fitting the SIR model~\eqref{eq:SIR} to the Bombay plague
+epidemic.
 
 We begin by loading the package
 <<load fitode, message=FALSE>>=
@@ -987,7 +919,7 @@ SIR_model <- odemodel(
         R ~ gamma * I
     ),
     observation = list(
-        mort ~ dnbinom(mu = R, size=k)
+        mort ~ dnbinom(mu = R, size = k)
     ),
     diffnames="R",
     initial=list(
@@ -1003,33 +935,33 @@ SIR_model <- odemodel(
 In the model definition above:
 \begin{description}
 \item[\code{model}]specifies the vector field given by the ODE \eqref{eq:SIR}.
-\bmb{I think it would be nice to compare, but we might be able to minimize the actual amount of code (e.g. say in passing ``OLS was fitted by using \code{ols} as the response distribution'', although that would miss the explanation of profiling out $\sigma$ \ldots)}
-\djde{We can just give the nbinom code but say we also fitted
-  with \code{ols}, i.e., changing the {\tt\hlkwc{observation}}
-  list to: {\tt
-%%\begin{alltt}
-  \hlstd{mort}
-  %%\hlopt{~} %% FIX: this comes out blank, hence:
-  {\color{black}\~{}}
-  \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{=
-    gamma} \hlopt{*} \hlstd{I)}
-%%\end{alltt}
-}
-}
-\swp{Rewrote some parts here to reflect nbinom implementation + correct mortality handling}
 \item[\code{observation}]specifies that the observed data
-  (\code{mort}) are assumed to arise from sampling from the negative binomial
-  distribution with a dispersion parameter of $k$ (\code{dnbinom}); the
-  mean of the distribution is given by the fitted model trajectory [equation~\eqref{eq:correct.mortality}]
+  (\code{mort}) are assumed to arise from sampling from the negative
+  binomial distribution [\code{dnbinom}, equation~\eqref{eq:NB}] with
+  overdispersion parameter $k$; the mean of the distribution is given by
+  the fitted model trajectory [equation~\eqref{eq:correct.mortality}],
 \begin{linenomath*}
 \begin{equation}
+<<<<<<< HEAD
   \mu(t_i) = \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
+=======
+  \mu(t) = \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
+  = R(t_i) - R(t_{i-1})
+ \,,
+>>>>>>> ea3d170b82d47541ce5888f0ba9fb503e119488c
 \end{equation}
 \end{linenomath*}
-which is equal to $R(t_i) - R(t_{i-1})$. This is implemented by using the
-\code{diffnames} argument to specify the state variable, for which consecutive differences
-need to be calculated and returned (instead of its raw value). Ordinary least squares
-can be implemented by simply changing the \code{observation} to \code{ols(mean = R)}
+Fitting to such differences is implemented by using the
+\code{diffnames} argument to specify the state variable for which
+consecutive differences are to be used (so, if the focal variable is
+$R$ then \code{fitode} fits to $R(t_i) - R(t_{i-1})$ rather than
+$R(t_i)$).  Ordinary least squares can be implemented by simply
+changing the \code{observation} argument to
+{\tt
+  \hlstd{mort}
+  \!\!{\color{black}\~{}}\!\!
+  \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{= R)}
+}
 \item[\code{initial}]conditions are expressed as numbers of individuals.
 \item[\code{par}]refers to the parameters that are to be fitted:
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
@@ -1583,6 +1515,47 @@ is the same.
 \item a bit of tribute to Fred
 \end{itemize}
 
+\subsection{Comments moved from elsewhere that might be helpful in Discussion}
+
+We chose to fix $I_0$ rather than the (known) population size
+($N\simeq10^6$).  \swp{The problem is that we're assuming S0 = 1e6 -
+  1. We can't do this.  We need much lower S0 to fit the data. So by
+  assuming a very large S0, things go crazy.  So we're better off
+  starting with assuming I0 = 1 and assuming the rest. That's the
+  whole point of Bacaer's paper: that the required S0 to fit the data
+  is so low that the standard SIR model is actually not appropriate
+  for modeling the bombay epidemic} \djde{I'll return to this after
+  reading Baca\"er \cite{bacaermodel2012}. Meanwhile I will note that
+  Gani and Leach \cite{GaniLeac04} found $\R_0\simeq1.3\pm1.8$ and
+  $\Tg\simeq6.8\pm2.2$ days, for ``modern'' pneumonic plague, and
+  based on that $\Tg$ we \cite{Earn+20} found similar $\R_0$ for 17th
+  century plague in London.  Baca\"er \cite{bacaermodel2012} seems to
+  assume (like \KM) that plague in Bombay had a CFP of near 1.
+  Anyway, the point of the discussion here will be to alert readers to
+  be cautious for all sorts of reasons, and a good fit of a model to
+  data does not necessarily mean that it is fair to make inferences
+  from estimated parameter values.}  \djde{Note KM's caution about
+  interpreting the param values.}
+
+Alternatives to the \hyperlink{DeltaMethod}{Delta Method}.
+\djde{Available in \code{fitode} but we not what we doing here:
+  Another possibility would be to use the estimated means and variances
+  for $\thetavec$ to define a multivariate Normal, sample that many
+  times and run the model, and draw the bands that contain 95\% of the
+  simulations.}
+  \swp{This is not what we actually do in fitode. We do something called
+  importance sampling where we draw from multivariate normal and then
+  do some weighting... probably a bit too much to explain in this paper
+  because we have to go all the way to metropolis hastings..}
+
+\swp{we might want to mention that profile likelihoods are a thing but are
+probably too complicated for this paper and especially for trajectories?}
+\djde{mentioning profile likelihoods in passing, with a reference,
+  would be good; we could add that here or in the Discussion.}
+
+
+
+
 \bibliographystyle{tfs}
 \bibliography{brauer-ms,fitode}
 
@@ -1709,10 +1682,11 @@ print(a.KM)
 \begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Parameters of \code{fitode} fits of the SIR model \eqref{eq:SIR} to Bombay data.
-      The $\R_0$ estimates assume the population of Bombay was
-      $N=1$ million \cite[p.\,408]{bacaermodel2012}.
-}\label{tab:bombay.fitode}
+    \caption{Parameter estimates from \code{fitode} fits of the SIR
+      model \eqref{eq:SIR} to the Bombay plague data (see
+      Figure~\ref{fig:Bombay}).  The $\R_0$ estimates assume the
+      population of Bombay was $N=1$ million
+      \cite[p.\,408]{bacaermodel2012}.}\label{tab:bombay.fitode}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
@@ -1748,12 +1722,14 @@ print(a.KM)
 \end{landscape}
 
 \begin{figure}
-<<Bombay-figure, echo=FALSE, fig.height=5, fig.show="hold", out.width="50%">>=
+\centering
+<<Bombay-figure, echo=FALSE, fig.height=5, fig.show="hold", out.width="95%">>=
 tvals <- seq(0, tmax, length.out=1000)
 setup_plot(ylim = c(0, 1000), xlim=c(0,tmax),
          xlab="weeks", ylab="plague deaths")
 draw_confband(traj_ci(tvals, nls.parameters, vcov(nlsfit)), col=col.nlsCI)
-draw_confband(SIR_confband, col=col.fitodenbCI)
+##DE: skipping fitode confband because there is too much overlap:
+##draw_confband(SIR_confband, col=col.fitodenbCI)
 curve(KM_approx(x, a=a.KM, omega=omega.KM, phi=phi.KM), from=0, to=tmax, n=1000, add=TRUE,
       lwd=lwd, xpd=NA, col=col.KM)
 curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=1000, add=TRUE,
@@ -1762,28 +1738,46 @@ lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd*0.60, lty=
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 draw_legend()
 
-setup_plot(ylim=c(5, 1000), xlim=c(0,tmax),
-         xlab="weeks", ylab="plague deaths",
-         at=c(25, 50, 100, 200, 400, 800))
+setup_plot(ylim=c(0, 1000), xlim=c(0,tmax), #DE: ymin was 5, not sure why
+         xlab="weeks", ylab="plague deaths"
+         ##, at=c(25, 50, 100, 200, 400, 800)
+         )
 draw_confband(SIR_confband, col=col.fitodenbCI)
 lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd)
-# lines(estimate ~ times, data=SIR_ols_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
+curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=250, add=TRUE,
+      lwd=lwd*0.60, xpd=NA, col=col.nls, lty="dotted")
+## lines(estimate ~ times, data=SIR_ols_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 @
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
-    (black dots) were digitized from \cite[Table~IX, p.\,753]{jhyg1907}
-  The fitted
-  curves are based on the KM approximation \eqref{eq:sech}; the
-  associated parameter estimates are given in Table~\ref{tab:Bombay}.}
+  (dots) were digitized from \cite[Table~IX, p.\,753]{jhyg1907}.
+  \emph{Top panel:} The blue and red curves show the \KM approximation
+  \eqref{eq:sech}, as fitted by \KM (blue) and by us using \code{nls}
+  (red, with pink confidence band).  The associated parameter
+  estimates are given in Table~\ref{tab:Bombay}.  The dotted yellow
+  curve shows the \code{fitode} fit, for which the associated
+  parameter estimates are given Table~\ref{tab:bombay.fitode}.
+  \emph{Bottom panel:} The yellow curve is identical to the yellow
+  dotted curve in the top panel, and the yellow band shows the
+  \code{fitode} confidence band.  The dotted red curve is identical to
+  the solid red curve in the top panel.  We have separated the two
+  panels because the confidence band overlap would make the plots
+  difficult to interpret.\djde{We need a legend in the bottom panel.}
+  \djde{Ben's comment in the caption to Figure~\ref{fig:stoch} applies
+    here too.  We need to explain why the \code{fitode} estimate and
+    confidence band is jagged, or make it smooth (which I realize is
+    easy for the estimate and a can of worms for the confidence
+    band).}  }
 \label{fig:Bombay}
 \end{figure}
 
 \begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Parameters of \code{fitode} fits of the SIR model \eqref{eq:SIR} to a stochastic SIR simulation.
-}\label{tab:stoch.fitode}
+    \caption{Parameter estimates from \code{fitode} fits of the SIR
+      model \eqref{eq:SIR} to a stochastic SIR simulation (see
+      Figure~\ref{fig:stoch}).}\label{tab:stoch.fitode}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
@@ -1847,8 +1841,11 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
 \begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Parameters of \code{fitode} fits of the SIR model \eqref{eq:SIR} to Philadelphia flu epidemic.
-}\label{tab:phila.fitode}
+    \caption{Parameter estimates from \code{fitode} fits
+      of the SIR model \eqref{eq:SIR} to reported
+      pneumonia and influenza mortality during the main
+      wave of the 1918 influenza pandemic in the city
+      of Philadelphia.}\label{tab:phila.fitode}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
@@ -1884,14 +1881,12 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
 \begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Parameter estimates for the Philadelphia epidemic
-        of \KM's \cite{KermMcKe27} approximation
-      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}
-      using nonlinear least squares
-      (\code{nls}).
-      The $\R_0$ estimates assume the population of Philadelphia
-      in 1918 is....
-}\label{tab:philanls}
+    \caption{Parameter estimates for the 1918 influenza epidemic in
+      Philadelphia, based on \KM's \cite{KermMcKe27} approximation
+      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, using nonlinear
+      least squares (\code{nls}).  The $\R_0$ estimates assume the
+      population of Philadelphia in 1918 was\dots
+    See Figure~\ref{fig:phila}.}\label{tab:philanls}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
