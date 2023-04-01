@@ -1023,7 +1023,7 @@ In the model definition above:
   mean of the distribution is given by the fitted model trajectory [equation~\eqref{eq:correct.mortality}]
 \begin{linenomath*}
 \begin{equation}
-  \mu(t) = \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
+  \mu(t_i) = \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
 \end{equation}
 \end{linenomath*}
 which is equal to $R(t_i) - R(t_{i-1})$. This is implemented by using the
@@ -1034,23 +1034,7 @@ can be implemented by simply changing the \code{observation} to \code{ols(mean =
 \item[\code{par}]refers to the parameters that are to be fitted:
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
 \end{description}
-We take our previous parameter estimates from \code{nls} as our starting values (we first plot the results of integrating the ODEs for these parameters to make sure they give a reasonable solution).
-\swp{Note that we still have to assign a parameter value for $k$ even though it is not used for simulating the SIR model.}
-
-<<sirmortstart,warning=FALSE,basefig=TRUE>>=
-SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
-
-ss_SIR <- simulate(SIR_model,
-    parms=SIR_start, times=bombay$week)
-
-plot(bombay)
-lines(ss_SIR$times, ss_SIR$R)
-@
-We already have a pretty good fit. Note that \code{fitode} returns \code{NA} at
-$t=1$ because we are starting from $t=1$, meaning that $R(2) - R(1)$ is the first
-value we can calculate. So we have to add an extra column to the data set when we're
-actually doing the fit:
-
+Since we are taking the difference $\mu(t_i) = R(t_i) - R(t_{i-1})$ to calculate the mortality trajectory, we have to add an extra row representing $t_0$ to the data set in order to compute $\mu(t_1) = R(t_1) - R(t_0)$:
 <<sirmortfit_data, cache=TRUE, warning=FALSE>>=
 bombay2 <- rbind(
     c(times=bombay$week[1] -
@@ -1058,17 +1042,27 @@ bombay2 <- rbind(
     bombay
 )
 @
-
-\swp{Some issues with parameter identifiability for Bombay. Let's fix gamma for now. Also eaier to compare.}
+Taking our previous parameter estimate from \code{nls} as our starting values, we can fit the model by calling the \code{fitode}: function
 <<sirmortfit,cache=TRUE,warning=FALSE>>=
+SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
 SIR_fit <- fitode(
-    SIR_model,
+    model = SIR_model,
     data = bombay2,
     start = SIR_start,
     fixed = list(gamma=gamma.nls),
     tcol = "week"
 )
 @
+In the fitting function above:
+\begin{description}
+\item[\code{model}]specifies the ODE model to be fitted.
+\item[\code{data}]specifies the data.
+\item[\code{start}]specifies starting parameter set for the optimization.
+\item[\code{fixed}]specifies parameter values to be fixed (and therefore not estimated). Here, we chose to assume that the recovery rate is known (using the \code{fixed} argument) due to parameter unidentifiability. In short, this means that we can obtain nearly identical fits across a wide range of $\gamma$. We discuss this issue in detail in Supplementary Materials.
+\item[\code{tcol}]specifies the time column of the data frame.
+\end{description}
+The resulting fits are plotted in Figure~\ref{fig:Bombay}).
+
 
 <<sirmortfitcoef>>==
 coef.bombay.fitode.nb <- coef(SIR_fit)
@@ -1090,7 +1084,7 @@ assignfun(ci.derived.bombay.fitode.nb[,1], ".bombay.fitode.nb")
 Confidence band on fit:
 <<confband>>=
 tmax <- 33
-tvals <- 1:tmax
+tvals <- 0:tmax
 SIR_confband <- predict(SIR_fit, times=tvals, level=0.95)$mort
 @
 
@@ -1125,9 +1119,6 @@ plot(SIR_fit2, level=0.95)
 Coef?
 <<coef-sir-fit2>>==
 coef(SIR_fit2)
-@
-Issues with parameter identifiability:
-<<bombay_identifiable, cache=TRUE>>=
 @
 
 OLS:
@@ -1165,6 +1156,12 @@ SIR_fit_ols <- fitode(
 )
 @
 
+Trying to numerically calculate the Hessian:
+<<>>=
+
+SIR_fit_ols@mle2@vcov
+@
+
 <<sirmortfitcoefols>>==
 coef.bombay.fitode.ols <- coef(SIR_fit_ols)
 ci.bombay.fitode.ols <- confint(SIR_fit_ols)[,-1]
@@ -1174,11 +1171,10 @@ assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
 
 \swp{This is also broken. Having trouble calculating vcov...}
 <<sirmortfit_ols_confband, eval=FALSE>>==
-SIR_ols_confband <- predict(SIR_fit_ols, level=0.95)$mort
+SIR_ols_confband <- predict(SIR_fit_ols, times=tvals, level=0.95)$mort
 @
 
-Trying to understand what's going on:
-<<bombay_likelihood_fit, cache=TRUE, warning=FALSE, message=FALSE>>==
+<<bombay_likelihood_fit, cache=TRUE, warning=FALSE, message=FALSE, include=FALSE>>==
 if (file.exists("bombay-likelihood.rda")) {
     load("bombay-likelihood.rda")
 } else {
