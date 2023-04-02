@@ -942,13 +942,9 @@ In the model definition above:
   the fitted model trajectory [equation~\eqref{eq:correct.mortality}],
 \begin{linenomath*}
 \begin{equation}
-<<<<<<< HEAD
   \mu(t_i) = \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
-=======
-  \mu(t) = \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
   = R(t_i) - R(t_{i-1})
  \,,
->>>>>>> ea3d170b82d47541ce5888f0ba9fb503e119488c
 \end{equation}
 \end{linenomath*}
 Fitting to such differences is implemented by using the
