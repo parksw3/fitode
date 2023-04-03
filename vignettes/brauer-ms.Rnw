@@ -514,8 +514,8 @@ invert_params <- function(I0, params) {
     with(as.list(params), {
         tpeak <- phi / omega
         Reff <- (1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2
-	q <- (Reff-1)/tanh(phi)
-	gamma <- 2 * omega/q ## gamma has a unit of 1/week
+	q <- (Reff-1)/tanh(phi) ## this is problematic. Not sure why.
+    gamma <- 2 * omega/q ## gamma has a unit of 1/week
 	S0 <- 2 * Reff * I0 * sinh(phi)^2/(Reff - 1)^2
 	beta <- Reff * gamma/S0
 	c(tpeak=tpeak, Reff=Reff, S0=S0, gamma=gamma, Tg=1/gamma, beta=beta)
@@ -990,16 +990,19 @@ In the fitting function above:
 \item[\code{tcol}]specifies the time column of the data frame.
 \end{description}
 The resulting fits are plotted in Figure~\ref{fig:Bombay}).
+The estimated coefficients and the associated confidence intervals can be
+obtained via \code{coef} and \code{confint} functions (Table~\ref{tab:bombay.fitode});
+the latter function also allows users to obtain confidence intervals for derived parameters using the Delta method.
 
+\swp{overall, the bombay data set is a really bad example for fitting SIR model. Not sure what else to do or say.}
 
-<<sirmortfitcoef>>==
+<<sirmortfitcoef, include=FALSE>>==
 coef.bombay.fitode.nb <- coef(SIR_fit)
 ci.bombay.fitode.nb <- confint(SIR_fit)[,-1]
 assignfun(coef.bombay.fitode.nb, ".bombay.fitode.nb")
 @
 
-Confint on derived parameers:
-<<sirmortconfint>>==
+<<sirmortconfint, include=FALSE>>==
 ci.derived.bombay.fitode.nb <- confint(SIR_fit,
         parm=list(
             Reff~beta*S0/gamma.nls,
@@ -1009,48 +1012,14 @@ ci.derived.bombay.fitode.nb <- confint(SIR_fit,
 assignfun(ci.derived.bombay.fitode.nb[,1], ".bombay.fitode.nb")
 @
 
-Confidence band on fit:
-<<confband>>=
+<<confband, include=FALSE>>=
 tmax <- 33
 tvals <- 0:tmax
 SIR_confband <- predict(SIR_fit, times=tvals, level=0.95)$mort
 @
 
-Plot:
-<<sirmortfitplot,basefig=TRUE>>=
-plot(SIR_fit, level=0.95)
-@
-The fit is very good, but the estimated parameters are unrealistic, with a mean infectious period ($1/\gamma$) of 0.3 days.
-<<sirmortcoef>>=
-coef(SIR_fit)
-@
-What happens if we force the infectious period to be more realistic (longer: i.e., fix a smaller value of $\gamma$)?
-<<sirmortfit2,cache=TRUE,warning=FALSE>>=
-SIR_fit2 <- fitode(
-    SIR_model,
-    data = bombay2,
-    start = coef(SIR_fit),
-    fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
-    tcol = "week"
-)
-@
-Much worse fit:
-
-<<loglik-sir>>==
-logLik(SIR_fit) - logLik(SIR_fit2)
-@
-
-Plot?
-<<plot-sir-fit2>>==
-plot(SIR_fit2, level=0.95)
-@
-Coef?
-<<coef-sir-fit2>>==
-coef(SIR_fit2)
-@
-
-OLS:
-<<sirmortmodel, echo=FALSE>>=
+% OLS:
+<<sirmortmodel, include=FALSE>>=
 SIR_model_ols <- odemodel(
     name="SIR model",
     model=list(
@@ -1071,8 +1040,8 @@ SIR_model_ols <- odemodel(
 )
 @
 
-Also fixing gamma for now:
-<<sirmortfit_correct, cache=TRUE, warning=FALSE>>=
+% Also fixing gamma for now:
+<<sirmortfit_correct, cache=TRUE, warning=FALSE, include=FALSE>>=
 SIR_start_ols <- coef(SIR_fit)[-5]
 
 SIR_fit_ols <- fitode(
@@ -1084,21 +1053,14 @@ SIR_fit_ols <- fitode(
 )
 @
 
-Trying to numerically calculate the Hessian:
-<<>>=
-
-SIR_fit_ols@mle2@vcov
-@
-
-<<sirmortfitcoefols>>==
+<<sirmortfitcoefols, include=FALSE>>==
 coef.bombay.fitode.ols <- coef(SIR_fit_ols)
 ci.bombay.fitode.ols <- confint(SIR_fit_ols)[,-1]
 assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
 @
-@
 
-\swp{This is also broken. Having trouble calculating vcov...}
-<<sirmortfit_ols_confband, eval=FALSE>>==
+% \swp{This is also broken. Having trouble calculating vcov...}
+<<sirmortfit_ols_confband, eval=FALSE, include=FALSE>>==
 SIR_ols_confband <- predict(SIR_fit_ols, times=tvals, level=0.95)$mort
 @
 
@@ -1134,7 +1096,7 @@ if (file.exists("bombay-likelihood.rda")) {
 }
 @
 
-<<bombay_likelihood_plot, cache=TRUE>>==
+<<bombay_likelihood_plot, cache=TRUE, include=FALSE>>==
 plot(gammavec, loglikvec,
      xlab="gamma (1/week)",
      ylab="log likelihood",
@@ -1143,7 +1105,7 @@ plot(gammavec, loglikvec,
 
 \section{Example for which KM approx is bad (via stochastic SIR)}
 
-<<compute-stochastic-SIR-via-sirr>>=
+<<compute-stochastic-SIR-via-sirr, include=FALSE>>=
 sirstoch_fn <- system.file("vignette_data", "sirstoch.RData", package = "fitode")
 if (file.exists(sirstoch_fn)) {
     load(sirstoch_fn)
@@ -1161,9 +1123,9 @@ if (file.exists(sirstoch_fn)) {
     mm1 <- create_SIRmodel(R0=R0, N=1)
     sir.det <- compute_SIRts(mm1)
     ## get associated params for KM approx:
-    a.det <- a_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-    omega.det <- omega_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-    phi.det <- phi_fun(Reff=R0, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+    a.det <- a_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+    omega.det <- omega_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+    phi.det <- phi_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
     ##
     tt <- 0:10
     sir.stoch <- get_ssa_soln(mm, stopcrit = NULL, inits=ii, times=tt)
@@ -1172,24 +1134,26 @@ if (file.exists(sirstoch_fn)) {
 }
 @
 
-Example is a Gillespie simulation (actually \code{adaptive.tau}), with
+\swp{need a proper time unit?}
+We now apply the same methodologies to a simulated mortality curve.
+In particular, we simulated a stochastic SIR model using an adaptive tau algorithm, with
 $(S_0,I_0,R_0)=(\Sexpr{iii})$, $\R_0=\Sexpr{R0}$,
-$\gamma=\Sexpr{mm$gamma}$.
+$\gamma=\Sexpr{mm$gamma}/\textrm{week}$.
+The simulated daily mortality curve is shown in Figure~\ref{fig:stoch} alongside the smooth deterministic trajectory of epidemic mortality ($dR/dt$).
+For this particular stochastic realization, the epidemic takes off slowly, resulting in a time shifted difference between the deterministic and stochastic trajectories.
+
+In this case, the Kermack and McKendrick's method gives a poor approximation of the dynamics using original parameters.
+The approximation predicts a much lower epiemide peak and a shorter duration of the epidemic.
 
 
-<<colours, echo=FALSE>>=
+<<colours, include=FALSE>>=
 my.red <- "#E41A1C"     # colour-blind friendly red
 my.blue <- "#377EB8"    # colour-blind friendly blue
 my.green <- "#4DAF4A" # colour-blind friendly green
 my.yellow <- "#FFD92F" # colour-blind friendly yellow
 @
 
-<<sirstochfit, cache=TRUE, warning=FALSE>>=
-start.stoch <- c(beta=mm$beta, gamma=mm$gamma,
-                 S0=iii["S"], I0=iii["I"])
-names(start.stoch) <- c("beta","gamma","S0","I0")
-print(start.stoch)
-
+<<sirstochdata>>==
 ## convert to daily mortality
 mort.stoch <- diff(sir.stoch$R[!duplicated(ceiling(sir.stoch$time*7),fromLast = TRUE)])
 mort.time <- ceiling(sir.stoch$time[!duplicated(ceiling(sir.stoch$time*7),fromLast = TRUE)]*7)
@@ -1199,6 +1163,38 @@ sir.stoch.data <- data.frame(
     time=mort.time[mort.which]/7,
     mort=c(NA, mort.stoch[head(mort.which, -1)])
 )
+@
+
+<<sirnlsfit, cache=TRUE, warning=FALSE, include=FALSE>>==
+nlsfit.stoch <- nls(mort ~ KM_approx(time, a, omega, phi),
+              data = sir.stoch.data,
+              start = c(a = unname(a.det), omega = unname(omega.det),
+                        phi = unname(phi.det)))
+
+nls.stoch.parameters <- coef(nlsfit.stoch)
+assignfun(nls.stoch.parameters, text=".nls.stoch")
+
+orig.params.KM.stoch <- invert_params(I0 = exp(ii[[2]]), params = c(a=unname(a.det), phi=unname(phi.det), omega=unname(omega.det)))
+orig.params.KM.stoch <- signif(orig.params.KM.stoch)
+assignfun(orig.params.KM.stoch, ".KM.stoch")
+
+orig.params.nls.stoch <- invert_params(I0 = exp(ii[[2]]), params = coef(nlsfit.stoch))
+orig.params.nls.stoch <- signif(orig.params.nls.stoch)
+assignfun(orig.params.nls.stoch, ".nls.stoch")
+
+cc.nls.stoch <- suppressMessages(confint(nlsfit.stoch))
+
+cc.delta.stoch <- KMcifun(nlsfit.stoch, I0 = exp(ii[[2]]), N=N)
+assignfun(cc.delta.stoch[,"2.5%"], text=".lwr.nls.stoch")
+assignfun(cc.delta.stoch[,"97.5%"], text=".upr.nls.stoch")
+
+@
+
+<<sirstochfit, cache=TRUE, warning=FALSE, include=FALSE>>=
+start.stoch <- c(beta=mm$beta, gamma=mm$gamma,
+                 S0=iii["S"], I0=iii["I"])
+names(start.stoch) <- c("beta","gamma","S0","I0")
+print(start.stoch)
 
 SIR_stoch_fit <- fitode(
     SIR_model,
@@ -1211,14 +1207,14 @@ sss <- predict(SIR_stoch_fit, level=0.95)[[1]]
 summary(SIR_stoch_fit)
 @
 
-<<stochestassign>>==
+<<stochestassign, include=FALSE>>==
 coef.stoch.fitode <- coef(SIR_stoch_fit)
 ci.stoch.fitode <- confint(SIR_stoch_fit)[,-1]
 assignfun(coef.stoch.fitode, ".stoch.fitode")
 @
 
-Confint on derived parameers:
-<<sirstochconfint>>==
+% Confint on derived parameers:
+<<sirstochconfint, include=FALSE>>==
 ci.derived.stoch.fitode <- confint(SIR_stoch_fit,
         parm=list(
             Reff~beta*S0/1,
@@ -1593,7 +1589,7 @@ draw_confband <- function(confband, col = col.fitodenbCI) {
 }
 draw_legend <- function(lwd=5, pt.bg="white") {
     legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
-       lty=c(NA,"solid","solid","dotted"),
+       lty=c(NA,"solid","solid","solid"),
        col=c("black",col.KM,col.nls,col.fitode.nb),
        pch=c(21,NA,NA,NA),
        pt.bg=c(pt.bg,NA,NA,NA),
@@ -1768,6 +1764,56 @@ points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 \label{fig:Bombay}
 \end{figure}
 
+
+\begin{landscape}
+\begin{table}
+  \begin{center}
+    \caption{Parameters of \KM's \cite{KermMcKe27} approximation
+      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, as estimated by
+      us using original parameters that were used to simulate the stochastic SIR model and using nonlinear least squares
+      (\code{nls}).
+}\label{tab:stoch.nls}
+    \medskip
+    %% making use of ragged2e and array packages:
+    \RaggedRight
+  \begin{tabular}{ m{3cm} | c | c | c | c | c c}
+  \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
+    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
+    & \bfseries KM & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
+    initial prevalence & $I_0$ & -- & -- &
+      \Sexpr{I0.KM} & \Sexpr{I0.nls} & -- \\
+    %%
+    \noalign{\vspace{10pt}}
+    \bfseries Estimated\break parameter \\\hline
+    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{a.det} &
+      \Sexpr{signif(a.nls.stoch,dig)} & \Sexpr{ci_fmt("a", cc.nls.stoch)} \\
+    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
+      \Sexpr{omega.det} & \Sexpr{signif(omega.nls.stoch,dig-1)} & \Sexpr{ci_fmt("omega", cc.nls.stoch)} \\
+    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.det} &
+      \Sexpr{signif(phi.nls.stoch,dig)} & \Sexpr{ci_fmt("phi", cc.nls.stoch)} \\
+    \noalign{\vspace{10pt}}
+    \bfseries Derived\break parameter \\\hline
+    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
+      \Sexpr{tpeak.KM.stoch} & \Sexpr{tpeak.nls.stoch} & \Sexpr{ci_fmt("tpeak", cc.delta.stoch)} \\
+    effective reproduction number & $\Reff$
+      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
+      \Sexpr{Reff.KM.stoch} & \Sexpr{Reff.nls.stoch} & \Sexpr{ci_fmt("Reff", cc.delta.stoch)} \\
+    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
+      \Sexpr{gamma.KM.stoch} & \Sexpr{gamma.nls.stoch} & \Sexpr{ci_fmt("gamma", cc.delta.stoch)} \\
+    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
+      \Sexpr{as.integer(S0.KM.stoch)} & \Sexpr{as.integer(S0.nls.stoch)} & \Sexpr{ci_fmt("S0", cc.delta.stoch, max_ord = 6)} \\
+    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{weeks}}$ &
+      \Sexpr{beta.KM.stoch} & \Sexpr{beta.nls.stoch} & \Sexpr{ci_fmt("beta", cc.delta.stoch)} \\
+    mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
+      \Sexpr{signif(7*Tg.KM.stoch,dig)} & \Sexpr{signif(7*Tg.nls.stoch,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta.stoch)} \\
+    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
+      \Sexpr{signif(2000*Reff.KM.stoch/S0.KM,dig)}
+      & \Sexpr{signif(2000*Reff.nls.stoch/S0.nls.stoch,dig)} & \Sexpr{ci_fmt("R0", cc.delta.stoch)}
+  \end{tabular}
+  \end{center}
+\end{table}
+\end{landscape}
+
 \begin{landscape}
 \begin{table}
   \begin{center}
@@ -1807,21 +1853,35 @@ points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 \end{landscape}
 
 \begin{figure}
-<<plot_stochastic_SIR, echo=FALSE>>=
+<<plot_stochastic_SIR, echo=FALSE, fig.height=5, fig.show="hold", out.width="95%">>=
 plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
      xlim=range(tt), ylim=range(sir.stoch.data$mort, na.rm=TRUE))
-draw_confband(sss, col=col.fitodenbCI)
-lines(sir.det$tau, 1 * sir.det$I * N/7, col=my.red, lwd=lwd) ## dR/dt
+# draw_confband(sss, col=col.fitodenbCI)
+lines(sir.det$tau, 1 * sir.det$I * N/7, col=my.green, lwd=lwd) ## dR/dt
 curve(KM_approx(x, a=a.det, omega=omega.det, phi=phi.det)/7, from=0, to=tmax, n=1000, add=TRUE,
       xpd=NA, col=my.blue, lwd=lwd)
-lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
+# lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
 points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
-legend("topright", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
-       lty=c(NA,"solid","solid","dotted"),
-       col=c("black",col.KM,col.nls,col.fitode.nb),
-       pch=c(21,NA,NA,NA),
-       pt.bg=c("white",NA,NA,NA),
-       legend=c("observed data","KM","deterministic","fitode (nbinom)"))
+legend("topright", bty="n", lwd=c(2,lwd,lwd),
+       lty=c(NA,"solid","solid"),
+       col=c("black",col.KM,my.green),
+       pch=c(21,NA,NA),
+       pt.bg=c("white",NA,NA),
+       legend=c("observed data","KM","deterministic"))
+
+plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
+     xlim=range(tt), ylim=range(sir.stoch.data$mort, na.rm=TRUE))
+draw_confband(traj_ci(tvals, nls.stoch.parameters, vcov(nlsfit.stoch)), col=col.nlsCI)
+curve(KM_approx(x, a=a.nls.stoch, omega=omega.nls.stoch, phi=phi.nls.stoch), from=0, to=tmax, n=1000, add=TRUE,
+      xpd=NA, col=col.nls, lwd=lwd, lty="dashed")
+# lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
+points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
+legend("topright", bty="n", lwd=c(2,lwd,lwd),
+       lty=c(NA,"solid","solid"),
+       col=c("black",col.KM,col.nls),
+       pch=c(21,NA,NA),
+       pt.bg=c("white",NA,NA),
+       legend=c("observed data","KM","deterministic"))
 @
 \caption{ Deterministic fits to a stochastic SIR simulation.
   \bmb{These are better than they were, but \ldots although I
