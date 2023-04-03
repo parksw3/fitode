@@ -1143,8 +1143,10 @@ The simulated daily mortality curve is shown in Figure~\ref{fig:stoch} alongside
 For this particular stochastic realization, the epidemic takes off slowly, resulting in a time shifted difference between the deterministic and stochastic trajectories.
 
 In this case, the Kermack and McKendrick's method gives a poor approximation of the dynamics using original parameters.
-The approximation predicts a much lower epiemide peak and a shorter duration of the epidemic.
-
+The approximation predicts a much lower epidemic peak and a shorter duration of the epidemic.
+\swp{Parameter values are a little screwed up at the moment. Doesn't seem like it's a trivial fix.}
+Nonetheless, we can still fit the KM approximation to the simulated epidemic and obtain a visually good fit.
+\swp{we don't want to interpret these parameter estimates as being ``wrong'' until we figure out the parameter conversion issues.}
 
 <<colours, include=FALSE>>=
 my.red <- "#E41A1C"     # colour-blind friendly red
@@ -1153,7 +1155,7 @@ my.green <- "#4DAF4A" # colour-blind friendly green
 my.yellow <- "#FFD92F" # colour-blind friendly yellow
 @
 
-<<sirstochdata>>==
+<<sirstochdata, include=FALSE>>==
 ## convert to daily mortality
 mort.stoch <- diff(sir.stoch$R[!duplicated(ceiling(sir.stoch$time*7),fromLast = TRUE)])
 mort.time <- ceiling(sir.stoch$time[!duplicated(ceiling(sir.stoch$time*7),fromLast = TRUE)]*7)
