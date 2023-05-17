@@ -864,6 +864,21 @@ observation time $t_i$ (and hence obtain a confidence band) by
 considering $g(\thetavec)=f(t_i;\thetavec)$.  This is how we obtained
 the pink confidence band shown in Figure~\ref{fig:Bombay}.
 
+\swp{Think we need to add some discussion of profile likelihood here:}
+Alternatively, confidence intervals can be calculated using the
+\term{Profile Likeilihood}, which can be calculated by fixing a set of
+model parameters to some values and fitting the remaining parameters
+to maximize the likelihood \citep{Bolk08}.
+By calculating the profile likelihood across a range of parameter
+values, we obtain the profile likelihood surface, from which the
+corresponding confidence intervals can be calculated using
+the likelihood ratio test.
+While using profile likelihoods is generally expected to give
+more accurate estimates of confidence intervals, calculating the
+profile likelihood can be challenging, if not
+practically impossible, for derived parameters or epidemic trajectories.
+Therefore, we rely on the Delta Method hereafter.
+
 \section{Fitting the ODE}
 
 Until now, we have focused on fitting KM's approximation
@@ -1105,6 +1120,7 @@ plot(gammavec, loglikvec,
      ylim=c(-140, -135.5))
 @
 
+\swp{I wonder if we should show the Philadelphia fits first.}
 \section{Example for which KM approx is bad (via stochastic SIR)}
 
 <<compute-stochastic-SIR-via-sirr, include=FALSE>>=
@@ -1234,6 +1250,20 @@ assignfun(ci.derived.stoch.fitode[,1], ".stoch.fitode")
 \section{Influenza in Philadelphia, October 1918}
 
 Finally, we analyze the influenza outbreak in Philadelphia, 1918.
+At this point, it is not surprising that we can find a set of parameters
+for KM's approximation that matches the epidemic curve using
+nonlinear least squares.
+However, the estimated parameters are extreme, with an $\mathcal R_0$ of
+2310 (Table~\ref{tab:philanls}).
+\swp{Again, possibly something wrong with parameter conversions here too.
+Haven't been able to figure out how to do it properly.}
+The SIR model gives a visually similar fit as the
+KM's approximation, while providing much more realistic parameter estimates
+(Table~\ref{tab:phila.fitode}).
+Converting the SIR parameters to KM parameters gives a worse fit, which
+underestimates the size and timing of the peak.
+\swp{Again, possibly something wrong.}
+
 
 <<philapop, echo=TRUE, include=FALSE>>=
 ## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
@@ -1339,6 +1369,37 @@ orig.params.phila <- signif(orig.params.phila,dig)
 assignfun(orig.params.phila, text = ".phila.nls")
 R0.phila.nls <- Reff.phila.nls/S0.phila.nls*philaS0
 @
+
+
+\section{Discussion}
+
+\begin{itemize}
+    \item We present a guideline/tutorial for fitting ODE models
+    to epidemic time series data alongside a user-friendly \code{R}
+    package for beginners.
+    \item In doing so, we compare SIR model fits to KM's approximations
+    across three data sets and the resulting parameter estimates.
+    \item For the Bombay plague data, both models give similar fits and parameter
+    estimates.
+    \item
+\end{itemize}
+
+\begin{itemize}
+\item appropriateness of fitting an SIR model to the Bombay plague
+  data; Baca\"er's \cite{bacaermodel2012}, opinion, our issues with
+  his opinion, potential to fit rat-flea-human model with the data
+  that are available.
+\item other types of models that should also be easy to deal with with
+  fitode, e.g., SEIR or fancier compartmental ODEs
+\item what kinds of things would likely cause trouble for fitode?
+\item optimization challenges, where to go if you run into trouble
+\item statistical challenges, where to go for further insights / more
+  advanced approaches
+\item fitting stochastic models, pomp
+\item fitting ABMs
+\item a bit of tribute to Fred
+\end{itemize}
+
 
 \section{To Do}
 
@@ -1499,25 +1560,7 @@ We will then end up with a different likelihood function
 to maximize, and obtain a different $\thetavechat$, but the basic idea
 is the same.
 
-\section{Discussion}
-
-\begin{itemize}
-\item appropriateness of fitting an SIR model to the Bombay plague
-  data; Baca\"er's \cite{bacaermodel2012}, opinion, our issues with
-  his opinion, potential to fit rat-flea-human model with the data
-  that are available.
-\item other types of models that should also be easy to deal with with
-  fitode, e.g., SEIR or fancier compartmental ODEs
-\item what kinds of things would likely cause trouble for fitode?
-\item optimization challenges, where to go if you run into trouble
-\item statistical challenges, where to go for further insights / more
-  advanced approaches
-\item fitting stochastic models, pomp
-\item fitting ABMs
-\item a bit of tribute to Fred
-\end{itemize}
-
-\subsection{Comments moved from elsewhere that might be helpful in Discussion}
+\subsection*{Comments moved from elsewhere that might be helpful in Discussion}
 
 We chose to fix $I_0$ rather than the (known) population size
 ($N\simeq10^6$).  \swp{The problem is that we're assuming S0 = 1e6 -
