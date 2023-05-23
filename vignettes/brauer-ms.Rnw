@@ -743,6 +743,8 @@ to overly narrow confidence intervals on parameters and predictions.
 The negative binomial distribution is one way to generalize
 the Poisson to allow for overdispersion \citep{linden2011using}.
 
+\djde{I reorganized this paragraph a bit, and corrected
+  some typos in equations.}
 The probability mass function for the \term{negative binomial
   distribution} (for counts $x=0,1,2,\ldots$) is
 \begin{linenomath*}
@@ -750,12 +752,14 @@ The probability mass function for the \term{negative binomial
   \texttt{NB}(x;\mu,k) =
   \frac{\Gamma(k+x)}{\Gamma(k) x!}
   \left(\frac{k}{k+\mu}\right)^k
-  \left(\frac{\mu}{k+\mu}\right)^x \,
+  \left(\frac{\mu}{k+\mu}\right)^x \,.
 \end{equation}
 \end{linenomath*}
-where the predicted variance of a particular observation
-is given by $\mu_i (1+\mu_i/k)$.
-The maximum likelihood estimate is, therefore,
+The predicted variance of a particular observation $y_i$ is given by
+$\mu_i (1+\mu_i/k)$, where $\mu_i(\thetavec) = f(t_i;\thetavec)$ is the
+model evaluated at the $i$\textsuperscript{th} observed data point
+[\emph{cf.}\ \eqref{eq:leastsquares}\eqref{eq:sechcorrect}].  The
+maximum likelihood estimate is, therefore,
 \begin{linenomath*}
   \begin{equation}
 \label{eq:negbinomMLE}
@@ -763,17 +767,18 @@ The maximum likelihood estimate is, therefore,
  \thetavechat
  &= \argmin_\thetavec\sum_{i=1}^n \Big(\!\!
                 -\log\Gamma\big(y_i+k\big)
-                +\log\Gamma(k) + \log(x!) \\
+                +\log\Gamma(k) + \log(y_i!) \\
                 &\hspace{3cm}
                 -k \log\left(\frac{k}{k+\mu_i(\thetavec)}\right)
                 -y_i \log\left(\frac{\mu_i(\thetavec)}{k+\mu_i(\thetavec)}\right)
                 \Big)
-  \,,
+  \,.
 \end{split}
   \end{equation}
 \end{linenomath*}
-with  $\mu_i(\thetavec) = f(t_i;\thetavec)$.
 
+\djde{There is commented-out text at this point.  I prefer deletions
+  to go in a cuts file.  Leaving here for now.}
 %% where, as for the likelihood associated with Normal errors, we assume
 %% $\sigma^2$ is computed as the variance of the residuals across the full
 %% time series.\djde{Is that what's done, or is $\sigma^2$ added to
