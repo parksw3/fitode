@@ -162,14 +162,15 @@ In the century that has elapsed since publication of \KM's initial
 paper, the field of mathematical epidemiology has expanded and
 matured, and has been the subject of many books
 \cite{Bart60,Bail75,AndeMay91,AndeBrit00b,DiekHees00,BrauCast01,Brau+19}
-and review articles \cite{Heth00,Earn+02,Earn09}.  Researchers have
-primarily focused on \term{compartmental models} like the SIR model, cast
-either as differential equations following the tradition of \KM
+and review articles \cite{Heth00,Earn+02,Earn08,Earn09}.  Researchers have
+primarily focused on \term{compartmental models} like the SIR model,
+cast either as differential equations following the tradition of \KM
 \cite{KermMcKe27}, or as \term{stochastic processes} in the tradition
-of Bartlett \cite{Bart60}.  In recent years, as the power of computers
-has grown exponentially, there has been increasing interest in
-\term{agent-based models}, which represent each individual as
-a separate unit that can have unique properties \cite{eubank2004modelling}.
+of McKendrick \cite{McKe26} and Bartlett \cite{Bart60}.  In recent
+years, as the power of computers has grown exponentially, there has
+been increasing interest in \term{agent-based models}, which represent
+each individual as a separate unit that can have unique properties
+\cite{eubank2004modelling}.
 
 Throughout the history of the subject, and regardless of the modelling
 frameworks they have exploited, mathematical epidemiologists have
@@ -203,7 +204,7 @@ comfortable with mathematical analysis of ODEs but have little or no
 experience with statistics and parameter estimation.  Unfortunately,
 we have lost the opportunity to present our work to Fred, but it seems
 fitting (!) to present such a tutorial in this volume dedicated to
-Fred's memory.
+Fred's memory.\djde{Humph.  We'll have to say something different.}
 
 \section{Kermack and McKendrick's fit}
 
@@ -372,9 +373,9 @@ good fits to the data.  The potential existence of
 multiple local optima makes fitting models to data
 hard; you need to be cautious, and use common sense,
 in interpreting the solutions found by your software (always
-plot the solutions! Raue \emph{et al.}
+plot the solutions!). Raue \emph{et al.}
 \cite{raue2013lessons} give suggestions for how to diagnose
-and handle multiple optima).
+and handle multiple optima.
 
 If you know that your parameters should be in a certain range, then
 you can exclude values outside that range.  For example, to ensure
