@@ -872,7 +872,7 @@ the pink confidence band shown in Figure~\ref{fig:Bombay}.
 
 \swp{Think we need to add some discussion of profile likelihood here:}
 Alternatively, confidence intervals can be calculated using the
-\term{Profile Likeilihood}, which can be calculated by fixing a set of
+\term{Profile Likelihood}, which can be calculated by fixing a set of
 model parameters to some values and fitting the remaining parameters
 to maximize the likelihood \citep{Bolk08}.
 By calculating the profile likelihood across a range of parameter
