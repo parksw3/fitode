@@ -1008,10 +1008,16 @@ In the fitting function above:
 \item[\code{model}]specifies the ODE model to be fitted.
 \item[\code{data}]specifies the data.
 \item[\code{start}]specifies starting parameter set for the optimization.
-\item[\code{fixed}]specifies parameter values to be fixed (and therefore not estimated). Here, we chose to assume that the recovery rate is known (using the \code{fixed} argument) due to parameter unidentifiability. In short, this means that we can obtain nearly identical fits across a wide range of $\gamma$. We discuss this issue in detail in Supplementary Materials.
+\item[\code{fixed}]specifies parameter values to be fixed (and
+  therefore not estimated). Here, we chose to assume that the recovery
+  rate is known (using the \code{fixed} argument) due to parameter
+  unidentifiability\footnote{In short, unidentifiability of $\gamma$
+    means that we can obtain nearly identical fits across a wide range
+    of $\gamma$. We discuss this issue in detail in Supplementary
+    Materials.\djde{to be written...}}.
 \item[\code{tcol}]specifies the time column of the data frame.
 \end{description}
-The resulting fits are plotted in Figure~\ref{fig:Bombay}).
+The resulting fits are plotted in Figure~\ref{fig:Bombay}.
 The estimated coefficients and the associated confidence intervals can be
 obtained via \code{coef} and \code{confint} functions (Table~\ref{tab:bombay.fitode});
 the latter function also allows users to obtain confidence intervals for derived parameters using the Delta method.
