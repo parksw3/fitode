@@ -1018,12 +1018,14 @@ In the fitting function above:
 \item[\code{tcol}]specifies the time column of the data frame.
 \end{description}
 The resulting fits are plotted in Figure~\ref{fig:Bombay}.
-The estimated coefficients and the associated confidence intervals can be
-obtained via \code{coef} and \code{confint} functions (Table~\ref{tab:bombay.fitode});
+The estimated coefficients and the associated confidence intervals
+(Table~\ref{tab:bombay.fitode}) can be obtained via \code{coef} and \code{confint} functions;
 the latter function also allows users to obtain confidence intervals for derived parameters using the Delta method.
-We note that \code{fitode} gives sharp prediction, rather than smooth curves, because we are calculating daily mortality at a discrete time scale using equation~\ref{eq:correct.mortality2}.
+Note that \code{fitode} gives discrete prediction (rather than smooth curves) because we are calculating mortality at discrete (weekly)
+time intervals using equation~\ref{eq:correct.mortality2}.
 
 \swp{overall, the bombay data set is a really bad example for fitting SIR model. Not sure what else to do or say.}
+\djde{Is it really bad or is it just that we are assuming CFP$=1$?}
 
 <<sirmortfitcoef, include=FALSE>>==
 coef.bombay.fitode.nb <- coef(SIR_fit)
@@ -1088,7 +1090,14 @@ ci.bombay.fitode.ols <- confint(SIR_fit_ols)[,-1]
 assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
 @
 
-% \swp{This is also broken. Having trouble calculating vcov...}
+\swp{This is also broken. Having trouble calculating vcov...}
+\djde{I've uncommented this comment, which occurs between the
+  \texttt{\upshape sirmortfitcoefols} and
+  \texttt{\upshape\detokenize{sirmortfit_ols_confband}} chunks, and I don't
+  know which you were referring to.  If a comment is not longer
+  relevant, then remove it.  If it is still relevant, then don't
+  comment it out.}
+
 <<sirmortfit_ols_confband, eval=FALSE, include=FALSE>>==
 SIR_ols_confband <- predict(SIR_fit_ols, times=tvals, level=0.95)$mort
 @
@@ -1133,6 +1142,10 @@ plot(gammavec, loglikvec,
 @
 
 \swp{I wonder if we should show the Philadelphia fits first.}
+\djde{That would require some significant restructuring, and change
+  the narrative.  I get why that would be advantageous, but I am
+  not enthusiastic about changing the story so much at this point.}
+
 \section{Example for which KM approx is bad (via stochastic SIR)}
 
 <<compute-stochastic-SIR-via-sirr, include=FALSE>>=
@@ -1164,23 +1177,33 @@ if (file.exists(sirstoch_fn)) {
 }
 @
 
-\swp{need a proper time unit?}
-We now apply the same methodologies to a simulated mortality curve.
-In particular, we simulated a stochastic SIR model using an adaptive tau algorithm, with
-$(S_0,I_0,R_0)=(\Sexpr{iii})$, $\R_0=\Sexpr{R0}$,
-$\gamma=\Sexpr{mm$gamma}/\textrm{week}$.
-The simulated daily mortality curve is shown in Figure~\ref{fig:stoch} alongside the smooth deterministic trajectory of epidemic mortality ($dR/dt$).
-For this particular stochastic realization, the epidemic takes off slowly, resulting in a time shifted difference between the deterministic and stochastic trajectories.
+\swp{need a proper time unit?}  We now apply the same methodologies to
+a simulated mortality curve.  In particular, we simulated a stochastic
+SIR model using an adaptive tau algorithm\djde{with $N=2000$ we should
+  be using Gillespie}, with $(S_0,I_0,R_0)=(\Sexpr{iii})$,
+$\R_0=\Sexpr{R0}$, $1/\gamma=\Sexpr{1/mm$gamma}$ week.  The
+simulated daily mortality curve is shown in Figure~\ref{fig:stoch}
+alongside the smooth, deterministic trajectory of epidemic mortality
+($dR/dt$) using the same parameter values and initial conditions.  For
+this particular stochastic realization, the epidemic takes off slowly,
+resulting in a time shift between the deterministic and stochastic
+trajectories.
 
-In this case, the Kermack and McKendrick's method gives a poor approximation of the dynamics using original parameters.
-The approximation predicts a much lower epidemic peak and a shorter duration of the epidemic.
-\swp{Parameter values are a little screwed up at the moment. Doesn't seem like it's a trivial fix.}
-Nonetheless, we can still fit the KM approximation to the simulated epidemic and obtain a visually good fit.
-\swp{we don't want to interpret these parameter estimates as being ``wrong'' until we figure out the parameter conversion issues.}
+In this case, the Kermack and McKendrick's method gives a poor
+approximation of the dynamics using original parameters.  The
+approximation predicts a much lower epidemic peak and a shorter
+duration of the epidemic.  \swp{Parameter values are a little screwed
+  up at the moment. Doesn't seem like it's a trivial fix.}
+Nonetheless, we can still fit the KM approximation to the simulated
+epidemic and obtain a visually good fit.  \swp{we don't want to
+  interpret these parameter estimates as being ``wrong'' until we
+  figure out the parameter conversion issues.}
 
-On the other hand, the SIR model gives a much better fit.
-We estimate a much lower initial prevalence to match the delayed onset of an epidemic;
-otherwise, all other parameter estimates are nearly identical to the original parameters.
+The exact deterministic SIR model gives a much better fit, which is
+achieved by estimating a (deterministic) initial prevalence that is
+much lower than the true (stochastic) initial prevalence; all other
+parameter estimates are nearly identical to the true parameter values
+used to generate the stochastic trajectory.
 
 <<colours, include=FALSE>>=
 my.red <- "#E41A1C"     # colour-blind friendly red
