@@ -135,7 +135,7 @@ knitr::opts_chunk$set(error = FALSE)
 
 \section{Introduction}
 
-In their landmark 1927 paper, Kermack and McKendrick (KM)
+In their landmark 1927 paper, Kermack and McKendrick (\KM)
 \cite[p.\,713]{KermMcKe27} introduced the now-standard
 susceptible-infected-removed (SIR) epidemic model,
 \begin{linenomath*}
@@ -259,7 +259,7 @@ written\footnote{There is a typographical error in equation (31) of
 \end{subequations}
 \end{linenomath*}
 \KM then presented the parameter estimates that we have listed in the
-KM column of Table~\ref{tab:Bombay}, and they plotted their
+\KM column of Table~\ref{tab:Bombay}, and they plotted their
 ``calculated'' curve, which we have reproduced in \KMcol in
 Figure~\ref{fig:Bombay}.
 
@@ -318,7 +318,7 @@ print(nls.parameters)
 
 \noindent
 Above, we chose as our starting guess the fitted parameter values of
-\KM.  Our least squares parameter values differ from KM's by a few
+\KM.  Our least squares parameter values differ from \KM's by a few
 percent (see Table~\ref{tab:Bombay}).  The least squares fitted
 function is shown in \nlscol in Figure~\ref{fig:Bombay}.
 
@@ -462,7 +462,7 @@ assignfun(cc[,"97.5%"], text=".upr")
 
 If we accept our fit as satisfactory, what can we infer about the
 dynamics of plague that \KM were attempting to capture with the SIR
-model \eqref{eq:SIR}?  We need to convert the parameters of KM's
+model \eqref{eq:SIR}?  We need to convert the parameters of \KM's
 approximation \eqref{eq:sechparams} back to the original parameters
 that are directly related to the mechanism of disease spread formalized by the model (i.e., $\beta$ and $\gamma$, and initial conditions
 $S_0$ and $I_0$).
@@ -813,7 +813,7 @@ variances of the parameter estimates, so we can take their (positive)
 square roots to get the standard error (SE) and compute approximate
 95\% confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to
 $\thetavechat$.  To obtain CIs on functions of the fitted parameters
-(e.g., $\R_0$ or $\gamma$ if our model is KM's approximation
+(e.g., $\R_0$ or $\gamma$ if our model is \KM's approximation
 \eqref{eq:sech}), we build on the idea that if the error in a
 parameter $a$ is $\Delta a$, then the associated error in a
 (differentiable) function $g(a)$ is $\Delta{g}\approx g'(a)\Delta{a}$.
@@ -858,7 +858,7 @@ which gives us the variance-covariance matrix of $g(\thetavec)$
 We can again get the 95\% CIs by taking square roots and computing
 $g(\thetavechat) \pm1.96\,\mathrm{SE}$.
 
-Given a fit of KM's approximation \eqref{eq:sech} to the time series
+Given a fit of \KM's approximation \eqref{eq:sech} to the time series
 data, which yields $\thetavechat=(\hat{a},\hat{\omega},\hat{\phi})$, we
 can apply the Delta method \eqref{eq:DeltaMethod} to the nonlinear
 relationships \eqref{eq:invertparams} to obtain CIs on
@@ -871,23 +871,24 @@ considering $g(\thetavec)=f(t_i;\thetavec)$.  This is how we obtained
 the pink confidence band shown in Figure~\ref{fig:Bombay}.
 
 \swp{Think we need to add some discussion of profile likelihood here:}
-Alternatively, confidence intervals can be calculated using the
-\term{Profile Likelihood}, which can be calculated by fixing a set of
-model parameters to some values and fitting the remaining parameters
-to maximize the likelihood \citep{Bolk08}.
-By calculating the profile likelihood across a range of parameter
-values, we obtain the profile likelihood surface, from which the
-corresponding confidence intervals can be calculated using
-the likelihood ratio test.
-While using profile likelihoods is generally expected to give
-more accurate estimates of confidence intervals, calculating the
-profile likelihood can be challenging, if not
-practically impossible, for derived parameters or epidemic trajectories.
-Therefore, we rely on the Delta Method hereafter.
+\djde{thx. revised a bit} Better confidence intervals can be obtained
+using the \term{profile likelihood}, which is calculated by fixing a
+set of model parameters to specific values and fitting the remaining
+parameters to maximize the likelihood \citep{Bolk08}.  By calculating
+the profile likelihood across a range of parameter values, we obtain
+the profile likelihood surface, from which confidence intervals can be
+estimated using the likelihood ratio test.\djde{we should either spell
+  that out, or give a reference to a section or page number in a book
+  that gives examples of getting CIs from profile likelihoods this
+  way} While profile likelihoods generally give more accurate
+estimates of confidence intervals, calculating the profile likelihood
+can be challenging, if not practically impossible, for derived
+parameters or epidemic trajectories.  Consequently, we rely on the
+Delta Method hereafter.
 
 \section{Fitting the ODE}
 
-Until now, we have focused on fitting KM's approximation
+Until now, we have focused on fitting \KM's approximation
 \eqref{eq:sech} rather than actual solutions of the SIR model
 \eqref{eq:SIR}.  If we had an exact analytical solution of the SIR
 ODE~\eqref{eq:SIR} then we could proceed as above, replacing the
@@ -1146,7 +1147,8 @@ plot(gammavec, loglikvec,
   the narrative.  I get why that would be advantageous, but I am
   not enthusiastic about changing the story so much at this point.}
 
-\section{Example for which KM approx is bad (via stochastic SIR)}
+\section{Example for which \KM approximation is poor
+  (via stochastic  SIR)}
 
 <<compute-stochastic-SIR-via-sirr, include=FALSE>>=
 sirstoch_fn <- system.file("vignette_data", "sirstoch.RData", package = "fitode")
@@ -1181,29 +1183,20 @@ if (file.exists(sirstoch_fn)) {
 a simulated mortality curve.  In particular, we simulated a stochastic
 SIR model using an adaptive tau algorithm\djde{with $N=2000$ we should
   be using Gillespie}, with $(S_0,I_0,R_0)=(\Sexpr{iii})$,
-$\R_0=\Sexpr{R0}$, $1/\gamma=\Sexpr{1/mm$gamma}$ week.  The
-simulated daily mortality curve is shown in Figure~\ref{fig:stoch}
-alongside the smooth, deterministic trajectory of epidemic mortality
-($dR/dt$) using the same parameter values and initial conditions.  For
+$\R_0=\Sexpr{R0}$,
+$\gamma^{-1}=\Sexpr{1/mm$gamma}$ week.  Figure~\ref{fig:stoch} (top
+panel) shows the simulated daily mortality curve (dots) alongside the
+smooth, deterministic trajectory of epidemic mortality ($\dbydt{R}$,
+green) using the same parameter values and initial conditions.  For
 this particular stochastic realization, the epidemic takes off slowly,
 resulting in a time shift between the deterministic and stochastic
 trajectories.
 
-In this case, the Kermack and McKendrick's method gives a poor
-approximation of the dynamics using original parameters.  The
-approximation predicts a much lower epidemic peak and a shorter
-duration of the epidemic.  \swp{Parameter values are a little screwed
-  up at the moment. Doesn't seem like it's a trivial fix.}
-Nonetheless, we can still fit the KM approximation to the simulated
-epidemic and obtain a visually good fit.  \swp{we don't want to
-  interpret these parameter estimates as being ``wrong'' until we
-  figure out the parameter conversion issues.}
+In this case, \KM's approximation \eqref{eq:sech}---using the correct parameter values---yields a poor representation of the dynamics.\djde{The fitted
+  $\R_0=0.0892$, which is absurd.  It should not be giving $\R_0<1$.}  The approximation predicts a much lower epidemic peak and a shorter duration of the epidemic (Figure~\ref{fig:stoch}, top panel, blue curve).  \swp{Parameter values are a little screwed up at the moment. Doesn't seem like it's a trivial fix.}  Nonetheless, we can still fit the KM approximation to the simulated epidemic and obtain visually reasonable agreement (Figure~\ref{fig:stoch}, bottom panel, red curve; Table~\ref{tab:stoch.nls}); the fit cannot get better because the approximation \eqref{eq:sech} is symmetric about the peak, whereas the rise is steeper than the fall in the true solution.  \swp{we don't want to interpret these parameter estimates as being ``wrong'' until we figure out the parameter conversion issues.}
 
-The exact deterministic SIR model gives a much better fit, which is
-achieved by estimating a (deterministic) initial prevalence that is
-much lower than the true (stochastic) initial prevalence; all other
-parameter estimates are nearly identical to the true parameter values
-used to generate the stochastic trajectory.
+The exact deterministic SIR model gives a much better fit, which
+is achieved by estimating an initial prevalence that is only a third of the true initial prevalence; all other parameter estimates are nearly identical to the true parameter values used to generate the stochastic trajectory (Table~\ref{tab:stoch.fitode}).
 
 <<colours, include=FALSE>>=
 my.red <- "#E41A1C"     # colour-blind friendly red
@@ -1415,7 +1408,6 @@ R0.phila.nls <- Reff.phila.nls/S0.phila.nls*philaS0
     across three data sets and the resulting parameter estimates.
     \item For the Bombay plague data, both models give similar fits and parameter
     estimates.
-    \item
 \end{itemize}
 
 \begin{itemize}
@@ -1854,7 +1846,9 @@ points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
     \caption{Parameters of \KM's \cite{KermMcKe27} approximation
       \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, as estimated by
       us using original parameters that were used to simulate the stochastic SIR model and using nonlinear least squares
-      (\code{nls}).
+      (\code{nls}).  The true parameter values used for
+      the simulation were  $(S_0,I_0,R_0)=(\Sexpr{iii})$,
+$\R_0=\Sexpr{R0}$, $1/\gamma=\Sexpr{1/mm$gamma}$ week.
 }\label{tab:stoch.nls}
     \medskip
     %% making use of ragged2e and array packages:
@@ -1902,8 +1896,10 @@ points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
   \begin{center}
     \caption{Parameter estimates from \code{fitode} fits of the SIR
       model \eqref{eq:SIR} to a stochastic SIR simulation (see
-      Figure~\ref{fig:stoch}).}\label{tab:stoch.fitode}
-    \medskip
+      Figure~\ref{fig:stoch}).  The true parameter values used for
+      the simulation were  $(S_0,I_0,R_0)=(\Sexpr{iii})$,
+$\R_0=\Sexpr{R0}$, $1/\gamma=\Sexpr{1/mm$gamma}$ week.}\label{tab:stoch.fitode}
+\medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
   \begin{tabular}{ m{3cm} | c | c | c c}
