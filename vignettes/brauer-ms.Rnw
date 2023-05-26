@@ -1373,15 +1373,49 @@ R0.phila.nls <- Reff.phila.nls/S0.phila.nls*philaS0
 
 \section{Discussion}
 
+\swp{I feel we need a way to distinguish nls KM approx vs parameter matching KM approx}
 \begin{itemize}
     \item We present a guideline/tutorial for fitting ODE models
     to epidemic time series data alongside a user-friendly \code{R}
     package for beginners.
     \item In doing so, we compare SIR model fits to KM's approximations
-    across three data sets and the resulting parameter estimates.
+    across three data sets and their resulting parameter estimates.
     \item For the Bombay plague data, both models give similar fits and parameter
     estimates.
-    \item
+    \item For the Philadelphia flu data, nonlinear least square fits of KM's approximation
+    give extreme parameters even though it provide a visually good fit.
+    \item Finally, fitting a deterministic SIR model to a stochastic simulation shows that
+    underlying epidemiological parameters, except for the initial conditions, can be recovered
+    with reasonable accuracy.
+\end{itemize}
+
+\begin{itemize}
+    \item Despite historical connections to KM, it is unclear whether
+    the SIR model is appropriate for studying the Bombay plague
+    data.
+    \item Instead, Baca\"er argued that the epidemic represents a
+    seasonal outbreak and therefore requires a change in transmission
+    rate over the course of an epidemic.
+    \item Here, we find that there are issues with parameter identifiability
+\end{itemize}
+
+\begin{itemize}
+    \item Features implemented in fitode but not covered in this paper
+    \item Calculating confidence intervals using importance sampling.
+    Expected to be more robust than the Delta Method.
+    \item Simultaneous fitting to multiple time series (e.g., predator-prey dynamics)
+    \item MCMC \& Priors
+\end{itemize}
+
+\begin{itemize}
+    \item There are many other issues that are not covered
+    by the \code{fitode} package that are important/useful for making
+    statistical inference from epidemic time series.
+    \item Flexible variation in transmission rate. TSIR \citep{grenfell2002dynamics,becker2017tsir}.
+    \item Process error. Many packages that deal with this: pomp \citep{king2015statistical},
+    odin \citep{odin2021}.
+    \item Agent based models. Covasim \citep{kerr2021covasim}
+    \item Fixed and random effects on parameters
 \end{itemize}
 
 \begin{itemize}
