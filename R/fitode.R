@@ -133,6 +133,7 @@ fixpar <- function(model, fixed) {
 ##' @param force.hessian (logical) calculate the hessian numerically instead of taking the jacobian of the gradients based on sensitivity equations
 ##' @param use.ginv (logical) use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
 ##' @param quietly suppress progress messages?
+##' @param trace print tracing info? (larger values = more verbose)
 ##' @param ... mle2 arguments
 ##' @return An object of class ``fitode'' as described in \code{\link{fitode-class}}.
 ##' @import bbmle
@@ -157,6 +158,7 @@ fitode <- function(model, data,
                    force.hessian=FALSE,
                    use.ginv=TRUE,
                    quietly=FALSE,
+                   trace = 0,
                    ...) {
     call <- match.call()
 
@@ -205,7 +207,7 @@ fitode <- function(model, data,
     names(data)[match(tcol, names(data))] <- "times"
 
     dataarg <- list(model=model, data=data, solver.opts=solver.opts, solver=solver, linklist=linklist,
-                    priorlist=priorlist)
+                    priorlist=priorlist, trace = trace)
 
     ## environment for memoisation (storing previously tried parameters/results)
     f.env <- new.env()
@@ -248,6 +250,10 @@ fitode <- function(model, data,
             assign("oldgrad", grad, f.env)
             assign("oldpar",  par, f.env)
 
+            if (trace > 10) {
+                cat("nll", names(v), "\n")
+                cat(v, "\n")
+            }
             return(switch(type,
                           obj=f.env$oldnll,
                           grad=f.env$oldgrad))
