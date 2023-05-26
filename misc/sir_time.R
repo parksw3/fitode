@@ -9,6 +9,7 @@ pc_birth_fun <- function(t) {
     return(0.2 + ((2050-t)/200)^2)
 }
 
+## model with exogenous per capita birth rate, sinusoidally/seasonally varying contact rate
 SIR_model <- odemodel(
     name="SIR (nbinom)",
     model=list(
@@ -29,15 +30,72 @@ SIR_model <- odemodel(
     link=c(i0="logit", beta0 = "log", beta1 = "logit", gamma = "log")
 )
 
+## reasonable parameters (taken from example in epidemic/fitode vignettes for
+## Sierra Leone Ebola example)
 SIR_start <- c(beta0=70, beta1 = 0.1, gamma=60, N=40000, i0=0.0004, phi=6)
+
+## start by simulating/fitting biweekly data for 4 years
+tshort <- seq(2014, 2018, by = 1/26)
+system.time(ss_SIR_short <- simulate(SIR_model,
+                               parms=SIR_start, times=tshort))
+
+##  13 seconds (including Hessian calculation)
+system.time(
+    SIRfit_short <- fitode(SIR_model, data=ss_SIR_short,
+                           start=SIR_start,
+                           control = list(maxit = 1e5),
+                           trace = 100, ## print neg log likelihood, gradient at each evaluation
+                           tcol="times")
+)
+
+plot(confirmed ~ times, data = ss_SIR_short)
+with(predict(SIRfit_short)$confirmed, lines(times, estimate))
+
+## fitting to SIMULATED data, starting from TRUE parameter values,
+##   we get a decent fit quickly ...
+
+## However, that's a best-case scenario.
+## What if we start with true parameters that are perturbed by ± 30%?
+## perturb parameters
+refit_fun <- function() {
+    rstart <- runif(length(SIR_start),
+                   min = 0.7*SIR_start,
+                   max = 1.3*SIR_start)
+    names(rstart) <- names(SIR_start)
+    fitode(SIR_model,
+           data=ss_SIR_short,
+           start=rstart,
+           control = list(maxit = 1e5),
+           tcol="times",
+           skip.hessian = TRUE)
+}
+
+
+## about 70 seconds for 10 fits
+system.time(refits <- replicate(10, refit_fun()))
+
+## extract estimates
+estimates <- sapply(refits, function(x) {
+    predict(x)$confirmed[,"estimate"]
+})
+
+## out of 10 perturbed fits, 3 are OK, the rest are bogus/ridiculous
+LLvec <- -1*sapply(refits, logLik)
+LLvec <- LLvec - min(LLvec)
+ok <- which(LLvec<1)
+
+plot(confirmed ~ times, data = ss_SIR_short)
+with(predict(SIRfit_short)$confirmed, lines(times, estimate))
+matlines(ss_SIR_short$times, estimates[,ok], lty=1)
 
 ## devtools::load_all("~/R/pkgs/fitode")
 ## biweekly 'data' for 200 years
 system.time(ss_SIR <- simulate(SIR_model,
                                parms=SIR_start, times=seq(2014, 2214, by = 1/26)))
-## 3.8 seconds
+## ~4 seconds to simulate
 
-oss_sub <- ss_SIR[, setdiff(colnames(ss_SIR), c("times", "sim"))]
+## extract all columns except time and simulation number index
+ss_sub <- ss_SIR[, setdiff(colnames(ss_SIR), c("times", "sim"))]
 par(las = 1, bty = "l")
 matplot(ss_SIR[,1], ss_sub, log = "y",type = "l", ylim = c(1e-1,1e6),
         ylab = "")
@@ -46,8 +104,9 @@ legend("top", horiz= TRUE,
        lty = 1,
        legend = colnames(ss_sub)
        )
+## fun dynamics
 
-## debug(fitode)
+## this doesn't work (yet)
 system.time(SIRfit <- fitode(SIR_model, data=ss_SIR,
                              start=SIR_start,
                              control = list(maxit = 1e5),
