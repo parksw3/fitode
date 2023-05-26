@@ -870,8 +870,7 @@ observation time $t_i$ (and hence obtain a confidence band) by
 considering $g(\thetavec)=f(t_i;\thetavec)$.  This is how we obtained
 the pink confidence band shown in Figure~\ref{fig:Bombay}.
 
-\swp{Think we need to add some discussion of profile likelihood here:}
-\djde{thx. revised a bit} Better confidence intervals can be obtained
+Better confidence intervals can be obtained
 using the \term{profile likelihood}, which is calculated by fixing a
 set of model parameters to specific values and fitting the remaining
 parameters to maximize the likelihood \citep{Bolk08}.  By calculating
@@ -1027,6 +1026,7 @@ time intervals using equation~\ref{eq:correct.mortality2}.
 
 \swp{overall, the bombay data set is a really bad example for fitting SIR model. Not sure what else to do or say.}
 \djde{Is it really bad or is it just that we are assuming CFP$=1$?}
+\swp{Really bad, I think. Look at the profile likelihood in the email. I think it's numerically bad, not necessarily biologically bad.}
 
 <<sirmortfitcoef, include=FALSE>>==
 coef.bombay.fitode.nb <- coef(SIR_fit)
@@ -1146,6 +1146,9 @@ plot(gammavec, loglikvec,
 \djde{That would require some significant restructuring, and change
   the narrative.  I get why that would be advantageous, but I am
   not enthusiastic about changing the story so much at this point.}
+  \swp{Sorry, I meant Philadelphia fit before the stochastic simulation.
+  But not before Bombay. So Bombay first, then Philly, and stochastic.
+  I don't think that would require much change in the story?}
 
 \section{Example for which \KM approximation is poor
   (via stochastic  SIR)}
@@ -1192,8 +1195,8 @@ this particular stochastic realization, the epidemic takes off slowly,
 resulting in a time shift between the deterministic and stochastic
 trajectories.
 
-In this case, \KM's approximation \eqref{eq:sech}---using the correct parameter values---yields a poor representation of the dynamics.\djde{The fitted
-  $\R_0=0.0892$, which is absurd.  It should not be giving $\R_0<1$.}  The approximation predicts a much lower epidemic peak and a shorter duration of the epidemic (Figure~\ref{fig:stoch}, top panel, blue curve).  \swp{Parameter values are a little screwed up at the moment. Doesn't seem like it's a trivial fix.}  Nonetheless, we can still fit the KM approximation to the simulated epidemic and obtain visually reasonable agreement (Figure~\ref{fig:stoch}, bottom panel, red curve; Table~\ref{tab:stoch.nls}); the fit cannot get better because the approximation \eqref{eq:sech} is symmetric about the peak, whereas the rise is steeper than the fall in the true solution.  \swp{we don't want to interpret these parameter estimates as being ``wrong'' until we figure out the parameter conversion issues.}
+In this case, \KM's approximation \eqref{eq:sech}---using the correct parameter values---yields a poor representation of the dynamics.
+The approximation predicts a much lower epidemic peak and a shorter duration of the epidemic (Figure~\ref{fig:stoch}, top panel, blue curve).  \swp{Parameter values are a little screwed up at the moment. Doesn't seem like it's a trivial fix.}  Nonetheless, we can still fit the KM approximation to the simulated epidemic and obtain visually reasonable agreement (Figure~\ref{fig:stoch}, bottom panel, red curve; Table~\ref{tab:stoch.nls}); the fit cannot get better because the approximation \eqref{eq:sech} is symmetric about the peak, whereas the rise is steeper than the fall in the true solution.  \swp{we don't want to interpret these parameter estimates as being ``wrong'' until we figure out the parameter conversion issues.}
 
 The exact deterministic SIR model gives a much better fit, which
 is achieved by estimating an initial prevalence that is only a third of the true initial prevalence; all other parameter estimates are nearly identical to the true parameter values used to generate the stochastic trajectory (Table~\ref{tab:stoch.fitode}).
@@ -1919,7 +1922,7 @@ $\R_0=\Sexpr{R0}$, $1/\gamma=\Sexpr{1/mm$gamma}$ week.
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
       \Sexpr{signif(7*Tg.KM.stoch,dig)} & \Sexpr{signif(7*Tg.nls.stoch,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta.stoch)} \\
     basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
-      \Sexpr{signif(2000*Reff.KM.stoch/S0.KM,dig)}
+      \Sexpr{signif(2000*Reff.KM.stoch/S0.KM.stoch,dig)}
       & \Sexpr{signif(2000*Reff.nls.stoch/S0.nls.stoch,dig)} & \Sexpr{ci_fmt("R0", cc.delta.stoch)}
   \end{tabular}
   \end{center}
