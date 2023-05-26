@@ -22,6 +22,7 @@ fitode(
   force.hessian = FALSE,
   use.ginv = TRUE,
   quietly = FALSE,
+  trace = 0,
   ...
 )
 }
@@ -59,6 +60,8 @@ fitode(
 \item{use.ginv}{(logical) use generalized inverse (\code{\link{ginv}}) to compute approximate vcov}
 
 \item{quietly}{suppress progress messages?}
+
+\item{trace}{print tracing info? (larger values = more verbose)}
 
 \item{...}{mle2 arguments}
 }
