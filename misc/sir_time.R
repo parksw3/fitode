@@ -51,6 +51,9 @@ system.time(
 plot(confirmed ~ times, data = ss_SIR_short)
 with(predict(SIRfit_short)$confirmed, lines(times, estimate))
 
+# you can also just do this
+plot(SIRfit_short, level=0.95)
+
 ## fitting to SIMULATED data, starting from TRUE parameter values,
 ##   we get a decent fit quickly ...
 
@@ -121,12 +124,14 @@ if (FALSE) {
     system.time(with(dataarg, gradfun(start, data, solver.opts, solver, linklist, priorlist)))
 }
 ## fitode does **not** work with vector parameters at present!
-if (FALSE) {
-    SIR_model_vec <- odemodel(
+## but we can still use beta1 beta2 to make it work...
+## not sure that writing beta[1] beta[2] is necessarily more efficient
+## than writing beta1 beta2
+SIR_model_vec <- odemodel(
     name="SIR (nbinom)",
     model=list(
-        S ~ pc_birth_fun(t)*N - ifelse(t<2030, beta[1], beta[2])*(1+0.1*cos(2*pi*t)) * S * I/N,
-        I ~ beta*(1+0.1*cos(2*pi*t)) * S * I/N - gamma * I,
+        S ~ pc_birth_fun(t)*N - ifelse(t<2015, beta1, beta2)*(1+0.1*cos(2*pi*t)) * S * I/N,
+        I ~ ifelse(t<2015, beta1, beta2)*(1+0.1*cos(2*pi*t)) * S * I/N - gamma * I,
         R ~ gamma * I
     ),
     observation=list(
@@ -138,12 +143,15 @@ if (FALSE) {
         R ~ 0
     ),
     diffnames="R",
-    par=c("beta", "gamma", "N", "i0", "phi", "nu"),
+    par=c("beta1", "beta2", "gamma", "N", "i0", "phi", "nu"),
     link=c(i0="logit")
 )
 
-SIR_start_vec <- list(beta=c(70,60), gamma=60, N=40000, i0=0.0004, phi=6)
+SIR_start_vec <- c(beta1=70, beta2=60, gamma=60, N=40000, i0=0.0004, phi=6)
 
 system.time(ss_SIR_vec <- simulate(SIR_model_vec,
-    parms=SIR_start_vec, times=seq(2014, 2214, by = 1/26)))
-}
+    parms=SIR_start_vec, times=seq(2014, 2018, by = 1/26)))
+
+## comparison
+plot(R ~ times, data = ss_SIR_short)
+lines(R ~ times, data = ss_SIR_vec, col=2)
