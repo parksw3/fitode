@@ -52,12 +52,6 @@ jobs:
       - name: Install texlive etc.
         run: sudo apt-get install texlive texlive-science texlive-latex-extra texlive-bibtex-extra
 
-      - name: Check
-        env:
-          _R_CHECK_CRAN_INCOMING_REMOTE_: false
-        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
-        shell: Rscript {0}
-
       - uses: r-lib/actions/check-r-package@v2
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
