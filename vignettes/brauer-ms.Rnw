@@ -1091,13 +1091,7 @@ ci.bombay.fitode.ols <- confint(SIR_fit_ols)[,-1]
 assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
 @
 
-\swp{This is also broken. Having trouble calculating vcov...}
-\djde{I've uncommented this comment, which occurs between the
-  \texttt{\upshape sirmortfitcoefols} and
-  \texttt{\upshape\detokenize{sirmortfit_ols_confband}} chunks, and I don't
-  know which you were referring to.  If a comment is not longer
-  relevant, then remove it.  If it is still relevant, then don't
-  comment it out.}
+\swp{This is also broken. Having trouble calculating vcov... so we can't get CIs for ols fits.}
 
 <<sirmortfit_ols_confband, eval=FALSE, include=FALSE>>==
 SIR_ols_confband <- predict(SIR_fit_ols, times=tvals, level=0.95)$mort
@@ -1142,147 +1136,11 @@ plot(gammavec, loglikvec,
      ylim=c(-140, -135.5))
 @
 
-\swp{I wonder if we should show the Philadelphia fits first.}
-\djde{That would require some significant restructuring, and change
-  the narrative.  I get why that would be advantageous, but I am
-  not enthusiastic about changing the story so much at this point.}
-  \swp{Sorry, I meant Philadelphia fit before the stochastic simulation.
-  But not before Bombay. So Bombay first, then Philly, and stochastic.
-  I don't think that would require much change in the story?}
-
-\section{Example for which \KM approximation is poor
-  (via stochastic  SIR)}
-
-<<compute-stochastic-SIR-via-sirr, include=FALSE>>=
-sirstoch_fn <- system.file("vignette_data", "sirstoch.RData", package = "fitode")
-if (file.exists(sirstoch_fn)) {
-    load(sirstoch_fn)
-} else {
-    library(sirr)
-    R0 <- 5
-    N <- 2000
-    mm <- create_SIRmodel(R0=R0, N=N)
-    ii <- set_inits(mm)
-    iii <- ii
-    iii[2] <- exp(iii[2])
-    names(iii) <- c("S","I","R")
-    ## FIX: this should not be necessary, but it is a bug in sirr
-    ##      associated with N != 1.
-    mm1 <- create_SIRmodel(R0=R0, N=1)
-    sir.det <- compute_SIRts(mm1)
-    ## get associated params for KM approx:
-    a.det <- a_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-    omega.det <- omega_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-    phi.det <- phi_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-    ##
-    tt <- 0:10
-    sir.stoch <- get_ssa_soln(mm, stopcrit = NULL, inits=ii, times=tt)
-    save(R0, N, mm, ii, iii, mm1, sir.det, a.det, omega.det, phi.det, tt,
-         sir.stoch, file="sirstoch.RData")
-}
-@
-
-\swp{need a proper time unit?}  We now apply the same methodologies to
-a simulated mortality curve.  In particular, we simulated a stochastic
-SIR model using an adaptive tau algorithm\djde{with $N=2000$ we should
-  be using Gillespie}, with $(S_0,I_0,R_0)=(\Sexpr{iii})$,
-$\R_0=\Sexpr{R0}$,
-$\gamma^{-1}=\Sexpr{1/mm$gamma}$ week.  Figure~\ref{fig:stoch} (top
-panel) shows the simulated daily mortality curve (dots) alongside the
-smooth, deterministic trajectory of epidemic mortality ($\dbydt{R}$,
-green) using the same parameter values and initial conditions.  For
-this particular stochastic realization, the epidemic takes off slowly,
-resulting in a time shift between the deterministic and stochastic
-trajectories.
-
-In this case, \KM's approximation \eqref{eq:sech}---using the correct parameter values---yields a poor representation of the dynamics.
-The approximation predicts a much lower epidemic peak and a shorter duration of the epidemic (Figure~\ref{fig:stoch}, top panel, blue curve).  \swp{Parameter values are a little screwed up at the moment. Doesn't seem like it's a trivial fix.}  Nonetheless, we can still fit the KM approximation to the simulated epidemic and obtain visually reasonable agreement (Figure~\ref{fig:stoch}, bottom panel, red curve; Table~\ref{tab:stoch.nls}); the fit cannot get better because the approximation \eqref{eq:sech} is symmetric about the peak, whereas the rise is steeper than the fall in the true solution.  \swp{we don't want to interpret these parameter estimates as being ``wrong'' until we figure out the parameter conversion issues.}
-
-The exact deterministic SIR model gives a much better fit, which
-is achieved by estimating an initial prevalence that is only a third of the true initial prevalence; all other parameter estimates are nearly identical to the true parameter values used to generate the stochastic trajectory (Table~\ref{tab:stoch.fitode}).
-
-<<colours, include=FALSE>>=
-my.red <- "#E41A1C"     # colour-blind friendly red
-my.blue <- "#377EB8"    # colour-blind friendly blue
-my.green <- "#4DAF4A" # colour-blind friendly green
-my.yellow <- "#FFD92F" # colour-blind friendly yellow
-@
-
-<<sirstochdata, include=FALSE>>==
-## convert to daily mortality
-mort.stoch <- diff(sir.stoch$R[!duplicated(ceiling(sir.stoch$time*7),fromLast = TRUE)])
-mort.time <- ceiling(sir.stoch$time[!duplicated(ceiling(sir.stoch$time*7),fromLast = TRUE)]*7)
-mort.which <- which(diff(mort.time)==1)
-
-sir.stoch.data <- data.frame(
-    time=mort.time[mort.which]/7,
-    mort=c(NA, mort.stoch[head(mort.which, -1)])
-)
-@
-
-<<sirnlsfit, cache=TRUE, warning=FALSE, include=FALSE>>==
-nlsfit.stoch <- nls(mort ~ KM_approx(time, a, omega, phi),
-              data = sir.stoch.data,
-              start = c(a = unname(a.det), omega = unname(omega.det),
-                        phi = unname(phi.det)))
-
-nls.stoch.parameters <- coef(nlsfit.stoch)
-assignfun(nls.stoch.parameters, text=".nls.stoch")
-
-orig.params.KM.stoch <- invert_params(I0 = exp(ii[[2]]), params = c(a=unname(a.det), phi=unname(phi.det), omega=unname(omega.det)))
-orig.params.KM.stoch <- signif(orig.params.KM.stoch)
-assignfun(orig.params.KM.stoch, ".KM.stoch")
-
-orig.params.nls.stoch <- invert_params(I0 = exp(ii[[2]]), params = coef(nlsfit.stoch))
-orig.params.nls.stoch <- signif(orig.params.nls.stoch)
-assignfun(orig.params.nls.stoch, ".nls.stoch")
-
-cc.nls.stoch <- suppressMessages(confint(nlsfit.stoch))
-
-cc.delta.stoch <- KMcifun(nlsfit.stoch, I0 = exp(ii[[2]]), N=N)
-assignfun(cc.delta.stoch[,"2.5%"], text=".lwr.nls.stoch")
-assignfun(cc.delta.stoch[,"97.5%"], text=".upr.nls.stoch")
-
-@
-
-<<sirstochfit, cache=TRUE, warning=FALSE, include=FALSE>>=
-start.stoch <- c(beta=mm$beta, gamma=mm$gamma,
-                 S0=iii["S"], I0=iii["I"])
-names(start.stoch) <- c("beta","gamma","S0","I0")
-print(start.stoch)
-
-SIR_stoch_fit <- fitode(
-    SIR_model,
-    data = sir.stoch.data,
-    start = c(start.stoch, k=10),
-    fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
-    tcol = "time"
-)
-sss <- predict(SIR_stoch_fit, level=0.95)[[1]]
-summary(SIR_stoch_fit)
-@
-
-<<stochestassign, include=FALSE>>==
-coef.stoch.fitode <- coef(SIR_stoch_fit)
-ci.stoch.fitode <- confint(SIR_stoch_fit)[,-1]
-assignfun(coef.stoch.fitode, ".stoch.fitode")
-@
-
-% Confint on derived parameers:
-<<sirstochconfint, include=FALSE>>==
-ci.derived.stoch.fitode <- confint(SIR_stoch_fit,
-        parm=list(
-            Reff~beta*S0/1,
-            R0~beta*2000/1
-        ))
-assignfun(ci.derived.stoch.fitode[,1], ".stoch.fitode")
-@
-
 \section{Influenza in Philadelphia, October 1918}
 
-Finally, we analyze the influenza outbreak in Philadelphia, 1918.  At
-this point, it is not surprising that we can find a set of parameters
-for KM's approximation that matches the epidemic curve using nonlinear
+We also analyze the influenza outbreak in Philadelphia, 1918.
+Using nonlinear least squares, we can find a set of parameters
+for KM's approximation that matches the epidemic curve
 least squares (Figure~\ref{fig:phila}).  However, the estimated
 parameters are extreme, with an $\mathcal R_0$ of 2310
 (Table~\ref{tab:philanls}).  \swp{Again, possibly something wrong with
@@ -1293,7 +1151,6 @@ estimates (Table~\ref{tab:phila.fitode}).  Converting the SIR
 parameters to KM parameters gives a worse fit, which underestimates
 the size and timing of the peak.  \swp{Again, possibly something
   wrong.}
-
 
 <<philapop, echo=TRUE, include=FALSE>>=
 ## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
@@ -1398,6 +1255,136 @@ orig.params.phila <- invert_params(I0=I0.phila.fitode, coef(phila.nlsfit))
 orig.params.phila <- signif(orig.params.phila,dig)
 assignfun(orig.params.phila, text = ".phila.nls")
 R0.phila.nls <- Reff.phila.nls/S0.phila.nls*philaS0
+@
+
+
+\section{Example for which \KM approximation is poor
+  (via stochastic  SIR)}
+
+<<compute-stochastic-SIR-via-sirr, include=FALSE>>=
+sirstoch_fn <- system.file("vignette_data", "sirstoch.RData", package = "fitode")
+if (file.exists(sirstoch_fn)) {
+    load(sirstoch_fn)
+} else {
+    library(sirr)
+    R0 <- 5
+    N <- 2000
+    mm <- create_SIRmodel(R0=R0, N=N)
+    ii <- set_inits(mm)
+    iii <- ii
+    iii[2] <- exp(iii[2])
+    names(iii) <- c("S","I","R")
+    ## FIX: this should not be necessary, but it is a bug in sirr
+    ##      associated with N != 1.
+    mm1 <- create_SIRmodel(R0=R0, N=1)
+    sir.det <- compute_SIRts(mm1)
+    ## get associated params for KM approx:
+    a.det <- a_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+    omega.det <- omega_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+    phi.det <- phi_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
+    ##
+    tt <- 0:10
+    sir.stoch <- get_ssa_soln(mm, stopcrit = NULL, inits=ii, times=tt)
+    save(R0, N, mm, ii, iii, mm1, sir.det, a.det, omega.det, phi.det, tt,
+         sir.stoch, file="sirstoch.RData")
+}
+@
+
+Finally, we apply the same methodologies to
+a simulated mortality curve.
+In particular, we simulated a stochastic
+SIR model using an adaptive tau algorithm\djde{with $N=2000$ we should
+  be using Gillespie}, with $(S_0,I_0,R_0)=(\Sexpr{iii})$,
+$\R_0=\Sexpr{R0}$,
+$\gamma^{-1}=\Sexpr{1/mm$gamma}$ week.  Figure~\ref{fig:stoch} (top
+panel) shows the simulated daily mortality curve (dots) alongside the
+smooth, deterministic trajectory of epidemic mortality ($\dbydt{R}$,
+green) using the same parameter values and initial conditions.  For
+this particular stochastic realization, the epidemic takes off slowly,
+resulting in a time shift between the deterministic and stochastic
+trajectories.
+
+In this case, \KM's approximation \eqref{eq:sech}---using the correct parameter values---yields a poor representation of the dynamics.
+The approximation predicts a much lower epidemic peak and a shorter duration of the epidemic (Figure~\ref{fig:stoch}, top panel, blue curve).  \swp{Parameter values are a little screwed up at the moment. Doesn't seem like it's a trivial fix.}  Nonetheless, we can still fit the KM approximation to the simulated epidemic and obtain visually reasonable agreement (Figure~\ref{fig:stoch}, bottom panel, red curve; Table~\ref{tab:stoch.nls}); the fit cannot get better because the approximation \eqref{eq:sech} is symmetric about the peak, whereas the rise is steeper than the fall in the true solution.  \swp{we don't want to interpret these parameter estimates as being ``wrong'' until we figure out the parameter conversion issues.}
+
+The exact deterministic SIR model gives a much better fit, which
+is achieved by estimating an initial prevalence that is only a third of the true initial prevalence; all other parameter estimates are nearly identical to the true parameter values used to generate the stochastic trajectory (Table~\ref{tab:stoch.fitode}).
+
+<<colours, include=FALSE>>=
+my.red <- "#E41A1C"     # colour-blind friendly red
+my.blue <- "#377EB8"    # colour-blind friendly blue
+my.green <- "#4DAF4A" # colour-blind friendly green
+my.yellow <- "#FFD92F" # colour-blind friendly yellow
+@
+
+<<sirstochdata, include=FALSE>>==
+## convert to daily mortality
+mort.stoch <- diff(sir.stoch$R[!duplicated(ceiling(sir.stoch$time*7),fromLast = TRUE)])
+mort.time <- ceiling(sir.stoch$time[!duplicated(ceiling(sir.stoch$time*7),fromLast = TRUE)]*7)
+mort.which <- which(diff(mort.time)==1)
+
+sir.stoch.data <- data.frame(
+    time=mort.time[mort.which]/7,
+    mort=c(NA, mort.stoch[head(mort.which, -1)])
+)
+@
+
+<<sirnlsfit, cache=TRUE, warning=FALSE, include=FALSE>>==
+nlsfit.stoch <- nls(mort ~ KM_approx(time, a, omega, phi),
+              data = sir.stoch.data,
+              start = c(a = unname(a.det), omega = unname(omega.det),
+                        phi = unname(phi.det)))
+
+nls.stoch.parameters <- coef(nlsfit.stoch)
+assignfun(nls.stoch.parameters, text=".nls.stoch")
+
+orig.params.KM.stoch <- invert_params(I0 = exp(ii[[2]]), params = c(a=unname(a.det), phi=unname(phi.det), omega=unname(omega.det)))
+orig.params.KM.stoch <- signif(orig.params.KM.stoch)
+assignfun(orig.params.KM.stoch, ".KM.stoch")
+
+orig.params.nls.stoch <- invert_params(I0 = exp(ii[[2]]), params = coef(nlsfit.stoch))
+orig.params.nls.stoch <- signif(orig.params.nls.stoch)
+assignfun(orig.params.nls.stoch, ".nls.stoch")
+
+cc.nls.stoch <- suppressMessages(confint(nlsfit.stoch))
+
+cc.delta.stoch <- KMcifun(nlsfit.stoch, I0 = exp(ii[[2]]), N=N)
+assignfun(cc.delta.stoch[,"2.5%"], text=".lwr.nls.stoch")
+assignfun(cc.delta.stoch[,"97.5%"], text=".upr.nls.stoch")
+
+@
+
+<<sirstochfit, cache=TRUE, warning=FALSE, include=FALSE>>=
+start.stoch <- c(beta=mm$beta, gamma=mm$gamma,
+                 S0=iii["S"], I0=iii["I"])
+names(start.stoch) <- c("beta","gamma","S0","I0")
+print(start.stoch)
+
+SIR_stoch_fit <- fitode(
+    SIR_model,
+    data = sir.stoch.data,
+    start = c(start.stoch, k=10),
+    fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
+    tcol = "time"
+)
+sss <- predict(SIR_stoch_fit, level=0.95)[[1]]
+summary(SIR_stoch_fit)
+@
+
+<<stochestassign, include=FALSE>>==
+coef.stoch.fitode <- coef(SIR_stoch_fit)
+ci.stoch.fitode <- confint(SIR_stoch_fit)[,-1]
+assignfun(coef.stoch.fitode, ".stoch.fitode")
+@
+
+% Confint on derived parameers:
+<<sirstochconfint, include=FALSE>>==
+ci.derived.stoch.fitode <- confint(SIR_stoch_fit,
+        parm=list(
+            Reff~beta*S0/1,
+            R0~beta*2000/1
+        ))
+assignfun(ci.derived.stoch.fitode[,1], ".stoch.fitode")
 @
 
 
@@ -1877,6 +1864,118 @@ points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
 \label{fig:Bombay}
 \end{figure}
 
+\begin{landscape}
+\begin{table}
+  \begin{center}
+    \caption{Parameter estimates for the 1918 influenza epidemic in
+      Philadelphia, based on \KM's \cite{KermMcKe27} approximation
+      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, using nonlinear
+      least squares (\code{nls}).  The $\R_0$ estimates assume the
+      population of Philadelphia in 1918 was\dots
+    See Figure~\ref{fig:phila}.}\label{tab:philanls}
+    \medskip
+    %% making use of ragged2e and array packages:
+    \RaggedRight
+  \begin{tabular}{ m{3cm} | c | c | c | c c}
+    \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
+    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
+    & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
+    initial prevalence & $I_0$ & -- & -- &
+      \Sexpr{I0.phila.fitode} & -- \\
+    %%
+    \noalign{\vspace{10pt}}
+    \bfseries Estimated\break parameter \\\hline
+    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{signif(a.phila.nls,dig)} & \Sexpr{ci_fmt("a", ci.phila.nls)} \\
+    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{signif(omega.phila.nls,dig-1)} & \Sexpr{ci_fmt("omega", ci.phila.nls)} \\
+    outbreak centre & $\phi$ & \eqref{eq:phi} & -- &
+      \Sexpr{signif(phi.phila.nls,dig)} & \Sexpr{ci_fmt("phi", ci.phila.nls)} \\
+    \noalign{\vspace{10pt}}
+    \bfseries Derived\break parameter \\\hline
+    peak time & $\tpeak$ & \eqref{eq:tpeak} & years &
+      \Sexpr{tpeak.phila.nls} & \Sexpr{ci_fmt("tpeak", cc.phila.delta)} \\
+    effective reproduction number & $\Reff$
+      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
+      \Sexpr{Reff.phila.nls} & \Sexpr{ci_fmt("Reff", cc.phila.delta)} \\
+    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{gamma.phila.nls} & \Sexpr{ci_fmt("gamma", cc.phila.delta)} \\
+    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
+       \Sexpr{as.integer(S0.phila.nls)} & \Sexpr{ci_fmt("S0", cc.phila.delta, max_ord = 6)} \\
+    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
+       \Sexpr{beta.phila.nls} & \Sexpr{ci_fmt("beta", cc.phila.delta)} \\
+    mean generation interval & $\Tg$ & \eqref{eq:Tg} & years &
+      \Sexpr{signif(Tg.phila.nls,dig)} & \Sexpr{ci_fmt("Tg", cc.phila.delta)} \\
+    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
+       \Sexpr{signif(R0.phila.nls,dig)} & \Sexpr{ci_fmt("R0", cc.phila.delta)}
+  \end{tabular}
+  \end{center}
+\end{table}
+\end{landscape}
+
+\begin{landscape}
+\begin{table}
+  \begin{center}
+    \caption{Parameter estimates from \code{fitode} fits
+      of the SIR model \eqref{eq:SIR} to reported
+      pneumonia and influenza mortality during the main
+      wave of the 1918 influenza pandemic in the city
+      of Philadelphia.}\label{tab:phila.fitode}
+    \medskip
+    %% making use of ragged2e and array packages:
+    \RaggedRight
+  \begin{tabular}{ m{3cm} | c | c | c c}
+  \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
+    & {\footnotesize\bfseries units}
+    & \bfseries \code{dnbinom} & \bfseries 95\% CI \\\hline
+    transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{beta.phila.fitode} & \Sexpr{ci_fmt("beta", ci.phila.fitode)} \\
+      recovery rate & $\gamma$ & $\frac{1}{\textrm{years}}$ & \Sexpr{gamma.phila.fitode} &
+      -- \\
+    initial\break susceptibles & $S_0$& -- &
+      \Sexpr{as.integer(S0.phila.fitode)} & \Sexpr{ci_fmt("S0", ci.phila.fitode, max_ord = 6)}\\
+      initial prevalence & $I_0$ & -- &
+      \Sexpr{I0.phila.fitode} & \Sexpr{ci_fmt("I0", ci.phila.fitode)}\\
+      overdispersion\break parameter & $k$ & -- &
+      \Sexpr{k.phila.fitode} & \Sexpr{ci_fmt("k", ci.phila.fitode)}\\
+      \noalign{\vspace{10pt}}
+      \bfseries Derived\break parameter \\\hline
+      effective reproduction number & $\Reff$ & -- &
+      \Sexpr{Reff.phila.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.phila.fitode[,-1])} \\
+      mean generation interval & $\Tg$ & years &
+      \Sexpr{signif(7*Tg.phila.fitode,dig)} & \Sexpr{ci_fmt("Tg", 7*ci.derived.phila.fitode[,-1])} \\
+    basic reproduction number & $\R_0$ & -- &
+      \Sexpr{signif(R0.phila.fitode,dig)}
+      &  \Sexpr{ci_fmt("R0", ci.derived.phila.fitode[,-1])}
+  \end{tabular}
+  \end{center}
+\end{table}
+\end{landscape}
+
+
+\begin{figure}
+<<phila-figure, echo=FALSE, fig.height=5>>=
+setup_plot(ylim = c(0, 800), xlim = range(phila1918b$time), ylab="daily P&I deaths")
+draw_confband(ppp)
+tvals <- with(phila1918b, seq(min(time),max(time), length=1000))
+t0 <- min(tvals)
+curve(KM_approx(x-t0, a=a.phila, omega=omega.phila, phi=phi.phila)/365, from=t0, to=max(tvals), n=1000, add=TRUE,
+      xpd=NA, col=my.blue, lwd=lwd)
+lines(tvals,
+      with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
+      xpd=NA, lwd=lwd, col=col.nls)
+lines(estimate ~ times, data=ppp, col=col.fitode.nb, lwd=lwd*0.60, lty="dotted")
+points(mort ~ time,
+       data = phila1918b, xpd=NA, pch=21, bg="white", lwd=2)
+draw_legend()
+@
+\caption{The main wave of the 1918 influenza epidemic in the city of
+  Philadelphia, 1 September 1918 to 31 December 1918 \cite{Gold+09}.
+  \djde{If we include this figure, we'll need another table
+    similar to the Bombay plague table (Table~\ref{tab:Bombay}).}
+}
+\label{fig:phila}
+\end{figure}
 
 \begin{landscape}
 \begin{table}
@@ -2018,121 +2117,6 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd),
     time-shifted?}\djde{The time shift is stochastic time to tipping
     point -- it's just one realization and happens to take off}}
 \label{fig:stoch}
-\end{figure}
-
-
-\begin{landscape}
-\begin{table}
-  \begin{center}
-    \caption{Parameter estimates for the 1918 influenza epidemic in
-      Philadelphia, based on \KM's \cite{KermMcKe27} approximation
-      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, using nonlinear
-      least squares (\code{nls}).  The $\R_0$ estimates assume the
-      population of Philadelphia in 1918 was\dots
-    See Figure~\ref{fig:phila}.}\label{tab:philanls}
-    \medskip
-    %% making use of ragged2e and array packages:
-    \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c | c c}
-    \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
-    & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
-    initial prevalence & $I_0$ & -- & -- &
-      \Sexpr{I0.phila.fitode} & -- \\
-    %%
-    \noalign{\vspace{10pt}}
-    \bfseries Estimated\break parameter \\\hline
-    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{signif(a.phila.nls,dig)} & \Sexpr{ci_fmt("a", ci.phila.nls)} \\
-    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{signif(omega.phila.nls,dig-1)} & \Sexpr{ci_fmt("omega", ci.phila.nls)} \\
-    outbreak centre & $\phi$ & \eqref{eq:phi} & -- &
-      \Sexpr{signif(phi.phila.nls,dig)} & \Sexpr{ci_fmt("phi", ci.phila.nls)} \\
-    \noalign{\vspace{10pt}}
-    \bfseries Derived\break parameter \\\hline
-    peak time & $\tpeak$ & \eqref{eq:tpeak} & years &
-      \Sexpr{tpeak.phila.nls} & \Sexpr{ci_fmt("tpeak", cc.phila.delta)} \\
-    effective reproduction number & $\Reff$
-      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
-      \Sexpr{Reff.phila.nls} & \Sexpr{ci_fmt("Reff", cc.phila.delta)} \\
-    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{gamma.phila.nls} & \Sexpr{ci_fmt("gamma", cc.phila.delta)} \\
-    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
-       \Sexpr{as.integer(S0.phila.nls)} & \Sexpr{ci_fmt("S0", cc.phila.delta, max_ord = 6)} \\
-    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
-       \Sexpr{beta.phila.nls} & \Sexpr{ci_fmt("beta", cc.phila.delta)} \\
-    mean generation interval & $\Tg$ & \eqref{eq:Tg} & years &
-      \Sexpr{signif(Tg.phila.nls,dig)} & \Sexpr{ci_fmt("Tg", cc.phila.delta)} \\
-    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
-       \Sexpr{signif(R0.phila.nls,dig)} & \Sexpr{ci_fmt("R0", cc.phila.delta)}
-  \end{tabular}
-  \end{center}
-\end{table}
-\end{landscape}
-
-
-\begin{landscape}
-\begin{table}
-  \begin{center}
-    \caption{Parameter estimates from \code{fitode} fits
-      of the SIR model \eqref{eq:SIR} to reported
-      pneumonia and influenza mortality during the main
-      wave of the 1918 influenza pandemic in the city
-      of Philadelphia.}\label{tab:phila.fitode}
-    \medskip
-    %% making use of ragged2e and array packages:
-    \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c c}
-  \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries units}
-    & \bfseries \code{dnbinom} & \bfseries 95\% CI \\\hline
-    transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{beta.phila.fitode} & \Sexpr{ci_fmt("beta", ci.phila.fitode)} \\
-      recovery rate & $\gamma$ & $\frac{1}{\textrm{years}}$ & \Sexpr{gamma.phila.fitode} &
-      -- \\
-    initial\break susceptibles & $S_0$& -- &
-      \Sexpr{as.integer(S0.phila.fitode)} & \Sexpr{ci_fmt("S0", ci.phila.fitode, max_ord = 6)}\\
-      initial prevalence & $I_0$ & -- &
-      \Sexpr{I0.phila.fitode} & \Sexpr{ci_fmt("I0", ci.phila.fitode)}\\
-      overdispersion\break parameter & $k$ & -- &
-      \Sexpr{k.phila.fitode} & \Sexpr{ci_fmt("k", ci.phila.fitode)}\\
-      \noalign{\vspace{10pt}}
-      \bfseries Derived\break parameter \\\hline
-      effective reproduction number & $\Reff$ & -- &
-      \Sexpr{Reff.phila.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.phila.fitode[,-1])} \\
-      mean generation interval & $\Tg$ & years &
-      \Sexpr{signif(7*Tg.phila.fitode,dig)} & \Sexpr{ci_fmt("Tg", 7*ci.derived.phila.fitode[,-1])} \\
-    basic reproduction number & $\R_0$ & -- &
-      \Sexpr{signif(R0.phila.fitode,dig)}
-      &  \Sexpr{ci_fmt("R0", ci.derived.phila.fitode[,-1])}
-  \end{tabular}
-  \end{center}
-\end{table}
-\end{landscape}
-
-
-\begin{figure}
-<<phila-figure, echo=FALSE, fig.height=5>>=
-setup_plot(ylim = c(0, 800), xlim = range(phila1918b$time), ylab="daily P&I deaths")
-draw_confband(ppp)
-tvals <- with(phila1918b, seq(min(time),max(time), length=1000))
-t0 <- min(tvals)
-curve(KM_approx(x-t0, a=a.phila, omega=omega.phila, phi=phi.phila)/365, from=t0, to=max(tvals), n=1000, add=TRUE,
-      xpd=NA, col=my.blue, lwd=lwd)
-lines(tvals,
-      with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
-      xpd=NA, lwd=lwd, col=col.nls)
-lines(estimate ~ times, data=ppp, col=col.fitode.nb, lwd=lwd*0.60, lty="dotted")
-points(mort ~ time,
-       data = phila1918b, xpd=NA, pch=21, bg="white", lwd=2)
-draw_legend()
-@
-\caption{The main wave of the 1918 influenza epidemic in the city of
-  Philadelphia, 1 September 1918 to 31 December 1918 \cite{Gold+09}.
-  \djde{If we include this figure, we'll need another table
-    similar to the Bombay plague table (Table~\ref{tab:Bombay}).}
-}
-\label{fig:phila}
 \end{figure}
 
 \end{document}
