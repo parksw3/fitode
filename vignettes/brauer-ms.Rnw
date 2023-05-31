@@ -167,7 +167,10 @@ primarily focused on \term{compartmental models} like the SIR model,
 cast either as differential equations following the tradition of \KM
 \cite{KermMcKe27}, or as \term{stochastic processes} in the tradition
 of McKendrick \cite{McKe26} and Bartlett \cite{Bart60}.  In recent
-years, as the power of computers has grown exponentially, there has
+years, as the power of computers has grown exponentially,
+\bmb{do we need ``exponentially'' here? it is true in this case but I would still
+  prefer to drop it}
+there has
 been increasing interest in \term{agent-based models}, which represent
 each individual as a separate unit that can have unique properties
 \cite{eubank2004modelling}.
@@ -205,6 +208,11 @@ experience with statistics and parameter estimation.  Unfortunately,
 we have lost the opportunity to present our work to Fred, but it seems
 fitting (!) to present such a tutorial in this volume dedicated to
 Fred's memory.\djde{Humph.  We'll have to say something different.}
+\bmb{Should we still use a Brauer-centric framing since the paper
+  is no longer going to that special issue? I don't object to it
+  but thought we should at least consider (if we do use it, we
+  should probably mention somewhere that the paper was originally
+  intended for a Brauer memorial issue)}
 
 \section{Kermack and McKendrick's fit}
 
@@ -342,7 +350,9 @@ growth rate, so it can be approximated easily by plotting the data on
 a log scale, estimating the initial slope, and dividing by 2.
 \djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is likely to be
   much better than fitting the initial condition $I_0$.  Is this worth
-  commenting on?}  Very rough guesses for $a$, $\tpeak$ and $\omega$
+  commenting on?}
+\bmb{I'm not sure it fits in here}
+Very rough guesses for $a$, $\tpeak$ and $\omega$
 are sufficient to converge on the same fit:
 
 <<nls-bombay-2>>=
@@ -396,17 +406,17 @@ Alternatively, you could write
 \end{linenomath*}
 and fit $A$, $\Omega$, and $\Phi$, which would guarantee positive $a$,
 $\omega$, and $\phi$ without having to constrain the values of the
-fitted parameters.  This last suggestion may just seem like a cute
-trick, but there is more to it than that.  A much broader range of
+fitted parameters.  While this last suggestion may just seem like a cute
+trick, there is more to it than that.  A much broader range of
 optimization algorithms is available for unconstrained fitting;
 numerical parameter values of very small magnitude can also lead to
 numerical instability, so it is advantageous to link parameters that
 must lie in a given range to unconstrained parameters that can be fit
 more easily.  In equation~\eqref{eq:loglink}, the \term{link function}
-that converts the parameters to the unconstrained scale is $\log$.
-Another common link function is logit (the inverse of the logistic
-function), which converts the unit interval $(0,1)$ to
-$(-\infty,\infty)$, and is especially convenient when parameters
+that converts the parameters to the unconstrained scale is $\log(x)$.
+Another common link function is $\textrm{logit}(x) = \log(x/(1-x))$ (the log-odds function,
+or inverse of the logistic function), which converts the unit interval $(0,1)$ to
+$(-\infty,\infty)$, and is convenient when parameters
 represent proportions or probabilities.  (Requiring positivity is so
 common that the default setting in \code{fitode} is to use a log link
 when fitting any parameter.)
@@ -629,6 +639,8 @@ preceding week, i.e., it would be better to define
     \end{align}
   \end{subequations}
 \end{linenomath*}
+\bmb{is it worth mentioning the assumption that infection fatality rate $\approx$ 100\% again (``Note that
+we are still assuming \ldots''?)}
 Indeed, whether we are fitting to mortality or incidence or another
 instantaneous rate, we should be integrating over the observation
 interval, which is precisely what we do below when fitting to the ODEs
@@ -758,8 +770,8 @@ The probability mass function for the \term{negative binomial
 The predicted variance of a particular observation $y_i$ is given by
 $\mu_i (1+\mu_i/k)$, where $\mu_i(\thetavec) = f(t_i;\thetavec)$ is the
 model evaluated at the $i$\textsuperscript{th} observed data point
-[\emph{cf.}\ \eqref{eq:leastsquares}\eqref{eq:sechcorrect}].  The
-maximum likelihood estimate is, therefore,
+[\emph{cf.}\ \eqref{eq:leastsquares} and \eqref{eq:sechcorrect}].
+The maximum likelihood estimate is, therefore,
 \begin{linenomath*}
   \begin{equation}
 \label{eq:negbinomMLE}
@@ -812,7 +824,10 @@ The diagonal elements of $\mathrm{Cov}(\thetavec)$ are the (estimated)
 variances of the parameter estimates, so we can take their (positive)
 square roots to get the standard error (SE) and compute approximate
 95\% confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to
-$\thetavechat$.  To obtain CIs on functions of the fitted parameters
+$\thetavechat$ ($\pm 1.96$ represents a range containing 95\% of the
+probability of a standard Normal distribution) \bmb{added the
+  explanation of $\pm 1.96$; I'm really unsure
+  how much probability \& stats we should try to explain \ldots}.  To obtain CIs on functions of the fitted parameters
 (e.g., $\R_0$ or $\gamma$ if our model is \KM's approximation
 \eqref{eq:sech}), we build on the idea that if the error in a
 parameter $a$ is $\Delta a$, then the associated error in a
@@ -873,16 +888,18 @@ the pink confidence band shown in Figure~\ref{fig:Bombay}.
 Better confidence intervals can be obtained
 using the \term{profile likelihood}, which is calculated by fixing a
 set of model parameters to specific values and fitting the remaining
-parameters to maximize the likelihood \citep{Bolk08}.  By calculating
+parameters to maximize the likelihood \citep[][\S 7.5.1]{Bolk08}.  By calculating
 the profile likelihood across a range of parameter values, we obtain
 the profile likelihood surface, from which confidence intervals can be
 estimated using the likelihood ratio test.\djde{we should either spell
   that out, or give a reference to a section or page number in a book
   that gives examples of getting CIs from profile likelihoods this
-  way} While profile likelihoods generally give more accurate
+  way}
+\bmb{added section ref to Bolker 2008 citation above}
+While profile likelihoods generally give more accurate
 estimates of confidence intervals, calculating the profile likelihood
 can be challenging, if not practically impossible, for derived
-parameters or epidemic trajectories.  Consequently, we rely on the
+parameters or epidemic trajectories \bmb{could ref \cite[][\S 7.5.1.2]{Bolk08} if you wanted}.  Consequently, we rely on the
 Delta Method hereafter.
 
 \section{Fitting the ODE}
@@ -893,7 +910,7 @@ Until now, we have focused on fitting \KM's approximation
 ODE~\eqref{eq:SIR} then we could proceed as above, replacing the
 approximate analytical expression \eqref{eq:sech} with the exact
 formula.  Since we do not have an exact solution, we must instead rely
-on numerical solutions of the ODE.  In general, fitting numerical
+on numerical solutions of the ODE.  Fitting numerical
 solutions of ODEs to data introduces significant coding/computational
 challenges, but conceptually the problem is the same as if we did have
 an analytical formula.  We can still use the Delta method
@@ -908,7 +925,11 @@ $\frac{\rm d}{{\rm d}t}\big(\frac{\partial
   x(t,\theta_i)}{\partial\theta_i}\big)$, where $\theta_i$ refers to
 the components of $\thetavec$\djde{Ben, I changed total derivative wrt
   $\theta$ to partial derivative wrt $\theta_i$, which made more sense
-  to me, but I haven't looked at the reference.}. They can easily be
+  to me, but I haven't looked at the reference.}
+\bmb{original ref (eq 6) uses $\frac{d}{dt}\frac{d{\mathbf x}(t, \theta)}{d\theta} =
+  \frac{\partial {\mathbf f}_x}{\partial \mathbf x} \frac{d{\mathbf x}(t, \theta)}{d\theta} +
+  \frac{\partial {\mathbf f}_x}{\partial \theta}$; doesn't consider multivariate $\theta$ explicitly \ldots I think
+your version is OK}. They can easily be
 derived using the chain rule; by solving them in parallel with the
 main set of ODEs, we get a computationally efficient and numerically
 stable way to calculate the overall gradients of the log-likelihood
@@ -973,15 +994,14 @@ Fitting to such differences is implemented by using the
 \code{diffnames} argument to specify the state variable for which
 consecutive differences are to be used (so, if the focal variable is
 $R$ then \code{fitode} fits to $R(t_i) - R(t_{i-1})$ rather than
-$R(t_i)$).  Ordinary least squares can be implemented by simply
-changing the \code{observation} argument to
+$R(t_i)$).  Ordinary least squares can be implemented by changing the \code{observation} argument to
 {\tt
   \hlstd{mort}
   \!\!{\color{black}\~{}}\!\!
   \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{= R)}
-}
+}.
 \item[\code{initial}]conditions are expressed as numbers of individuals.
-\item[\code{par}]refers to the parameters that are to be fitted:
+\item[\code{par}]refers to the parameters to be fitted:
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
 \end{description}
 Since we are taking the difference $\mu(t_i) = R(t_i) - R(t_{i-1})$ to calculate the mortality trajectory, we have to add an extra row representing $t_0$ to the data set in order to compute $\mu(t_1) = R(t_1) - R(t_0)$:
@@ -992,7 +1012,9 @@ bombay2 <- rbind(
     bombay
 )
 @
-Taking our previous parameter estimate from \code{nls} as our starting values, we can fit the model by calling the \code{fitode}: function
+\bmb{is it worth a note/footnote here to caution about the common practice of fitting to cumulative curves, e.g.
+  \cite{King+15}?}
+Taking our previous parameter estimate from \code{nls} as our starting values, we can fit the model by calling the \code{fitode} function
 <<sirmortfit,cache=TRUE,warning=FALSE>>=
 SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
 SIR_fit <- fitode(
@@ -1021,7 +1043,7 @@ The resulting fits are plotted in Figure~\ref{fig:Bombay}.
 The estimated coefficients and the associated confidence intervals
 (Table~\ref{tab:bombay.fitode}) can be obtained via \code{coef} and \code{confint} functions;
 the latter function also allows users to obtain confidence intervals for derived parameters using the Delta method.
-Note that \code{fitode} gives discrete prediction (rather than smooth curves) because we are calculating mortality at discrete (weekly)
+Note that \code{fitode} gives discrete predictions (rather than smooth curves) because we are calculating mortality at discrete (weekly)
 time intervals using equation~\ref{eq:correct.mortality2}.
 
 \swp{overall, the bombay data set is a really bad example for fitting SIR model. Not sure what else to do or say.}
@@ -1852,15 +1874,15 @@ points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
   parameter estimates are given Table~\ref{tab:bombay.fitode}.
   \emph{Bottom panel:} The yellow curve is identical to the yellow
   dotted curve in the top panel, and the yellow band shows the
-  \code{fitode} confidence band.  The dotted red curve is identical to
+  \code{fitode} confidence band; this confidence band is shown as
+  a linear interpolation between successive observation times because
+  the model fits to incidence at discrete time points rather than to
+  a continuous curve of the instantaneous death rate.
+  The dotted red curve is identical to
   the solid red curve in the top panel.  We have separated the two
   panels because the confidence band overlap would make the plots
   difficult to interpret.\djde{We need a legend in the bottom panel.}
-  \djde{Ben's comment in the caption to Figure~\ref{fig:stoch} applies
-    here too.  We need to explain why the \code{fitode} estimate and
-    confidence band is jagged, or make it smooth (which I realize is
-    easy for the estimate and a can of worms for the confidence
-    band).}  }
+}
 \label{fig:Bombay}
 \end{figure}
 
