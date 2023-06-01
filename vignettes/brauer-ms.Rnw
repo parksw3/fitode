@@ -812,12 +812,7 @@ partial derivatives of $-\log{\lik}$, also known as the \term{Fisher
 specifies the desired multivariate Normal with mean $\thetavechat$.
 This relationship between $\mathrm{Cov}(\thetavec)$ and the Hessian of
 $-\log{\lik}$ is, admittedly, not obvious!  See \citep[\S6.5]{Bolk08}
-for a heuristic explanation or \cite{Wassermanall2010} for a rigorous
-(if terse) explanation.\djde{It would be nice to be more
-  self-contained than this, if we can think of a useful way of doing
-  so.  Can you give a section or page number in Wasserman?}
-\bmb{probably chapter 9 ``Parametric Inference''. SpringerLink via McMaster
-  \href{https://link-springer-com.libaccess.lib.mcmaster.ca/book/10.1007/978-0-387-21736-9}{won't give me sufficient access to see exactly what's in there}}
+for a heuristic explanation or \cite[][\S\S9.7, 9.10]{Wassermanall2010} for a rigorous (if terse) explanation.
 
 \hypertarget{DeltaMethod}{}
 The diagonal elements of $\mathrm{Cov}(\thetavec)$ are the (estimated)
