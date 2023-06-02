@@ -162,17 +162,14 @@ In the century that has elapsed since publication of \KM's initial
 paper, the field of mathematical epidemiology has expanded and
 matured, and has been the subject of many books
 \cite{Bart60,Bail75,AndeMay91,AndeBrit00b,DiekHees00,BrauCast01,Brau+19}
-and review articles \cite{Heth00,Earn+02,Earn08,Earn09}.  Researchers have
-primarily focused on \term{compartmental models} like the SIR model,
-cast either as differential equations following the tradition of \KM
-\cite{KermMcKe27}, or as \term{stochastic processes} in the tradition
-of McKendrick \cite{McKe26} and Bartlett \cite{Bart60}.  In recent
-years, as the power of computers has grown exponentially,
-\bmb{do we need ``exponentially'' here? it is true in this case but I would still
-  prefer to drop it}
-there has
-been increasing interest in \term{agent-based models}, which represent
-each individual as a separate unit that can have unique properties
+and review articles \cite{Heth00,Earn+02,Earn08,Earn09}.  Researchers
+have primarily focused on \term{compartmental models} like the SIR
+model, cast either as differential equations following the tradition
+of \KM \cite{KermMcKe27}, or as \term{stochastic processes} in the
+tradition of McKendrick \cite{McKe26} and Bartlett \cite{Bart60}.  In
+recent years, as the power of computers has grown, there has been
+increasing interest in \term{agent-based models}, which represent each
+individual as a separate unit that can have unique properties
 \cite{eubank2004modelling}.
 
 Throughout the history of the subject, and regardless of the modelling
@@ -206,13 +203,22 @@ model fitting to Fred and others like him, i.e., individuals who are
 comfortable with mathematical analysis of ODEs but have little or no
 experience with statistics and parameter estimation.  Unfortunately,
 we have lost the opportunity to present our work to Fred, but it seems
-fitting (!) to present such a tutorial in this volume dedicated to
-Fred's memory.\djde{Humph.  We'll have to say something different.}
-\bmb{Should we still use a Brauer-centric framing since the paper
-  is no longer going to that special issue? I don't object to it
-  but thought we should at least consider (if we do use it, we
-  should probably mention somewhere that the paper was originally
-  intended for a Brauer memorial issue)}
+fitting (!) to highlight Fred's role in the history of this work, and
+to dedicate this tutorial to his memory.\footnote{We had hoped to
+  submit this paper to a volume in honour of Fred's memory
+  \cite{BrauerMemorialIssue}, but didn't complete the manuscript in
+  time.}
+
+\djde{Humph.  We'll have to say something different.}  \bmb{Should we
+  still use a Brauer-centric framing since the paper is no longer
+  going to that special issue? I don't object to it but thought we
+  should at least consider (if we do use it, we should probably
+  mention somewhere that the paper was originally intended for a
+  Brauer memorial issue)} \djde{What do you think of my revision?  It
+  would make me feel good to mention the history with Fred.  I'm not
+  convinced that highlighting my failure to meet the deadline for the
+  memorial issue is necessary, especially given that we don't plan to
+  submit to JBD. Perhaps you can improve on the language?}
 
 \section{Kermack and McKendrick's fit}
 
