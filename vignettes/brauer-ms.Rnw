@@ -922,12 +922,12 @@ to specific values and fitting the remaining parameters to maximize
 the likelihood \citep[][\S 7.5.1]{Bolk08}.  By calculating the profile
 likelihood across a range of parameter values, we obtain the profile
 likelihood surface, from which confidence intervals can be estimated
-using the likelihood ratio test.  While profile likelihoods generally
-give more accurate estimates of confidence intervals, calculating the
-profile likelihood can be challenging, if not practically impossible,
-for derived parameters or epidemic trajectories \cite[][\S
-7.5.1.2]{Bolk08}.  Consequently, we rely on the Delta Method
-hereafter.
+using the likelihood ratio test \citep[][\S 6.4.1.1]{Bolk08}.  While
+profile likelihoods generally give more accurate estimates of
+confidence intervals, calculating the profile likelihood can be
+challenging, if not practically impossible, for derived parameters or
+epidemic trajectories \cite[][\S 7.5.1.2]{Bolk08}.  Consequently, we
+rely on the Delta Method hereafter.
 
 \section{Fitting the ODE}
 
@@ -963,7 +963,7 @@ stable way to calculate the overall gradients of the log-likelihood
 with respect to the parameters.
 
 The \code{fitode} package\footnote{\code{fitode} is available on
-  \href{https://cran.r-project.org/}{CRAN}and consequently can be
+  \href{https://cran.r-project.org/}{CRAN} and consequently can be
   installed via \code{install.packages("fitode")}.} does all of this
 computational work under the hood, and makes it as easy for a user to
 fit an ODE to data as it was for us to use \code{nls} above to fit a
