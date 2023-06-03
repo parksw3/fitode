@@ -645,12 +645,21 @@ preceding week, i.e., it would be better to define
     \end{align}
   \end{subequations}
 \end{linenomath*}
-\bmb{is it worth mentioning the assumption that infection fatality rate $\approx$ 100\% again (``Note that
-we are still assuming \ldots''?)}
 Indeed, whether we are fitting to mortality or incidence or another
 instantaneous rate, we should be integrating over the observation
 interval, which is precisely what we do below when fitting to the ODEs
-directly.
+directly.  In addition, we really ought to consider the fact that not
+all infections end in death---we have followed \KM in assuming that
+the \term{infection fatality proportion} is 100\%.  Similarly, when
+analyzing incidence data, the \term{reporting proportion} ought to be
+taken into account.
+
+\bmb{is it worth mentioning the assumption that infection fatality
+  rate $\approx$ 100\% again (``Note that we are still assuming
+  \ldots''?)}  
+\djde{I've added two sentences above.  Feel free to improve, and to
+  comment on the non-indentifiability problems or whatever you think
+  is useful to mention here.}
 
 \section{Uncertainty}
 
@@ -795,16 +804,17 @@ The maximum likelihood estimate is, therefore,
   \end{equation}
 \end{linenomath*}
 
-\djde{There is commented-out text at this point.  I prefer deletions
-  to go in a cuts file.  Leaving here for now.}
-%% where, as for the likelihood associated with Normal errors, we assume
-%% $\sigma^2$ is computed as the variance of the residuals across the full
-%% time series.\djde{Is that what's done, or is $\sigma^2$ added to
-%%   $\thetavec$ as a parameter to fit?  or even $\sigma_i^2$ for each
-%%   i?}
-%% \swp{It is what's done. There's a version where $\sigma^2$ is added
-%% to $\thetavec$ but it is not used when we call the ols function. $\sigma_i^2$
-%% doesn't make sense because we have one residual per $i$.}
+\djde{There was commented-out text at this point, which I've converted
+  to grey.  If we definitely don't want it, it should be moved to
+  \texttt{cuts.Rnw}.}  {\color{gray} where, as for the likelihood
+  associated with Normal errors, we assume $\sigma^2$ is computed as
+  the variance of the residuals across the full time series.\djde{Is
+    that what's done, or is $\sigma^2$ added to $\thetavec$ as a
+    parameter to fit?  or even $\sigma_i^2$ for each i?}  \swp{It is
+    what's done. There's a version where $\sigma^2$ is added to
+    $\thetavec$ but it is not used when we call the ols
+    function. $\sigma_i^2$ doesn't make sense because we have one
+    residual per $i$.}  }
 
 Regardless of the form of the likelihood function, we can use it to
 obtain CIs on the MLE $\thetavechat$.  A relatively simple approach is
@@ -820,24 +830,23 @@ This relationship between $\mathrm{Cov}(\thetavec)$ and the Hessian of
 $-\log{\lik}$ is, admittedly, not obvious!  See \citep[\S6.5]{Bolk08}
 for a heuristic explanation or \cite[][\S\S9.7, 9.10]{Wassermanall2010} for a rigorous (if terse) explanation.
 
-\hypertarget{DeltaMethod}{}
-The diagonal elements of $\mathrm{Cov}(\thetavec)$ are the (estimated)
-variances of the parameter estimates, so we can take their (positive)
-square roots to get the standard error (SE) and compute approximate
-95\% confidence intervals by adding $\pm1.96\,\mathrm{SE}$ to
-$\thetavechat$ ($\pm 1.96$ represents a range containing 95\% of the
-probability of a standard Normal distribution) \bmb{added the
-  explanation of $\pm 1.96$; I'm really unsure
-  how much probability \& stats we should try to explain \ldots}.  To obtain CIs on functions of the fitted parameters
-(e.g., $\R_0$ or $\gamma$ if our model is \KM's approximation
-\eqref{eq:sech}), we build on the idea that if the error in a
-parameter $a$ is $\Delta a$, then the associated error in a
+\hypertarget{DeltaMethod}{} The diagonal elements of
+$\mathrm{Cov}(\thetavec)$ are the (estimated) variances of the
+parameter estimates, so we can take their (positive) square roots to
+get the standard error (SE) and compute approximate 95\% confidence
+intervals by adding $\pm1.96\,\mathrm{SE}$ to $\thetavechat$
+($\pm 1.96$ represents a range containing 95\% of the probability of a
+standard Normal distribution).  To obtain CIs on functions of the
+fitted parameters (e.g., $\R_0$ or $\gamma$ if our model is \KM's
+approximation \eqref{eq:sech}), we build on the idea that if the error
+in a parameter $a$ is $\Delta a$, then the associated error in a
 (differentiable) function $g(a)$ is $\Delta{g}\approx g'(a)\Delta{a}$.
 Given a (smooth) nonlinear function $g(\thetavec)$ of the parameters,
 the \term{Delta Method} \cite{Dorf38,VerH12} expands
 $\textrm{Var}(g(\thetavec))$ to first order about $\thetavechat$,
 which gives us the variance-covariance matrix of $g(\thetavec)$
-\cite[][\S7.5.2]{Bolk08} \cite[][\S9.9]{Wassermanall2010}.  In particular, the variance of $g(\thetavec)$ is
+\cite[][\S7.5.2]{Bolk08} \cite[][\S9.9]{Wassermanall2010}.  In
+particular, the variance of $g(\thetavec)$ is
 \begin{linenomath*}
 \begin{subequations}\label{eq:DeltaMethod}
 \begin{align}
@@ -886,18 +895,18 @@ observation time $t_i$ (and hence obtain a confidence band) by
 considering $g(\thetavec)=f(t_i;\thetavec)$.  This is how we obtained
 the pink confidence band shown in Figure~\ref{fig:Bombay}.
 
-Better confidence intervals can be obtained
-using the \term{profile likelihood}, which is calculated by fixing a
-set of model parameters to specific values and fitting the remaining
-parameters to maximize the likelihood \citep[][\S 7.5.1]{Bolk08}.  By calculating
-the profile likelihood across a range of parameter values, we obtain
-the profile likelihood surface, from which confidence intervals can be
-estimated using the likelihood ratio test.
-While profile likelihoods generally give more accurate
-estimates of confidence intervals, calculating the profile likelihood
-can be challenging, if not practically impossible, for derived
-parameters or epidemic trajectories \bmb{could ref \cite[][\S 7.5.1.2]{Bolk08} if you wanted}.  Consequently, we rely on the
-Delta Method hereafter.
+Better confidence intervals can be obtained using the \term{profile
+  likelihood}, which is calculated by fixing a set of model parameters
+to specific values and fitting the remaining parameters to maximize
+the likelihood \citep[][\S 7.5.1]{Bolk08}.  By calculating the profile
+likelihood across a range of parameter values, we obtain the profile
+likelihood surface, from which confidence intervals can be estimated
+using the likelihood ratio test.  While profile likelihoods generally
+give more accurate estimates of confidence intervals, calculating the
+profile likelihood can be challenging, if not practically impossible,
+for derived parameters or epidemic trajectories \cite[][\S
+7.5.1.2]{Bolk08}.  Consequently, we rely on the Delta Method
+hereafter.
 
 \section{Fitting the ODE}
 
@@ -1001,17 +1010,27 @@ $R(t_i)$).  Ordinary least squares can be implemented by changing the \code{obse
 \item[\code{par}]refers to the parameters to be fitted:
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
 \end{description}
-Since we are taking the difference $\mu(t_i) = R(t_i) - R(t_{i-1})$ to calculate the mortality trajectory, we have to add an extra row representing $t_0$ to the data set in order to compute $\mu(t_1) = R(t_1) - R(t_0)$:
+Since we are taking the difference $\mu(t_i) = R(t_i) - R(t_{i-1})$ to
+calculate the mortality trajectory,\footnote{It is not unusual to see
+  fits to cumulative curves.  However, doing so is ill-advised because
+  points in a cumulative time series are not independent, making it
+  difficult to define CIs \cite{King+15}.}  we have to add an extra
+row representing $t_0$ to the data set in order to compute
+$\mu(t_1) = R(t_1) - R(t_0)$:
 <<sirmortfit_data, cache=TRUE, warning=FALSE>>=
 bombay2 <- rbind(
     c(times=bombay$week[1] -
           diff(bombay$week)[1], mort=NA),
     bombay
 )
-@
-\bmb{is it worth a note/footnote here to caution about the common practice of fitting to cumulative curves, e.g.
-  \cite{King+15}?}
-Taking our previous parameter estimate from \code{nls} as our starting values, we can fit the model by calling the \code{fitode} function
+@ 
+%%
+\bmb{is it worth a note/footnote here to caution about the common
+  practice of fitting to cumulative curves, e.g.
+  \cite{King+15}?}\djde{I've added a footnote; you may want to alter
+  it.}  Taking our previous parameter estimate from \code{nls} as our
+starting values, we can fit the model by calling the \code{fitode}
+function
 <<sirmortfit,cache=TRUE,warning=FALSE>>=
 SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
 SIR_fit <- fitode(
@@ -1111,6 +1130,8 @@ assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
 @
 
 \swp{This is also broken. Having trouble calculating vcov... so we can't get CIs for ols fits.}
+\djde{``This'' is referring to \texttt{ci.bombay.fitode.ols}
+  in the \texttt{sirmortfitcoefols} chunk, which is suppressed here.}
 \bmb{Do we even expect to get CIs for OLS fits? I thought we explained above that OLS is not a statistical framework. If we want CIs we can either use a Normal error response (probably easiest), or back-calculate estimated resid SD from residual SSQs, scale Hessian appropriately ...}
 
 <<sirmortfit_ols_confband, eval=FALSE, include=FALSE>>==
