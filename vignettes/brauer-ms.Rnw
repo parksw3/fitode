@@ -406,14 +406,13 @@ illustrates a very important fact: there is \emph{not necessarily a
   unique best fit set of parameters!}  In this case, the alternative
 solution exists because $\sech^2(x)$ is symmetric about the $y$ axis,
 but in general, there can be multiple local minima that cause
-nonlinear optimizers to converge to points that may or may not represent equally
-good fits to the data.  The potential existence of
-multiple local optima makes fitting models to data
-hard; you need to be cautious, and use common sense,
-in interpreting the solutions found by your software (always
-plot the solutions!). Raue \emph{et al.}
-\cite{raue2013lessons} give suggestions for how to diagnose
-and handle multiple optima.
+nonlinear optimizers to converge to points that may or may not
+represent equally good fits to the data.  The potential existence of
+multiple local optima makes fitting models to data hard; you need to
+be cautious, and use common sense, in interpreting the solutions found
+by your software (always plot the solutions!). Raue \emph{et al.}\/
+\cite{raue2013lessons} give suggestions for how to diagnose and handle
+multiple optima.
 
 If you know that your parameters should be in a certain range, then
 you can exclude values outside that range.  For example, to ensure
@@ -937,30 +936,25 @@ Until now, we have focused on fitting \KM's approximation
 ODE~\eqref{eq:SIR} then we could proceed as above, replacing the
 approximate analytical expression \eqref{eq:sech} with the exact
 formula.  Since we do not have an exact solution, we must instead rely
-on numerical solutions of the ODE.  Fitting numerical
-solutions of ODEs to data introduces significant coding/computational
-challenges, but conceptually the problem is the same as if we did have
-an analytical formula.  We can still use the Delta method
+on numerical solutions of the ODE.  Fitting numerical solutions of
+ODEs to data introduces significant coding/computational challenges,
+but conceptually the problem is the same as if we did have an
+analytical formula.  We can still use the Delta method
 \eqref{eq:DeltaMethod} to estimate uncertainty, but calculating the
 gradient $(\nabla g)(\thetavec)$ is not straightforward if $g$ is a
 numerical solution of an ODE; we must simultaneously solve a set of
-\term{sensitivity equations} alongside the main differential equations
-\cite{raue2013lessons}. Sensitivity equations are an auxiliary set of
-ODEs that define the time derivatives of the derivatives of the state
-variables with respect to the parameters, i.e.,
+\term{sensitivity equations} \cite[Eq.\,(6)]{raue2013lessons}
+alongside the main differential equations. Sensitivity equations are
+an auxiliary set of ODEs that define the time derivatives of the
+derivatives of the state variables with respect to the parameters,
+i.e.,
 $\frac{\rm d}{{\rm d}t}\big(\frac{\partial
   x(t,\theta_i)}{\partial\theta_i}\big)$, where $\theta_i$ refers to
-the components of $\thetavec$\djde{Ben, I changed total derivative wrt
-  $\theta$ to partial derivative wrt $\theta_i$, which made more sense
-  to me, but I haven't looked at the reference.}
-\bmb{original ref (eq 6) uses $\frac{d}{dt}\frac{d{\mathbf x}(t, \theta)}{d\theta} =
-  \frac{\partial {\mathbf f}_x}{\partial \mathbf x} \frac{d{\mathbf x}(t, \theta)}{d\theta} +
-  \frac{\partial {\mathbf f}_x}{\partial \theta}$; doesn't consider multivariate $\theta$ explicitly \ldots I think
-your version is OK}. They can easily be
-derived using the chain rule; by solving them in parallel with the
-main set of ODEs, we get a computationally efficient and numerically
-stable way to calculate the overall gradients of the log-likelihood
-with respect to the parameters.
+the components of $\thetavec$. They can easily be derived using the
+chain rule; by solving them in parallel with the main set of ODEs, we
+get a computationally efficient and numerically stable way to
+calculate the overall gradients of the log-likelihood with respect to
+the parameters.
 
 The \code{fitode} package\footnote{\code{fitode} is available on
   \href{https://cran.r-project.org/}{CRAN} and consequently can be
@@ -1048,10 +1042,10 @@ bombay2 <- rbind(
 %%
 \bmb{is it worth a note/footnote here to caution about the common
   practice of fitting to cumulative curves, e.g.
-  \cite{King+15}?}\djde{I've added a footnote; you may want to alter
-  it.}  Taking our previous parameter estimate from \code{nls} as our
-starting values, we can fit the model by calling the \code{fitode}
-function
+  \cite{King+15}?}\djde{I've added a footnote above; you may want to
+  alter it.}  Taking our previous parameter estimate from \code{nls}
+as our starting values, we can fit the model by calling the
+\code{fitode} function
 <<sirmortfit,cache=TRUE,warning=FALSE>>=
 SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
 SIR_fit <- fitode(
