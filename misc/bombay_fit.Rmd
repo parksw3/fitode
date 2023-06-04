@@ -87,7 +87,7 @@ plot(p0, log = "y")
 
 I'm going to use 820,000 for $N$ (from [Wikipedia](https://en.wikipedia.org/wiki/Bombay_plague_epidemic) this was the value from the 1891 census, five years earlier - obviously the effective population size could be different from that but ...)
 
-```{r}
+```{r bombay_pop}
 bombay_pop <- 820e3
 ```
 
@@ -129,6 +129,7 @@ print(cov2cor(v), digits = 2)
 Simulate outcomes (confidence intervals and prediction intervals by "population prediction interval", i.e. MVN simulation + nbinom observation error)
 
 ```{r sims}
+p2B <- sir.pred(c(xfun(opt2$par, "logk"), logI0 = log(1)))
 nsim <- 1000
 nt <- length(p1)
 confmat <- predmat <- matrix(NA_real_, nrow = nt, ncol = nsim)
@@ -146,9 +147,9 @@ ppred <- t(apply(predmat, 1, quantile, c(0.025, 0.975)))
 ```{r plotconf}
 par(las=1, bty = "l")
 plot(mort ~ week, data = bombay, log = "y", ylim = c(3, 1500))
-lines(p2)
-matlines(pconf, col = 4, lty = 2)
-matlines(ppred, col = 6, lty = 3)
+lines(p2B)
+matlines(pconf2, col = 4, lty = 2)
+matlines(ppred2, col = 6, lty = 3)
 legend("topleft", lty = c(1, 2, 3),
        legend = c("best fit", "95% conf int", "95% pred int"),
        col = c(1, 4, 6))
@@ -172,9 +173,88 @@ cbind(est = do.call(trfun, as.list(opt1$par)),
 
 The $\gamma$ estimate is obviously silly (95% CI approx. 70-80).
 
-What if we do what's done in the paper and fix $I(0)=1$ and $\gamma=4.47$?
+What if we fix $I(0)=1$ as done in the paper and allow $S(0)$ (effective population size) to vary instead?
 
+```{r}
+sir.nll2 <- function(p, logI0 = log(1)) {
+    sirpred <- sir.pred(c(xfun(p, "logk"), logI0  = logI0))
+    -sum(dnbinom(x = bombay2$mort[-1],
+                 mu = sirpred,
+                 size = exp(p["logk"]), log = TRUE))
+}
+start2 <- c(xfun(start1, "logI0"), logS0 = log(bombay_pop))
+opt2 <- optim(start2, fn = sir.nll2, logI0 = log(1),
+              control = list(maxit = 1e6),
+              hessian = TRUE)
+v2 <- solve(opt2$hessian)
+sds2 <- sqrt(diag(v))
+raw_pars2 <- cbind(est = opt2$par, lwr = opt2$par-1.96*sds2, upr = opt2$par+1.96*sds2)
+human_pars2 <- rbind(R0 = exp(raw_pars2["logR0m1",])+1,
+                     r = exp(raw_pars2["logr",]),
+                     S0 = exp(raw_pars2["logS0",]),
+                     k = exp(raw_pars2["logk",]))
+print(human_pars2, digits = 3)
+```
 
+Stronger correlations (although still not insane)
+
+```{r}
+print(cov2cor(v2), digits = 2)
+```
+
+```{r sims2}
+nsim <- 1000
+nt <- length(p1)
+confmat2 <- predmat2 <- matrix(NA_real_, nrow = nt, ncol = nsim)
+set.seed(101)
+parmat2 <- MASS::mvrnorm(nsim, mu = opt2$par, Sigma = v)
+for (i in 1:nsim) {
+    confmat2[,i] <- sir.pred(c(xfun(parmat2[i,], "logk"), logI0 = log(1)))
+    predmat2[,i] <- rnbinom(nt, mu  = confmat2[,i], size = exp(opt2$par[["logk"]]))
+}
+## DRY ...
+pconf2 <- t(apply(confmat2, 1, quantile, c(0.025, 0.975)))
+ppred2 <- t(apply(predmat2, 1, quantile, c(0.025, 0.975)))
+```
+
+```{r plotconf2}
+par(las=1, bty = "l")
+plot(mort ~ week, data = bombay, log = "y", ylim = c(3, 1500))
+lines(p2B)
+lines(p2, col = 2)
+matlines(pconf2, col = 4, lty = 2)
+matlines(ppred2, col = 6, lty = 3)
+legend("topleft", lty = c(1, 2, 3),
+       legend = c("best fit (fix I0/gamma)",
+                  "best fit (fix N/?)",
+                  "95% conf int", "95% pred int"),
+       col = c(1, 2, 4, 6))
+```
+
+```{r}
+trfun2 <- function(logr, logR0m1, logS0, logk) {
+    c(beta = exp(logr)*(1+1/exp(logR0m1))/exp(logS0),
+      gamma = exp(logr - logR0m1),
+      S0 = exp(logS0),
+      I0 = 1,
+      k = exp(logk))
+}
+trmat2 <- apply(parmat2, 1, \(x) do.call(trfun2, as.list(x)))
+print(cbind(est = do.call(trfun2, as.list(opt2$par)),
+      lwr = apply(trmat2, 1, quantile, 0.025),
+      upr = apply(trmat2, 1, quantile, 0.975)),
+      digits = 2)
+```
+
+Correlations among beta/gamma/S0/k aren't too bad ...
+
+```{r}
+cor(t(trmat2[-4,]))
+```
+
+The value of $\gamma$ can compensate for a fixed value of $I(0)$ because we are measuring *incidence* (i.e. the initial observed mortality rate is approximately $\gamma I(0)$).
+
+Do we need to worry about incidence vs prevalence when translating K-M parameters to biological parameters ... ?
 
 ## with fitode
 
@@ -224,7 +304,6 @@ coef(SIR_fit1)
 
 * work back toward doing this with `fitode`
    * fix $\gamma$ instead of N?
-   * (possibly problem in fitode of parameter scaling - even though we have derivatives, and `numDeriv::jacobian()` uses Richardson extrapolation, could still be screwed if the *initial* epsilon is bad ... ?)
-* estimates of $\rzero$ are **extremely** small - does this match with Bacaer, K&M, etc. ? (Is this where we came in?)
+* How do estimates match with Bacaer, K&M, etc. ? (Is this where we came in?)
 * explore multivariate sensitivity (e.g. 2D profiles for R0, r? should re-optimize I0 in each case because of correlation between I0, R)
-
+* say something about biologically plausible range of $\gamma$? (go back to louseplague paper - how do we translate rat infectious periods to SIR infectious periods ... ? Louse plague prior fig gives $1/\gamma_r$ info; estimates from Tollenaere et al 2010 (4-10), Keeling and Gilligan 2000 (outlier, 18), Engelthaler et al 2000 (2-5)). Various other 'gamma' parameters are there, could dig through them ...)
