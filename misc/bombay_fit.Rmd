@@ -174,9 +174,10 @@ trfun <- function(logr, logR0m1, logI0, logk) {
       k = exp(logk))
 }
 trmat <- apply(parmat, 1, \(x) do.call(trfun, as.list(x)))
-cbind(est = do.call(trfun, as.list(opt1$par)),
+print(cbind(est = do.call(trfun, as.list(opt1$par)),
       lwr = apply(trmat, 1, quantile, 0.025),
-      upr = apply(trmat, 1, quantile, 0.975))
+      upr = apply(trmat, 1, quantile, 0.975)),
+      digits = 3)
 ```
 
 The $\gamma$ estimate is obviously silly (95% CI approx. 70-80).
@@ -234,14 +235,14 @@ lines(p2B)
 lines(p2, col = 2)
 matlines(pconf2, col = 4, lty = 2)
 matlines(ppred2, col = 6, lty = 3)
-legend("topleft", lty = c(1, 2, 3),
+legend("bottom", lty = c(1, 2, 3),
        legend = c("best fit (fix I0/gamma)",
                   "best fit (fix N/?)",
                   "95% conf int", "95% pred int"),
        col = c(1, 2, 4, 6))
 ```
 
-```{r}
+```{r trans_par2}
 trfun2 <- function(logr, logR0m1, logS0, logk) {
     c(beta = exp(logr)*(1+1/exp(logR0m1))/exp(logS0),
       gamma = exp(logr - logR0m1),
@@ -258,7 +259,7 @@ print(cbind(est = do.call(trfun2, as.list(opt2$par)),
 
 Correlations among beta/gamma/S0/k aren't too bad ...
 
-```{r}
+```{r more_cor}
 cor(t(trmat2[-4,]))
 ```
 
@@ -268,7 +269,7 @@ Do we need to worry about incidence vs prevalence when translating K-M parameter
 
 ## Gamma vs. N
 
-```{r}
+```{r fixed_gamma_fits, warning=FALSE}
 options(sir.grad_param = "R0m1_loggamma")
 start3 <- c(xfun(start1, c("logI0", "logr")),
             loggamma = log(4.77), logS0 = log(bombay_pop))
@@ -294,24 +295,28 @@ profmat <- matrix(NA_real_, nrow = length(lgammavec), ncol = 4,
                   dimnames = list(NULL, c(names(opt4$par), "nll")))
 for (i in seq_along(lgammavec)) {
     pstart <- start3
-    cat(i, lgammavec[i], "\n")
+    ## cat(i, lgammavec[i], "\n")
     oo <- try(optim(
         xfun(start3, "loggamma"),
         fn = sir.nll3,
         logI0 = log(1), loggamma = lgammavec[i],
         control = list(maxit = 1e6),
-        hessian = FALSE)
+        hessian = FALSE),
+        silent = TRUE
         )
     if (!is(oo, "try-error")) {
         pstart[names(oo$par)] <- oo$par
         profmat[i,] <- c(oo$par, oo$value)
     }
 }
-par(mfrow = c(2,2), las = 1, bty = "l")
+par(mfrow = c(2,2), las = 1, bty = "l", mar = c(3,4,1,1),
+    mgp = c(2, 1, 0))
 for (i in 1:4) {
     plot(lgammavec, profmat[,i], ylab = colnames(profmat)[i])
 }
 ```
+
+This fails above a certain fixed gamma value, presumably because we aren't allowing $I(0)$ to decrease ...
 
 ## with fitode
 
