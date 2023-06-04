@@ -1,0 +1,104 @@
+---
+title: "Exploring parameter conversions between the SIR model and the KM approximation"
+---
+
+Here is the SIR model: 
+$$
+\begin{aligned}
+\frac{dS}{dt} &= - \beta S I\\
+\frac{dI}{dt} &= \beta S I - \gamma I\\
+\frac{dR}{dt} &= \gamma I
+\end{aligned}
+$$
+Here's the approximation:
+$$
+\frac{dR}{dt} \approx a \,\textrm{sech}^2{(\omega\,t - \phi)}
+$$
+We want to be able to convert the SIR parameters to KM parameters (and also from KM parameters to SIR parameters).
+
+Based on Bacaër, we have:
+$$
+\begin{aligned}
+a &= \frac{\gamma^3 Q^2}{2 S_0 \beta^2}\\
+\omega &= \frac{Q \gamma}{2}\\
+\phi &= \textrm{arctanh}\left(\frac{\frac{\beta S_0}{\gamma} - 1}{Q} \right)\\
+Q &= \sqrt{\left(\frac{\beta S_0}{\gamma} - 1 \right)^2 + 2 S_0 I_0 \frac{\beta^2}{\gamma^2}}
+\end{aligned}
+$$
+Now, rewriting $R_e = \beta S_0/\gamma$, we have:
+$$
+\begin{aligned}
+a &= \frac{2 \omega^2 S_0}{\gamma R_e^2}\\
+\omega &= \frac{Q \gamma}{2}\\
+\phi &= \textrm{arctanh}\left(\frac{R_e - 1}{Q} \right)\\
+Q &= \sqrt{\left(R_e - 1 \right)^2 + 2 R_e^2 I_0/S_0}
+\end{aligned}
+$$
+For example, let's assume:
+```{r}
+Re <- 5
+gamma <- 1
+S0 <- 1998
+I0 <- 2
+```
+Let's convert to KM paramters:
+
+```{r}
+Q <- sqrt((Re-1)^2 + 2 * Re^2 * I0/S0)
+phi <- atanh((Re-1)/Q)
+omega <- (Q * gamma)/2
+a <- 2 * omega^2 * S0/(gamma * Re^2)
+print(c(Q=Q, phi=phi, omega=omega, a=a))
+```
+
+Now, let's try to convert back. In particular, we have:
+$$
+R_e = \frac{1}{2}\bigg( 1 + \sqrt{1 + \frac{4\,\omega\,I_0 \sinh\!{(2\phi)}}{a}}\bigg) 
+$$
+But this doesn't work!
+```{r}
+(1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2
+```
+Is there something wrong with the original derivation? Let's try again...
+
+First, we start with:
+$$
+\begin{aligned}
+Q &= \sqrt{\left(R_e - 1 \right)^2 + 2 R_e^2 I_0/S_0}\\
+Q^2 &= \left(R_e - 1 \right)^2 + 2 R_e^2 I_0/S_0\\
+Q^2 - \left(R_e - 1 \right)^2 &= 2 R_e^2 I_0/S_0\\
+S_0 &= \frac{2 R_e^2 I_0}{Q^2 - \left(R_e - 1 \right)^2}\\
+&= \frac{2 R_e^2 I_0}{((R_e-1)/\tanh(\phi) )^2 - \left(R_e - 1 \right)^2}\\
+&= \frac{2 R_e^2 I_0}{\left(R_e - 1 \right)^2 \left(\frac{1}{\tanh^2(\phi)} - 1\right)}\\
+&= \frac{2 R_e^2 I_0 \sinh^2(\phi)}{\left(R_e - 1 \right)^2}
+\end{aligned}
+$$
+OK, I think I found a typo with the original Baecer et al article at this point. They use
+$$
+Q = \sqrt{\left(R_e - 1 \right)^2 + 2 R_e I_0/S_0}
+$$
+during the derivation which is missing a square in the second term!!!! Let's keep going with the derivation..
+
+Since $\gamma = 2 \omega/Q$, we have:
+$$
+\begin{aligned}
+a &= \frac{2 \omega^2 S_0}{\gamma R_e^2}\\
+S_0 &= \frac{a \gamma R_e^2}{2 \omega^2}\\
+&= \frac{a R_e^2 }{Q \omega}\\
+&= \frac{a R_e^2 \tanh(\phi)}{\omega (R_e - 1)}\\
+&= \frac{a R_e^2 \sinh(\phi)}{\omega (R_e - 1) \cosh(\phi)}
+\end{aligned}
+$$
+Now, combining the two equations:
+$$
+\begin{aligned}
+\frac{a R_e^2 \sinh(\phi)}{\omega (R_e - 1) \cosh(\phi)} &= \frac{2 R_e^2 I_0 \sinh^2(\phi)}{\left(R_e - 1 \right)^2}\\
+\frac{a}{\omega \cosh(\phi)} &= \frac{2 I_0 \sinh(\phi)}{\left(R_e - 1 \right)}\\
+R_e &= 1 + 2 \omega I_0 \sinh(\phi) \cosh(\phi)/a
+\end{aligned}
+$$
+Let's test:
+```{r}
+1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a
+```
+This works.

@@ -494,6 +494,7 @@ $S_0$ and $I_0$).
 
 \FloatBarrier
 
+\swp{there's a typo in the original derivation which I fixed.}
 The nonlinear algebraic relationships specified by
 \cref{eq:sechparams} can be inverted
 analytically\footnote{In (common) situations in which
@@ -504,11 +505,10 @@ analytically\footnote{In (common) situations in which
 \begin{linenomath*}
 \begin{subequations}\label{eq:invertparams}
 \begin{align}
-  \Reff &= \frac{1}{2}\bigg( 1 +
-          \sqrt{1 + \frac{4\,\omega\,I_0 \sinh\!{(2\phi)}}{a}}\bigg) \,,
+  \Reff &= 1 + \frac{2 \omega I_0 \sinh(\phi) \cosh(\phi)}{a} \,,
           \label{eq:Reff} \\
   \gamma &= \frac{2\,\omega\tanh{\phi}}{\Reff-1} \,, \label{eq:gamma} \\
-  S_0 &= \frac{2\,\Reff\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} \,. % Bacaer eq. (3)
+  S_0 &= \frac{2\,\Reff^2\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} \,. % Bacaer eq. (3)
       \label{eq:S0}
 \end{align}
 \end{subequations}
@@ -539,10 +539,10 @@ the parameters as estimated by \KM and by us using \code{nls}.
 invert_params <- function(I0, params) {
     with(as.list(params), {
         tpeak <- phi / omega
-        Reff <- (1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2
-	q <- (Reff-1)/tanh(phi) ## this is problematic. Not sure why.
+        Reff <- 1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a
+	q <- (Reff-1)/tanh(phi)
         gamma <- 2 * omega/q ## gamma has units of 1/week
-	S0 <- 2 * Reff * I0 * sinh(phi)^2/(Reff - 1)^2
+	S0 <- 2 * Reff^2 * I0 * sinh(phi)^2/(Reff - 1)^2
 	beta <- Reff * gamma/S0
 	c(tpeak=tpeak, Reff=Reff, S0=S0, gamma=gamma, Tg=1/gamma, beta=beta)
     })
@@ -563,12 +563,12 @@ R0.nls <- Reff.nls/S0.nls*N.KM
 <<delta-method-ci, echo=FALSE>>==
 convert_express <- list(
     tpeak=expression(phi/omega),
-    Reff=expression((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2),
-    gamma=expression(2 * omega/((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2-1)/tanh(phi)),
-    S0=expression(2 * ((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) * I0 * sinh(phi)^2/(((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) - 1)^2),
-    beta=expression((((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) - 1) * omega * tanh(phi)/(I0 * sinh(phi)^2)),
-    Tg=expression(1/(2 * omega/((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2-1)/tanh(phi))),
-    R0=expression((((1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2) - 1)^2/(2 * I0 * sinh(phi)^2)*N)
+    Reff=expression((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a)),
+    gamma=expression(2 * omega/((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a)-1)/tanh(phi)),
+    S0=expression(2 * ((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a))^2 * I0 * sinh(phi)^2/(((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a)) - 1)^2),
+    beta=expression((2 * omega*tanh(phi))*((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a) - 1)/(2 * (1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a) * I0 * sinh(phi)^2)),
+    Tg=expression(1/(2 * omega/((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a)-1)/tanh(phi))),
+    R0=expression(((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a) - 1)^2/(2 * (1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a) * I0 * sinh(phi)^2)*N)
 )
 
 KMcifun <- function(fit,
@@ -665,7 +665,7 @@ taken into account.
 
 \bmb{is it worth mentioning the assumption that infection fatality
   rate $\approx$ 100\% again (``Note that we are still assuming
-  \ldots''?)}  
+  \ldots''?)}
 \djde{I've added two sentences above.  Feel free to improve, and to
   comment on the non-indentifiability problems or whatever you think
   is useful to mention here.}
@@ -1026,7 +1026,7 @@ bombay2 <- rbind(
           diff(bombay$week)[1], mort=NA),
     bombay
 )
-@ 
+@
 %%
 \bmb{is it worth a note/footnote here to caution about the common
   practice of fitting to cumulative curves, e.g.
