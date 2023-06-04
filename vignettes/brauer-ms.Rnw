@@ -226,21 +226,9 @@ comfortable with mathematical analysis of ODEs but have little or no
 experience with statistics and parameter estimation.  Unfortunately,
 we have lost the opportunity to present our work to Fred, but it seems
 fitting (!) to highlight Fred's role in the history of this work, and
-to dedicate this tutorial to his memory.\footnote{We had hoped to
-  submit this paper to a volume in honour of Fred's memory
-  \cite{BrauerMemorialIssue}, but didn't complete the manuscript in
-  time.}
-
-\djde{Humph.  We'll have to say something different.}  \bmb{Should we
-  still use a Brauer-centric framing since the paper is no longer
-  going to that special issue? I don't object to it but thought we
-  should at least consider (if we do use it, we should probably
-  mention somewhere that the paper was originally intended for a
-  Brauer memorial issue)} \djde{What do you think of my revision?  It
-  would make me feel good to mention the history with Fred.  I'm not
-  convinced that highlighting my failure to meet the deadline for the
-  memorial issue is necessary, especially given that we don't plan to
-  submit to JBD. Perhaps you can improve on the language?}
+to dedicate this tutorial to his memory.\footnote{We had originally
+intended to submit this paper to a volume in honour of Fred's memory
+\cite{BrauerMemorialIssue} \bmb{will probably need to cite this 'by hand' [Journal/volume/issue]. Leaving as ``undefined citation'' for now. FWIW footnotes [https://www.springer.com/journal/11538/submission-guidelines]{are allowed in BMB}}}
 
 \section{Kermack and McKendrick's fit}
 
@@ -553,7 +541,7 @@ invert_params <- function(I0, params) {
         tpeak <- phi / omega
         Reff <- (1 + sqrt(1 + 4 * omega * I0 * sinh(2 * phi)/a))/2
 	q <- (Reff-1)/tanh(phi) ## this is problematic. Not sure why.
-    gamma <- 2 * omega/q ## gamma has a unit of 1/week
+        gamma <- 2 * omega/q ## gamma has units of 1/week
 	S0 <- 2 * Reff * I0 * sinh(phi)^2/(Reff - 1)^2
 	beta <- Reff * gamma/S0
 	c(tpeak=tpeak, Reff=Reff, S0=S0, gamma=gamma, Tg=1/gamma, beta=beta)

@@ -1,0 +1,230 @@
+---
+title: "exploring Bombay-fitting problems"
+---
+
+
+\[
+\newcommand{\rzero}{{\cal R}_0}
+\]
+
+I'm going to try to understand why the Bombay data are so hard to fit/find reasonable confidence intervals for the parameters of an SIR model. We already know from Bacaer's paper that the closed-population, constant-transmission SIR is not a good *biological* model for the Bombay plague epidemic, but it is "SIR-shaped" and, for historical comparisons (i.e. to compare with Kermack and McKendrick's paper) we would like to be able to fit it with an SIR model even if that's not biologically sensible.
+
+My thoughts on identifiability:
+
+* It makes sense that $r = \beta-\gamma$ and $I(0)$ should be relatively easily
+identifiable (from the initial epidemic curve).  If we assume we're
+starting from zero recovered individuals, then $S0 \approx N$. As we all know $\rzero$ is monotonically related to final size *as a proportion of the
+population size*, so $\rzero$ and $N$ (*effective* population size) should be
+jointly unidentifiable.
+*  *If* we reparameterized as $\{r, \rzero, N, I_0\}$ then we *should* be able to estimate $\{r, \rzero, I(0)\}$ if we fix $N$.
+* On the other hand, fixing $\gamma$ *should* work in principle (once $\gamma$
+is fixed the initial slope should determine beta, which will determine
+$\rzero$, so we can estimate $S(0)$ ($\approx N$) independently from final size ...), but ...
+* estimating dispersion (negative binomial $k$ or Gaussian residual variance) *should* be independent of these \ldots
+* We can also reason from the fact that Kermack and McKendrick's formula works (fitting an SIR curve with only three parameters [which are not the same as, but correspond to, epidemic peak height, peak time, and half-initial growth rate]), that we only have three free parameters to work with.
+
+I'm going to work on this by brute force (`optim()` + `deSolve()` only) to avoid the possibilities that something weird is going on in `bbmle` and/or `fitode`.
+
+To give ourselves the best chance of having everything work, we're going to parameterize this robustly: $\{ \log(r), \log(\rzero-1), \log(I(0)) \}$ (thought experiment: given the choices $\{\beta, \gamma, r, \rzero, G\}$ (where $G$ is generation time), which are the closest to independent *conditional on an observed epidemic curve?* This relates back to some of JD's stuff \ldots
+
+We'll stick with the assumption of 100\% infection fatality rate for now.
+
+```{r load_pkg}
+library(deSolve)
+data("bombay", package = "fitode")
+## incidence-based version
+bombay2 <- rbind(
+    c(times=bombay$week[1] -
+          diff(bombay$week)[1], mort=NA),
+    bombay
+)
+```
+
+```{r sir_funs}
+sir.grad <- function (t, x, params) {
+    with(as.list(c(x, params)), {
+        R0m1 <- exp(logR0m1)
+        r <- exp(logr)
+        gamma <- r/R0m1
+        beta <- (r + gamma)/N
+        dS.dt <- -beta*S*I
+        dI.dt <- beta*S*I-gamma*I
+        dR.dt <- gamma*I
+        dxdt <- c(dS.dt,dI.dt,dR.dt) 
+        list(dxdt)
+    })
+}
+sir.pred <- function(p) {
+    times <- bombay2$week
+    I0 <- exp(p[["logI0"]])
+    S0 <- exp(p[["logS0"]])
+    ode.params <- c(p[c("logR0m1", "logr")], N = S0)
+    xstart <- c(S=S0, I=I0, R=0)
+    out <- deSolve::ode(func=sir.grad,
+                        y=xstart,
+                        times=times,
+                        parms=ode.params
+                        ) |> as.data.frame()
+    diff(out$R)
+}
+xfun <- function(x, n) x[setdiff(names(x), n)]
+sir.nll <- function(p, N = N) {
+    ## set S0 to N, ignore I0
+    sirpred <- sir.pred(c(xfun(p, "logk"), logS0  = log(N)))
+    -sum(dnbinom(x = bombay2$mort[-1],
+                 mu = sirpred,
+                 size = exp(p["logk"]), log = TRUE))
+}
+```
+
+
+```{r test0}
+start0 <- c(logR0m1 = log(4), logr = log(log(2)/1.5), logI0 = log(0.01),
+            logk = log(10))
+p0 <- sir.pred(c(xfun(start0, "logk"), logS0 = 0))
+plot(p0, log = "y")
+```
+
+I'm going to use 820,000 for $N$ (from [Wikipedia](https://en.wikipedia.org/wiki/Bombay_plague_epidemic) this was the value from the 1891 census, five years earlier - obviously the effective population size could be different from that but ...)
+
+```{r}
+bombay_pop <- 820e3
+```
+
+Eyeballing to adjust ($I(0)$ needs to be larger than we would have thought, to account for the delay from infection to mortality)
+```{r test1}
+start1 <- start0
+start1[["logI0"]]  <- log(3)
+start1[["logR0m1"]]  <- log(0.1)
+plot(mort ~ week, data = bombay2, log = "y", ylim = c(1,10000))
+p1 <- sir.pred(c(xfun(start1, "logk"), logS0 = log(bombay_pop)))
+lines(p1)
+```
+
+This is actually pretty terrible, but should be close enough for starting (should spend more time thinking about how 
+
+```{r fit}
+sir.nll(start1, N = bombay_pop)
+opt1 <- optim(start1, fn = sir.nll, N = bombay_pop, control = list(maxit = 1e6),
+              hessian = TRUE)
+plot(mort ~ week, data = bombay, log = "y")
+p2 <- sir.pred(c(xfun(opt1$par, "logk"), logS0 = log(bombay_pop)))
+lines(p2)
+v <- solve(opt1$hessian)
+sds <- sqrt(diag(v))
+raw_pars <- cbind(est = opt1$par, lwr = opt1$par-1.96*sds, upr = opt1$par+1.96*sds)
+human_pars <- rbind(R0 = exp(raw_pars["logR0m1",])+1,
+                    r = exp(raw_pars["logr",]),
+                    I0 = exp(raw_pars["logI0",]),
+                    k = exp(raw_pars["logk",]))
+print(human_pars, digits = 2)
+```
+
+Parameters are correlated, but not pathologically so:
+
+```{r corr}
+print(cov2cor(v), digits = 2)
+```
+
+Simulate outcomes (confidence intervals and prediction intervals by "population prediction interval", i.e. MVN simulation + nbinom observation error)
+
+```{r sims}
+nsim <- 1000
+nt <- length(p1)
+confmat <- predmat <- matrix(NA_real_, nrow = nt, ncol = nsim)
+set.seed(101)
+parmat <- MASS::mvrnorm(nsim, mu = opt1$par, Sigma = v)
+for (i in 1:nsim) {
+    confmat[,i] <- sir.pred(c(xfun(parmat[i,], "logk"), logS0 = log(bombay_pop)))
+    predmat[,i] <- rnbinom(nt, mu  = confmat[,i], size = exp(opt1$par[["logk"]]))
+}
+pconf <- t(apply(confmat, 1, quantile, c(0.025, 0.975)))
+ppred <- t(apply(predmat, 1, quantile, c(0.025, 0.975)))
+```
+
+
+```{r plotconf}
+par(las=1, bty = "l")
+plot(mort ~ week, data = bombay, log = "y", ylim = c(3, 1500))
+lines(p2)
+matlines(pconf, col = 4, lty = 2)
+matlines(ppred, col = 6, lty = 3)
+legend("topleft", lty = c(1, 2, 3),
+       legend = c("best fit", "95% conf int", "95% pred int"),
+       col = c(1, 4, 6))
+```
+
+What about translating back from parameters all the way to $\beta/\gamma$?
+
+```{r human2}
+trfun <- function(logr, logR0m1, logI0, logk) {
+    c(beta = exp(logr)*(1+1/exp(logR0m1))/bombay_pop,
+      gamma = exp(logr - logR0m1),
+      S0 = bombay_pop - exp(logI0),
+      I0 = exp(logI0),
+      k = exp(logk))
+}
+trmat <- apply(parmat, 1, \(x) do.call(trfun, as.list(x)))
+cbind(est = do.call(trfun, as.list(opt1$par)),
+      lwr = apply(trmat, 1, quantile, 0.025),
+      upr = apply(trmat, 1, quantile, 0.975))
+```
+
+The $\gamma$ estimate is obviously silly (95% CI approx. 70-80).
+
+What if we do what's done in the paper and fix $I(0)=1$ and $\gamma=4.47$?
+
+
+
+## with fitode
+
+Not done ...
+
+```{r fitode1, eval = FALSE}
+library(fitode)
+SIR_model <- odemodel(
+    name="SIR model",
+    model=list(
+        S ~ - beta * S * I,
+        I ~ beta * S * I - gamma * I,
+        R ~ gamma * I
+    ),
+    observation = list(
+        mort ~ dnbinom(mu = R, size = k)
+    ),
+    diffnames="R",
+    initial=list(
+        S ~ N-I0,
+        I ~ I0,
+        R ~ 0
+    ),
+    par=c("beta", "gamma", "S0", "I0", "k")
+)
+SIR_start1 <- with(as.list(opt1$par),
+                  c(beta = exp(logr)*(1+1/exp(logR0m1))/bombay_pop,
+                    gamma = exp(logr - logR0m1),
+                    S0 = bombay_pop - exp(logI0),
+                    I0 = exp(logI0),
+                    k = exp(logk)))
+SIR_start0 <- c(beta = 7.89e-05, gamma = 4.47, I0 = 1, S0 = 61500, k = 50)
+cbind(SIR_start0, SIR_start1)
+```
+
+```{r eval=FALSE}
+SIR_fit1 <- fitode(
+    model = SIR_model,
+    data = bombay2,
+    fixed 
+    start = SIR_start1,
+    tcol = "week")
+coef(SIR_fit1)
+```
+
+## To do
+
+* work back toward doing this with `fitode`
+   * fix $\gamma$ instead of N?
+   * (possibly problem in fitode of parameter scaling - even though we have derivatives, and `numDeriv::jacobian()` uses Richardson extrapolation, could still be screwed if the *initial* epsilon is bad ... ?)
+* estimates of $\rzero$ are **extremely** small - does this match with Bacaer, K&M, etc. ? (Is this where we came in?)
+* explore multivariate sensitivity (e.g. 2D profiles for R0, r? should re-optimize I0 in each case because of correlation between I0, R)
+
