@@ -13,8 +13,8 @@ My thoughts on identifiability:
 
 * It makes sense that $r = \beta-\gamma$ and $I(0)$ should be relatively easily
 identifiable (from the initial epidemic curve).  If we assume we're
-starting from zero recovered individuals, then $S0 \approx N$. As we all know $\rzero$ is monotonically related to final size *as a proportion of the
-population size*, so $\rzero$ and $N$ (*effective* population size) should be
+	starting from zero recovered individuals, then $S(0) \approx N$. Because $\rzero$ is monotonically related to final size (*as a proportion of the
+population size*), so $\rzero$ and $N$ (*effective* population size) should be
 jointly unidentifiable.
 *  *If* we reparameterized as $\{r, \rzero, N, I_0\}$ then we *should* be able to estimate $\{r, \rzero, I(0)\}$ if we fix $N$.
 * On the other hand, fixing $\gamma$ *should* work in principle (once $\gamma$
@@ -43,10 +43,17 @@ bombay2 <- rbind(
 ```{r sir_funs}
 sir.grad <- function (t, x, params) {
     with(as.list(c(x, params)), {
-        R0m1 <- exp(logR0m1)
-        r <- exp(logr)
-        gamma <- r/R0m1
-        beta <- (r + gamma)/N
+        parameterization <- getOption("sir.grad_param", "R0m1_r")
+        if (parameterization == "R0m1_r") {
+            R0m1 <- exp(logR0m1)
+            r <- exp(logr)
+            gamma <- r/R0m1
+            beta <- (r + gamma)/N
+        } else if (parameterization == "R0m1_loggamma") {
+            R0m1 <- exp(logR0m1)
+            gamma <- exp(loggamma)
+            beta <- (R0m1+1)*gamma
+        }
         dS.dt <- -beta*S*I
         dI.dt <- beta*S*I-gamma*I
         dR.dt <- gamma*I
@@ -129,7 +136,6 @@ print(cov2cor(v), digits = 2)
 Simulate outcomes (confidence intervals and prediction intervals by "population prediction interval", i.e. MVN simulation + nbinom observation error)
 
 ```{r sims}
-p2B <- sir.pred(c(xfun(opt2$par, "logk"), logI0 = log(1)))
 nsim <- 1000
 nt <- length(p1)
 confmat <- predmat <- matrix(NA_real_, nrow = nt, ncol = nsim)
@@ -147,9 +153,9 @@ ppred <- t(apply(predmat, 1, quantile, c(0.025, 0.975)))
 ```{r plotconf}
 par(las=1, bty = "l")
 plot(mort ~ week, data = bombay, log = "y", ylim = c(3, 1500))
-lines(p2B)
-matlines(pconf2, col = 4, lty = 2)
-matlines(ppred2, col = 6, lty = 3)
+lines(p2)
+matlines(pconf, col = 4, lty = 2)
+matlines(ppred, col = 6, lty = 3)
 legend("topleft", lty = c(1, 2, 3),
        legend = c("best fit", "95% conf int", "95% pred int"),
        col = c(1, 4, 6))
@@ -175,7 +181,7 @@ The $\gamma$ estimate is obviously silly (95% CI approx. 70-80).
 
 What if we fix $I(0)=1$ as done in the paper and allow $S(0)$ (effective population size) to vary instead?
 
-```{r}
+```{r sir_fit2}
 sir.nll2 <- function(p, logI0 = log(1)) {
     sirpred <- sir.pred(c(xfun(p, "logk"), logI0  = logI0))
     -sum(dnbinom(x = bombay2$mort[-1],
@@ -185,7 +191,8 @@ sir.nll2 <- function(p, logI0 = log(1)) {
 start2 <- c(xfun(start1, "logI0"), logS0 = log(bombay_pop))
 opt2 <- optim(start2, fn = sir.nll2, logI0 = log(1),
               control = list(maxit = 1e6),
-              hessian = TRUE)
+             hessian = TRUE)
+p2B <- sir.pred(c(xfun(opt2$par, "logk"), logI0 = log(1)))
 v2 <- solve(opt2$hessian)
 sds2 <- sqrt(diag(v))
 raw_pars2 <- cbind(est = opt2$par, lwr = opt2$par-1.96*sds2, upr = opt2$par+1.96*sds2)
@@ -255,6 +262,17 @@ cor(t(trmat2[-4,]))
 The value of $\gamma$ can compensate for a fixed value of $I(0)$ because we are measuring *incidence* (i.e. the initial observed mortality rate is approximately $\gamma I(0)$).
 
 Do we need to worry about incidence vs prevalence when translating K-M parameters to biological parameters ... ?
+
+## Gamma vs. N
+
+```{r}
+sir.nll2 <- function(p, logI0 = log(1)) {
+    sirpred <- sir.pred(c(xfun(p, "logk"), logI0  = logI0))
+    -sum(dnbinom(x = bombay2$mort[-1],
+                 mu = sirpred,
+                 size = exp(p["logk"]), log = TRUE))
+}
+```
 
 ## with fitode
 
