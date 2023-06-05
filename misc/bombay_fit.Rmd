@@ -55,6 +55,9 @@ sir.grad <- function (t, x, params) {
             R0m1 <- exp(logR0m1)
             gamma <- exp(loggamma)
             beta <- (R0m1+1)*gamma/N
+        } else if (parameterization == "logbeta_loggamma") {
+            gamma <- exp(loggamma)
+            beta <- exp(logbeta)
         }
         dS.dt <- -beta*S*I
         dI.dt <- beta*S*I-gamma*I
@@ -166,11 +169,19 @@ legend("topleft", lty = c(1, 2, 3),
 What about translating back from parameters all the way to $\beta/\gamma$?
 
 ```{r human2}
-trfun <- function(logr, logR0m1, logI0, logk) {
-    c(beta = exp(logr)*(1+1/exp(logR0m1))/bombay_pop,
+trfun <- function(logr, logR0m1, logI0, logk, logS0, N = log(bombay_pop)) {
+    I0 <- exp(logI0)
+    if (!missing(logS0)) {
+        ## 
+        S0 <- exp(logS0)
+        N <- S0 + I0
+    } else {
+        S0 <- N - I0
+    }
+    c(beta = exp(logr)*(1+1/exp(logR0m1))/N,
       gamma = exp(logr - logR0m1),
-      S0 = bombay_pop - exp(logI0),
-      I0 = exp(logI0),
+      S0 = S0,
+      I0 = I0,
       k = exp(logk))
 }
 trmat <- apply(parmat, 1, \(x) do.call(trfun, as.list(x)))
@@ -318,6 +329,32 @@ for (i in 1:4) {
 
 This fails above a certain fixed gamma value, presumably because we aren't allowing $I(0)$ to decrease ...
 
+## fixing gamma
+
+**tl;dr** with this set of constraints we 
+```{r}
+SIR_start0 <- c(beta = 7.89e-05, gamma = 4.47, I0 = 1, S0 = 61500, k = 50)
+start5 <- c(xfun(opt2$par, "logr"), logI0 = log(1))
+options(sir.grad_param = "R0m1_loggamma")
+sir.nll4 <- function(p, loggamma = log(SIR_start0[["gamma"]])) {
+    sirpred <- sir.pred(c(xfun(p, c("logk", "loggamma")), loggamma  = loggamma))
+    -sum(dnbinom(x = bombay2$mort[-1],
+                 mu = sirpred,
+                 size = exp(p["logk"]), log = TRUE))
+}
+sir.nll4(start5)
+opt5 <- optim(start5,
+              fn = sir.nll4,
+              loggamma = log(4.77),
+              control = list(maxit = 1e6),
+              hessian = TRUE)
+v5 <- solve(opt5$hessian)
+sqrt(diag(v5))
+```
+
+Still not identical to what we were doing with `fitode` since we have
+substituted `logR0m1` for `beta` in the parameterization ...
+
 ## with fitode
 
 Not done ...
@@ -342,22 +379,19 @@ SIR_model <- odemodel(
     ),
     par=c("beta", "gamma", "S0", "I0", "k")
 )
-SIR_start1 <- with(as.list(opt1$par),
-                  c(beta = exp(logr)*(1+1/exp(logR0m1))/bombay_pop,
-                    gamma = exp(logr - logR0m1),
-                    S0 = bombay_pop - exp(logI0),
-                    I0 = exp(logI0),
-                    k = exp(logk)))
+SIR_start2 <- do.call(trfun, as.list(c(opt2$par, logI0 = log(1))))
 SIR_start0 <- c(beta = 7.89e-05, gamma = 4.47, I0 = 1, S0 = 61500, k = 50)
-cbind(SIR_start0, SIR_start1)
+print(data.frame(s0 = SIR_start0, s2 = SIR_start2[names(SIR_start0)]), digits = 3)
 ```
+
+Results from `opt2` are similar to our original `fitode`-chosen starting values ...
 
 ```{r eval=FALSE}
 SIR_fit1 <- fitode(
     model = SIR_model,
     data = bombay2,
-    fixed 
-    start = SIR_start1,
+    fixed = list(gamma = SIR_start0[["gamma"]]),
+    start = SIR_start0,
     tcol = "week")
 coef(SIR_fit1)
 ```
