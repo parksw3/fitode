@@ -495,15 +495,16 @@ $S_0$ and $I_0$).
 \FloatBarrier
 
 The nonlinear algebraic relationships specified by
-\cref{eq:sechparams} can be inverted
-analytically\footnote{In (common) situations in which
-  nonlinear algebraic equations cannot be solved analytically,
-  they can still be solved numerically, for example with
-  the \code{nleqslv} package in R.}
-\cite[\S3]{bacaermodel2012}\footnote{There is a typographical
-error in the original derivation by Baca\"er, where a square term is missing
-in the equation above equation (3). We have corrected for this error and
-rederived these equations.}, to obtain
+\cref{eq:sechparams} can be inverted\footnote{Our expressions are
+  slightly different from those of Baca\"er
+  \cite[eq.~(3)]{bacaermodel2012} because we have corrected a minor
+  error.  At the start of \S3 of \cite{bacaermodel2012}, in the
+  expression for $Q$, the term $2Ry_0/x_0$ should be $2R^2y_0/x_0$ and
+  this missing square propagated through to the inversion formulae.}
+analytically\footnote{In (common) situations in which nonlinear
+  algebraic equations cannot be solved analytically, they can still be
+  solved numerically, for example with the \code{nleqslv} package in
+  R.} \cite[\S3]{bacaermodel2012}, to obtain
 \begin{linenomath*}
 \begin{subequations}\label{eq:invertparams}
 \begin{align}
