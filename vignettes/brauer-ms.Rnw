@@ -494,14 +494,16 @@ $S_0$ and $I_0$).
 
 \FloatBarrier
 
-\swp{there's a typo in the original derivation which I fixed.}
 The nonlinear algebraic relationships specified by
 \cref{eq:sechparams} can be inverted
 analytically\footnote{In (common) situations in which
   nonlinear algebraic equations cannot be solved analytically,
   they can still be solved numerically, for example with
   the \code{nleqslv} package in R.}
-\cite[\S3]{bacaermodel2012}, to obtain
+\cite[\S3]{bacaermodel2012}\footnote{There is a typographical
+error in the original derivation by Baca\"er, where a square term is missing
+in the equation above equation (3). We have corrected for this error and
+rederived these equations.}, to obtain
 \begin{linenomath*}
 \begin{subequations}\label{eq:invertparams}
 \begin{align}
@@ -778,8 +780,6 @@ to overly narrow confidence intervals on parameters and predictions.
 The negative binomial distribution is one way to generalize
 the Poisson to allow for overdispersion \citep{linden2011using}.
 
-\djde{I reorganized this paragraph a bit, and corrected
-  some typos in equations.}
 The probability mass function for the \term{negative binomial
   distribution} (for counts $x=0,1,2,\ldots$) is
 \begin{linenomath*}
@@ -1136,6 +1136,8 @@ assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
 \djde{``This'' is referring to \texttt{ci.bombay.fitode.ols}
   in the \texttt{sirmortfitcoefols} chunk, which is suppressed here.}
 \bmb{Do we even expect to get CIs for OLS fits? I thought we explained above that OLS is not a statistical framework. If we want CIs we can either use a Normal error response (probably easiest), or back-calculate estimated resid SD from residual SSQs, scale Hessian appropriately ...}
+\swp{The ols fits in the fitode already know how to back-calculate estimated resid SD and scale Hessian.
+It's just that these fits are having problems calculating the Hessians in the first place...}
 
 <<sirmortfit_ols_confband, eval=FALSE, include=FALSE>>==
 SIR_ols_confband <- predict(SIR_fit_ols, times=tvals, level=0.95)$mort
@@ -1687,14 +1689,6 @@ Alternatives to the \hyperlink{DeltaMethod}{Delta Method}.
   importance sampling where we draw from multivariate normal and then
   do some weighting... probably a bit too much to explain in this paper
   because we have to go all the way to metropolis hastings..}
-
-\swp{we might want to mention that profile likelihoods are a thing but are
-probably too complicated for this paper and especially for trajectories?}
-\djde{mentioning profile likelihoods in passing, with a reference,
-  would be good; we could add that here or in the Discussion.}
-
-
-
 
 \bibliographystyle{tfs}
 \bibliography{brauer-ms,fitode}
