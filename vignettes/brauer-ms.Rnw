@@ -811,18 +811,12 @@ The maximum likelihood estimate is, therefore,
 \end{split}
   \end{equation}
 \end{linenomath*}
-
-\djde{There was commented-out text at this point, which I've converted
-  to grey.  If we definitely don't want it, it should be moved to
-  \texttt{cuts.Rnw}.}  {\color{gray} where, as for the likelihood
-  associated with Normal errors, we assume $\sigma^2$ is computed as
-  the variance of the residuals across the full time series.\djde{Is
-    that what's done, or is $\sigma^2$ added to $\thetavec$ as a
-    parameter to fit?  or even $\sigma_i^2$ for each i?}  \swp{It is
-    what's done. There's a version where $\sigma^2$ is added to
-    $\thetavec$ but it is not used when we call the ols
-    function. $\sigma_i^2$ doesn't make sense because we have one
-    residual per $i$.}  }
+Here, the overdispersion parameter $k$ also needs to be estimated
+alongside $\thetavechat$ to maximize the likelihood.
+This is different from the likelihood
+ associated with Normal errors, where $\sigma^2$ cab be either
+ computed as the variance of the residuals across the full time
+ series or estimated jointly with model parameters.
 
 Regardless of the form of the likelihood function, we can use it to
 obtain CIs on the MLE $\thetavechat$.  A relatively simple approach is
@@ -1188,15 +1182,12 @@ We also analyze the influenza outbreak in Philadelphia, 1918.
 Using nonlinear least squares, we can find a set of parameters
 for KM's approximation that matches the epidemic curve
 least squares (\cref{fig:phila}).  However, the estimated
-parameters are extreme, with an $\mathcal R_0$ of 2310
-(\cref{tab:philanls}).  \swp{Again, possibly something wrong with
-  parameter conversions here too.  Haven't been able to figure out how
-  to do it properly.}  The SIR model gives a visually similar fit as
+parameters are extreme, with an $\mathcal R_0$ of 2490
+(\cref{tab:philanls}).  The SIR model gives a visually similar fit as
 the KM's approximation, while providing much more realistic parameter
 estimates (\cref{tab:phila.fitode}).  Converting the SIR
 parameters to KM parameters gives a worse fit, which underestimates
-the size and timing of the peak.  \swp{Again, possibly something
-  wrong.}
+the size and timing of the peak.
 
 <<philapop, echo=TRUE, include=FALSE>>=
 ## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
@@ -1351,7 +1342,9 @@ resulting in a time shift between the deterministic and stochastic
 trajectories.
 
 In this case, \KM's approximation \eqref{eq:sech}---using the correct parameter values---yields a poor representation of the dynamics.
-The approximation predicts a much lower epidemic peak and a shorter duration of the epidemic (\cref{fig:stoch}, top panel, blue curve).  \swp{Parameter values are a little screwed up at the moment. Doesn't seem like it's a trivial fix.}  Nonetheless, we can still fit the KM approximation to the simulated epidemic and obtain visually reasonable agreement (\cref{fig:stoch}, bottom panel, red curve; \cref{tab:stoch.nls}); the fit cannot get better because the approximation \eqref{eq:sech} is symmetric about the peak, whereas the rise is steeper than the fall in the true solution.  \swp{we don't want to interpret these parameter estimates as being ``wrong'' until we figure out the parameter conversion issues.}
+The approximation predicts a much lower epidemic peak and a shorter duration of the epidemic (\cref{fig:stoch}, top panel, blue curve).
+Nonetheless, we can still fit the KM approximation to the simulated epidemic and obtain visually reasonable agreement (\cref{fig:stoch}, bottom panel, red curve; \cref{tab:stoch.nls}); the fit cannot get better because the approximation \eqref{eq:sech} is symmetric about the peak, whereas the rise is steeper than the fall in the true solution.
+In addition, the estimated parameters are far from the true parameters that were used to simulate the epidemic (\cref{tab:stoch.nls}).
 
 The exact deterministic SIR model gives a much better fit, which
 is achieved by estimating an initial prevalence that is only a third of the true initial prevalence; all other parameter estimates are nearly identical to the true parameter values used to generate the stochastic trajectory (\cref{tab:stoch.fitode}).
@@ -1410,7 +1403,7 @@ SIR_stoch_fit <- fitode(
     SIR_model,
     data = sir.stoch.data,
     start = c(start.stoch, k=10),
-    fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
+    # fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
     tcol = "time"
 )
 sss <- predict(SIR_stoch_fit, level=0.95)[[1]]
@@ -1427,8 +1420,8 @@ assignfun(coef.stoch.fitode, ".stoch.fitode")
 <<sirstochconfint, include=FALSE>>==
 ci.derived.stoch.fitode <- confint(SIR_stoch_fit,
         parm=list(
-            Reff~beta*S0/1,
-            R0~beta*2000/1
+            Reff~beta*S0/gamma,
+            R0~beta*2000/gamma
         ))
 assignfun(ci.derived.stoch.fitode[,1], ".stoch.fitode")
 @
@@ -1436,31 +1429,40 @@ assignfun(ci.derived.stoch.fitode[,1], ".stoch.fitode")
 
 \section{Discussion}
 
-\swp{I feel we need a way to distinguish nls KM approx vs parameter matching KM approx}
-\begin{itemize}
-    \item We present a guideline/tutorial for fitting ODE models
-    to epidemic time series data alongside a user-friendly \code{R}
-    package for beginners.
-    \item In doing so, we compare SIR model fits to KM's approximations
-    across three data sets and their resulting parameter estimates.
-    \item For the Bombay plague data, both models give similar fits and parameter
-    estimates.
-    \item For the Philadelphia flu data, nonlinear least square fits of KM's approximation
-    give extreme parameters even though it provide a visually good fit.
-    \item Finally, fitting a deterministic SIR model to a stochastic simulation shows that
-    underlying epidemiological parameters, except for the initial conditions, can be recovered
-    with reasonable accuracy.
-\end{itemize}
+In this study, we present a guideline for fitting ODE models
+to epidemic time series data alongside a user-friendly \code{R}
+package for beginners. In doing so, we compare
+SIR model fits to KM's approximations
+across three data sets and their resulting parameter estimates.
+For the Bombay plague data, both models give similar fits and parameter
+estimates.
+For the Philadelphia flu data, the nonlinear least square fit of KM's approximation
+give extreme parameters even though it provides a visually good fit.
+Finally, fitting a deterministic SIR model to a stochastic simulation shows that
+underlying epidemiological parameters, except for the initial conditions, can be recovered
+with reasonable accuracy.
 
-\begin{itemize}
-    \item Despite historical connections to KM, it is unclear whether
-    the SIR model is appropriate for studying the Bombay plague
-    data.
-    \item Instead, Baca\"er argued that the epidemic represents a
-    seasonal outbreak and therefore requires a change in transmission
-    rate over the course of an epidemic.
-    \item Here, we find that there are issues with parameter identifiability
-\end{itemize}
+Despite historical connections to KM \cite{KermMcKe27}, it is unclear whether
+the SIR model is appropriate for studying the Bombay plague
+data. Instead, Baca\"er argued that the epidemic represents a
+seasonal outbreak and therefore requires a change in transmission
+rate over the course of an epidemic \cite{bacaermodel2012}.
+\swp{what is our opinion?}
+Here, we also find that the Bombay epidemic poses a computational issue
+for fitting the SIR model.
+In particular, the profile likelihood becomes extremely flat for high
+values of $\gamma$, indicating parameter unidentifiability.
+
+There are several features that are implemented in \code{fitode} but
+are not covered in this paper.
+First, \code{fitode} allows confidence intervals to be calculated
+using importance sampling.
+In this case, parameter sets are randomly drawn from a multivariate normal
+distribution whose mean and the variance covariance matrix corresponds to
+the maximum likelihood estimates and the estimated variance covariance matrix,
+respectively;
+then, each parameter set is weighted accordingly based on the their likelihood
+and the sampling probability.
 
 \begin{itemize}
     \item Features implemented in fitode but not covered in this paper
@@ -2081,16 +2083,13 @@ $\R_0=\Sexpr{R0}$, $1/\gamma=\Sexpr{1/mm$gamma}$ week.}\label{tab:stoch.fitode}
     %% making use of ragged2e and array packages:
     \RaggedRight
   \begin{tabular}{ m{3cm} | c | c | c c}
-  \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
+  \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
     & \bfseries \code{dnbinom} & \bfseries 95\% CI \\\hline
-    recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & 1 &
-      -- \\
-    %%
-    \noalign{\vspace{10pt}}
-    \bfseries Estimated\break parameter \\\hline
     transmission rate & $\beta$ & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{beta.stoch.fitode} & \Sexpr{ci_fmt("beta", ci.stoch.fitode)} \\
+    recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ &
+        \Sexpr{gamma.stoch.fitode} & \Sexpr{ci_fmt("gamma", ci.stoch.fitode)}\\
     initial\break susceptibles & $S_0$& -- &
       \Sexpr{as.integer(S0.stoch.fitode)} & \Sexpr{ci_fmt("S0", ci.stoch.fitode, max_ord = 6)}\\
       initial prevalence & $I_0$ & -- &
