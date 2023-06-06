@@ -280,7 +280,7 @@ Do we need to worry about incidence vs prevalence when translating K-M parameter
 
 ## Gamma vs. N
 
-```{r fixed_gamma_fits, warning=FALSE}
+```{r fixed_gamma_fits, warning=FALSE, cache = TRUE}
 options(sir.grad_param = "R0m1_loggamma")
 start3 <- c(xfun(start1, c("logI0", "logr")),
             loggamma = log(4.77), logS0 = log(bombay_pop))
@@ -331,7 +331,8 @@ This fails above a certain fixed gamma value, presumably because we aren't allow
 
 ## fixing gamma
 
-**tl;dr** with this set of constraints we 
+**tl;dr** with this set of constraints we  ...
+
 ```{r}
 SIR_start0 <- c(beta = 7.89e-05, gamma = 4.47, I0 = 1, S0 = 61500, k = 50)
 start5 <- c(xfun(opt2$par, "logr"), logI0 = log(1))
@@ -354,6 +355,27 @@ sqrt(diag(v5))
 
 Still not identical to what we were doing with `fitode` since we have
 substituted `logR0m1` for `beta` in the parameterization ...
+
+## no constraints
+
+JD thinks that all four parameters should be identifiable ... ?? 
+```{r}
+start6 <- c(opt5$par, loggamma = log(4.77))
+options(sir.grad_param = "R0m1_loggamma")
+sir.nll5 <- function(p) {
+    sirpred <- sir.pred(xfun(p, c("logk")))
+    -sum(dnbinom(x = bombay2$mort[-1],
+                 mu = sirpred,
+                 size = exp(p["logk"]), log = TRUE))
+}
+sir.nll5(start6)
+opt6 <- optim(start6,
+              fn = sir.nll5,
+              control = list(maxit = 1e6),
+              hessian = TRUE)
+data.frame(est = exp(opt6$par), se = sqrt(diag(solve(opt6$hessian)))*
+                                    exp(opt6$par))
+```
 
 ## with fitode
 
