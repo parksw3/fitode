@@ -1901,6 +1901,12 @@ curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=25
       lwd=lwd*0.60, xpd=NA, col=col.nls, lty="dotted")
 ## lines(estimate ~ times, data=SIR_ols_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
+legend("topleft", bty="n", lwd=c(2,lwd,lwd),
+       lty=c(NA,"dotted","solid"),
+       col=c("black",col.nls,col.fitode.nb),
+       pch=c(21,NA,NA),
+       pt.bg=c("white",NA,NA),
+       legend=c("observed data","nls","fitode (nbinom)"))
 @
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
@@ -2033,7 +2039,14 @@ draw_legend()
 \caption{The main wave of the 1918 influenza epidemic in the city of
   Philadelphia, 1 September 1918 to 31 December 1918 \cite{Gold+09}.
   See \cref{tab:philanls,tab:phila.fitode}.
-  \djde{This caption is a placeholder\dots}
+  The blue and red curves show the \KM approximation
+  \eqref{eq:sech}, based on the true parameters (blue) and
+  fitted by us using \code{nls}
+  (red, with pink confidence band).  The associated parameter
+  estimates are given in \cref{tab:philanls}.
+  The dotted yellow
+  curve shows the \code{fitode} fit, for which the associated
+  parameter estimates are given \cref{tab:phila.fitode}.
 }
 \label{fig:phila}
 \end{figure}
