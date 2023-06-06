@@ -1454,6 +1454,14 @@ for fitting the SIR model.
 In particular, the profile likelihood becomes extremely flat for high
 values of $\gamma$, indicating parameter unidentifiability.
 
+We have focused on fitting the SIR model in this paper for illustrative
+purposes, but the \code{fitode} can be used for fitting many other
+models.
+For example, any extensions of the SIR model that include additional
+compartments, such as the SEIR or SIRS models, can be easily set up.
+\code{fitode} also allows for non-autonomous models, such as the
+SIR model with sinusoidally forced transmission rate.
+
 There are several features that are implemented in \code{fitode} but
 are not covered in this paper.
 First, \code{fitode} allows confidence intervals to be calculated
@@ -1469,21 +1477,27 @@ than the Delta method but computationally more costly.
 \code{fitode} also allows for simultaneous fitting of multiple state variables
 to multiple time series and Bayesian inference via Markov chain Monte Carlo.
 
+Even with these extensions, there will be many other challenges to
+fitting ODE models with the \code{fitode} package, as with many other packages.
+For example, it is often difficult to ensure that the model has converged
+properly or reached its true maximum.
+Performing optimization from multiple starting conditions and drawing
+likelihood surfaces can help diagnose these issues.
+We also encourage users to open any issues via the GitHub repository:
+\url{https://github.com/parksw3/fitode}.
+
 There are many other issues that are not covered
 by the \code{fitode} package that are important and useful for making
 statistical inference from epidemic time series.
-
-
-\begin{itemize}
-    \item There are many other issues that are not covered
-    by the \code{fitode} package that are important/useful for making
-    statistical inference from epidemic time series.
-    \item Flexible variation in transmission rate. TSIR \citep{grenfell2002dynamics,becker2017tsir}.
-    \item Process error. Many packages that deal with this: pomp \citep{king2015statistical},
-    odin \citep{odin2021}.
-    \item Agent based models. Covasim \citep{kerr2021covasim}
-    \item Fixed and random effects on parameters
-\end{itemize}
+In particular, the \code{fitode} package only allows for
+fitting deterministic ODE models, meaning that
+it does not account for \term{process error}, which
+refers to the variability in the dynamics of the system;
+several studies have shown that accounting for
+the process error is critical to capturing the uncertainties
+in parameter estimates and describing the dynamics of a system.
+Popular \code{R} packages that allow for stochastic model fitting include \code{pomp} \citep{king2015statistical} and
+\code{odin} \citep{odin2021}.
 
 \begin{itemize}
 \item appropriateness of fitting an SIR model to the Bombay plague
