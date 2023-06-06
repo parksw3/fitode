@@ -186,13 +186,12 @@ for (i in seq_along(pertseq)) {
 }
 par(las = 1, bty = "l")
 matplot(pertmat, type = "b", pch=1, log = "y", ylim = c(0.1, 1e6),
-        col = 2:8)
+        col = 2:8, main = "prediction sensitivity\nperturbations of best fit, beta/gamma parameterization")
 lines(pred1)
 legend("topright",
        legend = c("orig",sprintf("10^(%1.1f)", log10(pertseq))),
        lty = 1,
        col = 1:8)
-
 
 ## plot some slices ... 4-dim (logS0, logI0, (logbeta/logR0m1), loggamma ...)
 ## re-inventing the slice() wheel from mle2 ...
@@ -244,12 +243,15 @@ gg1 <- ggplot(cc1, aes(x=logR0m1, y = loggamma, fill = nll, z = nll)) +
     geom_contour(breaks = min(cc1$nll, na.rm = TRUE) + 10, colour = "red")
 
 
-print(gg1)
+print(gg1 + labs(title = "NLL surface, logR0m1/loggamma parameterization"))
 
-print(gg1 %+% cc2 + aes(x = logbeta))
+print(gg1 %+% cc2 + aes(x = logbeta) +
+      labs(title = "NLL surface, logbeta/loggamma parameterization\n(10% perturbation)"))
 
 ## apparently we can only perturb the parameters a *tiny* bit and still get sensible answers ...
-gg3 <- gg1 %+% cc3 + aes(x = logbeta)
+gg3 <- gg1 %+% cc3 + aes(x = logbeta) +
+      labs(title = "NLL surface, logbeta/loggamma parameterization\n(0.01% perturbation)")
+
 ## lots of warnings about dropping 'fill', I think because we have panels
 ##  that are all NA ...
 
