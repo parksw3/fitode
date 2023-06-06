@@ -1461,16 +1461,17 @@ In this case, parameter sets are randomly drawn from a multivariate normal
 distribution whose mean and the variance covariance matrix corresponds to
 the maximum likelihood estimates and the estimated variance covariance matrix,
 respectively;
-then, each parameter set is weighted accordingly based on the their likelihood
-and the sampling probability.
+then, each parameter set is weighted accordingly based on the the likelihood of their
+epidemic trajectories and the sampling probability.
+Generally, this method is expected to provide more robust confidence intervals
+than the Delta method but computationally more costly.
+\code{fitode} also allows for simultaneous fitting of multiple state variables
+to multiple time series and Bayesian inference via Markov chain Monte Carlo.
 
-\begin{itemize}
-    \item Features implemented in fitode but not covered in this paper
-    \item Calculating confidence intervals using importance sampling.
-    Expected to be more robust than the Delta Method.
-    \item Simultaneous fitting to multiple time series (e.g., predator-prey dynamics)
-    \item MCMC \& Priors
-\end{itemize}
+There are many other issues that are not covered
+by the \code{fitode} package that are important and useful for making
+statistical inference from epidemic time series.
+
 
 \begin{itemize}
     \item There are many other issues that are not covered
