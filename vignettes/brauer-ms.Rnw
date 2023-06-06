@@ -1478,11 +1478,13 @@ than the Delta method but computationally more costly.
 to multiple time series and Bayesian inference via Markov chain Monte Carlo.
 
 Even with these extensions, there will be many other challenges to
-fitting ODE models with the \code{fitode} package, as with many other packages.
+fitting ODE models with the \code{fitode} package, as with many other software.
 For example, it is often difficult to ensure that the model has converged
 properly or reached its true maximum.
 Performing optimization from multiple starting conditions and drawing
 likelihood surfaces can help diagnose these issues.
+Using other optimization methods or reparameterizing the model can
+sometimes help resolve these issues as well.
 We also encourage users to open any issues via the GitHub repository:
 \url{https://github.com/parksw3/fitode}.
 
