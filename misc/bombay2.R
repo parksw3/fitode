@@ -3,6 +3,10 @@ xfun <- function(x, n) x[setdiff(names(x), n)]
 
 ## gradient function
 options(sir.grad_param = "R0m1_r")
+options(sir.grad_method = "lsoda")
+## minimum number of predicted deaths
+options(sir.lik_min = 1e-3)
+
 sir.grad <- function (t, x, params) {
     with(as.list(c(x, params)), {
         parameterization <- getOption("sir.grad_param", "R0m1_r")
@@ -35,7 +39,8 @@ sir.pred <- function(p) {
     out <- deSolve::ode(func=sir.grad,
                         y=xstart,
                         times=times,
-                        parms=ode.params
+                        parms=ode.params,
+                        method = getOption("sir.grad_method", "lsoda")
                         ) |> as.data.frame()
     diff(out$R)
 }
@@ -68,8 +73,14 @@ sir_nll_all <- function(p, param = NULL) {
     }
     sirpred <- sir.pred(xfun(p, c("logk")))
     -sum(dnbinom(x = bombay2$mort[-1],
-                 mu = sirpred,
+                 mu = pmax(sirpred, getOption("sir.lik_min")),
                  size = exp(p["logk"]), log = TRUE))
+}
+
+mk_sir_fixpar <- function(fixpars) {
+    function(p, ...) {
+        sir_nll_all(c(p, fixpars), ...)
+    }
 }
 
 options(sir.grad_param = "R0m1_gamma")
@@ -202,7 +213,7 @@ calc_slice <- function(par, fun, rng = 0.1, nvec = NULL,
         par <- xfun(par, names(xpars))
     }
     if (length(rng)<length(par)) rng <- rep(rng, length.out = length(par))
-    if (is.null(nvec)) nvec <- c(rep(51, 2), rep(4, length(par)-2))
+    if (is.null(nvec)) nvec <- c(rep(41, 2), rep(5, length(par)-2))
     parvecs <- Map(function(p, r, n) {
         seq(p*(1-r), p*(1+r), length.out = n)
     }, par, rng, nvec)
@@ -256,4 +267,58 @@ gg3 <- gg1 %+% cc3 + aes(x = logbeta) +
 ##  that are all NA ...
 
 suppressWarnings(print(gg3))
+
+
+## wide profile likelihood (not working well ...)
+
+sir_nll_fixgamma <- mk_sir_fixpar(c(loggamma = opt_beta_gamma$par[["loggamma"]]))
+sir_nll_fixgamma(xfun(opt_beta_gamma$par, "loggamma"))
+loggamma_vec <- opt_beta_gamma$par[["loggamma"]] -
+    10^seq(-6, -1, length = 21)
+options(sir.grad_param = "beta_gamma")
+pars <- xfun(opt_beta_gamma$par, "loggamma")
+prof <- matrix(NA_real_, nrow = length(loggamma_vec), ncol = 6)
+profpred <- matrix(NA_real_, nrow = length(loggamma_vec), ncol = length(pred1))
+for (i in seq_along(loggamma_vec)) {
+    ## cat(i, "\n")
+    fn <- mk_sir_fixpar(c(loggamma = loggamma_vec[i]))
+    opt <- try(optim(pars,
+                 fn = fn,
+                 control = list(maxit = 1e6),
+                 hessian = FALSE), silent = TRUE)
+    if (!is(opt, "try-error")) {
+        prof[i,] <- c(loggamma_vec[i], opt$par, opt$value)
+        profpred[i,] <- sir.pred(c(opt$par, loggamma = loggamma_vec[i]))
+        pars <- opt$par
+    }
+}
+
+matplot(t(profpred)+1, log = "y", type = "l")
+
+
+## last OK pars
+pars <- c(logbeta = -9.29308564855315, logS0 = 16.5006305188922, logI0 = -5.77298156204285,  logk = 4.07291127040001)
+
+fn <- mk_sir_fixpar(c(loggamma = loggamma_vec[14]))
+fn(pars)
+options(sir.grad_method = "lsoda")
+par(las = 1, bty = "l")
+plot(sir.pred(c(pars, loggamma = loggamma_vec[13])), log = "y",
+     ylim = c(1, 1e5),
+     main = "SIR solutions")
+lines(sir.pred(c(pars, loggamma = loggamma_vec[14])), col = 2)
+options(sir.grad_method = "rk4")
+lines(sir.pred(c(pars, loggamma = loggamma_vec[14])), col = 2, lty = 2)
+legend("topright",
+       legend = paste(sprintf("loggamma = %1.6f", rep(loggamma_vec[c(13,14)],
+                                                      c(1,2))),
+                      rep(c("(lsoda)", "(rk4)"), c(2, 1))),
+       col = c(NA, rep("red", 2)),
+       lty = c(NA, 1, 2),
+       pch = c(1, NA, NA))
+       
+
+## check lgamma equivalents on R0m1 scale
+ff <- \(x) trfun2(trfun1(c(pars, loggamma = x), out = "R0m1"))
+cbind(ok = ff(loggamma_vec[13]), bad = ff(loggamma_vec[14]))
 
