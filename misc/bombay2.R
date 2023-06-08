@@ -380,3 +380,21 @@ sdvec <- sqrt(diag(solve(opt_R0m1_gamma_rats$hessian)))
 cbind(opt_R0m1_gamma_rats$par, sdvec)
 
 cbind(exp_par, sdvec*exp_par)
+
+start2 <- c(logR0m1 = -1.83938712634667, loggamma = 0.987419536802977, 
+logI0 = -10.1192816792488, logk = 3.7884778013485, logmu = 10.429528373848
+)
+
+## challenging!
+library(bbmle)
+parnames(sir_nll_rats) <- names(start2)
+m2 <- mle2(sir_nll_rats, start = start2,
+     vecpar = TRUE, method = "Nelder-Mead",
+     control = list(maxit = 1e6, parscale = abs(start2)))
+
+pp2 <- profile(m2, trace = TRUE)
+plot(pp2)
+
+as.data.frame(pp2) |>
+    ggplot(aes(x = focal, y = z^2)) + geom_point() + geom_line() +
+    facet_wrap(~param, scale = "free")
