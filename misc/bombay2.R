@@ -374,7 +374,9 @@ opt_R0m1_gamma_rats <- optim(start_R0m1_gamma_rats,
 plot(bombay2$mort[-1])
 lines(sir.pred_rats(start_R0m1_gamma_rats))
 lines(sir.pred_rats(opt_R0m1_gamma_rats$par))
-exp(opt_R0m1_gamma_rats$par)
+exp_par <- exp(opt_R0m1_gamma_rats$par)
 
 sdvec <- sqrt(diag(solve(opt_R0m1_gamma_rats$hessian)))
 cbind(opt_R0m1_gamma_rats$par, sdvec)
+
+cbind(exp_par, sdvec*exp_par)
