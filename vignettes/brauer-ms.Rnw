@@ -672,6 +672,10 @@ taken into account.
 \djde{I've added two sentences above.  Feel free to improve, and to
   comment on the non-indentifiability problems or whatever you think
   is useful to mention here.}
+\bmb{Maybe add further that we're ignoring a lot more biology.
+\emph{cf.} Steve Ellner's fit of the Bombay plague data where
+he said he was assuming a constant proportionality between
+rat prevalence and human death.}
 
 \section{Uncertainty}
 
@@ -1133,6 +1137,9 @@ assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
 \bmb{Do we even expect to get CIs for OLS fits? I thought we explained above that OLS is not a statistical framework. If we want CIs we can either use a Normal error response (probably easiest), or back-calculate estimated resid SD from residual SSQs, scale Hessian appropriately ...}
 \swp{The ols fits in the fitode already know how to back-calculate estimated resid SD and scale Hessian.
 It's just that these fits are having problems calculating the Hessians in the first place...}
+\bmb{We can comment basically that there is a bunch of unidentifability
+and this is hard.  See footnote.  We could show likelihood profiles in
+an appendix.}
 
 <<sirmortfit_ols_confband, eval=FALSE, include=FALSE>>==
 SIR_ols_confband <- predict(SIR_fit_ols, times=tvals, level=0.95)$mort
@@ -1698,6 +1705,12 @@ We chose to fix $I_0$ rather than the (known) population size
   data does not necessarily mean that it is fair to make inferences
   from estimated parameter values.}  \djde{Note KM's caution about
   interpreting the param values.}
+\bmb{Note that Baca\"er \cite[Table~2, p.\.412]{bacaermodel2012}
+quotes CFP $\sigma = 0.9$ from the Indian report.  We can use
+this to argue that an independent estimate of CFP seems to rule
+out really small CFP.  In principle, we could do fit seasonal
+forcing and CFP and argue that with a reasonable prior on CFP
+we need seasonal forcing (or whatever).}
 
 Alternatives to the \hyperlink{DeltaMethod}{Delta Method}.
 \djde{Available in \code{fitode} but we not what we doing here:

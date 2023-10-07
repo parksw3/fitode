@@ -251,7 +251,7 @@ gg1 <- ggplot(cc1, aes(x=logR0m1, y = loggamma, fill = nll, z = nll)) +
     scale_fill_viridis_c(trans = "log10") +
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
-    geom_contour(breaks = min(cc1$nll, na.rm = TRUE) + 10, colour = "red")
+    geom_contour(breaks = min(cc1$nll, na.rm = TRUE) + 2, colour = "red")
 
 
 print(gg1 + labs(title = "NLL surface, logR0m1/loggamma parameterization"))
@@ -322,3 +322,79 @@ legend("topright",
 ff <- \(x) trfun2(trfun1(c(pars, loggamma = x), out = "R0m1"))
 cbind(ok = ff(loggamma_vec[13]), bad = ff(loggamma_vec[14]))
 
+
+## redo with Ellner comment: new scaling parameter
+
+sir_nll_rats <- function(p, param = NULL) {
+    if (!is.null(param)) {
+        op <- options(sir.grad_param = param)
+        on.exit(options(op))
+    }
+    sirpred <- sir.pred_rats(c(xfun(p, c("mu", "logk")), N = 1))
+    -sum(dnbinom(x = bombay2$mort[-1],
+                 mu = pmax(sirpred, getOption("sir.lik_min")),
+                 size = exp(p["logk"]), log = TRUE))
+}
+
+sir.pred_rats <- function(p) {
+    times <- bombay2$week
+    I0 <- exp(p[["logI0"]])
+    S0 <- 1-I0
+    ode.params <- c(xfun(p, c("logI0", "logk")), N = 1)
+    xstart <- c(S=S0, I=I0, R=0)
+    out <- deSolve::ode(func=sir.grad,
+                        y=xstart,
+                        times=times,
+                        parms=ode.params,
+                        method = getOption("sir.grad_method", "lsoda")
+                        ) |> as.data.frame()
+    exp(p[["logmu"]])*diff(out$R)
+}
+
+options(sir.grad_param = "R0m1_gamma",
+        sir.grad_method = "lsoda")
+
+## 
+start_R0m1_gamma_rats <- c(logR0m1 = 1,
+            loggamma = -2,
+            logI0 = -5,
+            logk = 1,
+            logmu = 9)
+plot(sir.pred_rats(start_R0m1_gamma_rats))
+
+plot(bombay2$mort[-1])
+lines(sir.pred_rats(start_R0m1_gamma_rats))
+
+sir_nll_rats(start_R0m1_gamma_rats)
+
+opt_R0m1_gamma_rats <- optim(start_R0m1_gamma_rats,
+              fn = sir_nll_rats,
+              control = list(maxit = 1e6),
+              hessian = TRUE)
+plot(bombay2$mort[-1])
+lines(sir.pred_rats(start_R0m1_gamma_rats))
+lines(sir.pred_rats(opt_R0m1_gamma_rats$par))
+exp_par <- exp(opt_R0m1_gamma_rats$par)
+
+sdvec <- sqrt(diag(solve(opt_R0m1_gamma_rats$hessian)))
+cbind(opt_R0m1_gamma_rats$par, sdvec)
+
+cbind(exp_par, sdvec*exp_par)
+
+start2 <- c(logR0m1 = -1.83938712634667, loggamma = 0.987419536802977, 
+logI0 = -10.1192816792488, logk = 3.7884778013485, logmu = 10.429528373848
+)
+
+## challenging!
+library(bbmle)
+parnames(sir_nll_rats) <- names(start2)
+m2 <- mle2(sir_nll_rats, start = start2,
+     vecpar = TRUE, method = "Nelder-Mead",
+     control = list(maxit = 1e6, parscale = abs(start2)))
+
+pp2 <- profile(m2, trace = TRUE)
+plot(pp2)
+
+as.data.frame(pp2) |>
+    ggplot(aes(x = focal, y = z^2)) + geom_point() + geom_line() +
+    facet_wrap(~param, scale = "free")
