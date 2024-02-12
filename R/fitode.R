@@ -179,6 +179,10 @@ fitode <- function(model, data,
         )
     }
 
+    if (!tcol %in% colnames(data)) stop(paste0("Column '", tcol, "' cannot be found. Please specify a time column using the `tcol` argument."))
+
+    if(length(unique(diff(data[,tcol]))) > 1) warning("Uneven time vector detected. Consider manually specifying the integration time step using the `solver.opts=list(method='rk4', hini=...)` argument.")
+
     if (length(prior) == 0) {
         priorlist <- list()
     } else {
