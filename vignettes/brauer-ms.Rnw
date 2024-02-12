@@ -135,7 +135,8 @@ knitr::opts_chunk$set(error = FALSE)
 \bigskip \bigskip
 
 \begin{abstract}
-  Fred Brauer had no desire to touch data himself, but recognized that
+  Fred Brauer made many contributions to mathematical epidemiology,
+  but had no desire to touch data.  Nevertheless, he recognized that
   fitting models to data is usually necessary when attempting to apply
   infectious disease transmission models to real public health
   problems.  He was curious to know how one goes about fitting
@@ -199,16 +200,16 @@ frameworks they have exploited, mathematical epidemiologists have
 frequently attempted to fit---or at least to compare---their models to
 observed infectious disease data. Such fits have often been
 na\"{\i}ve, with limited consideration of their quality. Over the
-years, however, there has been a trend towards greater sophistication and
-statistical rigour in parameter estimation for infectious disease
+years, however, there has been a trend towards greater sophistication
+and statistical rigour in parameter estimation for infectious disease
 models; books that explain these methods have begun to appear in
 recent decades \cite{Bolk08,bjornstadEpidemics2018}.  Careful
 consideration of uncertainty is especially important when epidemic
 models are used for the development and analysis of policy options for
 infectious disease management \cite{elderd2006uncertainty}, a
-challenge that has absorbed the attention of many mathematical
-epidemiologists during the course of the present COVID-19 pandemic
-\cite{Broo+21,Hill+21,Nixo+22}.
+challenge that began to absorb the attention of many mathematical
+epidemiologists as soon as the emergence of SARS-CoV-2 ignited the
+COVID-19 pandemic \cite{Broo+21,Hill+21,Nixo+22}.
 
 While visiting the University of British Columbia in 2014--2015, one
 of us (DE) had many conversations with Fred Brauer about epidemic
@@ -227,8 +228,9 @@ experience with statistics and parameter estimation.  Unfortunately,
 we have lost the opportunity to present our work to Fred, but it seems
 fitting (!) to highlight Fred's role in the history of this work, and
 to dedicate this tutorial to his memory.\footnote{We had originally
-intended to submit this paper to a volume in honour of Fred's memory
-\cite{BrauerMemorialIssue} \bmb{will probably need to cite this 'by hand' [Journal/volume/issue]. Leaving as ``undefined citation'' for now. FWIW footnotes [https://www.springer.com/journal/11538/submission-guidelines]{are allowed in BMB}}}
+intended to submit this paper to a collection in honour of Fred's memory
+\cite{Kribvand23}.
+\bmb{FWIW \href{https://www.springer.com/journal/11538/submission-guidelines}{footnotes are allowed in BMB}}.}
 
 \section{Kermack and McKendrick's fit}
 
@@ -1912,20 +1914,21 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
   \emph{Top panel:} The blue and red curves show the \KM approximation
   \eqref{eq:sech}, as fitted by \KM (blue) and by us using \code{nls}
   (red, with pink confidence band).  The associated parameter
-  estimates are given in \cref{tab:Bombay}.  The dotted yellow
-  curve shows the \code{fitode} fit, for which the associated
-  parameter estimates are given \cref{tab:bombay.fitode}.
-  \emph{Bottom panel:} The yellow curve is identical to the yellow
-  dotted curve in the top panel, and the yellow band shows the
-  \code{fitode} confidence band; this confidence band is shown as
-  a linear interpolation between successive observation times because
-  the model fits to incidence at discrete time points rather than to
-  a continuous curve of the instantaneous death rate.
-  The dotted red curve is identical to
-  the solid red curve in the top panel.  We have separated the two
-  panels because the confidence band overlap would make the plots
-  difficult to interpret.\djde{We need a legend in the bottom panel.}
-}
+  estimates are given in \cref{tab:Bombay}.  The dotted yellow curve
+  \djde{The legend should have dotted rather than solid yellow.} shows
+  the \code{fitode} fit, for which the associated parameter estimates
+  are given in \cref{tab:bombay.fitode}.  \emph{Bottom panel:} The
+  yellow curve is identical to the yellow dotted curve in the top
+  panel\djde{No, in the top panel the yellow dotted curve is a smooth,
+    not interpolated from values at observation times.}, and the
+  yellow band shows the \code{fitode} confidence band; this confidence
+  band is shown as a linear interpolation between successive
+  observation times because the model fits to incidence at discrete
+  time points rather than to a continuous curve representation of the
+  instantaneous death rate.  The dotted red curve is identical to the
+  solid red curve in the top panel.  We have separated the two panels
+  because the confidence band overlap would make the plots difficult
+  to interpret.}
 \label{fig:Bombay}
 \end{figure}
 
