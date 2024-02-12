@@ -510,7 +510,7 @@ analytically\footnote{In (common) situations in which nonlinear
 \begin{linenomath*}
 \begin{subequations}\label{eq:invertparams}
 \begin{align}
-  \Reff &= 1 + \frac{2 \omega I_0 \sinh(\phi) \cosh(\phi)}{a} \,,
+  \Reff &= 1 + \frac{2\, \omega I_0 \sinh(\phi) \cosh(\phi)}{a} \,,
           \label{eq:Reff} \\
   \gamma &= \frac{2\,\omega\tanh{\phi}}{\Reff-1} \,, \label{eq:gamma} \\
   S_0 &= \frac{2\,\Reff^2\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} \,. % Bacaer eq. (3)
@@ -678,6 +678,7 @@ taken into account.
 \emph{cf.} Steve Ellner's fit of the Bombay plague data where
 he said he was assuming a constant proportionality between
 rat prevalence and human death.}
+\djde{Can you point me to the Ellner paper?}
 
 \section{Uncertainty}
 
@@ -821,7 +822,7 @@ The maximum likelihood estimate is, therefore,
 Here, the overdispersion parameter $k$ also needs to be estimated
 alongside $\thetavechat$ to maximize the likelihood.
 This is different from the likelihood
- associated with Normal errors, where $\sigma^2$ cab be either
+ associated with Normal errors, where $\sigma^2$ can be either
  computed as the variance of the residuals across the full time
  series or estimated jointly with model parameters.
 
@@ -1034,8 +1035,8 @@ bombay2 <- rbind(
   \cite{King+15}?}\djde{I've added a footnote above; you may want to
   alter it.}  Taking our previous parameter estimate from \code{nls}
 as our starting values, we can fit the model by calling the
-\code{fitode} function
-<<sirmortfit,cache=TRUE,warning=FALSE>>=
+\code{fitode} function:
+<<sirmortfit,cache=TRUE,warning=FALSE,message=FALSE>>=
 SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
 SIR_fit <- fitode(
     model = SIR_model,
@@ -1045,7 +1046,7 @@ SIR_fit <- fitode(
     tcol = "week"
 )
 @
-In the fitting function above:
+\noindent In the fitting function above:
 \begin{description}
 \item[\code{model}]specifies the ODE model to be fitted.
 \item[\code{data}]specifies the data.
@@ -1059,12 +1060,16 @@ In the fitting function above:
     Materials.\djde{to be written...}}.
 \item[\code{tcol}]specifies the time column of the data frame.
 \end{description}
-The resulting fits are plotted in \cref{fig:Bombay}.
-The estimated coefficients and the associated confidence intervals
-(\cref{tab:bombay.fitode}) can be obtained via \code{coef} and \code{confint} functions;
-the latter function also allows users to obtain confidence intervals for derived parameters using the Delta method.
-Note that \code{fitode} gives discrete predictions (rather than smooth curves) because we are calculating mortality at discrete (weekly)
-time intervals using \cref{eq:correct.mortality2}.
+The resulting fits are plotted in \cref{fig:Bombay} and summarized in
+\cref{tab:bombay.fitode}.  The estimated parameter values (the
+\term{coefficients} in standard statistical jargon) can be obtained
+via \code{coef(SIR_fit)}.  The coefficients together with associated
+confidence intervals are obtained via \code{confint(SIR_fit)}, which
+also allows users to obtain confidence intervals for derived
+parameters using the Delta method.  Note that \code{fitode} gives
+discrete predictions (rather than smooth curves) because we are
+calculating mortality at discrete (weekly) time intervals using
+\cref{eq:correct.mortality2}.
 
 \swp{overall, the bombay data set is a really bad example for fitting SIR model. Not sure what else to do or say.}
 \djde{Is it really bad or is it just that we are assuming CFP$=1$?}
@@ -1175,7 +1180,51 @@ plot(gammavec, loglikvec,
      ylim=c(-140, -135.5))
 @
 
-\section{Influenza in Philadelphia, October 1918}
+We have highlighted the Bombay plague data because of their prominent
+role in \KM's paper \cite{KermMcKe27} and, consequently, for the
+history of mathematical epidemiology.  However, while they provide an
+interesting example with which to illustrate the process of fitting an
+epidemiological model to data, it is important to emphasize that
+modelling plague dynamics with the simple SIR model is, at best,
+difficult to justify \cite{bacaermodel2012,Earn+20}.  Indeed, \KM
+explicitly made a sequence of optomistic assumptions, which they
+recognized were not ``strictly'' satisfied:
+
+\begin{quote}
+  ``We are, in fact, assuming that plague in [humans] is a reflection
+  of plague in rats, and that with respect to the rat (1), the
+  uninfected population was uniformly susceptible; (2) that all
+  susceptible rats in the island had an equal chance of being
+  infected; (3) that the infectivity, recovery, and death rates were
+  of constant value throughout the course of sickness of each rat; (4)
+  that all cases ended fatally or became immune; and (5) that the flea
+  population was so large that the condition approximated to one of
+  contact infection.  None of these assumptions are strictly fulfilled
+  and consequently the numerical equation can only be a very rough
+  approximation. A close fit is not to be expected, and deductions as
+  to the actual values of the various constants should not be
+  drawn.'' 
+  
+  %%It may be said, however, that the calculated curve, which implies
+  %%that the rates did not vary during the period of the epidemic,
+  %%conforms roughly to the observed figures.
+  
+  \rightline{--- \KM \cite[p.\,715]{KermMcKe27}}
+\end{quote}
+
+\noindent
+Given the mental gymnastics required to motivate applying the SIR
+model to plague transmission, it is surprising that \KM did not choose
+to examine a more obviously suitable disease.  The surprise is
+especially extreme given that the most salient infectious disease
+epidemic in the 1920's would have been the 1918 influenza pandemic,
+which did involve direct human-to-human transmission, and for which
+much more detailed data were available at the time
+\cite{Roge20,Fros20,Eich23}.
+
+\thickredline
+
+\section{Influenza in Philadelphia, October 1918}\label{sec:phila}
 
 We also analyze the influenza outbreak in Philadelphia, 1918.
 Using nonlinear least squares, we can find a set of parameters
@@ -1203,7 +1252,8 @@ print(philapop1918)
 ## reduce this by case fatality proportion so we have
 ## the initial susceptible population who will be recorded
 ## as a death if they get infected:
-philaS0 <- round(philapop1918 * 0.025)
+philacfp <- 0.025
+philaS0 <- round(philapop1918 * philacfp)
 print(philaS0)
 @
 
@@ -1839,7 +1889,9 @@ ci_fmt("a", cc)
       model \eqref{eq:SIR} to the Bombay plague data (see
       \cref{fig:Bombay}).  The $\R_0$ estimates assume the
       population of Bombay was $N=1$ million
-      \cite[p.\,408]{bacaermodel2012}.}\label{tab:bombay.fitode}
+      \cite[p.\,408]{bacaermodel2012}.\djde{Why are the units of
+        $\R_0$ ``1.7'' ???  I guess that is the ols value of $\Tg$
+        in the previously line and -- and 1.7 got swapped ???}}\label{tab:bombay.fitode}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
@@ -1936,11 +1988,19 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
 \begin{table}
   \begin{center}
     \caption{Parameter estimates for the 1918 influenza epidemic in
-      Philadelphia, based on \KM's \cite{KermMcKe27} approximation
-      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, using nonlinear
-      least squares (\code{nls}).  The $\R_0$ estimates assume the
-      population of Philadelphia in 1918 was\dots
-    See \cref{fig:phila}.}\label{tab:philanls}
+      Philadelphia, based on a nonlinear least squares (\code{nls})
+      fit of \KM's \cite{KermMcKe27} approximation \eqref{eq:sech} to
+      the SIR model \eqref{eq:SIR}.  The $\R_0$ estimates assume the
+      population of Philadelphia in 1918 was
+      \Sexpr{prettyNum(philapop1918, big.mark=",")}.  \djde{I filled
+        in \code{philapop1918} there.  We also assumed
+        $\code{philacfp}=\Sexpr{philacfp}$, which determined
+        $\code{philaS0}=\Sexpr{philaS0}$.  But then we took the
+        initial \code{S0} guess to be $0.9*\code{philaS0}$.  The
+        fitted \code{S0} is so far from this that the assumed
+        population size and CFP don't seem to be constraining
+        anything.  Should we make more of this explicit?}  See
+      \cref{sec:phila,fig:phila}.}\label{tab:philanls}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
