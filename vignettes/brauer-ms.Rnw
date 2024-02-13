@@ -1436,7 +1436,7 @@ The standard stochastic SIR model \cite{AndeBrit00b} can be defined by
 interpreting the individual terms in \cref{eq:SIR} as event rates for
 stochastic processes in a population of $N$ individuals.  Realizations
 of this discrete-state model can be generated exactly using the
-Gillspie algorithm \cite{Gill76}, or approximately (as we do here)
+Gillespie algorithm \cite{Gill76}, or approximately (as we do here)
 using the ``$\tau$-leaping'' approach \cite{Gill01}, which is
 implemented in the \code{adaptivetau} R package \cite{adaptivetau}.
 The demographic stochasticity (aka \term{process noise}) that these
@@ -1447,31 +1447,43 @@ possibility that an epidemic can burn out \cite{Pars+24}).
 In \cref{fig:stoch}, the dots show a single realization of the
 stochastic SIR model with initial state $(S_0,I_0,R_0)=(\Sexpr{iii})$,
 basic reproduction number $\R_0=\Sexpr{R0}$, and mean generation
-interval $\Tg=\gamma^{-1}=\Sexpr{1/mm$gamma}$ week.
+interval $\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top
+panel, $\dbydt{R}$ \eqref{eq:SIR;R} with the correct initial
+conditions and parameter values is shown in green, and the \KM
+approximation \eqref{eq:sech} based on those parameter values is shown
+in \djde{colour??? do not use blue because the blue curve has a
+  different meaning in \cref{fig:Bombay}.}.  The \code{fitode} fit and
+confidence band are shown in yellow.  The time shift between the
+deterministic solution and the stochastic realization arises because
+the stochastic model captures the demographic noise (which causes a
+randomly distributed delay until the tipping point is reached, i.e.,
+until the epidemic takes off in a roughly deterministic fashion).
 
-\thickredline
+\djde{Daniel, you wrote ``shows the simulated daily mortality curve
+  (dots) alongside the smooth, deterministic trajectory of epidemic
+  mortality ($\dbydt{R}$, green)''.  Am I correct that you did not
+  model mortality?  So to interpret this as mortality, we would be
+  assuming that the CFP$=1$?  If that's the case, I don't think we
+  should describe this as mortality, but we might want to comment on
+  how to simulate mortality data.}
 
-Finally, we apply the same methodologies to
-a simulated mortality curve.
-In particular, we simulated a stochastic
-SIR model using an adaptive tau algorithm\djde{with $N=2000$ we should
-  be using Gillespie}, with $(S_0,I_0,R_0)=(\Sexpr{iii})$,
-$\R_0=\Sexpr{R0}$,
-infectious period ($\gamma^{-1}$) $=\Sexpr{1/mm$gamma}$ week.  \cref{fig:stoch} (top
-panel) shows the simulated daily mortality curve (dots) alongside the
-smooth, deterministic trajectory of epidemic mortality ($\dbydt{R}$,
-green) using the same parameter values and initial conditions.  For
-this particular stochastic realization, the epidemic takes off slowly,
-resulting in a time shift between the deterministic and stochastic
-trajectories.
+As expected, with the correct parameter values, \KM's approximation
+\eqref{eq:sech} fails once the \hyperlink{KMassumption}{requirement}
+that $\R_0 R(t)/N\ll1$ is violated.  Nonetheless, we can still fit the
+\KM approximation to the simulated epidemic and obtain visually
+reasonable agreement (\cref{fig:stoch}, bottom panel, red curve;
+\cref{tab:stoch.nls}); the fit cannot get better because the
+approximation \eqref{eq:sech} is symmetric about the peak, whereas the
+rise is steeper than the fall in the true solution.  In addition, the
+estimated parameters that yield the red curve are far from the true
+parameters that were used in the simulation (\cref{tab:stoch.nls}).
 
-In this case, \KM's approximation \eqref{eq:sech}---using the correct parameter values---yields a poor representation of the dynamics.
-The approximation predicts a much lower epidemic peak and a shorter duration of the epidemic (\cref{fig:stoch}, top panel, blue curve).
-Nonetheless, we can still fit the KM approximation to the simulated epidemic and obtain visually reasonable agreement (\cref{fig:stoch}, bottom panel, red curve; \cref{tab:stoch.nls}); the fit cannot get better because the approximation \eqref{eq:sech} is symmetric about the peak, whereas the rise is steeper than the fall in the true solution.
-In addition, the estimated parameters are far from the true parameters that were used to simulate the epidemic (\cref{tab:stoch.nls}).
-
-The exact deterministic SIR model gives a much better fit, which
-is achieved by estimating an initial prevalence that is only a third of the true initial prevalence; all other parameter estimates are nearly identical to the true parameter values used to generate the stochastic trajectory (\cref{tab:stoch.fitode}).
+The excellent fit of the determinsitic trajectory that \code{fitode}
+finds (yellow) is achieved by estimating an initial prevalence that is
+only a third of the true initial prevalence, thereby mimicking the
+stochastic delay with the deterministic model; all other parameter
+estimates are nearly identical to the true parameter values used to
+generate the stochastic trajectory (\cref{tab:stoch.fitode}).
 
 <<colours, include=FALSE>>=
 my.red <- "#E41A1C"     # colour-blind friendly red
@@ -1550,8 +1562,9 @@ ci.derived.stoch.fitode <- confint(SIR_stoch_fit,
 assignfun(ci.derived.stoch.fitode[,1], ".stoch.fitode")
 @
 
-
 \section{Discussion}
+
+\thickredline
 
 In this study, we present a guideline for fitting ODE models
 to epidemic time series data alongside a user-friendly \code{R}
@@ -2198,7 +2211,7 @@ draw_legend()
   approximation using the parameters estimated with \code{fitode}.
   \djde{The yellow line should be dotted in the legend.}
   \djde{The KM curve has a completely different meaning from the
-    KM curve in \cref{fig:bombay} and should be labelled and coloured
+    KM curve in \cref{fig:Bombay} and should be labelled and coloured
     differently.  Perhaps labelled ``KM approximation'' and coloured orange,
     with this appearing below fitode in the legend.  We must be able to
     come up with better labels for the legends in all the figures.}
@@ -2276,6 +2289,7 @@ draw_legend()
       $\R_0=\Sexpr{R0}$, $1/\gamma=\Sexpr{1/mm$gamma}$ week.
       \djde{$\beta$ should be given in units 1/year.}
       \djde{$\Tg$ should be listed and given in days.}
+      \djde{The upper limit of the CI for $k$ should not be in scientific notation.}
 }\label{tab:stoch.fitode}
 \medskip
     %% making use of ragged2e and array packages:
