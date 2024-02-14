@@ -930,7 +930,7 @@ challenging, if not practically impossible, for derived parameters or
 epidemic trajectories \cite[][\S 7.5.1.2]{Bolk08}.  Consequently, we
 rely on the Delta Method hereafter.
 
-\section{Fitting the ODE}
+\section{Fitting the ODE}\label{sec:fitode}
 
 Until now, we have focused on fitting \KM's approximation
 \eqref{eq:sech} rather than actual solutions of the SIR model
@@ -1441,15 +1441,17 @@ of the model.
 
 The standard stochastic SIR model \cite{AndeBrit00b} can be defined by
 interpreting the individual terms in \cref{eq:SIR} as event rates for
-stochastic processes in a population of $N$ individuals.  Realizations
-of this discrete-state model can be generated exactly using the
-Gillespie algorithm \cite{Gill76}, or approximately (as we do here)
-using the ``$\tau$-leaping'' approach \cite{Gill01}, which is
-implemented in the \code{adaptivetau} R package \cite{adaptivetau}.
-The demographic stochasticity (aka \term{process noise}) that these
-algorithms simulate is essential to capture real effects that occur
-when the number of infected individuals is small (especially the
-possibility that an epidemic can burn out \cite{Pars+24}).
+stochastic processes in a population of $N$ individuals (in the limit
+$N\to\infty$ the stochastic model approaches the ODEs \eqref{eq:SIR};
+see \cite{EthiKurt86}).  Realizations of this discrete-state model can
+be generated exactly using the Gillespie algorithm \cite{Gill76}, or
+approximately (as we do here) using the ``$\tau$-leaping'' approach
+\cite{Gill01}, which is implemented in the \code{adaptivetau} R
+package \cite{adaptivetau}.  The demographic stochasticity (aka
+\term{process noise}) that these algorithms simulate is essential to
+capture real effects that occur when the number of infected
+individuals is small (especially the possibility that an epidemic can
+burn out \cite{Pars+24}).
 
 In \cref{fig:stoch}, the dots show a single realization of the
 stochastic SIR model with initial state $(S_0,I_0,R_0)=(\Sexpr{iii})$,
@@ -1582,53 +1584,96 @@ standard methods for fitting dynamical models to time series, in the
 context of infectious disease epidemiology.  We explained how to use
 nonlinear least squares (\code{nls}) to fit a given function to a time
 series, and illustrated the approach using the Kermack and McKendrick
-(\KM, \cite{KermMcKe27}) approximation \eqref{eq:sech} to the standard
-SIR model \eqref{eq:SIR}.  We also explained how to fit solutions of
-ordinary differential equations (ODEs) to a time series---using our R
-package \code{fitode}---and obtain parameter estimates and confidence
-intervals, regardless of whether exact solutions of the ODEs are
-available.
+(\KM, \cite{KermMcKe27}) analytical approximation \eqref{eq:sech} to
+the solution of the standard SIR model \eqref{eq:SIR}.  We also
+explained how to fit solutions of ordinary differential equations
+(ODEs) to a time series---using our R package \code{fitode}---and
+obtain parameter estimates and confidence intervals, regardless of
+whether analytical solutions of the ODEs are available.
 
 \code{fitode} is flexible enough to handle most compartmental
-epidemiological and ecological models, so we hope the package will be
-useful for many readers, not only as a pedagogical tool but also to
-fit models to novel data.  Potential applications abound.  We have
-ourselves used the predecessor of \code{fitode} (\code{fitsir}) to
-study music popularity \cite{Rosa+21}.
+epidemiological and ecological models \cite{BrauCast01,Brau+19},
+including non-autonomous models, such as seasonally forced epidemic
+models \cite{Earn+00,HeEarn07,HeEarn16,PapsEarn19}.  We hope the
+package will be useful for many readers, not only as a pedagogical
+tool but also to fit models to novel data.  Potential applications
+abound (we have ourselves used \code{fitode}'s predecessor,
+\code{fitsir}, to study music popularity \cite{Rosa+21}).
+
+We focussed here on three illustrative examples of epidemic time
+series.  The first was the reported weekly mortality from plague in
+Bombay (\cref{fig:Bombay}), which was examined by \KM in their
+original paper \cite{KermMcKe27}.  Although historically important, it
+is certainly debatable whether any inferences we might draw from
+fitting the simple SIR model \eqref{eq:SIR} to these plague data can be
+trusted.  
+As we quoted at the end of \cref{sec:fitode}, to justify the
+application of their SIR model to these data, \KM highlighted five
+implicit assumptions, any or all of which might be strongly violated.
+Baca\"er \cite{bacaermodel2012} argued that seasonal changes in
+transmission rate must also be considered to make sense of the Bombay
+plague outbreak.  Of course, other mechanisms might play a role as well
+(e.g., heterogeneity in contact patterns).
+
+To obtain a deeper understanding of the Bombay plague epidemic, we
+could formulate a variety of models, fit them to the data using
+\code{fitode} or other software, and use a statistical framework for
+``model selection'' \cite{BurnAnde02} to rank the relative importance
+of the various mechanisms included in the sequence of models (see,
+e.g., He \emph{et al.} \cite{He+13a} for an example of using this
+approach to understand the occurrence of three distinct waves in the
+1918 influenza pandemic).  We have not attempted such a study here,
+since our goal was simply to explain and illustrate the fitting
+methodology.  However, it is worth highlighting that our analysis
+using the SIR model did reveal a computational challenge that---in the
+absense of additional information about the Bombay plague
+outbreak---would likely limit how much can be learned from a model
+selection exercise: the mean generation interval ($\Tg$) appears to be
+\term{unidentifiable}, i.e., impossible to estimate reliably from the
+reported weekly plague deaths (see \cref{fig:proflikgamma}).
+
+\djde{We should not have supp.  There is just the one figure, which we
+  can just stick here (I've commented out the creation of supp).  We
+  can probably say as much as we need to in the figure caption, but we
+  could, alternatively, have an \emph{appendix}, rather than
+  supplementary material.}
+
+Our second example was the main wave of the 1918 influenza pandemic in
+the city of Philadelphia, for which daily mortality from pneumonia and
+influenza (P\&I) was reported (\cref{fig:phila}).  Again we fitted the
+exact solution of the SIR model \eqref{eq:SIR} using \code{fitode},
+and \KM's analytical approximation \eqref{eq:sech}, but found---unlike
+the situation for Bombay plague---that only the \code{fitode} fit
+yielded plausible parameter estimates (see
+\cref{tab:phila.fitode,tab:philanls}).
+
+Finally, we conducted a kind of test that truly makes most sense to
+perform \emph{before} fitting to a real, empirically observed time
+series: we fit models to a \emph{simulation} that we ran, so we knew
+the parameter values used to generate the simulated ``observations''.
+The simulation was a realization of the stochastic SIR model, to
+which, again, we fit both the deterministic SIR model \eqref{eq:SIR}
+using \code{fitode} and \KM's analytical approximation \eqref{eq:sech}
+using \code{nls}.  Both provide visually reasonable fits
+(\cref{fig:stoch}) but \KM's approximation yields absurd parameter
+values, whereas \code{fitode} estimates the correct values of the
+underlying disease-related parameters
+\djde{and a discrepancy in the initial conditions that makes perfect
+sense; awkward to get this across nicely}
+(\cref{tab:stoch.fitode,tab:stoch.nls}).
+
+The reason that \KM's approximation fails to estimate the correct
+parameter values for the simulation is that the assumption on which
+the approximation is based \eqref{eq:KMassumption} is strongly
+violated in the simulation (\cref{fig:stoch}).  Consequently, the
+parameters of the \KM approximation cannot be interpreted biologically
+or mechanistically.  It is worth noting, however, that a
+phenomenological model with the same number of parameters can
+sometimes fit a stochastic simulation just as closely or even closer
+than the deterministic limit of the model that generated the data
+\cite{Rosa+21}.
 
 \thickredline
-
-In this study, we present a guideline for fitting ODE models
-to epidemic time series data alongside a user-friendly \code{R}
-package for beginners. In doing so, we compare
-SIR model fits to KM's approximations
-across three data sets and their resulting parameter estimates.
-For the Bombay plague data, both models give similar fits and parameter
-estimates.
-For the Philadelphia flu data, the nonlinear least square fit of KM's approximation
-give extreme parameters even though it provides a visually good fit.
-Finally, fitting a deterministic SIR model to a stochastic simulation shows that
-underlying epidemiological parameters, except for the initial conditions, can be recovered
-with reasonable accuracy.
-
-Despite historical connections to KM \cite{KermMcKe27}, it is unclear whether
-the SIR model is appropriate for studying the Bombay plague
-data. Instead, Baca\"er argued that the epidemic represents a
-seasonal outbreak and therefore requires a change in transmission
-rate over the course of an epidemic \cite{bacaermodel2012}.
-\swp{what is our opinion?}
-Here, we also find that the Bombay epidemic poses a computational issue
-for fitting the SIR model.
-In particular, the profile likelihood becomes extremely flat for high
-values of $\gamma$, indicating parameter unidentifiability.
-
-We have focused on fitting the SIR model in this paper for illustrative
-purposes, but the \code{fitode} can be used for fitting many other
-models.
-For example, any extensions of the SIR model that include additional
-compartments, such as the SEIR or SIRS models, can be easily set up.
-\code{fitode} also allows for non-autonomous models, such as the
-SIR model with sinusoidally forced transmission rate.
 
 There are several features that are implemented in \code{fitode} but
 are not covered in this paper.
@@ -2413,19 +2458,31 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd),
 
 \pagebreak
 
-\section*{Supplementary figures}
-\setcounter{figure}{0}
-\renewcommand{\thefigure}{S\arabic{figure}}
+%% \section*{Supplementary figures}
+%% \setcounter{figure}{0}
+%% \renewcommand{\thefigure}{S\arabic{figure}}
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{../misc/bombay_confint_dnbinom.pdf}
-\caption{
-\textbf{The profile likelihood of the SIR model for the Bombay epidemic across a wide range of values for $\gamma$.}
-(A) The profile likelihood is calculated by fixing $\gamma$ to a given value as maximizing the likelihood by estimating all other parameters.
-A flat profile-likelihood surface indicates parameter unidentifiability, meaning that we can obtain statistically indistinguishable fits across a wide range of values for $\gamma$.
-(B--E) The corresponding best parameter estimates for a given value of $\gamma$.
-Strong correlations across parameters drive parameter unidentifiability.
-}
+\caption{\textbf{Unidentifiability of the mean generation interval
+    $\Tg$ (or, equivalently, the removal rate $\gamma$) for the Bombay
+    plague epidemic shown in \cref{fig:Bombay}.}
+    %%
+    (\textsf{A}) The profile likelihood---briefly discussed at the end
+  of \cref{sec:Uncertainty}---is calculated by fixing $\gamma$ to a
+  given value and maximizing the likelihood by estimating all other
+  parameters \cite{Bolk08}.  A flat profile-likelihood surface
+  indicates parameter unidentifiability, meaning that we can obtain
+  statistically indistinguishable fits across a wide range of values
+  of the focal parameter ($\gamma$).  (\textsf{B--E}) The
+  corresponding best parameter estimates for a given value of
+  $\gamma$.  Strong correlations across parameters are symptomatic of
+  parameter unidentifiability.  \djde{The viz in the figure could be
+    improved.  I suggest stretching panel A to cover the current
+    positions of panels A and D, and then have a 4x4 grid of parameter
+    estimate panels next to it.  Also, use math symbols in the annotation,
+    e.g., $\beta$ not \texttt{beta}.}
+}\label{fig:proflikgamma}
 \end{figure}
 
 \end{document}
