@@ -1476,16 +1476,22 @@ until the epidemic takes off in a roughly deterministic fashion).
 
 As expected, with the correct parameter values, \KM's approximation
 \eqref{eq:sech} fails once the requirement \eqref{eq:KMassumption}
-that $R(t)/N\ll1/\R_0$ is violated.  Nonetheless, we can still fit the
-\KM approximation to the simulated epidemic and obtain visually
+that $R(t)/N\ll1/\R_0$ is violated.  We can, of course, find values of
+the parameters $(a,\omega,\phi)$ such that the function
+$a\sech^2{(\omega\,t - \phi)}$ [\cref{eq:sech}] more closely matches
+the shape of the full simulated epidemic.  Using nonlinear least
+squares (\code{nls}) as in previous sections, we obtain visually
 reasonable agreement (\cref{fig:stoch}, bottom panel, red curve;
-\cref{tab:stoch.nls}); the fit cannot get better because the
-approximation \eqref{eq:sech} is symmetric about the peak, whereas the
-rise is steeper than the fall in the true solution.  In addition, the
-estimated parameters that yield the red curve are far from the true
+\cref{tab:stoch.nls}). The \code{nls} fit cannot be improved further
+because the function we are fitting \eqref{eq:sech} is symmetric about
+its peak, whereas the rise is steeper than the fall in the simulated
+epidemic.  It is also worth emphasizing that the parameter values that
+yield the red curve in \cref{fig:stoch} are far from the true
 parameters that were used in the simulation (\cref{tab:stoch.nls}).
+\djde{We should have a ``true'' column in \cref{tab:stoch.nls} so the
+  comparison we're suggesting is very easy to make.}
 
-The excellent fit of the determinsitic trajectory that \code{fitode}
+The excellent fit of the deterministic trajectory that \code{fitode}
 finds (yellow) is achieved by estimating an initial prevalence that is
 only a third of the true initial prevalence, thereby mimicking the
 stochastic delay with the deterministic model; all other parameter
@@ -1570,6 +1576,25 @@ assignfun(ci.derived.stoch.fitode[,1], ".stoch.fitode")
 @
 
 \section{Discussion}
+
+We have presented a basic theoretical and practical introduction to
+standard methods for fitting dynamical models to time series, in the
+context of infectious disease epidemiology.  We explained how to use
+nonlinear least squares (\code{nls}) to fit a given function to a time
+series, and illustrated the approach using the Kermack and McKendrick
+(\KM, \cite{KermMcKe27}) approximation \eqref{eq:sech} to the standard
+SIR model \eqref{eq:SIR}.  We also explained how to fit solutions of
+ordinary differential equations (ODEs) to a time series---using our R
+package \code{fitode}---and obtain parameter estimates and confidence
+intervals, regardless of whether exact solutions of the ODEs are
+available.
+
+\code{fitode} is flexible enough to handle most compartmental
+epidemiological and ecological models, so we hope the package will be
+useful for many readers, not only as a pedagogical tool but also to
+fit models to novel data.  Potential applications abound.  We have
+ourselves used the predecessor of \code{fitode} (\code{fitsir}) to
+study music popularity \cite{Rosa+21}.
 
 \thickredline
 
@@ -2242,7 +2267,11 @@ draw_legend()
       \djde{I don't understand that.  What does the KM column
       mean exactly?}
       and using nonlinear least squares
-      (\code{nls}).  The true parameter values used for
+      (\code{nls}).
+      \djde{Rather than the following sentence, I think it would be better
+        to have a ``true'' column in the table and fill in all the
+        rows for the true parameter values.}
+      The true parameter values used for
       the simulation were  $(S_0,I_0,R_0)=(\Sexpr{iii})$,
       $\R_0=\Sexpr{R0}$, $1/\gamma=\Sexpr{1/mm$gamma}$ week.
       \djde{The Estimated parameter section should be
