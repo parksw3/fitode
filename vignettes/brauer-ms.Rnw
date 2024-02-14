@@ -244,10 +244,10 @@ Referring to their version of \cref{fig:Bombay}, \KM
 cent.\ of the cases reported terminate fatally, the ordinate may be
 taken as approximately representing [$\dbydt{R}$] as a function of
 $t$.''  Since (non-human) computers did not yet exist \cite{Camp09},
-\hypertarget{KMassumption}{}and an exact analytical form for this
-function could not be found, they proceeded to assume
-\cite[p.\,713]{KermMcKe27} that $\frac{\beta}{\gamma}R(t)\ll1$, which
-yields the approximate analytical form,
+and an exact analytical form for this function could not be found,
+they proceeded to assume \cite[p.\,713]{KermMcKe27} that
+$\frac{\beta}{\gamma}R(t)\ll1$, which yields the approximate
+analytical form,
 \begin{linenomath*}
 \begin{equation}\label{eq:sech}
 \ddt{R} \approx a \sech^2{(\omega\,t - \phi)}\,.
@@ -260,13 +260,25 @@ Noting that the \term{basic reproduction number} is
 \end{equation}
 \end{linenomath*}
 where $N$ is the total population size,
-and hence the \term{effective reproduction number} at time $t=0$
-is
+the assumption that yields \KM's approximation \eqref{eq:sech}
+can be written
 \begin{linenomath*}
-\begin{equation}\label{eq:Reffdef}
-\Reff = \frac{S_0\beta}{\gamma} \,,
+\begin{equation}\label{eq:KMassumption}
+\frac{R(t)}{N} \ll \frac{1}{\R_0} \,,
 \end{equation}
 \end{linenomath*}
+i.e., \cref{eq:sech} is a good approximation as long as
+the proportion of the population that has been infected and
+removed is much less than $1/\R_0$.
+
+Given \cref{eq:R0def}, the \term{effective reproduction number} at
+time $t=0$ is
+\begin{linenomath*}
+\begin{equation}\label{eq:Reffdef}
+\Reff = \frac{S_0\beta}{\gamma} \,.
+\end{equation}
+\end{linenomath*}
+In terms of $\Reff$, $\gamma$, $S_0$ and $I_0$, 
 the parameters in \cref{eq:sech} can be
 written\footnote{There is a typographical error in equation (31) of
   \KM \cite{KermMcKe27}: their factor $\sqrt{-q}$ should be $(-q)$ in
@@ -284,10 +296,10 @@ written\footnote{There is a typographical error in equation (31) of
 \end{align}
 \end{subequations}
 \end{linenomath*}
-\KM then presented the parameter estimates that we have listed in the
-\KM column of \cref{tab:Bombay}, and they plotted their
-``calculated'' curve, which we have reproduced in \KMcol in
-\cref{fig:Bombay}.
+The values of these parameters that \KM estimated for the Bombay
+plague epidemic are listed in the \KM column of \cref{tab:Bombay}.
+Using these values, \KM plotted their ``calculated'' curve, which we
+have reproduced in \KMcol in \cref{fig:Bombay}.
 
 <<functions to compute KM parameters, echo=FALSE>>=
 omega_fun <- function(Reff, gamma, S0, I0)
@@ -680,7 +692,7 @@ he said he was assuming a constant proportionality between
 rat prevalence and human death.}
 \djde{Can you point me to the Ellner paper?}
 
-\section{Uncertainty}
+\section{Uncertainty}\label{sec:Uncertainty}
 
 To this point, we have addressed only an optimization problem.  We
 solved it using the method of nonlinear least squares, which yields
@@ -1255,15 +1267,10 @@ If we convert the \code{fitode} estimates of the SIR parameters to the
 parameters of \KM's approximation, we obtain the blue \djde{orange?
   other colour?} curve in \cref{fig:phila}, which grossly
 underestimates the magnitude of the epidemic (the turnover is much too
-soon).  The \KM approximation is good initially, but becomes poorer
-and poorer as \hyperlink{KMassumption}{the underlying
-  approximation}---that $\R_0$ times the proportion removed is
-small---is less and less accurate.
-\djde{It might be best to display the \KM assumption so we can
-  refer to an equation here.  No journal will allow us to include a
-  hyperlink to the location of an inline expression.  It isn't a
-  completely trivial change because $\R_0$ isn't defined until
-  after the \KM assumption is stated.}
+soon).  The \KM approximation \eqref{eq:sech} is good initially, but
+becomes poorer and poorer over time as the underlying assumption
+\eqref{eq:KMassumption} on which it is based becomes less and less
+valid.
 
 <<philapop, echo=TRUE, include=FALSE>>=
 ## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
@@ -1468,8 +1475,8 @@ until the epidemic takes off in a roughly deterministic fashion).
   how to simulate mortality data.}
 
 As expected, with the correct parameter values, \KM's approximation
-\eqref{eq:sech} fails once the \hyperlink{KMassumption}{requirement}
-that $\R_0 R(t)/N\ll1$ is violated.  Nonetheless, we can still fit the
+\eqref{eq:sech} fails once the requirement \eqref{eq:KMassumption}
+that $R(t)/N\ll1/\R_0$ is violated.  Nonetheless, we can still fit the
 \KM approximation to the simulated epidemic and obtain visually
 reasonable agreement (\cref{fig:stoch}, bottom panel, red curve;
 \cref{tab:stoch.nls}); the fit cannot get better because the
@@ -2056,13 +2063,15 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
   (dots) were digitized from \cite[Table~IX, p.\,753]{jhyg1907}.
-  \emph{Top panel:} The blue and red curves show the \KM approximation
-  \eqref{eq:sech}, as fitted by \KM (blue) and by us using \code{nls}
-  (red, with pink confidence band).  The associated parameter
-  estimates are given in \cref{tab:Bombay}.  The dotted yellow curve
-  \djde{The legend should have dotted rather than solid yellow.} shows
-  the \code{fitode} fit, for which the associated parameter estimates
-  are given in \cref{tab:bombay.fitode}.  \emph{Bottom panel:} The
+  \emph{Top panel:} The \KMcol and red curves show the \KM
+  approximation \eqref{eq:sech}, as fitted by \KM (\KMcol) and by us
+  using \code{nls} (red, with pink confidence band).  The associated
+  parameter estimates are given in \cref{tab:Bombay}.  The dotted
+  yellow curve \djde{The legend should have dotted rather than solid
+    yellow.} shows the \code{fitode} fit, for which the associated
+  parameter estimates are given in \cref{tab:bombay.fitode}
+  (observation errors are assumed to be negative binomially
+  distributed; see \cref{sec:Uncertainty}).  \emph{Bottom panel:} The
   yellow curve is identical to the yellow dotted curve in the top
   panel\djde{No, in the top panel the yellow dotted curve is smooth,
     not interpolated from values at observation times.}, and the
@@ -2073,7 +2082,9 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
   instantaneous death rate.  The dotted red curve is identical to the
   solid red curve in the top panel.  We have separated the two panels
   because the confidence band overlap would make the plots difficult
-  to interpret.}
+  to interpret.  \djde{In the legend, ``KM'' might be clearer as
+    ``KM's (1927) fit'', and ``nls'' might be clearer as ``our nls
+    fit''.}  }
 \label{fig:Bombay}
 \end{figure}
 
