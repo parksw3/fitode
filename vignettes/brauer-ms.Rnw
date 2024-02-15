@@ -1593,11 +1593,11 @@ whether analytical solutions of the ODEs are available.
 \code{fitode} is flexible enough to handle most compartmental
 epidemiological and ecological models \cite{BrauCast01,Brau+19},
 including non-autonomous models, such as seasonally forced epidemic
-models \cite{Earn+00,HeEarn07,HeEarn16,PapsEarn19}.  We hope the
-package will be useful for many readers, not only as a pedagogical
-tool but also to fit models to novel data.  Potential applications
-abound (we have ourselves used \code{fitode}'s predecessor,
-\code{fitsir}, to study music popularity \cite{Rosa+21}).
+models \cite{LondYork73,Earn+00,HeEarn07,HeEarn16,PapsEarn19}.  We
+hope the package will be useful for many readers, not only as a
+pedagogical tool but also to fit models to novel data.  Potential
+applications abound (we have ourselves used \code{fitode}'s
+predecessor, \code{fitsir}, to study music popularity \cite{Rosa+21}).
 
 We focussed here on three illustrative examples of epidemic time
 series.  The first was the reported weekly mortality from plague in
@@ -1666,33 +1666,36 @@ parameter values for the simulation is that the assumption on which
 the approximation is based \eqref{eq:KMassumption} is strongly
 violated in the simulation (\cref{fig:stoch}).  Consequently, the
 parameters of the \KM approximation cannot be interpreted biologically
-or mechanistically.  It is worth noting, however, that a
+or mechanistically.  It is worth noting, more generally, that a purely
 phenomenological model with the same number of parameters can
 sometimes fit a stochastic simulation just as closely or even closer
 than the deterministic limit of the model that generated the data
-\cite{Rosa+21}; a good fit is not sufficient to conclude that a model
-is good.
+\cite{Rosa+21}; a good fit is not, on its own, sufficient to conclude
+that a model can help explain patterns in data.
 
 While not essential for conveying the basics that we have emphasized
 here, we would be remiss in not mentioning that \code{fitode} contains
 a number of useful features that we have not discussed.  In particular,
 there are options for:
-\djde{perhaps mention the help command that users should use to learn
-how to take advantage of these options}
+\djde{Perhaps mention the help commands that users should use to learn
+how to take advantage of each of these options?}
 \begin{description}
-\item[\term{importance sampling}]\code{fitode} provides an option to
-  compute confidence intervals using \needref. In this approach,
-  parameter sets are randomly drawn from a multivariate normal
+\item[\term{multiple data streams:}]\code{fitode} allows for
+  simultaneous fitting of multiple state variables to multiple time
+  series.
+\item[\term{importance sampling:}]\code{fitode} provides an option to
+  compute confidence intervals using the following approach\needref.
+  Parameter sets are randomly drawn from a multivariate normal
   distribution whose mean and variance-covariance matrix correspond to
   the maximum likelihood estimates and the estimated
   variance-covariance matrix, respectively; then, each parameter set
   is weighted accordingly based on the the likelihood of their
   epidemic trajectories and the sampling probability.  Generally, this
   method is expected to provide more robust confidence intervals than
-  the Delta method, but is computationally more costly.
-\item[multiple data streams]\code{fitode} allows for simultaneous
-  fitting of multiple state variables to multiple time series.
-\item[Bayesian inference via MCMC]Markov chain Monte Carlo.
+  the Delta method\needref, but is computationally more costly.
+\item[\term{Bayesian inference\needref via MCMC\needref:}]Markov chain
+  Monte Carlo. \djde{BB or SWP: Can you add something about why this
+    option is useful.}
 \end{description}
 Even with these extensions, there will be many other challenges to
 fitting ODE models with the \code{fitode} package, as with many other
@@ -1717,46 +1720,60 @@ system).  Parameters of models can also be subject to process error;
 for example, the transmission rate might, in practice, have a
 component that is dependent on random fluctuations in weather.  A
 number of studies have found that accounting for process error can be
-critical for estimating uncertainties in parameter estimates and the
-dynamics of a system.  Popular \code{R} packages that can fit models
-with process error include \code{pomp} \citep{king2015statistical} and
-\code{odin} \citep{odin2021}.
+critical for estimating uncertainties in parameter estimates \needref
+and confidence bands on the projected dynamics of a system\needref.
+Popular \code{R} packages that can fit models with process error
+include \code{pomp} \citep{king2015statistical} and \code{odin}
+\citep{odin2021}.
+
+\section{Closing remarks: from Fred Brauer to \code{fitode}}
+
+The idea of digging into to data seemed like punishment to Fred
+Brauer, but while he never---to our knowledge---did any data analysis
+himself, he did develop a sincere appreciation for the value of data
+in epidemiological research.  Fred's curiosity---about how dynamical
+models can be fit to data, and why it is hard---convinced us that it
+would be worth writing a paper (and accompanying software) that could
+draw more dynamicists working on epidemic models into the world of
+data.
+
+Initially, we developed \code{fitsir} (which fits the standard SIR
+model \eqref{eq:SIR} to a single time series) as a purely pedagogical
+tool, but we then found it tremendously useful for a research project
+\cite{Rosa+21}.  That experience motivated BB and SWP to develop
+\code{fitode}, which can be used to fit any ODE model to (multiple)
+time series, making it much more broadly useful for both pedagogy and
+research.
+
+We have provided two answers to Fred's question of ``how'' to fit
+models to data (in practice via \code{nls} or \code{fitode}) and
+through examples have hinted at some of the reasons ``why'' such
+fitting can be very difficult.  A true understanding of ``why it is
+hard'' is something that builds over time with experience, but the key
+points are that finding optima of a complex multi-dimensional function
+is hard enough on its own\needref, and estimating statistically
+meaningful uncertainty in those optima is extremely
+challenging\needref.
+
+Fred would never have used \code{fitode}, but would have delighted in
+seeing it demonstrated and in discussing the theoretical background on
+model fitting that we have presented in this paper.  We hope that
+others like him, as well as students and researchers who actually do
+want to dig into data, will benefit from this exposition.
 
 \thickredline
 
+\section{To Do}
+
+Remaining items on ToDo list:
 \begin{itemize}
-\item appropriateness of fitting an SIR model to the Bombay plague
-  data; Baca\"er's \cite{bacaermodel2012}, opinion, our issues with
-  his opinion, potential to fit rat-flea-human model with the data
-  that are available.
-\item other types of models that should also be easy to deal with with
-  fitode, e.g., SEIR or fancier compartmental ODEs
 \item what kinds of things would likely cause trouble for fitode?
 \item optimization challenges, where to go if you run into trouble
 \item statistical challenges, where to go for further insights / more
   advanced approaches
-\item fitting stochastic models, pomp
 \item fitting ABMs
-\item a bit of tribute to Fred
+\item switch to Bull Math Biol template
 \end{itemize}
-
-\thickredline
-
-Fred Brauer was curious not only to understand how those of us who
-spend time fitting dynamical models to data go about it, but why it is
-hard.
-
-... uncertainty is key to convey in applications... yet estimating the
-uncertainty in our parameter estimates and forecasts is extremely
-challenging...
-
-\section{To Do}
-
-\subsection*{Things to mention}
-
-application of \code{fitsir} to song downloads, and how we
-convinced ourselves that the SIR model was reasonable for that
-problem \cite{Rosa+21}.
 
 \paragraph*{notes from Ben.}
 
