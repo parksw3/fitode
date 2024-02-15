@@ -1447,11 +1447,10 @@ see \cite{EthiKurt86}).  Realizations of this discrete-state model can
 be generated exactly using the Gillespie algorithm \cite{Gill76}, or
 approximately (as we do here) using the ``$\tau$-leaping'' approach
 \cite{Gill01}, which is implemented in the \code{adaptivetau} R
-package \cite{adaptivetau}.  The demographic stochasticity (aka
-\term{process noise}) that these algorithms simulate is essential to
-capture real effects that occur when the number of infected
-individuals is small (especially the possibility that an epidemic can
-burn out \cite{Pars+24}).
+package \cite{adaptivetau}.  The demographic stochasticity that these
+algorithms simulate is essential to capture real effects that occur
+when the number of infected individuals is small (especially the
+possibility that an epidemic can burn out \cite{Pars+24}).
 
 In \cref{fig:stoch}, the dots show a single realization of the
 stochastic SIR model with initial state $(S_0,I_0,R_0)=(\Sexpr{iii})$,
@@ -1484,7 +1483,7 @@ $a\sech^2{(\omega\,t - \phi)}$ [\cref{eq:sech}] more closely matches
 the shape of the full simulated epidemic.  Using nonlinear least
 squares (\code{nls}) as in previous sections, we obtain visually
 reasonable agreement (\cref{fig:stoch}, bottom panel, red curve;
-\cref{tab:stoch.nls}). The \code{nls} fit cannot be improved further
+\cref{tab:stoch.nls}). This \code{nls} fit cannot be improved further
 because the function we are fitting \eqref{eq:sech} is symmetric about
 its peak, whereas the rise is steeper than the fall in the simulated
 epidemic.  It is also worth emphasizing that the parameter values that
@@ -1671,48 +1670,59 @@ or mechanistically.  It is worth noting, however, that a
 phenomenological model with the same number of parameters can
 sometimes fit a stochastic simulation just as closely or even closer
 than the deterministic limit of the model that generated the data
-\cite{Rosa+21}.
+\cite{Rosa+21}; a good fit is not sufficient to conclude that a model
+is good.
 
-\thickredline
-
-There are several features that are implemented in \code{fitode} but
-are not covered in this paper.
-First, \code{fitode} allows confidence intervals to be calculated
-using importance sampling.
-In this case, parameter sets are randomly drawn from a multivariate normal
-distribution whose mean and the variance covariance matrix corresponds to
-the maximum likelihood estimates and the estimated variance covariance matrix,
-respectively;
-then, each parameter set is weighted accordingly based on the the likelihood of their
-epidemic trajectories and the sampling probability.
-Generally, this method is expected to provide more robust confidence intervals
-than the Delta method but computationally more costly.
-\code{fitode} also allows for simultaneous fitting of multiple state variables
-to multiple time series and Bayesian inference via Markov chain Monte Carlo.
-
+While not essential for conveying the basics that we have emphasized
+here, we would be remiss in not mentioning that \code{fitode} contains
+a number of useful features that we have not discussed.  In particular,
+there are options for:
+\djde{perhaps mention the help command that users should use to learn
+how to take advantage of these options}
+\begin{description}
+\item[\term{importance sampling}]\code{fitode} provides an option to
+  compute confidence intervals using \needref. In this approach,
+  parameter sets are randomly drawn from a multivariate normal
+  distribution whose mean and variance-covariance matrix correspond to
+  the maximum likelihood estimates and the estimated
+  variance-covariance matrix, respectively; then, each parameter set
+  is weighted accordingly based on the the likelihood of their
+  epidemic trajectories and the sampling probability.  Generally, this
+  method is expected to provide more robust confidence intervals than
+  the Delta method, but is computationally more costly.
+\item[multiple data streams]\code{fitode} allows for simultaneous
+  fitting of multiple state variables to multiple time series.
+\item[Bayesian inference via MCMC]Markov chain Monte Carlo.
+\end{description}
 Even with these extensions, there will be many other challenges to
-fitting ODE models with the \code{fitode} package, as with many other software.
-For example, it is often difficult to ensure that the model has converged
-properly or reached its true maximum.
-Performing optimization from multiple starting conditions and drawing
-likelihood surfaces can help diagnose these issues.
-Using other optimization methods or reparameterizing the model can
-sometimes help resolve these issues as well.
-We also encourage users to open any issues via the GitHub repository:
+fitting ODE models with the \code{fitode} package, as with many other
+software packages\djde{(e.g., ...????...)}.  For example, it is often
+difficult to ensure that the model has converged properly or reached
+its true maximum.  Performing optimization from multiple starting
+conditions and drawing likelihood surfaces can help diagnose these
+problems.  Using different optimization methods or reparameterizing
+the model can sometimes help resolve these issues as well.  We also
+encourage users of \code{fitode} who encounter these or other
+fitting challenges to open any issues via the GitHub repository:
 \url{https://github.com/parksw3/fitode}.
 
-There are many other issues that are not covered
-by the \code{fitode} package that are important and useful for making
-statistical inference from epidemic time series.
-In particular, the \code{fitode} package only allows for
-fitting deterministic ODE models, meaning that
-it does not account for \term{process error}, which
-refers to the variability in the dynamics of the system;
-several studies have shown that accounting for
-the process error is critical to capturing the uncertainties
-in parameter estimates and describing the dynamics of a system.
-Popular \code{R} packages that allow for stochastic model fitting include \code{pomp} \citep{king2015statistical} and
+As its name suggests, the scope of \code{fitode} is limited to fitting
+ODEs to time series.  Consequently, by design, \code{fitode} ignores
+\term{process error}, i.e., variability that is intrinsic to the
+structure of the system (as opposed to \term{observation error}, which
+arises from imperfect measurements or reporting).  A key component of
+process error is the demographic stochasticity that is inherent to the
+stochastic SIR model discussed above (and to any real host-pathogen
+system).  Parameters of models can also be subject to process error;
+for example, the transmission rate might, in practice, have a
+component that is dependent on random fluctuations in weather.  A
+number of studies have found that accounting for process error can be
+critical for estimating uncertainties in parameter estimates and the
+dynamics of a system.  Popular \code{R} packages that can fit models
+with process error include \code{pomp} \citep{king2015statistical} and
 \code{odin} \citep{odin2021}.
+
+\thickredline
 
 \begin{itemize}
 \item appropriateness of fitting an SIR model to the Bombay plague
@@ -1730,6 +1740,15 @@ Popular \code{R} packages that allow for stochastic model fitting include \code{
 \item a bit of tribute to Fred
 \end{itemize}
 
+\thickredline
+
+Fred Brauer was curious not only to understand how those of us who
+spend time fitting dynamical models to data go about it, but why it is
+hard.
+
+... uncertainty is key to convey in applications... yet estimating the
+uncertainty in our parameter estimates and forecasts is extremely
+challenging...
 
 \section{To Do}
 
