@@ -291,7 +291,7 @@ written\footnote{There is a typographical error in equation (31) of
            \frac{2I_0}{S_0}\Reff^2}\,, \label{eq:omega} \\
   \phi &= \textrm{arctanh}\left(\frac{\Reff - 1}{2\,\omega/\gamma}
          \right)\,, \label{eq:phi} \\
-  \text{and}\quad
+  \text{and}\qquad
   a &= \frac{2\,\omega^2 S_0}{\gamma\,\Reff^2} \label{eq:a} \,.
 \end{align}
 \end{subequations}
@@ -928,7 +928,7 @@ profile likelihoods generally give more accurate estimates of
 confidence intervals, calculating the profile likelihood can be
 challenging, if not practically impossible, for derived parameters or
 epidemic trajectories \cite[][\S 7.5.1.2]{Bolk08}.  Consequently, we
-rely on the Delta Method hereafter.
+rely on the Delta Method here.
 
 \section{Fitting the ODE}\label{sec:fitode}
 
@@ -957,6 +957,10 @@ chain rule; by solving them in parallel with the main set of ODEs, we
 get a computationally efficient and numerically stable way to
 calculate the overall gradients of the log-likelihood with respect to
 the parameters.
+\djde{You define the derivatives but not the \underline{equations}.
+  It isn't clear to me from above what he sensitivity equations are
+  and how solving them helps, and certainly not how it yields
+  efficiency and numerical stability.}
 
 The \code{fitode} package\footnote{\code{fitode} is available on
   \href{https://cran.r-project.org/}{CRAN} and consequently can be
@@ -1069,7 +1073,10 @@ SIR_fit <- fitode(
   unidentifiability\footnote{In short, unidentifiability of $\gamma$
     means that we can obtain nearly identical fits across a wide range
     of $\gamma$. We discuss this issue in detail in Supplementary
-    Materials.\djde{to be written...}}.
+    Materials.\djde{As I say elsewhere, I don't think we need supp.
+      I think we should be able to explain whatever is needed in the
+      caption to \cref{fig:proflikgamma}, or in an appendix if
+      necessary.}}.
 \item[\code{tcol}]specifies the time column of the data frame.
 \end{description}
 The resulting fits are plotted in \cref{fig:Bombay} and summarized in
@@ -1591,28 +1598,44 @@ obtain parameter estimates and confidence intervals, regardless of
 whether analytical solutions of the ODEs are available.
 
 \code{fitode} is flexible enough to handle most compartmental
-epidemiological and ecological models \cite{BrauCast01,Brau+19},
-including non-autonomous models, such as seasonally forced epidemic
-models \cite{LondYork73,Earn+00,HeEarn07,HeEarn16,PapsEarn19}.  We
-hope the package will be useful for many readers, not only as a
-pedagogical tool but also to fit models to novel data.  Potential
-applications abound (we have ourselves used \code{fitode}'s
-predecessor, \code{fitsir}, to study music popularity \cite{Rosa+21}).
+epidemiological and ecological models
+\cite{BrauCast01,BrauKrib16,Brau+19}, including non-autonomous models,
+such as seasonally forced epidemic models
+\cite{LondYork73,Earn+00,HeEarn07,HeEarn16,PapsEarn19}.  We hope the
+package will be useful for many readers, not only as a pedagogical
+tool but also to fit models to novel data.  Potential applications
+abound (we have ourselves used \code{fitode}'s predecessor,
+\code{fitsir}, to study music popularity \cite{Rosa+21}).
 
 We focussed here on three illustrative examples of epidemic time
 series.  The first was the reported weekly mortality from plague in
-Bombay (\cref{fig:Bombay}), which was examined by \KM in their
+Bombay in 1906 (\cref{fig:Bombay}), which was examined by \KM in their
 original paper \cite{KermMcKe27}.  Although historically important, it
 is certainly debatable whether any inferences we might draw from
-fitting the simple SIR model \eqref{eq:SIR} to these plague data can be
-trusted.  
-As we quoted at the end of \cref{sec:fitode}, to justify the
-application of their SIR model to these data, \KM highlighted five
-implicit assumptions, any or all of which might be strongly violated.
-Baca\"er \cite{bacaermodel2012} argued that seasonal changes in
-transmission rate must also be considered to make sense of the Bombay
-plague outbreak.  Of course, other mechanisms might play a role as well
-(e.g., heterogeneity in contact patterns).
+fitting the simple SIR model \eqref{eq:SIR} to these plague data can
+be trusted.  As we quoted at the end of \cref{sec:fitode}, to justify
+the application of their SIR model to these data, \KM highlighted five
+implicit assumptions, any or all of which might be violated.  In
+addition, Baca\"er investigated the longer term pattern of plague
+mortality in Bombay and found that there were seasonal epidemics every
+year from 1897 to 1911 \cite[Fig.\,2]{bacaermodel2012}, suggesting
+that the 1906 epidemic was just one in a long sequence of epidemics
+that were ``driven by seasonality'' \cite[p.\,403]{bacaermodel2012}.
+Of course, other mechanisms (e.g., heterogeneity in contact patterns)
+might play a role as well.
+
+\djde{The strict seasonality in Baca\"er's Figure 2 is very
+  compelling.  This could happen from demographic stochasticity
+  sustaining transients, but only if the damping period happens to be
+  exactly one year.  I don't know if we can constrain the parameters
+  sufficiently to rule that out (and we would need vital dynamics
+  and/or decay of immunity to even try), but an exactly annual period
+  is much more likely to arise from seasonal forcing.  Digging into
+  this seems like a rabbit hole that is well outside the intended
+  scope of this paper; it would certainly have to involve fitting all
+  15 annual epidemics that Baca\"er shows and figuring out what other
+  useful information is in all those reports that he cites.  But it
+  would be fun to investigate, perhaps in another paper.}
 
 To obtain a deeper understanding of the Bombay plague epidemic, we
 could formulate a variety of models, fit them to the data using
@@ -1621,21 +1644,25 @@ could formulate a variety of models, fit them to the data using
 of the various mechanisms included in the sequence of models (see,
 e.g., He \emph{et al.} \cite{He+13a} for an example of using this
 approach to understand the occurrence of three distinct waves in the
-1918 influenza pandemic).  We have not attempted such a study here,
-since our goal was simply to explain and illustrate the fitting
-methodology.  However, it is worth highlighting that our analysis
-using the SIR model did reveal a computational challenge that---in the
-absense of additional information about the Bombay plague
-outbreak---would likely limit how much can be learned from a model
-selection exercise: the mean generation interval ($\Tg$) appears to be
-\term{unidentifiable}, i.e., impossible to estimate reliably from the
-reported weekly plague deaths (see \cref{fig:proflikgamma}).
+1918 influenza pandemic\djde{feel free to suggest other examples!}).
+We have not attempted such a study here, since our goal was simply to
+explain and illustrate the fitting methodology.  However, it is worth
+highlighting that our analysis using the SIR model did reveal a
+computational challenge that---in the absense of additional
+information about the Bombay plague outbreak---would likely limit how
+much can be learned from a model selection exercise: the mean
+generation interval ($\Tg$) appears to be \term{unidentifiable}, i.e.,
+impossible to estimate reliably from the reported weekly plague deaths
+(see \cref{fig:proflikgamma}).
 
 \djde{We should not have supp.  There is just the one figure, which we
-  can just stick here (I've commented out the creation of supp).  We
-  can probably say as much as we need to in the figure caption, but we
-  could, alternatively, have an \emph{appendix}, rather than
-  supplementary material.}
+  can just stick here (I've commented out the creation of supp so it
+  is now \cref{fig:proflikgamma} rather than S1).  We can probably say
+  as much as we need to in the figure caption, but we could,
+  alternatively, have an \emph{appendix}, rather than supplementary
+  material.}
+\djde{I wonder if fitting to the full 15 year time series that
+  Baca\"er shows would make $\Tg$ identifiable.}
 
 Our second example was the main wave of the 1918 influenza pandemic in
 the city of Philadelphia, for which daily mortality from pneumonia and
@@ -1746,14 +1773,13 @@ time series, making it much more broadly useful for both pedagogy and
 research.
 
 We have provided two answers to Fred's question of ``how'' to fit
-models to data (in practice via \code{nls} or \code{fitode}) and
-through examples have hinted at some of the reasons ``why'' such
-fitting can be very difficult.  A true understanding of ``why it is
-hard'' is something that builds over time with experience, but the key
-points are that finding optima of a complex multi-dimensional function
-is hard enough on its own\needref, and estimating statistically
-meaningful uncertainty in those optima is extremely
-challenging\needref.
+models to data (via \code{nls} or \code{fitode}), and through examples
+we have hinted at some of the reasons ``why'' such fitting can be very
+difficult.  A true understanding of ``why it is hard'' is something
+that builds over time with experience, but the key points are that
+finding optima of a complex multi-dimensional function is hard enough
+on its own\needref, and estimating statistically meaningful
+uncertainty in those optima is extremely challenging\needref.
 
 Fred would never have used \code{fitode}, but would have delighted in
 seeing it demonstrated and in discussing the theoretical background on
@@ -1775,21 +1801,9 @@ Remaining items on ToDo list:
 \item switch to Bull Math Biol template
 \end{itemize}
 
-\paragraph*{notes from Ben.}
-
-pedagogical refs: I would use Raue et al \cite{raue2013lessons} for
+\bmb{pedagogical refs: I would use Raue et al \cite{raue2013lessons} for
 sensitivity equations and see how much of the rest is defined in
-Bjornstad's book \cite{bjornstadEpidemics2018} (or fall back on mine).
-
-One thing to keep in mind (maybe mention in your article) is that the
-Bombay plague outbreak is arguably \emph{not} a good example of an SIR
-model (despite the nice historical connection with K\&M
-\cite{KermMcKe27}):
-\begin{quote}
-``So the 1906 epidemic is clearly not a good example of epidemic stopping because the number of susceptible humans has decreased under a
-threshold, as suggested by \KM, but an example of
-epidemic driven by seasonality.'' \cite{bacaermodel2012}
-\end{quote}
+Bjornstad's book \cite{bjornstadEpidemics2018} (or fall back on mine).}
 
 \subsection{DJDE's weird idea of introducing na\"ive confidence bands
   via residual errors only}
@@ -1888,32 +1902,10 @@ identically distributed (i.e. mean-zero, constant-$\sigma$)
 Normal observation errors in
 the time series.
 
+\subsection*{Priors}
+
 Having introduced the maximum likelihood framework, we can improve
 our estimates by making a more realistic assumption about
-the error distribution and/or taking advantage of any prior knowledge
-we have that might affect our notion of the most likely parameter
-values (i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
-specifying it as a probability distribution on the model's
-parameters).
-\bmb{I don't mind talking about priors if we're actually going to cover them,
-  but I feel like it might make more sense to introduce them later, starting as
-  a way to regularize/make optimization more robust.}
-We will then end up with a different likelihood function
-to maximize, and obtain a different $\thetavechat$, but the basic idea
-is the same.
-
-So what is a better assumption about the observation error distribution,
-and how do we get both better confidence bands on the the model fit
-and CIs on the estimated parameter values $\thetavechat$?
-
-(in our previous example, the assumption of normality is allowing the
-lower limit of the confidence band on the fitted model to drop below
-zero when the number of deaths is small)
-
-\section*{Priors}
-
-Having introduced the idea of maximum likelihood, we can do better
-than the na\"ive approach by making a more realistic assumption about
 the error distribution and/or taking advantage of any prior knowledge
 we have that might affect our notion of the most likely parameter
 values (i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
@@ -1945,25 +1937,13 @@ We chose to fix $I_0$ rather than the (known) population size
   Anyway, the point of the discussion here will be to alert readers to
   be cautious for all sorts of reasons, and a good fit of a model to
   data does not necessarily mean that it is fair to make inferences
-  from estimated parameter values.}  \djde{Note KM's caution about
-  interpreting the param values.}
+  from estimated parameter values.}
 \bmb{Note that Baca\"er \cite[Table~2, p.\.412]{bacaermodel2012}
 quotes CFP $\sigma = 0.9$ from the Indian report.  We can use
 this to argue that an independent estimate of CFP seems to rule
 out really small CFP.  In principle, we could do fit seasonal
 forcing and CFP and argue that with a reasonable prior on CFP
 we need seasonal forcing (or whatever).}
-
-Alternatives to the \hyperlink{DeltaMethod}{Delta Method}.
-\djde{Available in \code{fitode} but we not what we doing here:
-  Another possibility would be to use the estimated means and variances
-  for $\thetavec$ to define a multivariate Normal, sample that many
-  times and run the model, and draw the bands that contain 95\% of the
-  simulations.}
-  \swp{This is not what we actually do in fitode. We do something called
-  importance sampling where we draw from multivariate normal and then
-  do some weighting... probably a bit too much to explain in this paper
-  because we have to go all the way to metropolis hastings..}
 
 \bibliographystyle{tfs}
 \bibliography{brauer-ms,fitode}
