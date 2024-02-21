@@ -1282,6 +1282,7 @@ similar to the (red) fit of \KM's approximation, but provides much
 more realistic parameter estimates (\cref{tab:phila.fitode}); in
 particular, $\R_0\approx6.4$ and $\Tg\approx30$ days.  \djde{Ummm,
   that $\Tg$ is still way too big.}
+  \swp{I accidentally multiplied by 7 in the table (which happened from copying the code for Bombay).}
 
 If we convert the \code{fitode} estimates of the SIR parameters to the
 parameters of \KM's approximation, we obtain the blue \djde{orange?
@@ -1524,6 +1525,7 @@ my.red <- "#E41A1C"     # colour-blind friendly red
 my.blue <- "#377EB8"    # colour-blind friendly blue
 my.green <- "#4DAF4A" # colour-blind friendly green
 my.yellow <- "#FFD92F" # colour-blind friendly yellow
+my.orange <- "#D55E00" # colour-blind friendly orange
 @
 
 <<sirstochdata, include=FALSE>>==
@@ -2034,6 +2036,7 @@ ci_fmt("a", cc)
 }
 \djde{We should give $\beta$ in units of 1/years instead of 1/weeks.
    Then $\beta\simeq0.00425/$yr, which doesn't require scientific notation.}
+\swp{ci_fmt keeps giving me scientific notation for CIs. Not sure if we want to change that manually or keep it as is.}
 }\label{tab:Bombay}
     \medskip
     %% making use of ragged2e and array packages:
@@ -2065,8 +2068,8 @@ ci_fmt("a", cc)
       \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & \Sexpr{ci_fmt("gamma", cc.delta)} \\
     initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
       \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta, max_ord = 6)} \\
-    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{beta.KM} & \Sexpr{beta.nls} & \Sexpr{ci_fmt("beta", cc.delta)} \\
+    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{signif(beta.KM*52,dig)} & \Sexpr{signif(beta.nls*52,dig)} & \Sexpr{ci_fmt("beta", cc.delta*52)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
       \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta)} \\
     basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
@@ -2085,10 +2088,7 @@ ci_fmt("a", cc)
       model \eqref{eq:SIR} to the Bombay plague data (see
       \cref{fig:Bombay}).  The $\R_0$ estimates assume the
       population of Bombay was $N=1$ million
-      \cite[p.\,408]{bacaermodel2012}.\djde{Why are the units of
-        $\R_0$ ``1.7'' ???  I guess that is the ols value of $\Tg$
-        in the previously line and I guess that
-        ``--'' and ``1.7'' got swapped ???}
+      \cite[p.\,408]{bacaermodel2012}.
       \djde{Again, units of $\beta$ should be 1/year.}
     }\label{tab:bombay.fitode}
     \medskip
@@ -2116,8 +2116,8 @@ ci_fmt("a", cc)
       effective reproduction number & $\Reff$ & -- &
       \Sexpr{Reff.bombay.fitode.nb} &  \Sexpr{ci_fmt("Reff", ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(beta.bombay.fitode.ols*as.integer(S0.bombay.fitode.ols)/gamma.nls,dig)} \\
       mean generation interval & $\Tg$ & days &
-      \Sexpr{signif(7*Tg.bombay.fitode.nb,dig)} & \Sexpr{ci_fmt("Tg", 7*ci.derived.bombay.fitode.nb[,-1])} & --  \\
-    basic reproduction number & $\R_0$ & \Sexpr{signif(7*Tg.bombay.fitode.nb,dig)} &
+      \Sexpr{signif(7*Tg.bombay.fitode.nb,dig)} & \Sexpr{ci_fmt("Tg", 7*ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(7/gamma.nls,dig)}  \\
+    basic reproduction number & $\R_0$ & -- &
       \Sexpr{signif(R0.bombay.fitode.nb,dig)}
       &  \Sexpr{ci_fmt("R0", ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(beta.bombay.fitode.ols*1e6/gamma.nls, dig)}
   \end{tabular}
@@ -2140,7 +2140,12 @@ curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=10
       lwd=lwd, xpd=NA, col=col.nls)
 lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd*0.60, lty="dotted")
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
-draw_legend()
+legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
+       lty=c(NA,"solid","solid","dotted"),
+       col=c("black",col.KM,col.nls,col.fitode.nb),
+       pch=c(21,NA,NA,NA),
+       pt.bg=c("white",NA,NA,NA),
+       legend=c("observed data","KM's (1927) fit","our nls fit","fitode (nbinom)"))
 
 setup_plot(ylim=c(0, 1000), xlim=c(0,tmax), #DE: ymin was 5, not sure why
          xlab="weeks", ylab="plague deaths"
@@ -2166,14 +2171,13 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
   approximation \eqref{eq:sech}, as fitted by \KM (\KMcol) and by us
   using \code{nls} (red, with pink confidence band).  The associated
   parameter estimates are given in \cref{tab:Bombay}.  The dotted
-  yellow curve \djde{The legend should have dotted rather than solid
-    yellow.} shows the \code{fitode} fit, for which the associated
+  yellow curve shows the \code{fitode} fit, for which the associated
   parameter estimates are given in \cref{tab:bombay.fitode}
   (observation errors are assumed to be negative binomially
   distributed; see \cref{sec:Uncertainty}).  \emph{Bottom panel:} The
   yellow curve is identical to the yellow dotted curve in the top
   panel\djde{No, in the top panel the yellow dotted curve is smooth,
-    not interpolated from values at observation times.}, and the
+    not interpolated from values at observation times.} \swp{I'm confused because they are identical? They're both using the same code too. See L2143 and L2157}, and the
   yellow band shows the \code{fitode} confidence band; this confidence
   band is shown as a linear interpolation between successive
   observation times because the model fits to incidence at discrete
@@ -2181,9 +2185,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
   instantaneous death rate.  The dotted red curve is identical to the
   solid red curve in the top panel.  We have separated the two panels
   because the confidence band overlap would make the plots difficult
-  to interpret.  \djde{In the legend, ``KM'' might be clearer as
-    ``KM's (1927) fit'', and ``nls'' might be clearer as ``our nls
-    fit''.}  }
+  to interpret.}
 \label{fig:Bombay}
 \end{figure}
 
@@ -2257,8 +2259,6 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
       pneumonia and influenza mortality during the main
       wave of the 1918 influenza pandemic in the city
       of Philadelphia.
-      \djde{$\Tg$ should be given in units of weeks or days,
-      not years.}
     }\label{tab:phila.fitode}
     \medskip
     %% making use of ragged2e and array packages:
@@ -2281,8 +2281,8 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
       \bfseries Derived\break parameter \\\hline
       effective reproduction number & $\Reff$ & -- &
       \Sexpr{Reff.phila.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.phila.fitode[,-1])} \\
-      mean generation interval & $\Tg$ & years &
-      \Sexpr{signif(7*Tg.phila.fitode,dig)} & \Sexpr{ci_fmt("Tg", 7*ci.derived.phila.fitode[,-1])} \\
+      mean generation interval & $\Tg$ & days &
+      \Sexpr{signif(Tg.phila.fitode*365,dig)} & \Sexpr{ci_fmt("Tg", ci.derived.phila.fitode[,-1]*365)} \\
     basic reproduction number & $\R_0$ & -- &
       \Sexpr{signif(R0.phila.fitode,dig)}
       &  \Sexpr{ci_fmt("R0", ci.derived.phila.fitode[,-1])}
@@ -2299,14 +2299,19 @@ draw_confband(ppp)
 tvals <- with(phila1918b, seq(min(time),max(time), length=1000))
 t0 <- min(tvals)
 curve(KM_approx(x-t0, a=a.phila, omega=omega.phila, phi=phi.phila)/365, from=t0, to=max(tvals), n=1000, add=TRUE,
-      xpd=NA, col=my.blue, lwd=lwd)
+      xpd=NA, col=my.orange, lwd=lwd)
 lines(tvals,
       with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
       xpd=NA, lwd=lwd, col=col.nls)
 lines(estimate ~ times, data=ppp, col=col.fitode.nb, lwd=lwd*0.60, lty="dotted")
 points(mort ~ time,
        data = phila1918b, xpd=NA, pch=21, bg="white", lwd=2)
-draw_legend()
+legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
+       lty=c(NA,"solid","solid","solid"),
+       col=c("black",col.nls,col.fitode.nb,my.orange),
+       pch=c(21,NA,NA,NA),
+       pt.bg=c("white",NA,NA,NA),
+       legend=c("observed data","nls","fitode (nbinom)","KM approximation"))
 @
 \caption{The main wave of the 1918 influenza epidemic in the city of
   Philadelphia, 1 September 1918 to 31 December 1918
