@@ -90,7 +90,7 @@
 %% BMB: can decide whether this should be \mathrm{Norm} or \cal{N} or ...
 \newcommand{\normdist}{\ensuremath\mathrm{Normal}}
 %% tables
-\usepackage{multirow}   % for tables
+™\usepackage{multirow}   % for tables
 %\usepackage{subfig}
 \usepackage{tabularx}   % pretty tables
 % \usepackage{tabularray} % allows rowsep via tblr environment
@@ -278,7 +278,7 @@ time $t=0$ is
 \Reff = \frac{S_0\beta}{\gamma} \,.
 \end{equation}
 \end{linenomath*}
-In terms of $\Reff$, $\gamma$, $S_0$ and $I_0$, 
+In terms of $\Reff$, $\gamma$, $S_0$ and $I_0$,
 the parameters in \cref{eq:sech} can be
 written\footnote{There is a typographical error in equation (31) of
   \KM \cite{KermMcKe27}: their factor $\sqrt{-q}$ should be $(-q)$ in
@@ -691,6 +691,7 @@ taken into account.
 he said he was assuming a constant proportionality between
 rat prevalence and human death.}
 \djde{Can you point me to the Ellner paper?}
+\swp{I couldn't find the paper... I'll leave this to Ben.}
 
 \section{Uncertainty}\label{sec:Uncertainty}
 
@@ -961,6 +962,17 @@ the parameters.
   It isn't clear to me from above what he sensitivity equations are
   and how solving them helps, and certainly not how it yields
   efficiency and numerical stability.}
+\swp{Not sure how much more detail is needed. But sensitivity equations correspond to the following (is this what you meant by equations?):
+\begin{equation}
+\frac{\rm d}{{\rm d}t}\left(\frac{\partial
+  x(t,\theta_i)}{\partial\theta_i}\right) = \left[\frac{\partial}{\partial x} \left(\frac{{\rm d} x(t,\theta_i)}{{\rm d} t} \right)\right] \frac{\partial
+  x(t,\theta_i)}{\partial\theta_i} + \frac{\partial}{\partial \theta_i} \left(\frac{{\rm d} x(t,\theta_i)}{{\rm d} t} \right)
+\end{equation}.
+There are two reasons why solving sensitivity equation helps. First, it allows us to use gradient-based optimization algorithms.
+Second, it provides us the gradient of the epidemic trajectory with respect to model parameters, which can be then used to calculate CIs using the Delta method.
+It would be possible to do all of this using numerical differentiation (i.e., by taking the difference between $x(t,\theta_i)$ and $x(t,\theta_i+\epsilon)$) but this would be less stable.
+Comparison between sensitivity equation vs numerical differentiation is shown in \cite{raue2013lessons}.
+}
 
 The \code{fitode} package\footnote{\code{fitode} is available on
   \href{https://cran.r-project.org/}{CRAN} and consequently can be
@@ -1076,7 +1088,7 @@ SIR_fit <- fitode(
     Materials.\djde{As I say elsewhere, I don't think we need supp.
       I think we should be able to explain whatever is needed in the
       caption to \cref{fig:proflikgamma}, or in an appendix if
-      necessary.}}.
+      necessary.} \swp{I agree that figure caption is good enough.}}.
 \item[\code{tcol}]specifies the time column of the data frame.
 \end{description}
 The resulting fits are plotted in \cref{fig:Bombay} and summarized in
@@ -1096,6 +1108,7 @@ calculating mortality at discrete (weekly) time intervals using
 \djde{I've added text below to connect this section to the flu
   section, and hopefully reduce concerns about the plague data.  Let
   me know if you think more needs to be said here.}
+\swp{This seems good enough to me.}
 
 <<sirmortfitcoef, include=FALSE>>==
 coef.bombay.fitode.nb <- coef(SIR_fit)
@@ -1225,12 +1238,12 @@ recognized were not ``strictly'' satisfied:
   and consequently the numerical equation can only be a very rough
   approximation. A close fit is not to be expected, and deductions as
   to the actual values of the various constants should not be
-  drawn.'' 
-  
+  drawn.''
+
   %%It may be said, however, that the calculated curve, which implies
   %%that the rates did not vary during the period of the epidemic,
   %%conforms roughly to the observed figures.
-  
+
   \rightline{--- \KM \cite[p.\,715]{KermMcKe27}}
 \end{quote}
 
@@ -2323,8 +2336,8 @@ draw_legend()
   \begin{center}
     \caption{Parameters of \KM's \cite{KermMcKe27} approximation
       \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, as estimated by
-      us using original parameters that were used to simulate 
-      the stochastic SIR model 
+      us using original parameters that were used to simulate
+      the stochastic SIR model
       \djde{I don't understand that.  What does the KM column
       mean exactly?}
       and using nonlinear least squares
