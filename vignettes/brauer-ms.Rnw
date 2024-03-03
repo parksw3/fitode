@@ -2034,9 +2034,6 @@ ci_fmt("a", cc)
      estimated from those that are derived from the estimated
      parameters.
 }
-\djde{We should give $\beta$ in units of 1/years instead of 1/weeks.
-   Then $\beta\simeq0.00425/$yr, which doesn't require scientific notation.}
-\swp{ci_fmt keeps giving me scientific notation for CIs. Not sure if we want to change that manually or keep it as is.}
 }\label{tab:Bombay}
     \medskip
     %% making use of ragged2e and array packages:
@@ -2069,7 +2066,7 @@ ci_fmt("a", cc)
     initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
       \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta, max_ord = 6)} \\
     transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{signif(beta.KM*52,dig)} & \Sexpr{signif(beta.nls*52,dig)} & \Sexpr{ci_fmt("beta", cc.delta*52)} \\
+      \Sexpr{signif(beta.KM*52,dig)} & \Sexpr{signif(beta.nls*52,dig)} & \Sexpr{ci_fmt("beta", cc.delta*52, sn=FALSE, digits=dig)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
       \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta)} \\
     basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
@@ -2089,7 +2086,6 @@ ci_fmt("a", cc)
       \cref{fig:Bombay}).  The $\R_0$ estimates assume the
       population of Bombay was $N=1$ million
       \cite[p.\,408]{bacaermodel2012}.
-      \djde{Again, units of $\beta$ should be 1/year.}
     }\label{tab:bombay.fitode}
     \medskip
     %% making use of ragged2e and array packages:
@@ -2103,8 +2099,8 @@ ci_fmt("a", cc)
     %%
     \noalign{\vspace{10pt}}
     \bfseries Estimated\break parameter \\\hline
-    transmission rate & $\beta$ & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{beta.bombay.fitode.nb} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.nb)}  & \Sexpr{beta.bombay.fitode.ols} \\
+    transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{beta.bombay.fitode.nb*52} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.nb*52, sn=FALSE, digits=dig)}  & \Sexpr{beta.bombay.fitode.ols*52} \\
     initial\break susceptibles & $S_0$& -- &
       \Sexpr{as.integer(S0.bombay.fitode.nb)} & \Sexpr{ci_fmt("S0", ci.bombay.fitode.nb, max_ord = 6)} & \Sexpr{as.integer(S0.bombay.fitode.ols)}\\
       initial prevalence & $I_0$ & -- &
@@ -2204,12 +2200,12 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
         initial \code{S0} guess to be $0.9*\code{philaS0}$.  The
         fitted \code{S0} is so far from this that the assumed
         population size and CFP don't seem to be constraining
-        anything.  Should we make more of this explicit?}  \djde{Why
+        anything.  Should we make more of this explicit?}
+        \swp{Ah yes we should make this more explicit. Shouldn't we also fill out \code{philaS0} for R0 estimates instead o f \code{philapop1918}? As far as I can tell, we're using \code{philaS0} to get R0 estimates? For example, see L1359 and L1399.}
+        \djde{Why
         did we \underline{assume} $I_0=\Sexpr{I0.phila.fitode}$ ??}
+        \swp{It's actually what we estimate from fitode.  And we need to assume something about I0 to get other parameters.}
       See \cref{sec:phila,fig:phila}.
-      \djde{Units of $\tpeak$ should be weeks or days, not years.}
-      \djde{The CI for $\R_0$ should not be in scientific notation.
-      4 digit integers are far better.}
     }\label{tab:philanls}
     \medskip
     %% making use of ragged2e and array packages:
@@ -2231,8 +2227,8 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
       \Sexpr{signif(phi.phila.nls,dig)} & \Sexpr{ci_fmt("phi", ci.phila.nls)} \\
     \noalign{\vspace{10pt}}
     \bfseries Derived\break parameter \\\hline
-    peak time & $\tpeak$ & \eqref{eq:tpeak} & years &
-      \Sexpr{tpeak.phila.nls} & \Sexpr{ci_fmt("tpeak", cc.phila.delta)} \\
+    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
+      \Sexpr{tpeak.phila.nls*52} & \Sexpr{ci_fmt("tpeak", cc.phila.delta*52)} \\
     effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
       \Sexpr{Reff.phila.nls} & \Sexpr{ci_fmt("Reff", cc.phila.delta)} \\
@@ -2245,7 +2241,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & years &
       \Sexpr{signif(Tg.phila.nls,dig)} & \Sexpr{ci_fmt("Tg", cc.phila.delta)} \\
     basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
-       \Sexpr{signif(R0.phila.nls,dig)} & \Sexpr{ci_fmt("R0", cc.phila.delta)}
+       \Sexpr{signif(R0.phila.nls,dig)} & \Sexpr{ci_fmt("R0", cc.phila.delta, sn=FALSE, digits=dig)}
   \end{tabular}
   \end{center}
 \end{table}
