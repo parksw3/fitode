@@ -1280,13 +1280,12 @@ Matching trajectories of the exact SIR model using \code{fitode} gives
 a fit---the yellow curve in \cref{fig:phila}---that is visually
 similar to the (red) fit of \KM's approximation, but provides much
 more realistic parameter estimates (\cref{tab:phila.fitode}); in
-particular, $\R_0\approx6.4$ and $\Tg\approx30$ days.  \djde{Ummm,
+particular, $\R_0\approx6.4$ and $\Tg\approx4.27$ days.  \djde{Ummm,
   that $\Tg$ is still way too big.}
   \swp{I accidentally multiplied by 7 in the table (which happened from copying the code for Bombay).}
 
 If we convert the \code{fitode} estimates of the SIR parameters to the
-parameters of \KM's approximation, we obtain the blue \djde{orange?
-  other colour?} curve in \cref{fig:phila}, which grossly
+parameters of \KM's approximation, we obtain the orange curve in \cref{fig:phila}, which grossly
 underestimates the magnitude of the epidemic (the turnover is much too
 soon).  The \KM approximation \eqref{eq:sech} is good initially, but
 becomes poorer and poorer over time as the underlying assumption
@@ -1480,8 +1479,7 @@ interval $\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top
 panel, $\dbydt{R}$ \eqref{eq:SIR;R} with the correct initial
 conditions and parameter values is shown in green, and the \KM
 approximation \eqref{eq:sech} based on those parameter values is shown
-in \djde{colour??? do not use blue because the blue curve has a
-  different meaning in \cref{fig:Bombay}.}.  The \code{fitode} fit and
+in purple.  The \code{fitode} fit and
 confidence band are shown in yellow.  The time shift between the
 deterministic solution and the stochastic realization arises because
 the stochastic model captures the demographic noise (which causes a
@@ -1495,6 +1493,10 @@ until the epidemic takes off in a roughly deterministic fashion).
   assuming that the CFP$=1$?  If that's the case, I don't think we
   should describe this as mortality, but we might want to comment on
   how to simulate mortality data.}
+\swp{Several things going on here...yes, I'm just showing the smooth dR/dt, but
+I can show the integral of dR/dt if we want to. We also already comment on
+how to simulate mortality in equation 21? I also feel like assuming CFP=1 is OK
+for the simulation example but also don't feel strongly about not saying mortality...}
 
 As expected, with the correct parameter values, \KM's approximation
 \eqref{eq:sech} fails once the requirement \eqref{eq:KMassumption}
@@ -1510,8 +1512,6 @@ its peak, whereas the rise is steeper than the fall in the simulated
 epidemic.  It is also worth emphasizing that the parameter values that
 yield the red curve in \cref{fig:stoch} are far from the true
 parameters that were used in the simulation (\cref{tab:stoch.nls}).
-\djde{We should have a ``true'' column in \cref{tab:stoch.nls} so the
-  comparison we're suggesting is very easy to make.}
 
 The excellent fit of the deterministic trajectory that \code{fitode}
 finds (yellow) is achieved by estimating an initial prevalence that is
@@ -1651,6 +1651,7 @@ might play a role as well.
   15 annual epidemics that Baca\"er shows and figuring out what other
   useful information is in all those reports that he cites.  But it
   would be fun to investigate, perhaps in another paper.}
+\swp{Definitely another paper...}
 
 To obtain a deeper understanding of the Bombay plague epidemic, we
 could formulate a variety of models, fit them to the data using
@@ -1660,6 +1661,9 @@ of the various mechanisms included in the sequence of models (see,
 e.g., He \emph{et al.} \cite{He+13a} for an example of using this
 approach to understand the occurrence of three distinct waves in the
 1918 influenza pandemic\djde{feel free to suggest other examples!}).
+\swp{Not sure if model selection is the right way to go... this is
+the exact problem that the other plague paper had, if you remember.
+We could also mention Ben's multimodel paper as a caveat of this approach?}
 We have not attempted such a study here, since our goal was simply to
 explain and illustrate the fitting methodology.  However, it is worth
 highlighting that our analysis using the SIR model did reveal a
@@ -1676,8 +1680,10 @@ impossible to estimate reliably from the reported weekly plague deaths
   as much as we need to in the figure caption, but we could,
   alternatively, have an \emph{appendix}, rather than supplementary
   material.}
+  \swp{I agree we don't need appendix or supp}
 \djde{I wonder if fitting to the full 15 year time series that
   Baca\"er shows would make $\Tg$ identifiable.}
+  \swp{Maybe...but another paper.}
 
 Our second example was the main wave of the 1918 influenza pandemic in
 the city of Philadelphia, for which daily mortality from pneumonia and
@@ -1702,6 +1708,11 @@ underlying disease-related parameters
 \djde{and a discrepancy in the initial conditions that makes perfect
 sense; awkward to get this across nicely}
 (\cref{tab:stoch.fitode,tab:stoch.nls}).
+\swp{How about this: while we still find a minor discrepancy in the estimates of
+initial conditions, this discrepancy is expected as this particular realization of
+the stochastic outbreak simulation did not take off immediately. Underestimation of
+the initial prevalence allows the deterministic model to offset the delayed epidemic
+onset.}
 
 The reason that \KM's approximation fails to estimate the correct
 parameter values for the simulation is that the assumption on which
@@ -1720,7 +1731,8 @@ here, we would be remiss in not mentioning that \code{fitode} contains
 a number of useful features that we have not discussed.  In particular,
 there are options for:
 \djde{Perhaps mention the help commands that users should use to learn
-how to take advantage of each of these options?}
+how to take advantage of each of these options?} \swp{I don't think any of these
+have any help commands yet... I can try to come up with them later...}
 \begin{description}
 \item[\term{multiple data streams:}]\code{fitode} allows for
   simultaneous fitting of multiple state variables to multiple time
@@ -1735,9 +1747,18 @@ how to take advantage of each of these options?}
   epidemic trajectories and the sampling probability.  Generally, this
   method is expected to provide more robust confidence intervals than
   the Delta method\needref, but is computationally more costly.
-\item[\term{Bayesian inference\needref via MCMC\needref:}]Markov chain
-  Monte Carlo. \djde{BB or SWP: Can you add something about why this
+  \swp{Ben might know references for these ones... I think we just sat down
+  and derived them together without references?}
+\item[\term{Bayesian inference\needref via MCMC\needref:}]
+\djde{BB or SWP: Can you add something about why this
     option is useful.}
+    \swp{Unlike maximum likelihood approaches, which seek to estimate the best-fitting
+    parameter set, Bayesian methods aim to estimate a distribution of
+    parameters (also known as the posterior distribution) that are consistent with our
+    assumptions/knowledge about the system (also known as the prior distribution) as well
+    as the observed data. Markov chain Monte Carlo are typically used to explore the
+    parameter space and approximate the target distribution. These approaches are generally
+    better at handling parameter uncertainteis but are computationally more expensive in general.}
 \end{description}
 Even with these extensions, there will be many other challenges to
 fitting ODE models with the \code{fitode} package, as with many other
@@ -1762,8 +1783,8 @@ system).  Parameters of models can also be subject to process error;
 for example, the transmission rate might, in practice, have a
 component that is dependent on random fluctuations in weather.  A
 number of studies have found that accounting for process error can be
-critical for estimating uncertainties in parameter estimates \needref
-and confidence bands on the projected dynamics of a system\needref.
+critical for estimating uncertainties in parameter estimates
+and confidence bands on the projected dynamics of a system\needref \citep{King+15,taylor2016stochasticity,li2018fitting}.
 Popular \code{R} packages that can fit models with process error
 include \code{pomp} \citep{king2015statistical} and \code{odin}
 \citep{odin2021}.
@@ -1793,8 +1814,8 @@ we have hinted at some of the reasons ``why'' such fitting can be very
 difficult.  A true understanding of ``why it is hard'' is something
 that builds over time with experience, but the key points are that
 finding optima of a complex multi-dimensional function is hard enough
-on its own\needref, and estimating statistically meaningful
-uncertainty in those optima is extremely challenging\needref.
+on its own \citep{raue2013lessons}, and estimating statistically meaningful
+uncertainty in those optima is extremely challenging\citep{elderd2006uncertainty,li2018fitting}\needref.
 
 Fred would never have used \code{fitode}, but would have delighted in
 seeing it demonstrated and in discussing the theoretical background on
@@ -2041,7 +2062,7 @@ ci_fmt("a", cc)
   \begin{tabular}{ m{3cm} | c | c | c | c | c c}
   \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
-    & \bfseries KM & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
+    & {\footnotesize\bfseries KM} & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
     initial prevalence & $I_0$ & -- & -- &
       \Sexpr{I0.KM} & \Sexpr{I0.nls} & -- \\
       population size & $N$ & -- & -- & $10^6$ & $10^6$ & -- \\
@@ -2093,7 +2114,7 @@ ci_fmt("a", cc)
   \begin{tabular}{ m{3cm} | c | c | c c | c}
   \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
-    & \bfseries \code{dnbinom} & \bfseries 95\% CI & \bfseries \code{ols} \\\hline
+    & {\footnotesize\bfseries \code{dnbinom}} & {\footnotesize\bfseries 95\% CI} & {\footnotesize\bfseries \code{ols}} \\\hline
     recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{gamma.nls} &
       -- & \Sexpr{gamma.nls} \\
     %%
@@ -2213,7 +2234,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
   \begin{tabular}{ m{3cm} | c | c | c | c c}
     \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
-    & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
+    & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
     initial prevalence & $I_0$ & -- & -- &
       \Sexpr{I0.phila.fitode} & -- \\
     %%
@@ -2262,7 +2283,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
   \begin{tabular}{ m{3cm} | c | c | c c}
   \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
-    & \bfseries \code{dnbinom} & \bfseries 95\% CI \\\hline
+    & {\footnotesize\bfseries \code{dnbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
     transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
       \Sexpr{beta.phila.fitode} & \Sexpr{ci_fmt("beta", ci.phila.fitode)} \\
       recovery rate & $\gamma$ & $\frac{1}{\textrm{years}}$ & \Sexpr{gamma.phila.fitode} &
@@ -2290,10 +2311,18 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd),
 
 \begin{figure}
 <<phila-figure, echo=FALSE, fig.height=5>>=
-setup_plot(ylim = c(0, 800), xlim = range(phila1918b$time), ylab="daily P&I deaths")
+setup_plot(ylim = c(0, 800), xlim = range(phila1918b$time), ylab="daily P&I deaths",
+           xaxt='n')
+axis(side=1, at=phila1918b$time[c(1, 31, 62)],
+     labels=c("Sep", "Oct", "Nov"))
 draw_confband(ppp)
 tvals <- with(phila1918b, seq(min(time),max(time), length=1000))
 t0 <- min(tvals)
+tt_phila <- traj_ci(tvals-t0, phila.nls.parameters, vcov(phila.nlsfit))
+
+tt_phila$times <- tt_phila$times + t0
+
+draw_confband(tt_phila, col=col.nlsCI)
 curve(KM_approx(x-t0, a=a.phila, omega=omega.phila, phi=phi.phila)/365, from=t0, to=max(tvals), n=1000, add=TRUE,
       xpd=NA, col=my.orange, lwd=lwd)
 lines(tvals,
@@ -2303,7 +2332,7 @@ lines(estimate ~ times, data=ppp, col=col.fitode.nb, lwd=lwd*0.60, lty="dotted")
 points(mort ~ time,
        data = phila1918b, xpd=NA, pch=21, bg="white", lwd=2)
 legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
-       lty=c(NA,"solid","solid","solid"),
+       lty=c(NA,"solid","dotted","solid"),
        col=c("black",col.nls,col.fitode.nb,my.orange),
        pch=c(21,NA,NA,NA),
        pt.bg=c("white",NA,NA,NA),
@@ -2313,21 +2342,13 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
   Philadelphia, 1 September 1918 to 31 December 1918
   \cite{Roge20,Gold+09}.  Reported daily deaths from pneumonia and
   influenza (P\&I) are shown with dots.  The red curve and pink
-  confidence band \djde{there is no pink confidence band visible}
+  confidence band
   show a nonlinear least squares (nls) fit of \KM's
   approximation \eqref{eq:sech}; the parameter estimates are given in
   \cref{tab:philanls}.  The dotted yellow curve and yellow confidence
   band show the \code{fitode} fit, for which the parameter estimates
   are given in \cref{tab:phila.fitode}.  The blue curve shows the \KM
   approximation using the parameters estimated with \code{fitode}.
-  \djde{The yellow line should be dotted in the legend.}
-  \djde{The KM curve has a completely different meaning from the
-    KM curve in \cref{fig:Bombay} and should be labelled and coloured
-    differently.  Perhaps labelled ``KM approximation'' and coloured orange,
-    with this appearing below fitode in the legend.  We must be able to
-    come up with better labels for the legends in all the figures.}
-  \djde{The horizontal axis in this plot should have labels ``Sep'',
-  ``Oct'', ``Nov'', etc, not 1918.75 etc.}
 }
 \label{fig:phila}
 \end{figure}
@@ -2343,9 +2364,6 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
       mean exactly?} \swp{We converted SIR model parameters to KM parameters. I tried to make this clearer.}
       and  by fitting nonlinear least squares
       (\code{nls}).
-      \djde{The Estimated parameter section should be
-      rounded to 3 significant digits.}
-      \djde{$\beta$ should be given in units of 1/year.}
 }\label{tab:stoch.nls}
     \medskip
     %% making use of ragged2e and array packages:
@@ -2374,10 +2392,10 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
       \Sexpr{Reff.KM.stoch} & \Sexpr{Reff.nls.stoch} & \Sexpr{ci_fmt("Reff", cc.delta.stoch)} \\
     removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{mm$gamma} &
       \Sexpr{gamma.KM.stoch} & \Sexpr{gamma.nls.stoch} & \Sexpr{ci_fmt("gamma", cc.delta.stoch)} \\
-    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- & \Sexpr{iii[[1]]}$ &
+    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- & \Sexpr{iii[[1]]} &
       \Sexpr{as.integer(S0.KM.stoch)} & \Sexpr{as.integer(S0.nls.stoch)} & \Sexpr{ci_fmt("S0", cc.delta.stoch, max_ord = 6)} \\
     transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ & \Sexpr{52*R0*mm$gamma/2000} &
-      \Sexpr{52*beta.KM.stoch} & \Sexpr{52*beta.nls.stoch} & \Sexpr{ci_fmt("beta", 52*cc.delta.stoch)} \\
+      \Sexpr{52*beta.KM.stoch} & \Sexpr{signif(52*beta.nls.stoch,dig)} & \Sexpr{ci_fmt("beta", 52*cc.delta.stoch)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days & \Sexpr{7*1/mm$gamma} &
       \Sexpr{signif(7*Tg.KM.stoch,dig)} & \Sexpr{signif(7*Tg.nls.stoch,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta.stoch)} \\
     basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- & \Sexpr{R0} &
@@ -2396,9 +2414,6 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
       \cref{fig:stoch}).  The true parameter values used for
       the simulation were  $(S_0,I_0,R_0)=(\Sexpr{iii})$,
       $\R_0=\Sexpr{R0}$, $1/\gamma=\Sexpr{1/mm$gamma}$ week.
-      \djde{$\beta$ should be given in units 1/year.}
-      \djde{$\Tg$ should be listed and given in days.}
-      \djde{The upper limit of the CI for $k$ should not be in scientific notation.}
 }\label{tab:stoch.fitode}
 \medskip
     %% making use of ragged2e and array packages:
@@ -2406,9 +2421,9 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
   \begin{tabular}{ m{3cm} | c | c | c c}
   \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
-    & \bfseries \code{dnbinom} & \bfseries 95\% CI \\\hline
-    transmission rate & $\beta$ & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{beta.stoch.fitode} & \Sexpr{ci_fmt("beta", ci.stoch.fitode)} \\
+    & {\footnotesize\bfseries \code{dnbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
+    transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{signif(52*beta.stoch.fitode,dig)} & \Sexpr{ci_fmt("beta", 52*ci.stoch.fitode, sn=FALSE, digits=dig)} \\
     recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ &
         \Sexpr{gamma.stoch.fitode} & \Sexpr{ci_fmt("gamma", ci.stoch.fitode)}\\
     initial\break susceptibles & $S_0$& -- &
@@ -2416,9 +2431,10 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
       initial prevalence & $I_0$ & -- &
       \Sexpr{I0.stoch.fitode} & \Sexpr{ci_fmt("I0", ci.stoch.fitode)}\\
       overdispersion\break parameter & $k$ & -- &
-      \Sexpr{k.stoch.fitode} & \Sexpr{ci_fmt("k", ci.stoch.fitode)}\\
+      \Sexpr{k.stoch.fitode} & \Sexpr{ci_fmt("k", ci.stoch.fitode, sn=FALSE, digits=dig)}\\
       \noalign{\vspace{10pt}}
       \bfseries Derived\break parameter \\\hline
+      mean generation interval & $\Tg$ & days & \Sexpr{signif(7*1/gamma.stoch.fitode,dig)} & \Sexpr{ci_fmt("gamma", 7*1/ci.stoch.fitode)}\\
       effective reproduction number & $\Reff$ & -- &
       \Sexpr{Reff.stoch.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.stoch.fitode[,-1])} \\
     basic reproduction number & $\R_0$ & -- &
@@ -2436,15 +2452,15 @@ plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
 draw_confband(sss, col=col.fitodenbCI)
 lines(sir.det$tau, 1 * sir.det$I * N/7, col=my.green, lwd=lwd) ## dR/dt
 curve(KM_approx(x, a=a.det, omega=omega.det, phi=phi.det)/7, from=0, to=tmax, n=1000, add=TRUE,
-      xpd=NA, col=my.blue, lwd=lwd)
+      xpd=NA, col="purple", lwd=lwd)
 # lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
 points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
 legend("topright", bty="n", lwd=c(2,lwd,lwd),
        lty=c(NA,"solid","solid"),
-       col=c("black",col.KM,my.green),
+       col=c("black","purple",my.green),
        pch=c(21,NA,NA),
        pt.bg=c("white",NA,NA),
-       legend=c("observed data","KM","deterministic"))
+       legend=c("observed data","KM conversion","deterministic"))
 
 plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
      xlim=range(tt), ylim=range(sir.stoch.data$mort, na.rm=TRUE))
@@ -2459,11 +2475,11 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd),
        col=c("black",col.nls,col.fitode.nb),
        pch=c(21,NA,NA),
        pt.bg=c("white",NA,NA),
-       legend=c("observed data","KM (nls)","fitode (nbinom)"))
+       legend=c("observed data","nls","fitode (nbinom)"))
 @
 \caption{ Deterministic fits to a stochastic SIR simulation.
-\emph{Top panel:} The blue curve shows the \KM approximation
-  \eqref{eq:sech} calculated by by converting the original
+\emph{Top panel:} The purple curve shows the \KM approximation
+  \eqref{eq:sech} calculated by directly converting the original
   parameters that were used to simulate the SIR model.
     The green curve shows the deterministic trajectory
     of the same SIR model.
