@@ -90,7 +90,7 @@
 %% BMB: can decide whether this should be \mathrm{Norm} or \cal{N} or ...
 \newcommand{\normdist}{\ensuremath\mathrm{Normal}}
 %% tables
-™\usepackage{multirow}   % for tables
+\usepackage{multirow}   % for tables
 %\usepackage{subfig}
 \usepackage{tabularx}   % pretty tables
 % \usepackage{tabularray} % allows rowsep via tblr environment
