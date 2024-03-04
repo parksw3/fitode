@@ -2336,19 +2336,13 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
 \begin{table}
   \begin{center}
     \caption{Parameters of \KM's \cite{KermMcKe27} approximation
-      \eqref{eq:sech} to the SIR model \eqref{eq:SIR}, as estimated by
-      us using original parameters that were used to simulate
-      the stochastic SIR model
-      \djde{I don't understand that.  What does the KM column
-      mean exactly?}
-      and using nonlinear least squares
+      \eqref{eq:sech} to the SIR model \eqref{eq:SIR} calculated
+      by directly converting the parameters that were used to simulate
+      the stochastic SIR model and
+    \djde{I don't understand that.  What does the KM column
+      mean exactly?} \swp{We converted SIR model parameters to KM parameters. I tried to make this clearer.}
+      and  by fitting nonlinear least squares
       (\code{nls}).
-      \djde{Rather than the following sentence, I think it would be better
-        to have a ``true'' column in the table and fill in all the
-        rows for the true parameter values.}
-      The true parameter values used for
-      the simulation were  $(S_0,I_0,R_0)=(\Sexpr{iii})$,
-      $\R_0=\Sexpr{R0}$, $1/\gamma=\Sexpr{1/mm$gamma}$ week.
       \djde{The Estimated parameter section should be
       rounded to 3 significant digits.}
       \djde{$\beta$ should be given in units of 1/year.}
@@ -2356,37 +2350,37 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c | c | c c}
+  \begin{tabular}{ m{3cm} | c | c | c | c | c | c c}
   \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
-    & \bfseries KM & \bfseries \code{nls} & \bfseries 95\% CI \\\hline
-    initial prevalence & $I_0$ & -- & -- &
-      \Sexpr{I0.KM} & \Sexpr{I0.nls} & -- \\
+    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units} & {\footnotesize\bfseries True}
+    & {\footnotesize\bfseries KM} & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
+    initial prevalence & $I_0$ & -- & -- & \Sexpr{iii[[2]]} &
+      \Sexpr{iii[[2]]} & \Sexpr{iii[[2]]} & -- \\
     %%
     \noalign{\vspace{10pt}}
     \bfseries Estimated\break parameter \\\hline
-    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{a.det} &
+    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & -- & \Sexpr{signif(a.det,dig)} &
       \Sexpr{signif(a.nls.stoch,dig)} & \Sexpr{ci_fmt("a", cc.nls.stoch)} \\
-    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{omega.det} & \Sexpr{signif(omega.nls.stoch,dig-1)} & \Sexpr{ci_fmt("omega", cc.nls.stoch)} \\
-    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.det} &
+    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ & -- &
+      \Sexpr{signif(omega.det,dig)} & \Sexpr{signif(omega.nls.stoch,dig-1)} & \Sexpr{ci_fmt("omega", cc.nls.stoch)} \\
+    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & -- & \Sexpr{signif(phi.det,dig)} &
       \Sexpr{signif(phi.nls.stoch,dig)} & \Sexpr{ci_fmt("phi", cc.nls.stoch)} \\
     \noalign{\vspace{10pt}}
     \bfseries Derived\break parameter \\\hline
-    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
+    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks & -- &
       \Sexpr{tpeak.KM.stoch} & \Sexpr{tpeak.nls.stoch} & \Sexpr{ci_fmt("tpeak", cc.delta.stoch)} \\
     effective reproduction number & $\Reff$
-      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
+      & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- & \Sexpr{R0*iii[[1]]/2000} &
       \Sexpr{Reff.KM.stoch} & \Sexpr{Reff.nls.stoch} & \Sexpr{ci_fmt("Reff", cc.delta.stoch)} \\
-    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
+    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{mm$gamma} &
       \Sexpr{gamma.KM.stoch} & \Sexpr{gamma.nls.stoch} & \Sexpr{ci_fmt("gamma", cc.delta.stoch)} \\
-    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
+    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- & \Sexpr{iii[[1]]}$ &
       \Sexpr{as.integer(S0.KM.stoch)} & \Sexpr{as.integer(S0.nls.stoch)} & \Sexpr{ci_fmt("S0", cc.delta.stoch, max_ord = 6)} \\
-    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{beta.KM.stoch} & \Sexpr{beta.nls.stoch} & \Sexpr{ci_fmt("beta", cc.delta.stoch)} \\
-    mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
+    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ & \Sexpr{52*R0*mm$gamma/2000} &
+      \Sexpr{52*beta.KM.stoch} & \Sexpr{52*beta.nls.stoch} & \Sexpr{ci_fmt("beta", 52*cc.delta.stoch)} \\
+    mean generation interval & $\Tg$ & \eqref{eq:Tg} & days & \Sexpr{7*1/mm$gamma} &
       \Sexpr{signif(7*Tg.KM.stoch,dig)} & \Sexpr{signif(7*Tg.nls.stoch,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta.stoch)} \\
-    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
+    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- & \Sexpr{R0} &
       \Sexpr{signif(2000*Reff.KM.stoch/S0.KM.stoch,dig)}
       & \Sexpr{signif(2000*Reff.nls.stoch/S0.nls.stoch,dig)} & \Sexpr{ci_fmt("R0", cc.delta.stoch)}
   \end{tabular}
