@@ -1,10 +1,13 @@
 library(fitode)
 library(dplyr)
-library(ggplot2); theme_set(theme_bw())
+library(ggplot2); theme_set(theme_bw(base_family="Times"))
 library(egg)
+library(gridExtra)
 
 if (file.exists("bombay_confint_dnbinom.rda")) {
     load("bombay_confint_dnbinom.rda")
+    nfits <- 500
+    gammavec <- seq(1, 100, length.out=nfits)
 } else {
     SIR_model <- odemodel(
         name="SIR model",
@@ -80,25 +83,35 @@ gammadata <- lapply(fitlist_gamma, function(x) {
 
 g1 <- ggplot(gammadata) +
     geom_point(aes(gamma, logLik)) +
+    scale_x_continuous(expression(gamma)) +
     scale_y_continuous("Profile log-likelihood") +
     ggtitle("A")
 
 g2 <- ggplot(gammadata) +
     geom_point(aes(gamma, beta)) +
+    scale_x_continuous(expression(gamma)) +
+    scale_y_continuous(expression(beta)) +
     ggtitle("B")
 
 g3 <- ggplot(gammadata) +
     geom_point(aes(gamma, S0)) +
+    scale_x_continuous(expression(gamma)) +
+    scale_y_continuous(expression(S(0))) +
     ggtitle("C")
 
 g4 <- ggplot(gammadata) +
     geom_point(aes(gamma, I0))  +
+    scale_x_continuous(expression(gamma)) +
+    scale_y_continuous(expression(I(0))) +
     ggtitle("D")
 
 g5 <- ggplot(gammadata) +
     geom_point(aes(gamma, k)) +
+    scale_x_continuous(expression(gamma)) +
+    scale_y_continuous(expression(k)) +
     ggtitle("E")
+gcomb <- ggarrange(g2, g3, g4, g5)
 
-gcomb <- ggarrange(g1, g2, g3, g4, g5, nrow=2)
+gfinal <- arrangeGrob(g1, gcomb, nrow=1, widths=c(1, 2))
 
-ggsave("bombay_confint_dnbinom.pdf", gcomb, width=8, height=6)
+ggsave("bombay_confint_dnbinom.pdf", gfinal, width=8, height=4)
