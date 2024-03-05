@@ -177,7 +177,7 @@ susceptible-infected-removed (SIR) epidemic model,
 where $S$, $I$ and $R$ represent the numbers of individuals who are
 susceptible, infected or removed\footnote{In the words of \KM
   \cite[p.\,701]{KermMcKe27}, ``removed from the number of those who
-  are sick, by recovery or by death''.}, $\beta$ is the transmission
+  are sick, by recovery or by death''. \bmb{is this needed?}}, $\beta$ is the transmission
 rate, and $\gamma$ is the recovery rate.  In that original paper,
 \KM \cite[p.\,714]{KermMcKe27} also fit their model
 to plague mortality data from an epidemic in Bombay (now Mumbai) that
@@ -192,8 +192,8 @@ have primarily focused on \term{compartmental models} like the SIR
 model, cast either as differential equations following the tradition
 of \KM \cite{KermMcKe27}, or as \term{stochastic processes} in the
 tradition of McKendrick \cite{McKe26} and Bartlett \cite{Bart60}.  In
-recent years, as the power of computers has grown, there has been
-increasing interest in \term{agent-based models}, which represent each
+recent years, as the power of computers has grown, some researchers
+have turned to \term{agent-based models}, which represent each
 individual as a separate unit that can have unique properties
 \cite{eubank2004modelling}.
 
@@ -232,7 +232,7 @@ fitting (!) to highlight Fred's role in the history of this work, and
 to dedicate this tutorial to his memory.\footnote{We had originally
 intended to submit this paper to a collection in honour of Fred's memory
 \cite{Kribvand23}.}
-o
+
 \section{Kermack and McKendrick's fit}
 
 We begin by revisiting \KM's \cite{KermMcKe27}
@@ -321,7 +321,7 @@ sort of \term{trajectory matching}, i.e., adjusting parameter values
 until the model---\cref{eq:sech} in their case---is, by some
 measure, close to the observed data points.  The most obvious metric
 for this purpose is the Euclidean distance between the model curve and
-the data.  Thus, the natural \term{objective function} to
+the data.  Thus, a natural \term{objective function} to
 minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
@@ -356,14 +356,14 @@ print(nls.parameters)
 @
 
 \noindent
-Above, we chose as our starting guess the fitted parameter values of
+Above, we chose as our starting value the fitted parameter values of
 \KM.  Our least squares parameter values differ from \KM's by a few
 percent (see \cref{tab:Bombay}).  The least squares fitted
 function is shown in \nlscol in \cref{fig:Bombay}.
 
 Starting from someone else's fit is not a great way to test the
 method, but fortunately the least squares fit for this problem is not
-very sensitive to the initial guess.  To make a reasonable initial guess,
+very sensitive to the starting value.  To pick reasonable starting values,
 it often helps to think
 about the meaning of parameters.  For example, in the case of
 \cref{eq:sech}, it is useful to note that $a$ is the maximum
@@ -375,14 +375,10 @@ $\omega(t-\tpeak)$ then
   \end{equation}
 \end{linenomath*}
 is the \term{peak time} (at which the maximum occurs); both $a$ and
-$\tpeak$ can be guessed approximately by looking at the plotted data.
+$\tpeak$ can be approximated by looking at the plotted data.
 Assuming $I_0/S_0\ll1$, $\omega$ is half the initial exponential
 growth rate, so it can be approximated easily by plotting the data on
 a log scale, estimating the initial slope, and dividing by 2.
-\djde{Intuitively at least, fitting $\tpeak$ or $\phi$ is likely to be
-  much better than fitting the initial condition $I_0$.  Is this worth
-  commenting on?}
-\bmb{I'm not sure it fits in here}
 Very rough guesses for $a$, $\tpeak$ and $\omega$
 are sufficient to converge on the same fit:
 
@@ -399,10 +395,10 @@ print(nls.parameters <- coef(nlsfit))
 @
 
 \noindent
-However, if you experiment with initial guesses, you will find that if
-you make a sufficiently \emph{bad} guess, then \code{nls} will fail.
+However, if you experiment with starting values, you will find that if
+you pick sufficiently \emph{bad} starting values, then \code{nls} will fail.
 For example, starting from $a=2000$, $\tpeak=5$, and $\omega=0.1$
-yields a \code{singular gradient} error.  More interestingly, starting
+yields a ``singular gradient'' error.  More interestingly, starting
 from $a=500$, $\tpeak=5$, and $\omega=0.1$ yields $a=869$,
 $\omega=-0.19$, $\phi=-3.48$, which is far from our fitted values and
 illustrates a very important fact: there is \emph{not necessarily a
@@ -1831,6 +1827,7 @@ want to dig into data, will benefit from this exposition.
 Remaining items on ToDo list:
 \begin{itemize}
 \item what kinds of things would likely cause trouble for fitode?
+\item Comment on reparameterizing, specifically parameterizing with $\tpeak$ or $\phi$ rather than initial condition $I_0$?
 \item optimization challenges, where to go if you run into trouble
 \item statistical challenges, where to go for further insights / more
   advanced approaches

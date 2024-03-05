@@ -398,3 +398,39 @@ plot(pp2)
 as.data.frame(pp2) |>
     ggplot(aes(x = focal, y = z^2)) + geom_point() + geom_line() +
     facet_wrap(~param, scale = "free")
+
+library(fitode)
+
+SIR_rat_model <- odemodel(
+    name="SIR rat model",
+    model=list(
+        S ~ - beta * S * I,
+        I ~ beta * S * I - gamma * I,
+        R ~ mu * I
+    ),
+    observation = list(
+        mort ~ dnbinom(mu = R, size = k)
+    ),
+    diffnames="R",
+    initial=list(
+        S ~ 1 - I0,
+        I ~ I0,
+        R ~ 0
+    ),
+    par=c("beta", "gamma", "I0", "mu", "k")
+)
+
+start2 <- c(logR0m1 = -1.83938712634667, loggamma = 0.987419536802977, 
+logI0 = -10.1192816792488, logk = 3.7884778013485, logmu = 10.429528373848
+)
+start2R <-  c(logbeta = with(as.list(start2), {
+    log1p(exp(logR0m1))+loggamma-log(1)}),
+    start2[-1])
+
+SIR_rat_fit <- fitode(
+    model = SIR_rat_model,
+    data = bombay2,
+    start = trfun2(start2R),
+    tcol = "week"
+)
+vcov(SIR_rat_fit)
