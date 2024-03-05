@@ -142,13 +142,15 @@ knitr::opts_chunk$set(error = FALSE)
   problems.  He was curious to know how one goes about fitting
   dynamical models to data, and why it can be hard.  Initially in
   response to Fred's questions, we developed a user-friendly \code{R}
-  package that facilitates fitting ordinary differential equations to
-  observed time series.  Here, we use the package (\code{fitode}) to
+  package, \code{fitode}, that facilitates fitting ordinary differential equations to
+  observed time series.  Here, we use this package to
   provide a brief tutorial introduction to fitting compartmental
   epidemic models to a single observed time series.  We assume that,
   like Fred, the reader is familiar with dynamical systems from a
   mathematical perspective, but has limited experience (if any) with
   statistical methodology or optimization techniques.
+  \bmb{Is this framing weird if this is going to appear in a regular issue of BMB? Does it need
+    to be tweaked, e.g. with a clause explaining who Fred Brauer was?}
 \end{abstract}
 
 \begin{keywords}
@@ -229,9 +231,8 @@ we have lost the opportunity to present our work to Fred, but it seems
 fitting (!) to highlight Fred's role in the history of this work, and
 to dedicate this tutorial to his memory.\footnote{We had originally
 intended to submit this paper to a collection in honour of Fred's memory
-\cite{Kribvand23}.
-\bmb{FWIW \href{https://www.springer.com/journal/11538/submission-guidelines}{footnotes are allowed in BMB}}.}
-
+\cite{Kribvand23}.}
+o
 \section{Kermack and McKendrick's fit}
 
 We begin by revisiting \KM's \cite{KermMcKe27}
