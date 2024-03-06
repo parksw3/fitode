@@ -1,0 +1,11 @@
+# generate diff.pdf from a particular commit, e.g. './mkdiff 673409a0'
+MS=brauer-ms
+Rscript -e "knitr::knit(\"${MS}.Rnw\")"
+mv ${MS}.tex ${MS}-new.tex
+git checkout $1
+Rscript -e "knitr::knit(\"${MS}.Rnw\")"
+mv ${MS}.tex ${MS}-old.tex
+latexdiff ${MS}-old.tex ${MS}-new.tex >diff.tex
+pdflatex diff
+git checkout master
+
