@@ -1702,10 +1702,16 @@ Beyond the basics that we have discussed here, \code{fitode} contains
 a number of useful advanced features. In particular,
 \code{fitode} can
 \begin{description}
-\item [fit to multiple data streams]: e.g. in the case where
-  case reports, hospitalization reports, and wastewater sampling are
-  all available in a COVID-19 time series
-\item [compute confidence intervals via importance sampling]:
+\item [fit to multiple data streams:] \code{fitode} is not
+  limited to fitting a trajectory to a single state variable, such
+  as incidence or prevalence of infected individuals. For example,
+  during the later stages of the COVID-19 pandemic modelers often
+  had access to time series of case reports, hospitalization reports, and
+  wastewater sampling for the same geographic region. If we
+  can build a model that includes state variables for hospitalized individuals
+  and for virus concentrations in wastewater, we can fit its parameters
+  using all of the available data. \needref
+\item [compute confidence intervals via importance sampling:]
   While the Delta method can compute confidence intervals for derived
   quantities such as predicted trajectories, it rests on strong
   and sometimes unreliable assumptions. A more accurate
@@ -1718,7 +1724,7 @@ a number of useful advanced features. In particular,
   size of the epidemic); an average value and confidence intervals
   are derived from weighted moments (means) or quantiles (medians
   or extremes such as 10th and 90th percentiles).
-\item [apply Bayesian inference]:
+\item [apply Bayesian inference:]
   Unlike maximum likelihood approaches, which seek to estimate the best-fitting
   parameter set, Bayesian methods aim to estimate a distribution of
   parameters (also known as the posterior distribution) that are consistent with our
@@ -1726,21 +1732,21 @@ a number of useful advanced features. In particular,
   as the observed data.
   These approaches are generally
   better at handling parameter uncertainties \citep{elderd2006uncertainty}
-  but are usually mush more computationally expensive.
+  but are usually much more computationally expensive.
 
   \code{fitode} allows the user to specify prior distributions on parameters; these
   can either reflect previous knowledge of a disease system, or can be used to
   \emph{regularize} a fitting procedure by downweighting extreme values of parameters
   \cite{Lemo2019}.
 
-  \emph{Markov chain Monte Carlo} algorithms are typically used to explore the
-  parameter space and approximate the target distribution. \code{fitode} implements
+  Bayesian modelers typically use \emph{Markov chain Monte Carlo} algorithms
+  to explore the parameter space and approximate the target distribution. \code{fitode} implements
   a simple \emph{Metropolis-Hasting} sampler \citep[\S7.3.1]{Bolk08}. 
-  The Stan platform provides a much more powerful Bayesian sampling algorithm
+  (The Stan platform provides a much more powerful Bayesian sampling algorithm
   using sensitivity equations,
   built on top of a fully general system for specifying ODEs; however, this
   tool requires significantly more computational and statistical background to
-  use effectively \cite{Grin+2021}.
+  use effectively \cite{Grin+2021}.)
  
 \end{description}
 
