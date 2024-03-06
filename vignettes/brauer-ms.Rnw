@@ -110,6 +110,11 @@ knitr::knit_hooks$set(basefig=function(before, options, envir) {
                    } else { }
 })
 knitr::opts_chunk$set(error = FALSE)
+## override BMB's finicky settings
+options(warnPartialMatchArgs = FALSE,
+          warnPartialMatchAttr = FALSE,
+          warnPartialMatchDollar = FALSE)
+
 @
 \begin{document}
 
@@ -407,7 +412,7 @@ solution exists because $\sech^2(x)$ is symmetric about the $y$ axis,
 but in general, there can be multiple local minima that cause
 nonlinear optimizers to converge to points that may or may not
 represent equally good fits to the data.  The potential existence of
-multiple local optima makes fitting models to data hard; you need to
+multiple local optima makes fitting to data hard; you need to
 be cautious, and use common sense, in interpreting the solutions found
 by your software (always plot the solutions!). Raue \emph{et al.}\/
 \cite{raue2013lessons} give suggestions for how to diagnose and handle
@@ -433,19 +438,18 @@ Alternatively, you could write
 and fit $A$, $\Omega$, and $\Phi$, which would guarantee positive $a$,
 $\omega$, and $\phi$ without having to constrain the values of the
 fitted parameters.  While this last suggestion may just seem like a cute
-trick, there is more to it than that.  A much broader range of
-optimization algorithms is available for unconstrained fitting;
+trick, there is more to it than that.  Many more optimization algorithms
+are available for unconstrained fitting;
 numerical parameter values of very small magnitude can also lead to
 numerical instability, so it is advantageous to link parameters that
 must lie in a given range to unconstrained parameters that can be fit
 more easily.  In \cref{eq:loglink}, the \term{link function}
 that converts the parameters to the unconstrained scale is $\log(x)$.
 Another common link function is $\textrm{logit}(x) = \log(x/(1-x))$ (the log-odds function,
-or inverse of the logistic function), which converts the unit interval $(0,1)$ to
+or the inverse of the logistic function), which converts the unit interval $(0,1)$ to
 $(-\infty,\infty)$, and is convenient when parameters
 represent proportions or probabilities.  (Requiring positivity is so
-common that the default setting in \code{fitode} is to use a log link
-when fitting any parameter.)
+common that \code{fitode} uses a log link for all parameters by default.)
 
 <<KM-fitted-values, echo=FALSE>>=
 dig <- 3 # number of significant digits for printing
@@ -511,7 +515,7 @@ The nonlinear algebraic relationships specified by
   \cite[eq.~(3)]{bacaermodel2012} because we have corrected a minor
   error.  At the start of \S3 of \cite{bacaermodel2012}, in the
   expression for $Q$, the term $2Ry_0/x_0$ should be $2R^2y_0/x_0$ and
-  this missing square propagated through to the inversion formulae.}
+  this missing square is propagated through to the inversion formulae.}
 analytically\footnote{In (common) situations in which nonlinear
   algebraic equations cannot be solved analytically, they can still be
   solved numerically, for example with the \code{nleqslv} package in
@@ -647,7 +651,7 @@ traj_ci <- function(t,
 
 \paragraph*{Correctly handling weekly mortality.}
 
-Something we have glossed over is that we have fitted observed weekly
+We have glossed over the fact that we have fitted observed weekly
 mortality to the \emph{instantaneous} rate, $\dbydt{R}$
 \eqref{eq:sech}, which is not observed.  We did this because it is
 what \KM did, and we wanted to be able to compare formal nonlinear
@@ -676,19 +680,18 @@ all infections end in death---we have followed \KM in assuming that
 the \term{infection fatality proportion} is 100\%.  Similarly, when
 analyzing incidence data, the \term{reporting proportion} ought to be
 taken into account.
-
-\bmb{is it worth mentioning the assumption that infection fatality
-  rate $\approx$ 100\% again (``Note that we are still assuming
-  \ldots''?)}
-\djde{I've added two sentences above.  Feel free to improve, and to
-  comment on the non-indentifiability problems or whatever you think
-  is useful to mention here.}
-\bmb{Maybe add further that we're ignoring a lot more biology.
-\emph{cf.} Steve Ellner's fit of the Bombay plague data where
-he said he was assuming a constant proportionality between
-rat prevalence and human death.}
-\djde{Can you point me to the Ellner paper?}
-\swp{I couldn't find the paper... I'll leave this to Ben.}
+\bmb{I wrote some stuff (commented out here), but then realized that it's
+  pretty well covered by the caveats paragraph from KM at the end of this
+  section (search for ``mental gymnastics'').
+  The Ellner fit I was referring to is unpublished, \href{https://ms.mcmaster.ca/~bolker/eeid/2010/Ecology/EllnerMaxLikEEID2010.pdf}{here}}
+%(If we think carefully about the biology we 
+%realize that we are sweeping many more assumptions under the rug:
+%for example,
+%in reality plague is a vector-borne disease of rodents that spills over
+%into humans, rarely being transmitted directly between humans. One
+%way to gloss over these complexities is to say that $\beta$ and $\gamma$
+%implicitly both include a scaling factor that captures the relationship
+%between rat infections and observed human deaths.
 
 \section{Uncertainty}\label{sec:Uncertainty}
 
@@ -951,28 +954,20 @@ i.e.,
 $\frac{\rm d}{{\rm d}t}\big(\frac{\partial
   x(t,\theta_i)}{\partial\theta_i}\big)$, where $\theta_i$ refers to
 the components of $\thetavec$. They can easily be derived using the
-chain rule; by solving them in parallel with the main set of ODEs, we
-get a computationally efficient and numerically stable way to
-calculate the overall gradients of the log-likelihood with respect to
-the parameters.
-\djde{You define the derivatives but not the \underline{equations}.
-  It isn't clear to me from above what he sensitivity equations are
-  and how solving them helps, and certainly not how it yields
-  efficiency and numerical stability.}
-\swp{Not sure how much more detail is needed. But sensitivity equations correspond to the following (is this what you meant by equations?):
+chain rule, i.e. if we write
 \begin{equation}
-\frac{\rm d}{{\rm d}t}\left(\frac{\partial
+S(x,t, \theta_i) = \frac{\rm d}{{\rm d}t}\left(\frac{\partial
   x(t,\theta_i)}{\partial\theta_i}\right) = \left[\frac{\partial}{\partial x} \left(\frac{{\rm d} x(t,\theta_i)}{{\rm d} t} \right)\right] \frac{\partial
   x(t,\theta_i)}{\partial\theta_i} + \frac{\partial}{\partial \theta_i} \left(\frac{{\rm d} x(t,\theta_i)}{{\rm d} t} \right)
-\end{equation}.
-There are two reasons why solving sensitivity equation helps. First, it allows us to use gradient-based optimization algorithms.
-Second, it provides us the gradient of the epidemic trajectory with respect to model parameters, which can be then used to calculate CIs using the Delta method.
-It would be possible to do all of this using numerical differentiation (i.e., by taking the difference between $x(t,\theta_i)$ and $x(t,\theta_i+\epsilon)$) but this would be less stable.
-Comparison between sensitivity equation vs numerical differentiation is shown in \cite{raue2013lessons}.
-}
+\end{equation}
+then we can calculate the derivative of $x(t)$ with respect to $\theta_i$ as $\int_0^{t} S(x,t') \, dt'$, i.e. by solving the differential equation; we can then use a further chain-rule step to compute the derivative of the log-likelihood of the observations at time $t$ with respect to the parameters. Integrating the sensitivity equations in parallel with the main set of ODEs is
+a computationally efficient and numerically stable way to
+calculate the overall gradients of the log-likelihood with respect to
+the parameters, which makes nonlinear estimation more robust and efficient. We can also use these gradients to calculate CIs using the Delta method.
+Raue \emph{et al.} \cite{raue2013lessons} give a more detailed comparison between using the sensitivity equations and computing gradients by finite-difference approximations.
 
 The \code{fitode} package\footnote{\code{fitode} is available on
-  \href{https://cran.r-project.org/}{CRAN} and consequently can be
+  \href{https://cran.r-project.org/}{CRAN}, and can be
   installed via \code{install.packages("fitode")}.} does all of this
 computational work under the hood, and makes it as easy for a user to
 fit an ODE to data as it was for us to use \code{nls} above to fit a
@@ -1016,7 +1011,15 @@ In the model definition above:
 \item[\code{observation}]specifies that the observed data
   (\code{mort}) are assumed to arise from sampling from the negative
   binomial distribution [\code{dnbinom}, \cref{eq:NB}] with
-  overdispersion parameter $k$; the mean of the distribution is given by
+  overdispersion parameter $k$; Ordinary least squares can be implemented by changing the \code{observation} argument to
+  {\tt
+    \hlstd{mort}
+    \!\!{\color{black}\~{}}\!\!
+    \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{= R)}
+}.
+  % Ugly: https://stackoverflow.com/questions/48328364/inline-code-format-with-knitr-and-rnw; https://stackoverflow.com/questions/40252885/how-to-syntax-highlight-inline-r-code-in-r-markdown ?
+  
+  The mean of the distribution is given by
   the fitted model trajectory [\cref{eq:correct.mortality}],
 \begin{linenomath*}
 \begin{equation}
@@ -1030,12 +1033,7 @@ Fitting to such differences is implemented by using the
 \code{diffnames} argument to specify the state variable for which
 consecutive differences are to be used (so, if the focal variable is
 $R$ then \code{fitode} fits to $R(t_i) - R(t_{i-1})$ rather than
-$R(t_i)$).  Ordinary least squares can be implemented by changing the \code{observation} argument to
-{\tt
-  \hlstd{mort}
-  \!\!{\color{black}\~{}}\!\!
-  \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{= R)}
-}.
+$R(t_i)$).  
 \item[\code{initial}]conditions are expressed as numbers of individuals.
 \item[\code{par}]refers to the parameters to be fitted:
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
@@ -1054,11 +1052,8 @@ bombay2 <- rbind(
     bombay
 )
 @
-%%
-\bmb{is it worth a note/footnote here to caution about the common
-  practice of fitting to cumulative curves, e.g.
-  \cite{King+15}?}\djde{I've added a footnote above; you may want to
-  alter it.}  Taking our previous parameter estimate from \code{nls}
+
+Taking our previous parameter estimate from \code{nls}
 as our starting values, we can fit the model by calling the
 \code{fitode} function:
 <<sirmortfit,cache=TRUE,warning=FALSE,message=FALSE>>=
@@ -1081,11 +1076,7 @@ SIR_fit <- fitode(
   rate is known (using the \code{fixed} argument) due to parameter
   unidentifiability\footnote{In short, unidentifiability of $\gamma$
     means that we can obtain nearly identical fits across a wide range
-    of $\gamma$. We discuss this issue in detail in Supplementary
-    Materials.\djde{As I say elsewhere, I don't think we need supp.
-      I think we should be able to explain whatever is needed in the
-      caption to \cref{fig:proflikgamma}, or in an appendix if
-      necessary.} \swp{I agree that figure caption is good enough.}}.
+    of $\gamma$.}
 \item[\code{tcol}]specifies the time column of the data frame.
 \end{description}
 The resulting fits are plotted in \cref{fig:Bombay} and summarized in
@@ -1093,19 +1084,11 @@ The resulting fits are plotted in \cref{fig:Bombay} and summarized in
 \term{coefficients} in standard statistical jargon) can be obtained
 via \code{coef(SIR_fit)}.  The coefficients together with associated
 confidence intervals are obtained via \code{confint(SIR_fit)}, which
-also allows users to obtain confidence intervals for derived
+can also provide confidence intervals for derived
 parameters using the Delta method.  Note that \code{fitode} gives
 discrete predictions (rather than smooth curves) because we are
 calculating mortality at discrete (weekly) time intervals using
 \cref{eq:correct.mortality2}.
-
-\swp{overall, the bombay data set is a really bad example for fitting SIR model. Not sure what else to do or say.}
-\djde{Is it really bad or is it just that we are assuming CFP$=1$?}
-\swp{Really bad, I think. Look at the profile likelihood in the email. I think it's numerically bad, not necessarily biologically bad.}
-\djde{I've added text below to connect this section to the flu
-  section, and hopefully reduce concerns about the plague data.  Let
-  me know if you think more needs to be said here.}
-\swp{This seems good enough to me.}
 
 <<sirmortfitcoef, include=FALSE>>==
 coef.bombay.fitode.nb <- coef(SIR_fit)
@@ -1219,7 +1202,7 @@ interesting example with which to illustrate the process of fitting an
 epidemiological model to data, it is important to emphasize that
 modelling plague dynamics with the simple SIR model is, at best,
 difficult to justify \cite{bacaermodel2012,Earn+20}.  Indeed, \KM
-explicitly made a sequence of optomistic assumptions, which they
+explicitly made a sequence of optimistic assumptions, which they
 recognized were not ``strictly'' satisfied:
 
 \begin{quote}
@@ -1249,7 +1232,7 @@ Given the mental gymnastics required to motivate applying the SIR
 model to plague transmission, it is surprising that \KM did not choose
 to examine a more obviously suitable disease.  The surprise is
 especially extreme given that the most salient infectious disease
-epidemic in the 1920's would have been the 1918 influenza pandemic,
+epidemic in the 1920s would have been the 1918 influenza pandemic,
 which did involve direct human-to-human transmission, and for which
 much more detailed data were available at the time
 \cite{Roge20,Fros20,Eich23}.
@@ -1277,16 +1260,17 @@ Matching trajectories of the exact SIR model using \code{fitode} gives
 a fit---the yellow curve in \cref{fig:phila}---that is visually
 similar to the (red) fit of \KM's approximation, but provides much
 more realistic parameter estimates (\cref{tab:phila.fitode}); in
-particular, $\R_0\approx6.4$ and $\Tg\approx4.27$ days.  \djde{Ummm,
-  that $\Tg$ is still way too big.}
-  \swp{I accidentally multiplied by 7 in the table (which happened from copying the code for Bombay).}
+particular, $\R_0\approx6.4$ and $\Tg\approx4.27$ days.
+\bmb{we could import these numbers from R code (by writing to an
+  included TeX file with definitions, or by using inline expressions)
+  rather than hard-coding them, if we wanted ...}
 
 If we convert the \code{fitode} estimates of the SIR parameters to the
 parameters of \KM's approximation, we obtain the orange curve in \cref{fig:phila}, which grossly
-underestimates the magnitude of the epidemic (the turnover is much too
+underestimates the magnitude of the epidemic (the epidemic peak occurs much too
 soon).  The \KM approximation \eqref{eq:sech} is good initially, but
 becomes poorer and poorer over time as the underlying assumption
-\eqref{eq:KMassumption} on which it is based becomes less and less
+on which it is based \eqref{eq:KMassumption} becomes less and less
 valid.
 
 <<philapop, echo=TRUE, include=FALSE>>=
@@ -1429,28 +1413,28 @@ if (file.exists(sirstoch_fn)) {
 @
 
 The most compelling tests of estimation methods involve fitting models
-to data that have been generated with a known algorithm, so we know
-the underlying values of the parameters we are trying to estimate.
+to data that have been generated from a known model, so we know
+the true underlying values of the parameters we are trying to estimate.
 
 The most basic test is essentially a consistency check: in the context
 of the SIR model, we choose initial conditions $(S_0,I_0)$ and
 parameter values ($\R_0,\Tg$), compute the associated trajectory by
 solving \cref{eq:SIR} numerically, and then use \code{fitode} to
-estimate the parameters.  At least if we start from parameter guesses
-close to the correct underlying values, \code{fitode} should converge
+estimate the parameters.  At least if we choose starting values
+reasonably close to the correct underlying values, \code{fitode} should converge
 to those values.
 
-The next level of test would be to take our numerically computed
+The next level of testing is to take our numerically computed
 solution and artificially ``observe'' it with error, i.e., using a
 noise distribution that we specify.  For example, we could take
 observation errors to be negative binomially distributed with
 overdispersion parameter $k$, and then use \code{fitode} to estimate
 $k$ together with the other parameters ($S_0,I_0,\R_0,\Tg$).
 
-A still higher level of test is to begin by simulating data that are
-more realistic than can be generated by the idealized model that we
-want to fit, and then seeing if we can nevertheless recover the
-underlying parameter values that correspond to those of our idealized
+A still more stringent test is to simulate data from a model
+that is more complex and realistic than the idealized model that we
+want to fit, and then seeing if we can nevertheless recover parameters
+that correspond to those of our idealized
 model (e.g., $\R_0$ and $\Tg$ for the SIR model).  We will take a step
 in this direction in this section by fitting the deterministic SIR
 model \eqref{eq:SIR} to data generated by a fully stochastic version
@@ -1619,7 +1603,7 @@ tool but also to fit models to novel data.  Potential applications
 abound (we have ourselves used \code{fitode}'s predecessor,
 \code{fitsir}, to study music popularity \cite{Rosa+21}).
 
-We focussed here on three illustrative examples of epidemic time
+We focused here on three illustrative examples of epidemic time
 series.  The first was the reported weekly mortality from plague in
 Bombay in 1906 (\cref{fig:Bombay}), which was examined by \KM in their
 original paper \cite{KermMcKe27}.  Although historically important, it
@@ -1636,51 +1620,40 @@ that were ``driven by seasonality'' \cite[p.\,403]{bacaermodel2012}.
 Of course, other mechanisms (e.g., heterogeneity in contact patterns)
 might play a role as well.
 
-\djde{The strict seasonality in Baca\"er's Figure 2 is very
-  compelling.  This could happen from demographic stochasticity
-  sustaining transients, but only if the damping period happens to be
-  exactly one year.  I don't know if we can constrain the parameters
-  sufficiently to rule that out (and we would need vital dynamics
-  and/or decay of immunity to even try), but an exactly annual period
-  is much more likely to arise from seasonal forcing.  Digging into
-  this seems like a rabbit hole that is well outside the intended
-  scope of this paper; it would certainly have to involve fitting all
-  15 annual epidemics that Baca\"er shows and figuring out what other
-  useful information is in all those reports that he cites.  But it
-  would be fun to investigate, perhaps in another paper.}
-\swp{Definitely another paper...}
+%\djde{The strict seasonality in Baca\"er's Figure 2 is very
+%%   compelling.  This could happen from demographic stochasticity
+%%   sustaining transients, but only if the damping period happens to be
+%%   exactly one year.  I don't know if we can constrain the parameters
+%%   sufficiently to rule that out (and we would need vital dynamics
+%%   and/or decay of immunity to even try), but an exactly annual period
+%%   is much more likely to arise from seasonal forcing.  Digging into
+%%   this seems like a rabbit hole that is well outside the intended
+%%   scope of this paper; it would certainly have to involve fitting all
+%%   15 annual epidemics that Baca\"er shows and figuring out what other
+%%   useful information is in all those reports that he cites.  But it
+%%   would be fun to investigate, perhaps in another paper.}
+%% \swp{Definitely another paper...}
 
 To obtain a deeper understanding of the Bombay plague epidemic, we
 could formulate a variety of models, fit them to the data using
 \code{fitode} or other software, and use a statistical framework for
-``model selection'' \cite{BurnAnde02} to rank the relative importance
+model selection \cite{BurnAnde02} to rank the relative importance
 of the various mechanisms included in the sequence of models (see,
 e.g., He \emph{et al.} \cite{He+13a} for an example of using this
 approach to understand the occurrence of three distinct waves in the
-1918 influenza pandemic\djde{feel free to suggest other examples!}).
-\swp{Not sure if model selection is the right way to go... this is
-the exact problem that the other plague paper had, if you remember.
-We could also mention Ben's multimodel paper as a caveat of this approach?}
+1918 influenza pandemic. (Alternatively, we could formulate one model
+that included \emph{all} of the processes and attempt to measure
+their relative importance by comparing the magnitudes of parameters
+\cite{Bolk23}.)
 We have not attempted such a study here, since our goal was simply to
 explain and illustrate the fitting methodology.  However, it is worth
 highlighting that our analysis using the SIR model did reveal a
-computational challenge that---in the absense of additional
+computational challenge that---in the absence of additional
 information about the Bombay plague outbreak---would likely limit how
 much can be learned from a model selection exercise: the mean
 generation interval ($\Tg$) appears to be \term{unidentifiable}, i.e.,
 impossible to estimate reliably from the reported weekly plague deaths
-(see \cref{fig:proflikgamma}).
-
-\djde{We should not have supp.  There is just the one figure, which we
-  can just stick here (I've commented out the creation of supp so it
-  is now \cref{fig:proflikgamma} rather than S1).  We can probably say
-  as much as we need to in the figure caption, but we could,
-  alternatively, have an \emph{appendix}, rather than supplementary
-  material.}
-  \swp{I agree we don't need appendix or supp}
-\djde{I wonder if fitting to the full 15 year time series that
-  Baca\"er shows would make $\Tg$ identifiable.}
-  \swp{Maybe...but another paper.}
+alone (see \cref{fig:proflikgamma}).
 
 Our second example was the main wave of the 1918 influenza pandemic in
 the city of Philadelphia, for which daily mortality from pneumonia and
@@ -1693,7 +1666,7 @@ yielded plausible parameter estimates (see
 
 Finally, we conducted a kind of test that truly makes most sense to
 perform \emph{before} fitting to a real, empirically observed time
-series: we fit models to a \emph{simulation} that we ran, so we knew
+series: we fit models to a simulation that we ran, so we knew
 the parameter values used to generate the simulated ``observations''.
 The simulation was a realization of the stochastic SIR model, to
 which, again, we fit both the deterministic SIR model \eqref{eq:SIR}
@@ -1702,89 +1675,104 @@ using \code{nls}.  Both provide visually reasonable fits
 (\cref{fig:stoch}) but \KM's approximation yields absurd parameter
 values, whereas \code{fitode} estimates the correct values of the
 underlying disease-related parameters
-\djde{and a discrepancy in the initial conditions that makes perfect
-sense; awkward to get this across nicely}
 (\cref{tab:stoch.fitode,tab:stoch.nls}).
-\swp{How about this: while we still find a minor discrepancy in the estimates of
-initial conditions, this discrepancy is expected as this particular realization of
-the stochastic outbreak simulation did not take off immediately. Underestimation of
-the initial prevalence allows the deterministic model to offset the delayed epidemic
-onset.}
+(We did find a discrepancy in the estimates of
+initial conditions; this was driven by the failure of
+the stochastic outbreak simulation to take off immediately.
+A lower initial prevalence is the only mechanism by which
+the deterministic model can capture the delayed onset of the epidemic.
+In practice, modelers fitting to epidemic time series by trajectory
+matching usually pick an ``epidemic window'' that corresponds to
+the part of the epidemic that can be reasonably captured by
+a deterministic model \cite{Earn+20}.)
 
-The reason that \KM's approximation fails to estimate the correct
-parameter values for the simulation is that the assumption on which
-the approximation is based \eqref{eq:KMassumption} is strongly
+\KM's approximation estimates the simulation
+parameters badly because the assumption on which
+it is based \eqref{eq:KMassumption} is strongly
 violated in the simulation (\cref{fig:stoch}).  Consequently, the
 parameters of the \KM approximation cannot be interpreted biologically
-or mechanistically.  It is worth noting, more generally, that a purely
+or mechanistically.  Nore generally, a purely
 phenomenological model with the same number of parameters can
 sometimes fit a stochastic simulation just as closely or even closer
 than the deterministic limit of the model that generated the data
 \cite{Rosa+21}; a good fit is not, on its own, sufficient to conclude
-that a model can help explain patterns in data.
+that a model matches the underlying processes of a dynamical system.
 
-While not essential for conveying the basics that we have emphasized
-here, we would be remiss in not mentioning that \code{fitode} contains
-a number of useful features that we have not discussed.  In particular,
-there are options for:
-\djde{Perhaps mention the help commands that users should use to learn
-how to take advantage of each of these options?} \swp{I don't think any of these
-have any help commands yet... I can try to come up with them later...}
+Beyond the basics that we have discussed here, \code{fitode} contains
+a number of useful advanced features. In particular,
+\code{fitode} can
 \begin{description}
-\item[\term{multiple data streams:}]\code{fitode} allows for
-  simultaneous fitting of multiple state variables to multiple time
-  series.
-\item[\term{importance sampling:}]\code{fitode} provides an option to
-  compute confidence intervals using the following approach\needref.
-  Parameter sets are randomly drawn from a multivariate normal
-  distribution whose mean and variance-covariance matrix correspond to
-  the maximum likelihood estimates and the estimated
-  variance-covariance matrix, respectively; then, each parameter set
-  is weighted accordingly based on the the likelihood of their
-  epidemic trajectories and the sampling probability.  Generally, this
-  method is expected to provide more robust confidence intervals than
-  the Delta method\needref, but is computationally more costly.
-  \swp{Ben might know references for these ones... I think we just sat down
-  and derived them together without references?}
-\item[\term{Bayesian inference\needref via MCMC\needref:}]
-\djde{BB or SWP: Can you add something about why this
-    option is useful.}
-    \swp{Unlike maximum likelihood approaches, which seek to estimate the best-fitting
-    parameter set, Bayesian methods aim to estimate a distribution of
-    parameters (also known as the posterior distribution) that are consistent with our
-    assumptions/knowledge about the system (also known as the prior distribution) as well
-    as the observed data. Markov chain Monte Carlo are typically used to explore the
-    parameter space and approximate the target distribution. These approaches are generally
-    better at handling parameter uncertainteis but are computationally more expensive in general.}
+\item [fit to multiple data streams]: e.g. in the case where
+  case reports, hospitalization reports, and wastewater sampling are
+  all available in a COVID-19 time series
+\item [compute confidence intervals via importance sampling]:
+  While the Delta method can compute confidence intervals for derived
+  quantities such as predicted trajectories, it rests on strong
+  and sometimes unreliable assumptions. A more accurate
+  but computationally expensive approach starts by
+  sampling parameter sets randomly from a multivariate normal
+  distribution with a mean and covariance matrix drawn from
+  the maximum likelihood fit. For each set of parameters in
+  the ensemble, \code{fitode} computes the likelihood and
+  a predicted trajectory (or some quantity such as the total
+  size of the epidemic); an average value and confidence intervals
+  are derived from weighted moments (means) or quantiles (medians
+  or extremes such as 10th and 90th percentiles).
+\item [apply Bayesian inference]:
+  Unlike maximum likelihood approaches, which seek to estimate the best-fitting
+  parameter set, Bayesian methods aim to estimate a distribution of
+  parameters (also known as the posterior distribution) that are consistent with our
+  previous knowledge about the system (encapsulated in \emph{prior distributions}) as well
+  as the observed data.
+  These approaches are generally
+  better at handling parameter uncertainties \citep{elderd2006uncertainty}
+  but are usually mush more computationally expensive.
+
+  \code{fitode} allows the user to specify prior distributions on parameters; these
+  can either reflect previous knowledge of a disease system, or can be used to
+  \emph{regularize} a fitting procedure by downweighting extreme values of parameters
+  \cite{Lemo2019}.
+
+  \emph{Markov chain Monte Carlo} algorithms are typically used to explore the
+  parameter space and approximate the target distribution. \code{fitode} implements
+  a simple \emph{Metropolis-Hasting} sampler \citep[\S7.3.1]{Bolk08}. 
+  The Stan platform provides a much more powerful Bayesian sampling algorithm
+  using sensitivity equations,
+  built on top of a fully general system for specifying ODEs; however, this
+  tool requires significantly more computational and statistical background to
+  use effectively \cite{Grin+2021}.
+ 
 \end{description}
-Even with these extensions, there will be many other challenges to
-fitting ODE models with the \code{fitode} package, as with many other
-software packages\djde{(e.g., ...????...)}.  For example, it is often
+
+Even with these extensions, modelers will face many challenges when
+fitting ODEs to data with the \code{fitode} package, as with 
+fitting any nonlinear model to data.  For example, it is often
 difficult to ensure that the model has converged properly or reached
 its true maximum.  Performing optimization from multiple starting
 conditions and drawing likelihood surfaces can help diagnose these
 problems.  Using different optimization methods or reparameterizing
-the model can sometimes help resolve these issues as well.  We also
+the model can also help \cite{raue2013lessons,Bolk+2013}.  We also
 encourage users of \code{fitode} who encounter these or other
 fitting challenges to open any issues via the GitHub repository:
 \url{https://github.com/parksw3/fitode}.
 
-As its name suggests, the scope of \code{fitode} is limited to fitting
+As its name suggests, \code{fitode} is limited to fitting
 ODEs to time series.  Consequently, by design, \code{fitode} ignores
-\term{process error}, i.e., variability that is intrinsic to the
-structure of the system (as opposed to \term{observation error}, which
-arises from imperfect measurements or reporting).  A key component of
+\term{process error}, i.e., random variability that affects
+both current and future steps of the trajectory --- as opposed to \term{observation error}, which
+arises from imperfect measurements or reporting and is usually assumed to
+be independent of the trajectory itself.  A key component of
 process error is the demographic stochasticity that is inherent to the
-stochastic SIR model discussed above (and to any real host-pathogen
+discrete stochastic SIR model discussed above (and to any real host-pathogen
 system).  Parameters of models can also be subject to process error;
-for example, the transmission rate might, in practice, have a
-component that is dependent on random fluctuations in weather.  A
-number of studies have found that accounting for process error can be
+for example, the transmission rate might depend on random fluctuations in weather.
+Properly accounting for process error can be
 critical for estimating uncertainties in parameter estimates
-and confidence bands on the projected dynamics of a system\needref \citep{King+15,taylor2016stochasticity,li2018fitting}.
+and confidence bands on the projected dynamics of a system \citep{King+15,taylor2016stochasticity,li2018fitting}.
 Popular \code{R} packages that can fit models with process error
 include \code{pomp} \citep{king2015statistical} and \code{odin}
 \citep{odin2021}.
+\bmb{can odin do that? really?}
 
 \section{Closing remarks: from Fred Brauer to \code{fitode}}
 
@@ -1797,6 +1785,7 @@ would be worth writing a paper (and accompanying software) that could
 draw more dynamicists working on epidemic models into the world of
 data.
 
+\bmb{do we need this paragraph? Seems irrelevant to the average reader \ldots}
 Initially, we developed \code{fitsir} (which fits the standard SIR
 model \eqref{eq:SIR} to a single time series) as a purely pedagogical
 tool, but we then found it tremendously useful for a research project
@@ -1812,7 +1801,7 @@ difficult.  A true understanding of ``why it is hard'' is something
 that builds over time with experience, but the key points are that
 finding optima of a complex multi-dimensional function is hard enough
 on its own \citep{raue2013lessons}, and estimating statistically meaningful
-uncertainty in those optima is extremely challenging\citep{elderd2006uncertainty,li2018fitting}\needref.
+uncertainty in those optima is extremely challenging\citep{elderd2006uncertainty,li2018fitting}.
 
 Fred would never have used \code{fitode}, but would have delighted in
 seeing it demonstrated and in discussing the theoretical background on
