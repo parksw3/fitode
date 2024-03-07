@@ -1,4 +1,5 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
+## https://stackoverflow.com/questions/10376206/what-is-the-preferred-bash-shebang
 # generate diff.pdf from a particular commit, e.g. './mkdiff 673409a0'
 MS=brauer-ms
 Rscript -e "knitr::knit(\"${MS}.Rnw\")"
@@ -8,5 +9,6 @@ Rscript -e "knitr::knit(\"${MS}.Rnw\")"
 mv ${MS}.tex ${MS}-old.tex
 latexdiff ${MS}-old.tex ${MS}-new.tex >diff.tex
 pdflatex diff
+rm ${MS}-old.tex ${MS}-new.tex diff.tex
 git checkout master
 

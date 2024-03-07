@@ -1082,7 +1082,7 @@ SIR_fit <- fitode(
 \end{description}
 The resulting fits are plotted in \cref{fig:Bombay} and summarized in
 \cref{tab:bombay.fitode}.  The estimated parameter values (the
-\term{coefficients} in standard statistical jargon) can be obtained
+\term{coefficients} of the model) can be obtained
 via \code{coef(SIR_fit)}.  The coefficients together with associated
 confidence intervals are obtained via \code{confint(SIR_fit)}, which
 can also provide confidence intervals for derived
@@ -1932,22 +1932,6 @@ identically distributed (i.e. mean-zero, constant-$\sigma$)
 Normal observation errors in
 the time series.
 
-\subsection*{Priors}
-
-Having introduced the maximum likelihood framework, we can improve
-our estimates by making a more realistic assumption about
-the error distribution and/or taking advantage of any prior knowledge
-we have that might affect our notion of the most likely parameter
-values (i.e., \emph{not} ignoring $\Pop(\text{model})$, and instead
-specifying it as a probability distribution on the model's
-parameters).
-\bmb{I don't mind talking about priors if we're actually going to cover them,
-  but I feel like it might make more sense to introduce them later, starting as
-  a way to regularize/make optimization more robust.}
-We will then end up with a different likelihood function
-to maximize, and obtain a different $\thetavechat$, but the basic idea
-is the same.
-
 \subsection*{Comments moved from elsewhere that might be helpful in Discussion}
 
 We chose to fix $I_0$ rather than the (known) population size
@@ -2343,6 +2327,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
   band show the \code{fitode} fit, for which the parameter estimates
   are given in \cref{tab:phila.fitode}.  The blue curve shows the \KM
   approximation using the parameters estimated with \code{fitode}.
+  \bmb{I don't see a blue curve? (orange?)}
 }
 \label{fig:phila}
 \end{figure}
