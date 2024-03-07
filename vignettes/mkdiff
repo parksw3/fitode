@@ -1,3 +1,4 @@
+#!/usr/local/bin/bash
 # generate diff.pdf from a particular commit, e.g. './mkdiff 673409a0'
 MS=brauer-ms
 Rscript -e "knitr::knit(\"${MS}.Rnw\")"
