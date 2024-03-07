@@ -140,22 +140,23 @@ options(warnPartialMatchArgs = FALSE,
 \bigskip \bigskip
 
 \begin{abstract}
-  Fred Brauer made many contributions to mathematical epidemiology,
-  but had no desire to touch data.  Nevertheless, he recognized that
-  fitting models to data is usually necessary when attempting to apply
-  infectious disease transmission models to real public health
-  problems.  He was curious to know how one goes about fitting
-  dynamical models to data, and why it can be hard.  Initially in
-  response to Fred's questions, we developed a user-friendly \code{R}
-  package, \code{fitode}, that facilitates fitting ordinary differential equations to
-  observed time series.  Here, we use this package to
-  provide a brief tutorial introduction to fitting compartmental
-  epidemic models to a single observed time series.  We assume that,
-  like Fred, the reader is familiar with dynamical systems from a
-  mathematical perspective, but has limited experience (if any) with
-  statistical methodology or optimization techniques.
-  \bmb{Is this framing weird if this is going to appear in a regular issue of BMB? Does it need
-    to be tweaked, e.g. with a clause explaining who Fred Brauer was?}
+  Fred Brauer was an eminent mathematician who studied dynamical
+  systems, especially differential equations.
+  He made many contributions to mathematical epidemiology, a field
+  that is strongly connected to data, but he had no desire to touch
+  data.  Nevertheless, he recognized that fitting models to data is
+  usually necessary when attempting to apply infectious disease
+  transmission models to real public health problems.  He was curious
+  to know how one goes about fitting dynamical models to data, and why
+  it can be hard.  Initially in response to Fred's questions, we
+  developed a user-friendly \code{R} package, \code{fitode}, that
+  facilitates fitting ordinary differential equations to observed time
+  series.  Here, we use this package to provide a brief tutorial
+  introduction to fitting compartmental epidemic models to a single
+  observed time series.  We assume that, like Fred, the reader is
+  familiar with dynamical systems from a mathematical perspective, but
+  has limited experience (if any) with statistical methodology or
+  optimization techniques.
 \end{abstract}
 
 \begin{keywords}
