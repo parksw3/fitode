@@ -894,30 +894,30 @@ particular, the variance of $g(\thetavec)$ is
 \mathrm{Var}(g(\thetavec))
 &\approx
 \mathrm{Var}\big[g(\thetavechat)
-   + (\nabla g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big] \\
+   + (\gradtheta g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big] \\
 &=
-\mathrm{Var}\big[(\nabla g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big] \\
+\mathrm{Var}\big[(\gradtheta g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big] \\
 &=
-\mathbb{E}\big[\big((\nabla g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big)^2\big] \\
+\mathbb{E}\big[\big((\gradtheta g)(\thetavechat)\cdot(\thetavec-\thetavechat)\big)^2\big] \\
 &=
 \,\mathbb{E}\big[
-(\nabla g)(\thetavechat)^\transpose
+(\gradtheta g)(\thetavechat)^\transpose
   (\thetavec-\thetavechat)
   (\thetavec-\thetavechat)^\transpose
-  (\nabla g)(\thetavechat)
+  (\gradtheta g)(\thetavechat)
   \big]\,
 \\
 &=
-(\nabla g)(\thetavechat)^\transpose
+(\gradtheta g)(\thetavechat)^\transpose
 \,\mathbb{E}\big[
   (\thetavec-\thetavechat)
   (\thetavec-\thetavechat)^\transpose
   \big]\,
-(\nabla g)(\thetavechat) \\
+(\gradtheta g)(\thetavechat) \\
 &=
-(\nabla g)(\thetavechat)^\transpose
+(\gradtheta g)(\thetavechat)^\transpose
 \,\textrm{Cov}(\thetavec)\,
-(\nabla g)(\thetavechat)
+(\gradtheta g)(\thetavechat)
 \end{align}
 \end{subequations}
 \end{linenomath*}
@@ -962,7 +962,7 @@ ODEs to data introduces significant coding/computational challenges,
 but conceptually the problem is the same as if we did have an
 analytical formula.  We can still use the Delta method
 \eqref{eq:DeltaMethod} to estimate uncertainty, but calculating the
-gradient $(\nabla g)(\thetavec)$ is not straightforward if $g$ is a
+gradient $(\gradtheta g)(\thetavec)$ is not straightforward if $g$ is a
 numerical solution of an ODE; we must simultaneously solve a set of
 \term{sensitivity equations} \cite[Eq.\,(6)]{raue2013lessons}
 alongside the main differential equations. Sensitivity equations are
