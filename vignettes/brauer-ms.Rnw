@@ -75,8 +75,14 @@
 \usepackage{xspace}
 \newcommand{\KM}{KM\xspace}
 \usepackage{bm} % bold math
+\newcommand{\fvec}{{\bm{f}}}
+\newcommand{\xvec}{{\bm{x}}}
 \newcommand{\thetavec}{{\bm{\theta}}}
 \newcommand{\thetavechat}{{\bm{\hat\theta}}}
+%%\newcommand{\gradtheta}{\nabla_{\!\!\thetavec}}
+\newcommand{\gradtheta}{\nabla_{{}_{\!\!\thetavec}}}
+%%\newcommand{\gradx}{\nabla_{\!\!\xvec}}
+\newcommand{\gradx}{\nabla_{{}_{\!\!\xvec}}}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \usepackage{xspace}
 \newcommand{\KMcol}{blue\xspace}
@@ -99,7 +105,11 @@
 %% https://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
 \usepackage{ragged2e}
 %%\usepackage{array} % for m{...}
-
+\newcommand{\ie}{i.e., }
+\newcommand{\sens}{{\mathsf S}}
+\newcommand{\sensmat}{{\bm{\sens}}}
+\newcommand\ttbackslash{{\tt\char`\\}}
+\newcommand{\macro}[1]{{\tt\ttbackslash#1}}
 
 <<setup, echo=FALSE, include=FALSE>>=
 ## set default base-graphics plotting options
@@ -183,11 +193,14 @@ susceptible-infected-removed (SIR) epidemic model,
 where $S$, $I$ and $R$ represent the numbers of individuals who are
 susceptible, infected or removed\footnote{In the words of \KM
   \cite[p.\,701]{KermMcKe27}, ``removed from the number of those who
-  are sick, by recovery or by death''. \bmb{is this needed?}}, $\beta$ is the transmission
-rate, and $\gamma$ is the recovery rate.  In that original paper,
-\KM \cite[p.\,714]{KermMcKe27} also fit their model
-to plague mortality data from an epidemic in Bombay (now Mumbai) that
-occurred about 20 years before their paper was written.
+  are sick, by recovery or by death''. \bmb{is this needed?}\djde{No,
+    but I like it.  I didn't realize until finding this quote that KM
+    themselves thought of $R$ as a class for both recovered or dead
+    individuals.}}, $\beta$ is the transmission rate, and $\gamma$ is
+the recovery rate.  In that original paper, \KM
+\cite[p.\,714]{KermMcKe27} also fit their model to plague mortality
+data from an epidemic in Bombay (now Mumbai) that occurred about 20
+years before their paper was written.
 
 In the century that has elapsed since publication of \KM's initial
 paper, the field of mathematical epidemiology has expanded and
@@ -410,6 +423,8 @@ $\omega=-0.19$, $\phi=-3.48$, which is far from our fitted values and
 illustrates a very important fact: there is \emph{not necessarily a
   unique best fit set of parameters!}  In this case, the alternative
 solution exists because $\sech^2(x)$ is symmetric about the $y$ axis,
+\djde{Perhaps add a footnote mentioning Ben's discovery that including
+gradients in the fit eliminates this symmetric solution?}
 but in general, there can be multiple local minima that cause
 nonlinear optimizers to converge to points that may or may not
 represent equally good fits to the data.  The potential existence of
@@ -685,14 +700,16 @@ taken into account.
   pretty well covered by the caveats paragraph from KM at the end of this
   section (search for ``mental gymnastics'').
   The Ellner fit I was referring to is unpublished, \href{https://ms.mcmaster.ca/~bolker/eeid/2010/Ecology/EllnerMaxLikEEID2010.pdf}{here}}
-%(If we think carefully about the biology we 
-%realize that we are sweeping many more assumptions under the rug:
-%for example,
-%in reality plague is a vector-borne disease of rodents that spills over
-%into humans, rarely being transmitted directly between humans. One
-%way to gloss over these complexities is to say that $\beta$ and $\gamma$
-%implicitly both include a scaling factor that captures the relationship
-%between rat infections and observed human deaths.
+\djde{I've temporarily exposed your text in grey to avoid commented-out stuff in the ms.}
+{\color{gray}
+(If we think carefully about the biology we 
+realize that we are sweeping many more assumptions under the rug:
+for example,
+in reality plague is a vector-borne disease of rodents that spills over
+into humans, rarely being transmitted directly between humans. One
+way to gloss over these complexities is to say that $\beta$ and $\gamma$
+implicitly both include a scaling factor that captures the relationship
+between rat infections and observed human deaths.}
 
 \section{Uncertainty}\label{sec:Uncertainty}
 
@@ -950,22 +967,41 @@ numerical solution of an ODE; we must simultaneously solve a set of
 \term{sensitivity equations} \cite[Eq.\,(6)]{raue2013lessons}
 alongside the main differential equations. Sensitivity equations are
 an auxiliary set of ODEs that define the time derivatives of the
-derivatives of the state variables with respect to the parameters,
-i.e.,
-$\frac{\rm d}{{\rm d}t}\big(\frac{\partial
-  x(t,\theta_i)}{\partial\theta_i}\big)$, where $\theta_i$ refers to
-the components of $\thetavec$. They can easily be derived using the
-chain rule, i.e. if we write
-\begin{equation}
-S(x,t, \theta_i) = \frac{\rm d}{{\rm d}t}\left(\frac{\partial
-  x(t,\theta_i)}{\partial\theta_i}\right) = \left[\frac{\partial}{\partial x} \left(\frac{{\rm d} x(t,\theta_i)}{{\rm d} t} \right)\right] \frac{\partial
-  x(t,\theta_i)}{\partial\theta_i} + \frac{\partial}{\partial \theta_i} \left(\frac{{\rm d} x(t,\theta_i)}{{\rm d} t} \right)
-\end{equation}
-then we can calculate the derivative of $x(t)$ with respect to $\theta_i$ as $\int_0^{t} S(x,t') \, dt'$, i.e. by solving the differential equation; we can then use a further chain-rule step to compute the derivative of the log-likelihood of the observations at time $t$ with respect to the parameters. Integrating the sensitivity equations in parallel with the main set of ODEs is
-a computationally efficient and numerically stable way to
-calculate the overall gradients of the log-likelihood with respect to
-the parameters, which makes nonlinear estimation more robust and efficient. We can also use these gradients to calculate CIs using the Delta method.
-Raue \emph{et al.} \cite{raue2013lessons} give a more detailed comparison between using the sensitivity equations and computing gradients by finite-difference approximations.
+derivatives of the state variables with respect to the parameters, \ie
+$\ddt{}\big( \gradtheta\xvec(t,\thetavec) \big)$.  They can easily be
+derived using the chain rule; if we write a generic, autonomous ODE as
+$\dbydt{\xvec} = \fvec(\xvec,\thetavec)$ then \djde{using 
+  \macro{sens} (currently $\sens$)
+  rather than $S$ to avoid confusion with susceptibles}
+\begin{linenomath*}
+\begin{subequations}
+\begin{align}
+\sensmat(\xvec,t, \thetavec) 
+&= \ddt{}\Big(\gradtheta\xvec(t,\thetavec)\Big)
+= \gradtheta\Big( \ddt{\xvec(t,\thetavec)} \Big)
+= \gradtheta\Big( \fvec(\xvec,\thetavec) \Big) \\
+\noalign{\vspace{10pt}}
+&=  \gradx\fvec(\xvec,\thetavec)
+    \,\gradtheta\xvec
+   +  \gradtheta\fvec
+\end{align}
+\end{subequations}
+\end{linenomath*}
+\djde{I'm assuming an autonomous ODE; not clear what $\gradtheta$
+  means otherwise} then we can calculate the derivative of $x_i(t)$
+with respect to $\theta_j$ as
+$\int_0^{t} \sens_{ij}(\xvec,t',\thetavec) \, dt'$, i.e. by solving the
+differential equation; we can then use a further chain-rule step to
+compute the derivative of the log-likelihood of the observations at
+time $t$ with respect to the parameters. Integrating the sensitivity
+equations in parallel with the main set of ODEs is a computationally
+efficient and numerically stable way to calculate the overall
+gradients of the log-likelihood with respect to the parameters, which
+makes nonlinear estimation more robust and efficient. We can also use
+these gradients to calculate CIs using the Delta method.  Raue
+\emph{et al.} \cite{raue2013lessons} give a more detailed comparison
+between using the sensitivity equations and computing gradients by
+finite-difference approximations.
 
 The \code{fitode} package\footnote{\code{fitode} is available on
   \href{https://cran.r-project.org/}{CRAN}, and can be
