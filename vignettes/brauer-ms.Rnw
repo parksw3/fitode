@@ -984,17 +984,17 @@ ODEs to data introduces significant coding/computational challenges,
 but conceptually the problem is the same as if we did have an
 analytical formula.  We can still use the Delta method
 \eqref{eq:DeltaMethod} to estimate uncertainty, but calculating the
-gradient $(\gradtheta g)(\thetavec)$ is not straightforward if $g$ is a
-numerical solution of an ODE; we must simultaneously solve a set of
+gradient $(\gradtheta g)(\thetavec)$ is not straightforward if $g$ is
+a numerical solution of an ODE; we must simultaneously solve a set of
 \term{sensitivity equations} \cite[Eq.\,(6)]{raue2013lessons}
-alongside the main differential equations. Sensitivity equations are
-an auxiliary set of ODEs that define the time derivatives of the
-derivatives of the state variables with respect to the parameters, \ie
+alongside the main differential equations. Sensitivity equations
+define the time derivatives of the gradients of trajectories with
+respect to the parameters, \ie
 $\ddt{}\big( \gradtheta\xvec(t,\thetavec) \big)$.  They can easily be
 derived using the chain rule; if we write a generic, autonomous ODE as
-$\dbydt{\xvec} = \fvec(\xvec,\thetavec)$ then \djde{using 
-  \macro{sens} (currently $\sens$)
-  rather than $S$ to avoid confusion with susceptibles}
+$\dbydt{\xvec} = \fvec(\xvec,\thetavec)$ then the \term{sensitivities}
+are \djde{using \macro{sens} (currently $\sens$) rather than $S$ to
+  avoid confusion with susceptibles}
 \begin{linenomath*}
 \begin{subequations}
 \begin{align}
@@ -1004,26 +1004,31 @@ $\dbydt{\xvec} = \fvec(\xvec,\thetavec)$ then \djde{using
 = \gradtheta\Big( \fvec(\xvec,\thetavec) \Big) \\
 \noalign{\vspace{10pt}}
 &=  \gradx\fvec(\xvec,\thetavec)
-    \,\gradtheta\xvec
-   +  \gradtheta\fvec
+    \, \gradtheta\xvec
+   +  \gradtheta\fvec \,. \label{eq:sens;b}
 \end{align}
 \end{subequations}
 \end{linenomath*}
 \djde{I'm assuming an autonomous ODE; not clear what $\gradtheta$
-  means otherwise} then we can calculate the derivative of $x_i(t)$
-with respect to $\theta_j$ as
-$\int_0^{t} \sens_{ij}(\xvec,t',\thetavec) \, dt'$, i.e. by solving the
-differential equation; we can then use a further chain-rule step to
-compute the derivative of the log-likelihood of the observations at
-time $t$ with respect to the parameters. Integrating the sensitivity
-equations in parallel with the main set of ODEs is a computationally
-efficient and numerically stable way to calculate the overall
-gradients of the log-likelihood with respect to the parameters, which
-makes nonlinear estimation more robust and efficient. We can also use
-these gradients to calculate CIs using the Delta method.  Raue
-\emph{et al.} \cite{raue2013lessons} give a more detailed comparison
-between using the sensitivity equations and computing gradients by
-finite-difference approximations.
+  means otherwise.}\djde{\cref{eq:sens;b} requires us to know
+  $\gradtheta\xvec$, but we don't.  So how do we compute
+  this?}\djde{It seems to me that the notation should be
+  $\sensmat(\xvec(t,\thetavec),\thetavec)$ to make clear that there is
+  no explicit dependence on $t$.}From the time-varying matrix
+$\sensmat$, we can calculate the derivative of $x_i(t,\thetavec)$ with
+respect to $\theta_j$ as
+$\int_0^{t} \sens_{ij}(\xvec,t',\thetavec) \, {\rm d}t'$, \ie by
+integrating along the solution to the differential equation; we can
+then use a further chain-rule step to compute the derivative of the
+log-likelihood of the observations at time $t$ with respect to the
+parameters. Integrating the sensitivity equations in parallel with the
+ODEs is a computationally efficient and numerically stable way to
+calculate the overall gradients of the log-likelihood with respect to
+the parameters, which makes nonlinear estimation more robust and
+efficient. We can also use these gradients to calculate CIs using the
+Delta method.  Raue \emph{et al.} \cite{raue2013lessons} give a
+detailed comparison between using the sensitivity equations and
+computing gradients by finite-difference approximations.
 
 The \code{fitode} package\footnote{\code{fitode} is available on
   \href{https://cran.r-project.org/}{CRAN}, and can be
