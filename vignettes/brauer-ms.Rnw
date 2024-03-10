@@ -989,42 +989,56 @@ a numerical solution of an ODE; we must simultaneously solve a set of
 \term{sensitivity equations} \cite[Eq.\,(6)]{raue2013lessons}
 alongside the main differential equations. Sensitivity equations
 define the time derivatives of the gradients of trajectories with
-respect to the parameters, \ie
-$\ddt{}\big( \gradtheta\xvec(t,\thetavec) \big)$.  They can easily be
-derived using the chain rule; if we write a generic, autonomous ODE as
-$\dbydt{\xvec} = \fvec(\xvec,\thetavec)$ then the \term{sensitivities}
-are \djde{using \macro{sens} (currently $\sens$) rather than $S$ to
-  avoid confusion with susceptibles}
+respect to the parameters.  They can easily be derived using the chain
+rule; if we write a generic, autonomous ODE for $\xvec(t,\thetavec)$
+as
+\begin{equation}\label{eq:genericODE}
+  \ddt{\xvec} = \fvec(\xvec,\thetavec)\,,
+  \qquad \xvec(0,\thetavec) = \xvec_0(\thetavec),
+\end{equation}
+then the sensitivity equations are
 \begin{linenomath*}
-\begin{subequations}
+\begin{subequations}\label{eq:senseqns}
 \begin{align}
-\sensmat(\xvec,t, \thetavec) 
-&= \ddt{}\Big(\gradtheta\xvec(t,\thetavec)\Big)
-= \gradtheta\Big( \ddt{\xvec(t,\thetavec)} \Big)
+\ddt{}\Big(\gradtheta\xvec(t,\thetavec)\Big)
+&= \gradtheta\Big( \ddt{\xvec(t,\thetavec)} \Big)
 = \gradtheta\Big( \fvec(\xvec,\thetavec) \Big) \\
 \noalign{\vspace{10pt}}
 &=  \gradx\fvec(\xvec,\thetavec)
-    \, \gradtheta\xvec
-   +  \gradtheta\fvec \,. \label{eq:sens;b}
+    \, \gradtheta\xvec(t,\thetavec)
+   +  \gradtheta\fvec(\xvec,\thetavec) \,. \label{eq:senseqns;b}
 \end{align}
 \end{subequations}
 \end{linenomath*}
-\djde{I'm assuming an autonomous ODE; not clear what $\gradtheta$
-  means otherwise.}\djde{\cref{eq:sens;b} requires us to know
-  $\gradtheta\xvec$, but we don't.  So how do we compute
-  this?}\djde{It seems to me that the notation should be
-  $\sensmat(\xvec(t,\thetavec),\thetavec)$ to make clear that there is
-  no explicit dependence on $t$.}From the time-varying matrix
-$\sensmat$, we can calculate the derivative of $x_i(t,\thetavec)$ with
-respect to $\theta_j$ as
-$\int_0^{t} \sens_{ij}(\xvec,t',\thetavec) \, {\rm d}t'$, \ie by
-integrating along the solution to the differential equation; we can
-then use a further chain-rule step to compute the derivative of the
-log-likelihood of the observations at time $t$ with respect to the
-parameters. Integrating the sensitivity equations in parallel with the
-ODEs is a computationally efficient and numerically stable way to
-calculate the overall gradients of the log-likelihood with respect to
-the parameters, which makes nonlinear estimation more robust and
+If $\xvec$ and $\thetavec$ are $n$- and $m$-dimensional,
+respectively, then the $nm$ \term{sensitivities} $\sens_{ij}(t)$
+are given by the $n\times m$ \term{sensitivity matrix},
+\begin{equation}
+\sensmat(t) = \gradtheta\xvec(t,\thetavec) \,.
+\end{equation}
+\cref{eq:senseqns} defines a set of $nm$ differential
+equations for $\sens_{ij}$, 
+\begin{equation}
+  \ddt{\sensmat} = \big[\gradx\fvec(\xvec,\thetavec)\big]
+    \, \sensmat
+   +  \big[\gradtheta\fvec(\xvec,\thetavec)\big] \,,
+\end{equation}
+which can be solved jointly with the original ODEs
+\eqref{eq:genericODE} for the state variables ($\xvec$) by specifying
+initial conditions
+\begin{equation}\label{eq:sensic}
+  \sensmat(0) = \gradtheta\big(\xvec_0(\thetavec)\big) \,.
+\end{equation}
+%%
+We can then use a further chain-rule step to compute the derivative of
+the log-likelihood of the observations at time $t$ with respect to the
+parameters.
+\djde{We should write down that chain-rule step too.}
+%%
+Integrating the sensitivity equations in parallel with the ODEs is a
+computationally efficient and numerically stable way to calculate the
+overall gradients of the log-likelihood with respect to the
+parameters, which makes nonlinear estimation more robust and
 efficient. We can also use these gradients to calculate CIs using the
 Delta method.  Raue \emph{et al.} \cite{raue2013lessons} give a
 detailed comparison between using the sensitivity equations and
