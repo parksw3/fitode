@@ -215,10 +215,7 @@ susceptible-infected-removed (SIR) epidemic model,
 where $S$, $I$ and $R$ represent the numbers of individuals who are
 susceptible, infected or removed\footnote{In the words of \KM
   \cite[p.\,701]{KermMcKe27}, ``removed from the number of those who
-  are sick, by recovery or by death''. \bmb{is this needed?}\djde{No,
-    but I like it.  I didn't realize until finding this quote that KM
-    themselves thought of $R$ as a class for both recovered or dead
-    individuals.}}, $\beta$ is the transmission rate, and $\gamma$ is
+  are sick, by recovery or by death''.}, $\beta$ is the transmission rate, and $\gamma$ is
 the recovery rate.  In that original paper, \KM
 \cite[p.\,714]{KermMcKe27} also fit their model to plague mortality
 data from an epidemic in Bombay (now Mumbai) that occurred about 20
@@ -445,8 +442,6 @@ $\omega=-0.19$, $\phi=-3.48$, which is far from our fitted values and
 illustrates a very important fact: there is \emph{not necessarily a
   unique best fit set of parameters!}  In this case, the alternative
 solution exists because $\sech^2(x)$ is symmetric about the $y$ axis,
-\djde{Perhaps add a footnote mentioning Ben's discovery that including
-gradients in the fit eliminates this symmetric solution?}
 but in general, there can be multiple local minima that cause
 nonlinear optimizers to converge to points that may or may not
 represent equally good fits to the data.  The potential existence of
@@ -718,20 +713,6 @@ all infections end in death---we have followed \KM in assuming that
 the \term{infection fatality proportion} is 100\%.  Similarly, when
 analyzing incidence data, the \term{reporting proportion} ought to be
 taken into account.
-\bmb{I wrote some stuff (commented out here), but then realized that it's
-  pretty well covered by the caveats paragraph from KM at the end of this
-  section (search for ``mental gymnastics'').
-  The Ellner fit I was referring to is unpublished, \href{https://ms.mcmaster.ca/~bolker/eeid/2010/Ecology/EllnerMaxLikEEID2010.pdf}{here}}
-\djde{I've temporarily exposed your text in grey to avoid commented-out stuff in the ms.}
-{\color{gray}
-(If we think carefully about the biology we 
-realize that we are sweeping many more assumptions under the rug:
-for example,
-in reality plague is a vector-borne disease of rodents that spills over
-into humans, rarely being transmitted directly between humans. One
-way to gloss over these complexities is to say that $\beta$ and $\gamma$
-implicitly both include a scaling factor that captures the relationship
-between rat infections and observed human deaths.}
 
 \section{Uncertainty}\label{sec:Uncertainty}
 
@@ -1096,8 +1077,8 @@ In the model definition above:
     \hlstd{mort}
     \!\!{\color{black}\~{}}\!\!
     \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{= R)}}.
-\bmb{Ugly: \url{https://stackoverflow.com/questions/48328364/inline-code-format-with-knitr-and-rnw}; \url{https://stackoverflow.com/questions/40252885/how-to-syntax-highlight-inline-r-code-in-r-markdown}?}
   %%
+  \bmb{This is ugly: we won't have coloured text in the paper anyway ... \url{https://stackoverflow.com/questions/48328364/inline-code-format-with-knitr-and-rnw}; \url{https://stackoverflow.com/questions/40252885/how-to-syntax-highlight-inline-r-code-in-r-markdown}?}
   The mean of the distribution is given by
   the fitted model trajectory [\cref{eq:correct.mortality}],
 \begin{linenomath*}
@@ -1792,7 +1773,7 @@ a number of useful advanced features. In particular,
   build a model that includes state variables for hospitalized individuals
   and for virus concentrations in wastewater, \code{fitode} can fit 
   the model's parameters
-  using all of the available data. \needref
+  using all of the available data (as in \cite{Nour+2022}).
 \item [compute confidence intervals via importance sampling:]
   While the Delta method can compute confidence intervals for derived
   quantities such as predicted trajectories, it rests on strong
@@ -2477,13 +2458,6 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
   Since the \KM approximation is symmetric about its maximum, it is
   impossible to obtain a good fit in situations like this, where
   the rise of the epidemic is faster than the fall.
-  %%
-  \djde{Ben, I've retained the following comment.  Not sure
-    if you want to follow up on this.}
-  \bmb{These are better than they were, but \ldots although I
-    understand that fitode will give a sharp set of predictions (1)
-    we'll need to explain that (I've thought about making a sensible
-    smooth prediction curve for incidence, but it's a can of worms).}
 }\label{fig:stoch}
 \end{figure}
 

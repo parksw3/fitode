@@ -82,33 +82,35 @@ gammadata <- lapply(fitlist_gamma, function(x) {
     filter(logLik > -140)
 
 g1 <- ggplot(gammadata) +
-    geom_point(aes(gamma, logLik)) +
+    geom_point(aes(gamma, logLik - max(logLik))) +
     scale_x_continuous(expression(gamma)) +
     scale_y_continuous("Profile log-likelihood") +
     ggtitle("A")
 
 g2 <- ggplot(gammadata) +
-    geom_point(aes(gamma, beta)) +
-    scale_x_continuous(expression(gamma)) +
-    scale_y_continuous(expression(beta)) +
+    geom_point(aes(gamma, beta*1e5)) +
+    labs(x = expression("recovery rate"~(gamma)),
+         y = expression("transmission rate"~(beta)~(""%*%10^5))) + 
+## scale_x_continuous(expression(gamma)) +
+##    scale_y_continuous(expression(beta)) +
     ggtitle("B")
 
 g3 <- ggplot(gammadata) +
-    geom_point(aes(gamma, S0)) +
-    scale_x_continuous(expression(gamma)) +
-    scale_y_continuous(expression(S(0))) +
+    geom_point(aes(gamma, S0/1e5)) +
+    labs(x = expression("recovery rate"~(gamma)),
+         y = expression("init susceptibles"~S(0)~(""/10^5)))
     ggtitle("C")
 
 g4 <- ggplot(gammadata) +
     geom_point(aes(gamma, I0))  +
-    scale_x_continuous(expression(gamma)) +
-    scale_y_continuous(expression(I(0))) +
+    labs(x = expression("recovery rate"~(gamma)),
+         y = expression("init infectives"~I(0))) +
     ggtitle("D")
 
 g5 <- ggplot(gammadata) +
     geom_point(aes(gamma, k)) +
-    scale_x_continuous(expression(gamma)) +
-    scale_y_continuous(expression(k)) +
+    labs(x = expression("recovery rate"~(gamma)),
+         y = expression("dispersion"~(k))) +
     ggtitle("E")
 gcomb <- ggarrange(g2, g3, g4, g5)
 
