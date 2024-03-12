@@ -1068,8 +1068,6 @@ In the model definition above:
     \hlstd{mort}
     \!\!{\color{black}\~{}}\!\!
     \hlkwd{ols}\hlstd{(}\hlkwc{mean} \hlstd{= R)}}.
-  %%
-  \bmb{This is ugly: we won't have coloured text in the paper anyway ... \url{https://stackoverflow.com/questions/48328364/inline-code-format-with-knitr-and-rnw}; \url{https://stackoverflow.com/questions/40252885/how-to-syntax-highlight-inline-r-code-in-r-markdown}?}
   The mean of the distribution is given by
   the fitted model trajectory [\cref{eq:correct.mortality}],
 \begin{linenomath*}
