@@ -98,7 +98,7 @@ g2 <- ggplot(gammadata) +
 g3 <- ggplot(gammadata) +
     geom_point(aes(gamma, S0/1e5)) +
     labs(x = expression("recovery rate"~(gamma)),
-         y = expression("init susceptibles"~S(0)~(""/10^5)))
+         y = expression("init susceptibles"~S(0)~(""/10^5))) +
     ggtitle("C")
 
 g4 <- ggplot(gammadata) +

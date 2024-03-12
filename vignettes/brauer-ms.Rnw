@@ -93,7 +93,6 @@
 \newcommand{\transpose}{{\textsf{T}}}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
-%% BMB: can decide whether this should be \mathrm{Norm} or \cal{N} or ...
 \newcommand{\normdist}{\ensuremath\mathrm{Normal}}
 %% tables
 \usepackage{multirow}   % for tables
@@ -165,7 +164,7 @@ options(warnPartialMatchArgs = FALSE,
   introduction to fitting compartmental epidemic models to a single
   observed time series.  We assume that, like Fred, the reader is
   familiar with dynamical systems from a mathematical perspective, but
-  has limited experience (if any) with statistical methodology or
+  has limited experience with statistical methodology or
   optimization techniques.
 \end{abstract}
 
@@ -178,22 +177,6 @@ options(warnPartialMatchArgs = FALSE,
 
 \begin{itemize}
 \item switch to Bull Math Biol template
-\item what kinds of things would likely cause trouble for fitode?
-\item Comment on reparameterizing, specifically parameterizing with $\tpeak$ or $\phi$ rather than initial condition $I_0$?
-\item optimization challenges, where to go if you run into trouble
-\item statistical challenges, where to go for further insights / more
-  advanced approaches
-\item fitting ABMs
-\item \bmb{Note that Baca\"er \cite[Table~2, p.\.412]{bacaermodel2012}
-quotes CFP $\sigma = 0.9$ from the Indian report.  We can use
-this to argue that an independent estimate of CFP seems to rule
-out really small CFP.  In principle, we could do fit seasonal
-forcing and CFP and argue that with a reasonable prior on CFP
-we need seasonal forcing (or whatever).}
-\item \bmb{pedagogical refs: I would use Raue et al
-    \cite{raue2013lessons} for sensitivity equations and see how much
-    of the rest is defined in Bjornstad's book
-    \cite{bjornstadEpidemics2018} (or fall back on mine).}
 \end{itemize}
 
 \section{Introduction}
@@ -243,7 +226,7 @@ na\"{\i}ve, with limited consideration of their quality. Over the
 years, however, there has been a trend towards greater sophistication
 and statistical rigour in parameter estimation for infectious disease
 models; books that explain these methods have begun to appear in
-recent decades \cite{Bolk08,bjornstadEpidemics2018}.  Careful
+recent decades \cite{Bolk08,bjorn2018}.  Careful
 consideration of uncertainty is especially important when epidemic
 models are used for the development and analysis of policy options for
 infectious disease management \cite{elderd2006uncertainty}, a
@@ -1015,6 +998,8 @@ We can then use a further chain-rule step to compute the derivative of
 the log-likelihood of the observations at time $t$ with respect to the
 parameters.
 \djde{We should write down that chain-rule step too.}
+\bmb{is it really necessary \ldots Can't we leave it as
+  an exercise for the reader?}
 %%
 Integrating the sensitivity equations in parallel with the ODEs is a
 computationally efficient and numerically stable way to calculate the
@@ -1024,6 +1009,9 @@ efficient. We can also use these gradients to calculate CIs using the
 Delta method.  Raue \emph{et al.} \cite{raue2013lessons} give a
 detailed comparison between using the sensitivity equations and
 computing gradients by finite-difference approximations.
+ (Bj{\o}rnstad \cite{bjorn2018} Chapter 9 also gives
+an introduction to trajectory matching.)
+
 
 The \code{fitode} package\footnote{\code{fitode} is available on
   \href{https://cran.r-project.org/}{CRAN}, and can be
@@ -1099,8 +1087,8 @@ $R(t_i)$).
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
 \end{description}
 Since we are taking the difference $\mu(t_i) = R(t_i) - R(t_{i-1})$ to
-calculate the mortality trajectory,\footnote{It is not unusual to see
-  fits to cumulative curves.  However, doing so is ill-advised because
+calculate the mortality trajectory,\footnote{Modelers often
+  fit trajectories to cumulative curves.  However, doing so is ill-advised because
   points in a cumulative time series are not independent, making it
   difficult to define CIs \cite{King+15}.}  we have to add an extra
 row representing $t_0$ to the data set in order to compute
@@ -1259,11 +1247,17 @@ We have highlighted the Bombay plague data because of their prominent
 role in \KM's paper \cite{KermMcKe27} and, consequently, for the
 history of mathematical epidemiology.  However, while they provide an
 interesting example with which to illustrate the process of fitting an
-epidemiological model to data, it is important to emphasize that
-modelling plague dynamics with the simple SIR model is, at best,
-difficult to justify \cite{bacaermodel2012,Earn+20}.  Indeed, \KM
-explicitly made a sequence of optimistic assumptions, which they
-recognized were not ``strictly'' satisfied:
+epidemiological model to data, modelling plague dynamics
+with the simple SIR model is, at best,
+difficult to justify: Baca\"er \cite{bacaermodel2012} argues that
+the trajectory of the Bombay plague epidemic was primarily governed
+by seasonality rather than SIR dynamics.
+\bmb{I took out the ref to \cite{Earn+20}; not sure why it was
+  needed here? (We do cite it elsewhere, when discussing epidemic
+  fitting windows}
+Indeed, \KM\ themselves recognized that their model involves a
+sequence of optimistic assumptions, which they
+admitted were not ``strictly'' satisfied:
 
 \begin{quote}
   ``We are, in fact, assuming that plague in [humans] is a reflection
@@ -1307,34 +1301,6 @@ valuable example concerns the main wave in the city of Philadelphia
 \cite{Roge20}.  These data are exceptional because they are restricted
 to a single, large city, and because they provide \emph{daily} counts
 that capture the detailed temporal pattern (dots in \cref{fig:phila}).
-
-As for Bombay plague, we can fit \KM's approximation \eqref{eq:sech}
-to the Philadelphia influenza epidemic using nonlinear least squares,
-which yields the red curve in \cref{fig:phila}.  While this \code{nls}
-fit does not look unreasonable at a glance, the fitted parameter
-values (\cref{tab:philanls}) are absurd, including a basic
-reproduction number $\R_0\approx2500$ and a mean generation interval
-$\Tg\approx1.5$ years.
-
-Matching trajectories of the exact SIR model using \code{fitode} gives
-a fit---the yellow curve in \cref{fig:phila}---that is visually
-similar to the (red) fit of \KM's approximation, but provides much
-more realistic parameter estimates (\cref{tab:phila.fitode}); in
-particular, $\R_0\approx6.4$ and $\Tg\approx4.27$ days.
-\bmb{we could import these numbers from R code (by writing to an
-  included TeX file with definitions, or by using inline expressions)
-  rather than hard-coding them, if we wanted ...}
-\djde{Yes, we should do that to reduce the chance of screwing up
-  if we end up changing things.}
-
-If we convert the \code{fitode} estimates of the SIR parameters to the
-parameters of \KM's approximation, we obtain the orange curve in \cref{fig:phila}, which grossly
-underestimates the magnitude of the epidemic (the epidemic peak occurs much too
-soon).  The \KM approximation \eqref{eq:sech} is good initially, but
-becomes poorer and poorer over time as the underlying assumption
-on which it is based \eqref{eq:KMassumption} becomes less and less
-valid.
-
 <<philapop, echo=TRUE, include=FALSE>>=
 ## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
 philapop <- data.frame(year = c(1910,1920), population = c(1549008, 1823779))
@@ -1441,6 +1407,29 @@ assignfun(orig.params.phila, text = ".phila.nls")
 R0.phila.nls <- Reff.phila.nls/S0.phila.nls*philaS0
 @
 
+
+As for Bombay plague, we can fit \KM's approximation \eqref{eq:sech}
+to the Philadelphia influenza epidemic using nonlinear least squares,
+which yields the red curve in \cref{fig:phila}.  While this \code{nls}
+fit does not look unreasonable at a glance, the fitted parameter
+values (\cref{tab:philanls}) are absurd, including a basic
+reproduction number $\R_0\approx \Sexpr{signif(R0.phila.nls,2)}$ and a mean generation interval
+$\Tg\approx \Sexpr{signif(Tg.phila.nls,2)}$ years.
+
+Matching trajectories of the exact SIR model using \code{fitode} gives
+a fit---the yellow curve in \cref{fig:phila}---that is visually
+similar to the (red) fit of \KM's approximation, but provides much
+more realistic parameter estimates (\cref{tab:phila.fitode}); in
+particular, $\R_0\approx \Sexpr{signif(R0.phila.fitode,2)}$ and $\Tg\approx
+\Sexpr{signif(Tg.phila.fitode*365,2)}$ days.
+
+If we convert the \code{fitode} estimates of the SIR parameters to the
+parameters of \KM's approximation, we obtain the orange curve in \cref{fig:phila}, which grossly
+underestimates the magnitude of the epidemic (the epidemic peak occurs much too
+soon).  The \KM approximation \eqref{eq:sech} is good initially, but
+becomes poorer and poorer over time as the underlying assumption
+on which it is based \eqref{eq:KMassumption} becomes less and less
+valid.
 
 %%\section{Example for which \KM approximation is poor (via stochastic  SIR)}
 \section{Fitting the deterministic SIR model to stochastic simulations}
@@ -2475,18 +2464,16 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
     %%
   (\textsf{A}) The profile likelihood---briefly discussed at the end
   of \cref{sec:Uncertainty}---is calculated by fixing $\gamma$ to a
-  given value and maximizing the likelihood by estimating all other
-  parameters \cite{Bolk08}.  A flat profile-likelihood surface
+  series of given values and, for each value,
+  maximizing the likelihood by estimating all other
+  parameters \cite{Bolk08}. (The maximum value is shifted to 0
+  without loss of generality.) A flat profile-likelihood surface
   indicates parameter unidentifiability, meaning that we can obtain
-  statistically indistinguishable fits across a wide range of values
+  very similar fits across a wide range of values
   of the focal parameter ($\gamma$).  (\textsf{B--E}) The
   corresponding best parameter estimates for a given value of
-  $\gamma$.  Strong correlations across parameters are symptomatic of
-  parameter unidentifiability.  \djde{Can you please change the style
-    of the $y$-axis tick labels in panels B and C?  \ie
-    $9.23\times10^{-5}$ rather than {\upshape\code{9.23e-05}}?  An
-    alternative is to write $9.23$ and put $\times10^{-5}$ at the top
-    edge of the $y$-axis.}  }\label{fig:proflikgamma}
+  $\gamma$. Panel \textsf{C} shows that the primary driver of
+  unidentifiability is the confounding between $\gamma$ and $S(0)$.}\label{fig:proflikgamma}
 \end{figure}
 
 \end{document}
