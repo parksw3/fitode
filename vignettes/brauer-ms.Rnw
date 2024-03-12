@@ -119,6 +119,9 @@ knitr::knit_hooks$set(basefig=function(before, options, envir) {
                    } else { }
 })
 knitr::opts_chunk$set(error = FALSE)
+## B&W format: https://stackoverflow.com/questions/22666475/how-to-achieve-blackwhite-friendly-syntax-highlighting-in-pdfs-produced-with-kn
+knitr::opts_knit$set( out.format="latex" )
+knitr::knit_theme$set("print")
 ## override BMB's finicky settings
 options(warnPartialMatchArgs = FALSE,
           warnPartialMatchAttr = FALSE,
