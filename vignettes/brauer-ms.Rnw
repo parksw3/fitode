@@ -138,7 +138,7 @@ options(warnPartialMatchArgs = FALSE,
 \author{
 \name{David J.\,D.~Earn\textsuperscript{a}\thanks{CONTACT D.J.D.~Earn. Email: earn@math.mcmaster.ca. ORCID:
     0000-0002-7562-1341, Twitter: @David.J.D.Earn},
-    Sang Woo Park\textsuperscript{b}\thanks{S.W.~Park. ORCID 0000-0003-2202-3361, Twitter: @sang\_woo\_park, Mastodon: @sangwoopark@ecoevo.social},
+    Sang Woo Park\textsuperscript{b}\thanks{S.W.~Park. ORCID 0000-0003-2202-3361, Mastodon: @sangwoopark@ecoevo.social},
     and Benjamin M.~Bolker\textsuperscript{a,c}\thanks{B.M.~Bolker. ORCID: 0000-0002-2127-0443, Twitter: @bolkerb, Mastodon: @bbolker@fediscience.org}}
 \affil{\textsuperscript{a}Department of Mathematics and Statistics,
   McMaster University, Hamilton, Ontario, Canada, L8S 4K1; \textsuperscript{b}Department of Ecology and Evolutionary Biology, Princeton University, Princeton, NJ 08544; \textsuperscript{c}Department of Biology,
@@ -984,7 +984,7 @@ are given by the $n\times m$ \term{sensitivity matrix},
 \sensmat(t) = \gradtheta\xvec(t,\thetavec) \,.
 \end{equation}
 \cref{eq:senseqns} defines a set of $nm$ differential
-equations for $\sens_{ij}$, 
+equations for $\sens_{ij}$,
 \begin{equation}
   \ddt{\sensmat} = \big[\gradx\fvec(\xvec,\thetavec)\big]
     \, \sensmat
@@ -1003,6 +1003,7 @@ parameters.
 \djde{We should write down that chain-rule step too.}
 \bmb{is it really necessary \ldots Can't we leave it as
   an exercise for the reader?}
+  \swp{I also agree that this doesn't feel necessary...}
 %%
 Integrating the sensitivity equations in parallel with the ODEs is a
 computationally efficient and numerically stable way to calculate the
@@ -1061,7 +1062,7 @@ In the model definition above:
 \item[\code{observation}]specifies that the observed data
   (\code{mort}) are assumed to arise from sampling from the negative
   binomial distribution [\code{dnbinom}, \cref{eq:NB}] with
-  overdispersion parameter $k$. Ordinary least squares 
+  overdispersion parameter $k$. Ordinary least squares
   (with normally distributed observation errors)
   can be implemented by changing the \code{observation} argument to
   {\tt
@@ -1082,7 +1083,7 @@ Fitting to such differences is implemented by using the
 \code{diffnames} argument to specify the state variable for which
 consecutive differences are to be used (so, if the focal variable is
 $R$ then \code{fitode} fits to $R(t_i) - R(t_{i-1})$ rather than
-$R(t_i)$).  
+$R(t_i)$).
 \item[\code{initial}]conditions are expressed as numbers of individuals.
 \item[\code{par}]refers to the parameters to be fitted:
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
@@ -1253,9 +1254,6 @@ with the simple SIR model is, at best,
 difficult to justify: Baca\"er \cite{bacaermodel2012} argues that
 the trajectory of the Bombay plague epidemic was primarily governed
 by seasonality rather than SIR dynamics.
-\bmb{I took out the ref to \cite{Earn+20}; not sure why it was
-  needed here? (We do cite it elsewhere, when discussing epidemic
-  fitting windows}
 Indeed, \KM\ themselves recognized that their model involves a
 sequence of optimistic assumptions, which they
 admitted were not ``strictly'' satisfied:
@@ -1512,24 +1510,12 @@ interval $\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top
 panel, $\dbydt{R}$ \eqref{eq:SIR;R} with the correct initial
 conditions and parameter values is shown in green, and the \KM
 approximation \eqref{eq:sech} based on those parameter values is shown
-in purple.  The \code{fitode} fit and
+in purple.  The \code{fitode} fit (based on $\int (\dbydt{R}) \dt$) and
 confidence band are shown in yellow.  The time shift between the
 deterministic solution and the stochastic realization arises because
 the stochastic model captures the demographic noise (which causes a
 randomly distributed delay until the tipping point is reached, i.e.,
 until the epidemic takes off in a roughly deterministic fashion).
-
-\djde{Daniel, you wrote ``shows the simulated daily mortality curve
-  (dots) alongside the smooth, deterministic trajectory of epidemic
-  mortality ($\dbydt{R}$, green)''.  Am I correct that you did not
-  model mortality?  So to interpret this as mortality, we would be
-  assuming that the CFP$=1$?  If that's the case, I don't think we
-  should describe this as mortality, but we might want to comment on
-  how to simulate mortality data.}
-\swp{Several things going on here...yes, I'm just showing the smooth dR/dt, but
-I can show the integral of dR/dt if we want to. We also already comment on
-how to simulate mortality in equation 21? I also feel like assuming CFP=1 is OK
-for the simulation example but also don't feel strongly about not saying mortality...}
 
 As expected, with the correct parameter values, \KM's approximation
 \eqref{eq:sech} fails once the requirement \eqref{eq:KMassumption}
@@ -1761,7 +1747,7 @@ a number of useful advanced features. In particular,
   had access to time series of case reports, hospitalization reports, and
   wastewater sampling for the same geographic region. If we
   build a model that includes state variables for hospitalized individuals
-  and for virus concentrations in wastewater, \code{fitode} can fit 
+  and for virus concentrations in wastewater, \code{fitode} can fit
   the model's parameters
   using all of the available data (as in \cite{Nour+2022}).
 \item [compute confidence intervals via importance sampling:]
@@ -1795,17 +1781,17 @@ a number of useful advanced features. In particular,
 
   Bayesian modelers typically use \emph{Markov chain Monte Carlo} algorithms
   to explore the parameter space and approximate the target distribution. \code{fitode} implements
-  a simple \emph{Metropolis-Hasting} sampler \citep[\S7.3.1]{Bolk08}. 
+  a simple \emph{Metropolis-Hasting} sampler \citep[\S7.3.1]{Bolk08}.
   (The Stan platform provides a much more powerful Bayesian sampling algorithm
   using sensitivity equations,
   built on top of a fully general system for specifying ODEs; however, this
   tool requires significantly more computational and statistical background to
   use effectively \cite{Grin+2021}.)
- 
+
 \end{description}
 
 Even with these extensions, modelers will face many challenges when
-fitting ODEs to data with the \code{fitode} package, as with 
+fitting ODEs to data with the \code{fitode} package, as with
 fitting any nonlinear model to data.  For example, it is often
 difficult to ensure that the model has converged properly or reached
 its true maximum.  Performing optimization from multiple starting
@@ -1830,9 +1816,8 @@ Properly accounting for process error can be
 critical for estimating uncertainties in parameter estimates
 and confidence bands on the projected dynamics of a system \citep{King+15,taylor2016stochasticity,li2018fitting}.
 Popular \code{R} packages that can fit models with process error
-include \code{pomp} \citep{king2015statistical} and \code{odin}
-\citep{odin2021}.
-\bmb{can odin do that? really?}
+include \code{pomp} \citep{king2015statistical} and \code{mcstate}
+\citep{mcstate}.
 
 \section{Closing remarks: from Fred Brauer to \code{fitode}}
 
@@ -1846,6 +1831,9 @@ draw more dynamicists working on epidemic models into the world of
 data.
 
 \bmb{do we need this paragraph? Seems irrelevant to the average reader \ldots}
+\swp{It seems like a good practice to give credit to Dora who first started fitsir?
+I wonder if it's more appropriate to do that in the acknowledgements though.
+We also already mention fitsir in the main text.}
 Initially, we developed \code{fitsir} (which fits the standard SIR
 model \eqref{eq:SIR} to a single time series) as a purely pedagogical
 tool, but we then found it tremendously useful for a research project
@@ -1935,9 +1923,7 @@ ci_fmt("a", cc)
       of the standard SIR model parameters from the parameters of
       \KM's approximation (using the indicated equations).  Like
       Baca\"er \cite[p.\,408]{bacaermodel2012}, we assume the
-      population of Bombay was $N=1$ million.  \djde{I revised this
-        caption and changed the table order to
-        Estimated-Assumed-Derived, which is more logical.}
+      population of Bombay was $N=1$ million.
     }\label{tab:Bombay}
 \medskip
     %% making use of ragged2e and array packages:
@@ -1989,14 +1975,16 @@ ci_fmt("a", cc)
       using \code{fitode} to fit numerically computed trajectories to
       the Bombay plague data, assuming observation errors are
       distributed negative binomially (\code{dnbinom}) or normally
-      (\code{ols}).  \djde{Why are there no CIs for \code{ols}?}  The
+      (\code{ols}).  \djde{Why are there no CIs for \code{ols}?} \swp{Numerical
+      instability caused by unidentifiability leading to not being able to get the
+      right variance covariance matrix..} The
       recovery rate $\gamma$ was fixed rather than fitted due to
       parameter unidentifiability.  \djde{Can we say what goes wrong
         if one attempts to fit $\gamma$ as well?  And why fix $\gamma$
         rather than some other parameter?  Such info could be given in
         footnote 9, which occurs in the explanation of the
-        \code{fixed} argument in the main text.}  \djde{We should
-        state why $\gamma$ was fixed at 4.11 specifically.}
+        \code{fixed} argument in the main text.} $\gamma$ was fixed to
+        $4.11/\textrm{weeks}$ to remain consistent with \code{nls} fits.
       %%
       The fitted trajectory and
       confidence band are shown in the lower panel
@@ -2028,7 +2016,7 @@ ci_fmt("a", cc)
     \noalign{\vspace{10pt}}
     \bfseries Assumed\break parameter \\\hline
     population size & $N$ & -- & $10^6$ & -- & $10^6$ \\
-    %% 
+    %%
     \noalign{\vspace{10pt}}
     \bfseries Derived\break parameter \\\hline
       effective reproduction number & $\Reff$ & -- &
@@ -2092,7 +2080,7 @@ legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd),
   yellow curve shows the \code{fitode} fit, for which the associated
   parameter estimates are given in \cref{tab:bombay.fitode}
   (observation errors are assumed to be negative binomially
-  distributed; see \cref{sec:Uncertainty}).  
+  distributed; see \cref{sec:Uncertainty}).
   \djde{The closeness of the \KM fit and the \code{fitode} fit
     is remarkable.  Perhaps \KM had a time machine and actually
     went 100 years into the future to use \code{fitode}.}
@@ -2130,9 +2118,9 @@ legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd),
       initial prevalence had the value estimated by \code{fitode} (see
       \cref{tab:phila.fitode}) and the population size was the known
       population of Philadelphia at the time.  The fitted trajectory
-      and confidence band are shown in \cref{fig:phila}.  
+      and confidence band are shown in \cref{fig:phila}.
       See \cref{sec:phila}.
-      %% 
+      %%
       \djde{I filled in \code{philapop1918} there.  We also assumed
         $\code{philacfp}=\Sexpr{philacfp}$, which determined
         $\code{philaS0}=\Sexpr{philaS0}$.  But then we took the
@@ -2391,7 +2379,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
 <<plot_stochastic_SIR, echo=FALSE, fig.height=5, fig.show="hold", out.width="95%">>=
 my.tmax <- 8
 plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
-     ##xlim=range(tt), 
+     ##xlim=range(tt),
      xlim=c(0,my.tmax), # FIX: hack: max(tt) in sirstoch.RData is 10, which is too large
      ylim=range(sir.stoch.data$mort, na.rm=TRUE))
 draw_confband(sss, col=col.fitodenbCI)
@@ -2408,13 +2396,13 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.6),
        legend=c("simulated data","fitode (nbinom)","deterministic","KM approx"))
 
 plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
-     ##xlim=range(tt), 
+     ##xlim=range(tt),
      xlim=c(0,my.tmax), # FIX: hack: max(tt) in sirstoch.RData is 10, which is too large
      ylim=range(sir.stoch.data$mort, na.rm=TRUE))
 draw_confband(traj_ci(tvals, nls.stoch.parameters, vcov(nlsfit.stoch)), col=col.nlsCI)
 draw_confband(sss, col=col.fitodenbCI)
 lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
-curve(KM_approx(x, a=a.nls.stoch, omega=omega.nls.stoch, phi=phi.nls.stoch), 
+curve(KM_approx(x, a=a.nls.stoch, omega=omega.nls.stoch, phi=phi.nls.stoch),
       from=0, to=my.tmax, n=1000, add=TRUE,
       xpd=NA, col=col.nls, lwd=lwd*0.8, lty="solid")
 points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
