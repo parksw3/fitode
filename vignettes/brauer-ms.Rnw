@@ -1202,8 +1202,8 @@ coef.bombay.fitode.ols <- coef(SIR_fit_ols)
 assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
 @
 
-<<sirmortfit_ols_confband, eval=FALSE, include=FALSE>>==
-SIR_ols_confband <- predict(SIR_fit_ols, times=tvals, level=0.95)$mort
+<<sirmortfit_ols_confband, include=FALSE>>==
+SIR_ols_confband <- predict(SIR_fit_ols, times=tvals)$mort
 @
 
 <<bombay_likelihood_fit, cache=TRUE, warning=FALSE, message=FALSE, include=FALSE>>==
@@ -2061,14 +2061,14 @@ draw_confband(SIR_confband, col=col.fitodenbCI)
 lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd)
 curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=250, add=TRUE,
       lwd=lwd*0.60, xpd=NA, col=col.nls, lty="dotted")
-##lines(estimate ~ times, data=SIR_ols_confband, col=col.fitode.ols, lwd=lwd*0.60, lty="dotted")
+lines(estimate ~ times, data=SIR_ols_confband, col="purple", lwd=lwd*0.60)
 points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
-legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd),
-       lty=c(NA,"dotted","solid"),
-       col=c("black",col.nls,col.fitode.nb),
-       pch=c(21,NA,NA),
-       pt.bg=c("white",NA,NA),
-       legend=c("observed data","our nls fit","fitode (nbinom)"))
+legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd,lwd*0.6),
+       lty=c(NA,"dotted","solid","solid"),
+       col=c("black",col.nls,col.fitode.nb,"purple"),
+       pch=c(21,NA,NA,NA),
+       pt.bg=c("white",NA,NA,NA),
+       legend=c("observed data","our nls fit","fitode (nbinom)", "fitode (ols)"))
 @
 \caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
@@ -2081,28 +2081,19 @@ legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd),
   parameter estimates are given in \cref{tab:bombay.fitode}
   (observation errors are assumed to be negative binomially
   distributed; see \cref{sec:Uncertainty}).
-  \djde{The closeness of the \KM fit and the \code{fitode} fit
-    is remarkable.  Perhaps \KM had a time machine and actually
-    went 100 years into the future to use \code{fitode}.}
   %%
   \emph{Bottom panel:} The yellow curve is identical to the yellow
-  dotted curve in the top panel\djde{No, in the top panel the yellow
-    dotted curve is smooth, not interpolated from values at
-    observation times.} \swp{I'm confused because they are identical?
-    They're both using the same code too. See L2143 and
-    L2157}\djde{Perhaps my eyes are deceiving me, but the yellow dots
-    in the upper panel to not appear to be consistent with the solid
-    yellow curve in the bottom panel.}, and the yellow band shows the
+  dotted curve in the top panel
+    , and the yellow band shows the
   \code{fitode} confidence band; this confidence band is shown as a
   linear interpolation between successive observation times because
   the model fits to incidence at discrete time points rather than to a
   continuous curve representation of the instantaneous death rate.
   The dotted red curve is identical to the solid red curve in the top
-  panel.  We have separated the two panels because the confidence band
-  overlap would make the plots difficult to interpret.  \djde{In the
-    bottom panel, why don't we also show the \code{fitode} \code{ols}
-    fit, for which we list estimated parameters in
-    \cref{tab:bombay.fitode}?}  }
+  panel. The purple curve shows the \code{fitode} fit by minimizing
+  the ordinary least squares.
+  We have separated the two panels because the confidence band
+  overlap would make the plots difficult to interpret. }
 \label{fig:Bombay}
 \end{figure}
 
@@ -2116,23 +2107,18 @@ legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd),
       during the main wave of the pandemic.  In order to derive estimates
       of the standard epidemiological parameters, we assume the
       initial prevalence had the value estimated by \code{fitode} (see
-      \cref{tab:phila.fitode}) and the population size was the known
-      population of Philadelphia at the time.  The fitted trajectory
+      \cref{tab:phila.fitode}).
+      Instead
+      of using the raw population size to estimate $\mathcal R_0$,
+      we consider the size of population that would eventually die
+      if they were infected, which was calculated by multiplying
+      the population size of Philadelphia
+      (\Sexpr{prettyNum(philapop1918, big.mark=",")}) with the assumed CFP of 0.025.
+      \swp{See if this is appropriate and edit accordingly.}
+      The fitted trajectory
       and confidence band are shown in \cref{fig:phila}.
-      See \cref{sec:phila}.
-      %%
-      \djde{I filled in \code{philapop1918} there.  We also assumed
-        $\code{philacfp}=\Sexpr{philacfp}$, which determined
-        $\code{philaS0}=\Sexpr{philaS0}$.  But then we took the
-        initial \code{S0} guess to be $0.9*\code{philaS0}$.  The
-        fitted \code{S0} is so far from this that the assumed
-        population size and CFP don't seem to be constraining
-        anything.  Should we make more of this explicit?}  \swp{Ah yes
-        we should make this more explicit. Shouldn't we also fill out
-        \code{philaS0} for R0 estimates instead o f
-        \code{philapop1918}? As far as I can tell, we're using
-        \code{philaS0} to get R0 estimates? For example, see L1359 and
-        L1399.}  }\label{tab:philanls}
+      See \cref{sec:phila}.}
+      %%\label{tab:philanls}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
@@ -2150,8 +2136,8 @@ legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd),
     \bfseries Assumed\break parameter \\\hline
     initial prevalence & $I_0$ & -- & -- &
       \Sexpr{I0.phila.fitode} & -- \\
-    population size & $N$ & -- & -- &
-      \Sexpr{prettyNum(philapop1918, big.mark=",")}& -- \\
+    effective population size & $N$ & -- & -- &
+      \Sexpr{prettyNum(philaS0, big.mark=",")} & -- \\
     \noalign{\vspace{10pt}}
     \bfseries Derived\break parameter \\\hline
     peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
@@ -2180,12 +2166,6 @@ legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd),
     \caption{Parameter estimates from \code{fitode} fits of the SIR
       model \eqref{eq:SIR} to reported P\&I mortality during the main
       wave of the 1918 influenza pandemic in the city of Philadelphia.
-      \djde{Daniel, did you fix $\gamma$ for this fit?  I assume so
-        from the lack of a CI, but then it should be listed as a fixed
-        parameter, not an estimated parameter.  Where did this fixed
-        value come from?  I'm then confused
-        by the CI on $\Tg$, which just have no error since it is just
-        the inverse of a fixed parameter.}
       As in \cref{tab:philanls}, we assume the known 1918 Philadelphia
       population size in order to derive an $\R_0$ estimate.
     }\label{tab:phila.fitode}
@@ -2199,7 +2179,7 @@ legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd),
     transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
       \Sexpr{beta.phila.fitode} & \Sexpr{ci_fmt("beta", ci.phila.fitode)} \\
       recovery rate & $\gamma$ & $\frac{1}{\textrm{years}}$ & \Sexpr{gamma.phila.fitode} &
-      -- \\
+      \Sexpr{ci_fmt("gamma", ci.phila.fitode)} \\
     initial\break susceptibles & $S_0$& -- &
       \Sexpr{as.integer(S0.phila.fitode)} & \Sexpr{ci_fmt("S0", ci.phila.fitode, max_ord = 6)}\\
       initial prevalence & $I_0$ & -- &
@@ -2208,8 +2188,8 @@ legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd),
       \Sexpr{k.phila.fitode} & \Sexpr{ci_fmt("k", ci.phila.fitode)}\\
       \noalign{\vspace{10pt}}
       \bfseries Assumed\break parameter \\\hline
-      population size & $N$ & -- &
-      \Sexpr{prettyNum(philapop1918, big.mark=",")} &  -- \\
+      effective population size & $N$ & -- &
+      \Sexpr{prettyNum(philaS0, big.mark=",")} &  -- \\
       \noalign{\vspace{10pt}}
       \bfseries Derived\break parameter \\\hline
       effective reproduction number & $\Reff$ & -- &
@@ -2269,6 +2249,9 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
   \djde{I've changed the colours and line styles in a way that makes
     more sense to me... hopefully others agree... I've adjusted
   the legend accordingly.}
+  \swp{I thought we didn't want to use the same colors for different fits...
+  we're already using yellow dotted in Figure 1 for something else? but your call...
+  I don't object.}
 }
 \label{fig:phila}
 \end{figure}
@@ -2292,6 +2275,8 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
       slots, but these values are in the KM column.  Again, I can see
       why this was done, but it is confusing.  I need to think more about
       how to present this clearly.}
+      \swp{These are also in KM because we converted from true to KM. So KM to derived parameter
+      recovers the true derived parameter.}
 }\label{tab:stoch.nls}
     \medskip
     %% making use of ragged2e and array packages:
@@ -2339,35 +2324,31 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
   \begin{center}
     \caption{Parameter estimates from \code{fitode} fits of the SIR
       model \eqref{eq:SIR} to a stochastic SIR simulation (see
-      \cref{fig:stoch}).  The true parameter values used for
-      the simulation were  $(S_0,I_0,R_0)=(\Sexpr{iii})$,
-      $\R_0=\Sexpr{R0}$, $\Tg=\Sexpr{1/mm$gamma}$ week.
-      \djde{It would be helpful to have a \textbf{true} column
-      between \textbf{units} and \code{dnbinom}.}
+      \cref{fig:stoch}).
 }\label{tab:stoch.fitode}
 \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c c}
+  \begin{tabular}{ m{3cm} | c | c | c | c c}
   \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries units}
+    & {\footnotesize\bfseries units} & {\footnotesize\bfseries true}
     & {\footnotesize\bfseries \code{dnbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
-    transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
+    transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ & \Sexpr{52*R0*mm$gamma/2000} &
       \Sexpr{signif(52*beta.stoch.fitode,dig)} & \Sexpr{ci_fmt("beta", 52*ci.stoch.fitode, sn=FALSE, digits=dig)} \\
-    recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ &
+    recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{mm$gamma} &
         \Sexpr{gamma.stoch.fitode} & \Sexpr{ci_fmt("gamma", ci.stoch.fitode)}\\
-    initial\break susceptibles & $S_0$& -- &
+    initial\break susceptibles & $S_0$& -- & \Sexpr{iii[[1]]} &
       \Sexpr{as.integer(S0.stoch.fitode)} & \Sexpr{ci_fmt("S0", ci.stoch.fitode, max_ord = 6)}\\
-      initial prevalence & $I_0$ & -- &
+      initial prevalence & $I_0$ & -- & \Sexpr{iii[[2]]} &
       \Sexpr{I0.stoch.fitode} & \Sexpr{ci_fmt("I0", ci.stoch.fitode)}\\
-      overdispersion\break parameter & $k$ & -- &
+      overdispersion\break parameter & $k$ & -- & -- &
       \Sexpr{k.stoch.fitode} & \Sexpr{ci_fmt("k", ci.stoch.fitode, sn=FALSE, digits=dig)}\\
       \noalign{\vspace{10pt}}
       \bfseries Derived\break parameter \\\hline
-      mean generation interval & $\Tg$ & days & \Sexpr{signif(7*1/gamma.stoch.fitode,dig)} & \Sexpr{ci_fmt("gamma", 7*1/ci.stoch.fitode)}\\
-      effective reproduction number & $\Reff$ & -- &
+      mean generation interval & $\Tg$ & days & \Sexpr{7/mm$gamma} & \Sexpr{signif(7*1/gamma.stoch.fitode,dig)} & \Sexpr{ci_fmt("gamma", 7*1/ci.stoch.fitode)}\\
+      effective reproduction number & $\Reff$ & -- & \Sexpr{R0*iii[[1]]/2000} &
       \Sexpr{Reff.stoch.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.stoch.fitode[,-1])} \\
-    basic reproduction number & $\R_0$ & -- &
+    basic reproduction number & $\R_0$ & -- & \Sexpr{R0} &
       \Sexpr{signif(R0.stoch.fitode,dig)}
       &  \Sexpr{ci_fmt("R0", ci.derived.stoch.fitode[,-1])}
   \end{tabular}
@@ -2399,7 +2380,7 @@ plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
      ##xlim=range(tt),
      xlim=c(0,my.tmax), # FIX: hack: max(tt) in sirstoch.RData is 10, which is too large
      ylim=range(sir.stoch.data$mort, na.rm=TRUE))
-draw_confband(traj_ci(tvals, nls.stoch.parameters, vcov(nlsfit.stoch)), col=col.nlsCI)
+draw_confband(traj_ci((0:(my.tmax*7))/7, nls.stoch.parameters, vcov(nlsfit.stoch)), col=col.nlsCI)
 draw_confband(sss, col=col.fitodenbCI)
 lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
 curve(KM_approx(x, a=a.nls.stoch, omega=omega.nls.stoch, phi=phi.nls.stoch),
@@ -2419,7 +2400,7 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
   mean generation interval $\Tg=1$ week.  \djde{Daniel, did you
     observe the simulation with a negative binomial process?  (if so,
     what $k$?)  Or did you just count the number of new cases each
-    day?}
+    day?} \swp{Just counted the number of new recovery (death) each day.}
   %%
   In both panels, the yellow curve and confidence band show the
   \code{fitode} fit to the simulated data.  \emph{Top panel:} The
@@ -2432,7 +2413,6 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
   %%
   \emph{Bottom panel:} The red curve shows the \KM approximation
   \eqref{eq:sech}, fitted to the stochastic simulation using \code{nls}.
-  \djde{Why are we not showing a confidence band for the \code{nls} fit?}
   Since the \KM approximation is symmetric about its maximum, it is
   impossible to obtain a good fit in situations like this, where
   the rise of the epidemic is faster than the fall.
