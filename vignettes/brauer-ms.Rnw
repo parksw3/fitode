@@ -104,6 +104,7 @@
 %% https://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
 \usepackage{ragged2e}
 %%\usepackage{array} % for m{...}
+\newcommand{\traj}{F}
 \newcommand{\ie}{i.e., }
 \newcommand{\sens}{{\mathsf S}}
 \newcommand{\sensmat}{{\bm{\sens}}}
@@ -120,8 +121,8 @@ knitr::knit_hooks$set(basefig=function(before, options, envir) {
 })
 knitr::opts_chunk$set(error = FALSE)
 ## B&W format: https://stackoverflow.com/questions/22666475/how-to-achieve-blackwhite-friendly-syntax-highlighting-in-pdfs-produced-with-kn
-knitr::opts_knit$set( out.format="latex" )
-knitr::knit_theme$set("print")
+##knitr::opts_knit$set( out.format="latex" )
+##knitr::knit_theme$set("print")
 ## override BMB's finicky settings
 options(warnPartialMatchArgs = FALSE,
           warnPartialMatchAttr = FALSE,
@@ -349,11 +350,11 @@ the data.  Thus, a natural \term{objective function} to
 minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
-\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2 \,,
+\sum_{i=1}^n \big(\traj(t_i;\thetavec) - y_i\big)^2 \,,
 \end{equation}
 \end{linenomath*}
 where the observed data are the points $\{(t_i,y_i):i=1,\ldots,n\}$,
-$f(t;\thetavec)$ is the model \eqref{eq:sech}, and the parameter
+$\traj(t;\thetavec)$ is the model \eqref{eq:sech}, and the parameter
 vector for \KM's problem is
 $\thetavec=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
 respect to $\thetavec$ would have required some heroic arithmetic
@@ -682,7 +683,7 @@ preceding week, i.e., it would be better to define
 \begin{linenomath*}
   \begin{subequations}\label{eq:sechcorrect}
     \begin{align}
-      f(t_i;\thetavec) &=
+      \traj(t_i;\thetavec) &=
                          \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
 \label{eq:correct.mortality} \\
                        &= \int_{t_{i-1}}^{t_i}  a \sech^2{(\omega\,t - \phi)}\,\dt \\
@@ -734,7 +735,7 @@ model is
 =
 \prod_{i=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
-\exp\left(-\frac{\big(f(t_i;\thetavec) - y_i\big)^2}{2\sigma^2} \right) \Delta{y_i}
+\exp\left(-\frac{\big(\traj(t_i;\thetavec) - y_i\big)^2}{2\sigma^2} \right) \Delta{y_i}
 \right]
 \,.
 \end{equation}
@@ -762,10 +763,10 @@ yields an estimate,
 &= \argmax_\thetavec \lik(\thetavec) \\
 &= \argmin_\thetavec \big(\!\!-\log{\lik(\thetavec)}\big) \\
 &= \argmin_\thetavec\Big(
-\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2
+\sum_{i=1}^n \big(\traj(t_i;\thetavec) - y_i\big)^2
 \;+\; \text{constant}
 \Big) \\
-&= \argmin_\thetavec\sum_{i=1}^n \big(f(t_i;\thetavec) - y_i\big)^2
+&= \argmin_\thetavec\sum_{i=1}^n \big(\traj(t_i;\thetavec) - y_i\big)^2
  \,,
 \end{align}
 \end{subequations}
@@ -819,7 +820,7 @@ The probability mass function for the \term{negative binomial
 \end{equation}
 \end{linenomath*}
 The predicted variance of a particular observation $y_i$ is given by
-$\mu_i (1+\mu_i/k)$, where $\mu_i(\thetavec) = f(t_i;\thetavec)$ is the
+$\mu_i (1+\mu_i/k)$, where $\mu_i(\thetavec) = \traj(t_i;\thetavec)$ is the
 model evaluated at the $i$\textsuperscript{th} observed data point
 [\emph{cf.}\ \eqref{eq:leastsquares} and \eqref{eq:sechcorrect}].
 The maximum likelihood estimate is, therefore,
@@ -922,7 +923,7 @@ precisely how we obtained the CIs on the derived parameters listed in
 \cref{tab:Bombay}.  Perhaps less obviously, we can also use the
 Delta method to obtain CIs on the fitted trajectory at each
 observation time $t_i$ (and hence obtain a confidence band) by
-considering $g(\thetavec)=f(t_i;\thetavec)$.  This is how we obtained
+considering $g(\thetavec)=\traj(t_i;\thetavec)$.  This is how we obtained
 the pink confidence band shown in \cref{fig:Bombay}.
 
 Better confidence intervals can be obtained using the \term{profile
@@ -985,6 +986,7 @@ are given by the $n\times m$ \term{sensitivity matrix},
 \end{equation}
 \cref{eq:senseqns} defines a set of $nm$ differential
 equations for $\sens_{ij}$,
+\begin{subequations}\label{eq:senseqns.S}
 \begin{equation}
   \ddt{\sensmat} = \big[\gradx\fvec(\xvec,\thetavec)\big]
     \, \sensmat
@@ -996,6 +998,7 @@ initial conditions
 \begin{equation}\label{eq:sensic}
   \sensmat(0) = \gradtheta\big(\xvec_0(\thetavec)\big) \,.
 \end{equation}
+\end{subequations}
 %%
 We can then use a further chain-rule step to compute the derivative of
 the log-likelihood of the observations at time $t$ with respect to the
@@ -1005,7 +1008,14 @@ parameters.
   an exercise for the reader?}
   \swp{I also agree that this doesn't feel necessary...}
 %%
-Integrating the sensitivity equations in parallel with the ODEs is a
+  \begin{equation}
+    \gradtheta\log\lik\big(\xvec(t,\thetavec)\big)
+    = \frac{1}{\lik\big(\xvec(t,\thetavec)\big)}
+      \gradx\lik\big(\xvec(t,\thetavec)\big) \, \sensmat(t) \,.
+  \end{equation}
+%%
+Integrating the sensitivity equations \eqref{eq:senseqns.S}
+in parallel with the ODEs \eqref{eq:genericODE} is a
 computationally efficient and numerically stable way to calculate the
 overall gradients of the log-likelihood with respect to the
 parameters, which makes nonlinear estimation more robust and
