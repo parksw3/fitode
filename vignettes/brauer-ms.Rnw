@@ -1126,7 +1126,14 @@ SIR_fit <- fitode(
   rate is known (using the \code{fixed} argument) due to parameter
   unidentifiability\footnote{In short, unidentifiability of $\gamma$
     means that we can obtain nearly identical fits across a wide range
-    of $\gamma$.}.
+    of $\gamma$. \swp{While we can still fit the model without fixing $\gamma$,
+    resulting estimates become too sensitive to starting conditions and
+    numerically unstable, which can prevent us from obtaining the Hessian matrix
+    and therefore calculating confidence intervals. It would be also possible to
+    fit the model by fixing other parameters and estimate $\gamma$ instead. We chose
+    to fix $\gamma$ as the duration of infection can be often estimated from
+    independent data sources (and to remain consistent with our \code{nls} fits
+    of the KM approximation).}}.
 \item[\code{tcol}]specifies the time column of the data frame.
 \end{description}
 The resulting fits are plotted in \cref{fig:Bombay} and summarized in
@@ -1979,11 +1986,7 @@ ci_fmt("a", cc)
       instability caused by unidentifiability leading to not being able to get the
       right variance covariance matrix..} The
       recovery rate $\gamma$ was fixed rather than fitted due to
-      parameter unidentifiability.  \djde{Can we say what goes wrong
-        if one attempts to fit $\gamma$ as well?  And why fix $\gamma$
-        rather than some other parameter?  Such info could be given in
-        footnote 9, which occurs in the explanation of the
-        \code{fixed} argument in the main text.} $\gamma$ was fixed to
+      parameter unidentifiability. $\gamma$ was fixed to
         $4.11/\textrm{weeks}$ to remain consistent with \code{nls} fits.
       %%
       The fitted trajectory and
