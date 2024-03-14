@@ -1001,7 +1001,7 @@ initial conditions
 \end{subequations}
 %%
 We can then use a further chain-rule step to compute the derivative of
-the log-likelihood of the observations $\{\xvec_{t_i}\}$ (at times
+the log-likelihood of the observations $\{\xvec_{t_\ell}\}$ (at times
 $\{t_1,t_2,\ldots,t_{n_t}\}$) with respect to the parameters
 $\thetavec$,
 %%
@@ -1009,19 +1009,19 @@ $\thetavec$,
 \begin{subequations}\label{eq:2nd.chain}
 \begin{align}
   \gradtheta\log\lik(\thetavec)
-  &= \gradtheta\log\Pop\big(\{\xvec_{t_i}:i=1,\dots,n_t\} \mid \xvec(t,\thetavec)\big) \\
-  &= \gradtheta\log\prod_{i=1}^{n_t} \Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big) \\
-  &= \sum_{i=1}^{n_t} \gradtheta\log \Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big) \\
-  &= \sum_{i=1}^{n_t} \frac{1}{\Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big)}
-     \gradx\log \Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big) \, \sensmat(t) \,,
+  &= \gradtheta\log\Pop\big(\{\xvec_{t_\ell}:\ell=1,\dots,n_t\} \mid \xvec(t,\thetavec)\big) \\
+  &= \gradtheta\log\prod_{\ell=1}^{n_t} \Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec)\big) \\
+  &= \sum_{\ell=1}^{n_t} \gradtheta\log \Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec)\big) \\
+  &= \sum_{\ell=1}^{n_t} \frac{1}{\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec)\big)}
+     \gradx\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec)\big) \, \sensmat(t) \,,
 \end{align}
 \end{subequations}
 \end{linenomath*}
 %%
 where we typically assume [\emph{cf.}~\cref{eq:NB}]
 \begin{equation}
-\Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big) =
-\prod_{j=1}^n\texttt{NB}(x_{j,t_i};x_j(t_i,\thetavec),k) \,.
+\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec)\big) =
+\prod_{i=1}^n\texttt{NB}(x_{i,t_\ell};x_i(t_\ell,\thetavec),k) \,.
 \end{equation}
 \djde{$k$ should be one of the parameters in $\thetavec$... awkward...
   I'm also not sure about the embedded assumptions above when fitting
