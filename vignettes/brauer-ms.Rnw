@@ -1001,19 +1001,28 @@ initial conditions
 \end{subequations}
 %%
 We can then use a further chain-rule step to compute the derivative of
-the log-likelihood of the observations at time $t$ with respect to the
-parameters.
-\djde{We should write down that chain-rule step too.}
-\bmb{is it really necessary \ldots Can't we leave it as
-  an exercise for the reader?}
-  \swp{I also agree that this doesn't feel necessary...}
+the log-likelihood of the observations at times
+$\{t_1,t_2,\ldots,t_{n_t}\}$ with respect to the parameters $\thetavec$,
 %%
-  \begin{equation}
-    \gradtheta\log\lik\big(\xvec(t,\thetavec)\big)
-    = \frac{1}{\lik\big(\xvec(t,\thetavec)\big)}
-      \gradx\lik\big(\xvec(t,\thetavec)\big) \, \sensmat(t) \,.
-  \end{equation}
+\begin{linenomath*}
+\begin{subequations}\label{eq:2nd.chain}
+\begin{align}
+  \gradtheta\log\lik(\thetavec)
+  &= \gradtheta\log\Pop\big(\{\xvec_{t_i}:i=1,\dots,n_t\} \mid \xvec(t,\thetavec)\big) \\
+  &= \gradtheta\log\prod_{i=1}^{n_t} \Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big) \\
+  &= \sum_{i=1}^{n_t} \gradtheta\log \Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big) \\
+  &= \sum_{i=1}^{n_t} \frac{1}{\Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big)}
+     \gradx\log \Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big) \, \sensmat(t) \,,
+\end{align}
+\end{subequations}
+\end{linenomath*}
 %%
+where we typically assume [\emph{cf.}~\cref{eq:NB}]
+\begin{equation}
+\Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big) =
+\prod_{j=1}^n\texttt{NB}(x_{j,t_i};x_j(t_i,\thetavec),k) \,.
+\end{equation}
+\djde{$k$ should be one of the parameters in $\thetavec$... awkward...}
 Integrating the sensitivity equations \eqref{eq:senseqns.S}
 in parallel with the ODEs \eqref{eq:genericODE} is a
 computationally efficient and numerically stable way to calculate the
