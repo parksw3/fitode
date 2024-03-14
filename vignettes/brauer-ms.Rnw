@@ -1004,24 +1004,31 @@ We can then use a further chain-rule step to compute the derivative of
 the log-likelihood of the observations $\{\xvec_{t_\ell}\}$ (at times
 $\{t_1,t_2,\ldots,t_{n_t}\}$) with respect to the parameters
 $\thetavec$,
+\djde{to get this right, we need to be very explicit about dependence
+on the trajectory model $\xvec(t,\theta)$ and the observation model}
 %%
 \begin{linenomath*}
 \begin{subequations}\label{eq:2nd.chain}
 \begin{align}
   \gradtheta\log\lik(\thetavec)
-  &= \gradtheta\log\Pop\big(\{\xvec_{t_\ell}:\ell=1,\dots,n_t\} \mid \xvec(t,\thetavec)\big) \\
-  &= \gradtheta\log\prod_{\ell=1}^{n_t} \Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec)\big) \\
-  &= \sum_{\ell=1}^{n_t} \gradtheta\log \Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec)\big) \\
-  &= \sum_{\ell=1}^{n_t} \frac{1}{\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec)\big)}
-     \gradx\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec)\big) \, \sensmat(t) \,,
+  &= \gradtheta\log\Pop\big(\{\xvec_{t_\ell}:\ell=1,\dots,n_t\} \mid \xvec(t,\thetavec),\,\thetavec\big) \\
+  &= \gradtheta\log\prod_{\ell=1}^{n_t} \Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec),\,\thetavec\big) \\
+  &= \sum_{\ell=1}^{n_t} \gradtheta\log \Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec),\,\thetavec\big) \\
+  &= \sum_{\ell=1}^{n_t} \frac{1}{\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec),\,\thetavec\big)}
+     \gradx\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec),\,\thetavec\big) \, \sensmat(t)
+ \,,
 \end{align}
 \end{subequations}
 \end{linenomath*}
 %%
+\djde{there should be another term on the RHS associated with differentiating
+  wrt the component that does not depend on $\xvec$; notation $\partial/\partial\thetavec$
+  is problematic... need to think this through}
 where we typically assume [\emph{cf.}~\cref{eq:NB}]
+\djde{need to clarify that NB parameter $k$ is one of the params in $\thetavec$}
 \begin{equation}
-\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec)\big) =
-\prod_{i=1}^n\texttt{NB}(x_{i,t_\ell};x_i(t_\ell,\thetavec),k) \,.
+\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec),\,\thetavec\big) =
+\prod_{i=1}^n\texttt{NB}(x_{i,t_\ell};x_i(t_\ell,\thetavec),\,\thetavec) \,.
 \end{equation}
 \djde{$k$ should be one of the parameters in $\thetavec$... awkward...
   I'm also not sure about the embedded assumptions above when fitting
