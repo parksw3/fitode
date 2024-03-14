@@ -1001,8 +1001,9 @@ initial conditions
 \end{subequations}
 %%
 We can then use a further chain-rule step to compute the derivative of
-the log-likelihood of the observations at times
-$\{t_1,t_2,\ldots,t_{n_t}\}$ with respect to the parameters $\thetavec$,
+the log-likelihood of the observations $\{\xvec_{t_i}\}$ (at times
+$\{t_1,t_2,\ldots,t_{n_t}\}$) with respect to the parameters
+$\thetavec$,
 %%
 \begin{linenomath*}
 \begin{subequations}\label{eq:2nd.chain}
@@ -1022,7 +1023,9 @@ where we typically assume [\emph{cf.}~\cref{eq:NB}]
 \Pop\big(\xvec_{t_i} \mid \xvec(t,\thetavec)\big) =
 \prod_{j=1}^n\texttt{NB}(x_{j,t_i};x_j(t_i,\thetavec),k) \,.
 \end{equation}
-\djde{$k$ should be one of the parameters in $\thetavec$... awkward...}
+\djde{$k$ should be one of the parameters in $\thetavec$... awkward...
+  I'm also not sure about the embedded assumptions above when fitting
+to multiple time series ($n>1$).}
 Integrating the sensitivity equations \eqref{eq:senseqns.S}
 in parallel with the ODEs \eqref{eq:genericODE} is a
 computationally efficient and numerically stable way to calculate the
