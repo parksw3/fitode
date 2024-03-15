@@ -2139,6 +2139,7 @@ setup_plot(ylim=c(0, 1000), xlim=c(0,tmax), #DE: ymin was 5, not sure why
          ##, at=c(25, 50, 100, 200, 400, 800)
          )
 draw_confband(SIR_confband, col=col.fitodenbCI)
+draw_confband(SIR_ols_confband, col=col.fitodeCI)
 lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd)
 lines(estimate ~ times, data=SIR_ols_confband, col=col.fitode.ols, lwd=lwd*0.60)
 curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=250, add=TRUE,
