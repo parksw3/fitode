@@ -1275,11 +1275,21 @@ SIR_fit_ols <- fitode(
 
 <<sirmortfitcoefols, include=FALSE>>==
 coef.bombay.fitode.ols <- coef(SIR_fit_ols)
+ci.bombay.fitode.ols <- confint(SIR_fit_ols)[,-1]
 assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
+
+ci.derived.bombay.fitode.ols <- confint(SIR_fit_ols,
+        parm=list(
+            Reff~beta*S0/gamma.nls,
+            R0~beta*N.KM/gamma.nls,
+            Tg~1/gamma.nls
+        ))
+
+assignfun(ci.derived.bombay.fitode.ols[,1], ".bombay.fitode.ols")
 @
 
 <<sirmortfit_ols_confband, include=FALSE>>==
-SIR_ols_confband <- predict(SIR_fit_ols, times=tvals)$mort
+SIR_ols_confband <- predict(SIR_fit_ols, times=tvals, level=0.95)$mort
 @
 
 <<bombay_likelihood_fit, cache=TRUE, warning=FALSE, message=FALSE, include=FALSE>>==
@@ -2067,36 +2077,36 @@ ci_fmt("a", cc)
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c c | c}
+  \begin{tabular}{ m{3cm} | c | c | c c | c c}
   \bfseries Fixed\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
-    & {\footnotesize\bfseries \code{dnbinom}} & {\footnotesize\bfseries 95\% CI} & {\footnotesize\bfseries \code{ols}} \\\hline
+    & {\footnotesize\bfseries \code{dnbinom}} & {\footnotesize\bfseries 95\% CI} & {\footnotesize\bfseries \code{ols}} & {\footnotesize\bfseries 95\% CI} \\\hline
     recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{gamma.nls} &
-      -- & \Sexpr{gamma.nls} \\
+      -- & \Sexpr{gamma.nls} & -- \\
     %%
     \noalign{\vspace{10pt}}
     \bfseries Estimated\break parameter \\\hline
     transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{beta.bombay.fitode.nb*52} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.nb*52, sn=FALSE, digits=dig)}  & \Sexpr{beta.bombay.fitode.ols*52} \\
+      \Sexpr{beta.bombay.fitode.nb*52} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.nb*52, sn=FALSE, digits=dig)}  & \Sexpr{beta.bombay.fitode.ols*52} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.ols*52, sn=FALSE, digits=dig)}  \\
     initial\break susceptibles & $S_0$& -- &
-      \Sexpr{as.integer(S0.bombay.fitode.nb)} & \Sexpr{ci_fmt("S0", ci.bombay.fitode.nb, max_ord = 6)} & \Sexpr{as.integer(S0.bombay.fitode.ols)}\\
+      \Sexpr{as.integer(S0.bombay.fitode.nb)} & \Sexpr{ci_fmt("S0", ci.bombay.fitode.nb, max_ord = 6)} & \Sexpr{as.integer(S0.bombay.fitode.ols)} & \Sexpr{ci_fmt("S0", ci.bombay.fitode.ols, max_ord = 6)}\\
       initial prevalence & $I_0$ & -- &
-      \Sexpr{I0.bombay.fitode.nb} & \Sexpr{ci_fmt("I0", ci.bombay.fitode.nb)} & \Sexpr{I0.bombay.fitode.ols} \\
+      \Sexpr{I0.bombay.fitode.nb} & \Sexpr{ci_fmt("I0", ci.bombay.fitode.nb)} & \Sexpr{I0.bombay.fitode.ols} & \Sexpr{ci_fmt("I0", ci.bombay.fitode.ols)} \\
       overdispersion\break parameter & $k$ & -- &
-      \Sexpr{k.bombay.fitode.nb} & \Sexpr{ci_fmt("k", ci.bombay.fitode.nb)} & -- \\
+      \Sexpr{k.bombay.fitode.nb} & \Sexpr{ci_fmt("k", ci.bombay.fitode.nb)} & -- & -- \\
     \noalign{\vspace{10pt}}
     \bfseries Assumed\break parameter \\\hline
-    population size & $N$ & -- & $10^6$ & -- & $10^6$ \\
+    population size & $N$ & -- & $10^6$ & -- & $10^6$ & -- \\
     %%
     \noalign{\vspace{10pt}}
     \bfseries Derived\break parameter \\\hline
       effective reproduction number & $\Reff$ & -- &
-      \Sexpr{Reff.bombay.fitode.nb} &  \Sexpr{ci_fmt("Reff", ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(beta.bombay.fitode.ols*as.integer(S0.bombay.fitode.ols)/gamma.nls,dig)} \\
+      \Sexpr{Reff.bombay.fitode.nb} &  \Sexpr{ci_fmt("Reff", ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(beta.bombay.fitode.ols*as.integer(S0.bombay.fitode.ols)/gamma.nls,dig)}  &  \Sexpr{ci_fmt("Reff", ci.derived.bombay.fitode.ols[,-1])} \\
       mean generation interval & $\Tg$ & days &
-      \Sexpr{signif(7*Tg.bombay.fitode.nb,dig)} & \Sexpr{ci_fmt("Tg", 7*ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(7/gamma.nls,dig)}  \\
+      \Sexpr{signif(7*Tg.bombay.fitode.nb,dig)} & -- & \Sexpr{signif(7/gamma.nls,dig)} & -- \\
     basic reproduction number & $\R_0$ & -- &
       \Sexpr{signif(R0.bombay.fitode.nb,dig)}
-      &  \Sexpr{ci_fmt("R0", ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(beta.bombay.fitode.ols*1e6/gamma.nls, dig)}
+      &  \Sexpr{ci_fmt("R0", ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(beta.bombay.fitode.ols*1e6/gamma.nls, dig)} &  \Sexpr{ci_fmt("R0", ci.derived.bombay.fitode.ols[,-1])}
   \end{tabular}
   \end{center}
 \end{table}
