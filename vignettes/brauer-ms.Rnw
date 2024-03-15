@@ -2333,29 +2333,19 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
       standard stochastic SIR model \cite{AndeBrit00b} (see
       \cref{sec:stoch,fig:stoch}).
       %%
-      The parameter values in the ``True'' column are
-      are
-      those used to
-      generate the stochastic simulation ($S_0$, $I_0$, $\R_0$
-      and $\Tg$) and the values of other parameters derived
-      from these true parameter values using the indicated equations.
-      \djde{A value for every single parameter should be listed in this
-        column with no exceptions.}
-      %%
-      The \code{nls} column lists our estimates obtained by fitting
+      The parameter values in the ``true'' column are those used to
+      generate the stochastic simulation ($S_0$, $I_0$, $\R_0$ and
+      $\Tg$) and the values of other parameters derived from these
+      true parameter values using the indicated equations.  The
+      \code{nls} column lists our estimates obtained by fitting
       \cref{eq:sech} to the simulated data using nonlinear least
-      squares and the Delta method.
-      %%
-      \djde{Daniel, I am still failing to understand what the \KM
-        column is.  We need to talk about this.}
-      %%
-}\label{tab:stoch.nls}
+      squares and the Delta method.  }\label{tab:stoch.nls}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
   \begin{tabular}{ m{3cm} | c | c | c | c | c c}
   \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units} & {\footnotesize\bfseries True}
+    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units} & {\footnotesize\bfseries true}
     & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
     initial prevalence & $I_0$ & -- & -- &
       \Sexpr{iii[[2]]} & \Sexpr{iii[[2]]} & -- \\
