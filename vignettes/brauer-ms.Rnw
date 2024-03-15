@@ -63,9 +63,20 @@
 \newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
 \newcommand{\needref}{{\color{orange}[NEED REF]}}
 \newcommand{\term}[1]{{\bfseries\slshape#1}}
-\newcommand{\dt}{{\rm d}t}
-\newcommand{\ddt}[1]{\dfrac{{\rm d}#1}{{\rm d}t}}
-\newcommand{\dbydt}[1]{{\rm d}#1/{\rm d}t}
+
+%% derivatives
+%% note that \d is a built-in accent macro
+\newcommand{\dee}{{\rm d}}
+\newcommand{\dd}[2]{{\frac{\dee{#1}}{\dee{#2}}}}
+\newcommand{\dbyd}[2]{{{\dee{#1}}/{\dee{#2}}}}
+\newcommand{\ddx}[1]{\dd{#1}{x}}
+\newcommand{\ddt}[1]{\dd{#1}{t}}
+\newcommand{\ddtau}[1]{\dd{#1}{\tau}}
+\newcommand{\dbydx}[1]{\dbyd{#1}{x}}
+\newcommand{\dbydt}[1]{\dbyd{#1}{t}}
+\newcommand{\dbydtau}[1]{\dbyd{#1}{\tau}}
+\newcommand{\dt}{\dee t}
+
 \newcommand{\sech}{\,\textrm{sech}}
 \newcommand{\Ipeak}{I_{\rm p}}
 \newcommand{\tpeak}{t_{\rm p}}
@@ -76,6 +87,7 @@
 \newcommand{\KM}{KM\xspace}
 \usepackage{bm} % bold math
 \newcommand{\fvec}{{\bm{f}}}
+\newcommand{\Phivec}{{\bm{\Phi}}}
 \newcommand{\xvec}{{\bm{x}}}
 \newcommand{\thetavec}{{\bm{\theta}}}
 \newcommand{\thetavechat}{{\bm{\hat\theta}}}
@@ -104,12 +116,19 @@
 %% https://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
 \usepackage{ragged2e}
 %%\usepackage{array} % for m{...}
+\newcommand\ttbackslash{{\tt\char`\\}}
+\newcommand{\macro}[1]{{\tt\ttbackslash#1}}
 \newcommand{\traj}{F}
 \newcommand{\ie}{i.e., }
 \newcommand{\sens}{{\mathsf S}}
 \newcommand{\sensmat}{{\bm{\sens}}}
-\newcommand\ttbackslash{{\tt\char`\\}}
-\newcommand{\macro}[1]{{\tt\ttbackslash#1}}
+\newcommand{\tindex}{{\ell}}
+\newcommand{\ti}{t_\tindex}
+\newcommand{\tindexmax}{{n_t}}
+\newcommand{\xindex}{{i}}
+\newcommand{\xindexmax}{{n_{{}_x}}}
+\newcommand{\thetaindex}{{j}}
+\newcommand{\thetaindexmax}{{n_{{}_\theta}}}
 
 <<setup, echo=FALSE, include=FALSE>>=
 ## set default base-graphics plotting options
@@ -978,13 +997,13 @@ then the sensitivity equations are
 \end{align}
 \end{subequations}
 \end{linenomath*}
-If $\xvec$ and $\thetavec$ are $n$- and $m$-dimensional,
-respectively, then the $nm$ \term{sensitivities} $\sens_{ij}(t)$
-are given by the $n\times m$ \term{sensitivity matrix},
+If $\xvec$ and $\thetavec$ are $\xindexmax$- and $\thetaindexmax$-dimensional,
+respectively, then the $\xindexmax\thetaindexmax$ \term{sensitivities} $\sens_{ij}(t)$
+are given by the $\xindexmax\times \thetaindexmax$ \term{sensitivity matrix},
 \begin{equation}
 \sensmat(t) = \gradtheta\xvec(t,\thetavec) \,.
 \end{equation}
-\cref{eq:senseqns} defines a set of $nm$ differential
+\cref{eq:senseqns} defines a set of $\xindexmax\thetaindexmax$ differential
 equations for $\sens_{ij}$,
 \begin{subequations}\label{eq:senseqns.S}
 \begin{equation}
@@ -1000,60 +1019,77 @@ initial conditions
 \end{equation}
 \end{subequations}
 %%
-We can then use a further chain-rule step to compute the derivative of
-the log-likelihood of the observations $\{\xvec_{t_\ell}\}$ (at times
-$\{t_1,t_2,\ldots,t_{n_t}\}$) with respect to the parameters
-$\thetavec$,
-\djde{to get this right, we need to be very explicit about dependence
-on the trajectory model $\xvec(t,\theta)$ and the observation model}
+We can then use a further chain-rule step to compute the (total)
+derivative of the log-likelihood of the observations with respect to
+the parameters.  To get this right, it helps to make explicit
+dependence on the trajectory ($\xvec$) versus dependence on the
+parameters ($\thetavec$, which includes parameters of the trajectory
+model and of the observation process model).  For a general function
+$\Phivec(\xvec,\thetavec)$, the total derivative with respect to
+$\thetavec$ is
+\begin{equation}
+  \dd{\Phivec}{\thetavec}
+  = \gradx\Phivec \; \gradtheta\xvec + \gradtheta\Phivec \,.
+\end{equation}
+To apply this to the log-likelihood, it is helpful to make dependence
+on the trajectory $\xvec$ explicit.  To reduce notational confusion,
+we write $\xvec[\ti]$ for the observations at times
+$\ti\in\{t_1,t_2,\ldots,t_{\tindexmax}\}$, making it easier to
+distinguish them from the fitted model trajectory evaluated at these
+times, $\xvec(\ti,\thetavec)$.  Then
 %%
 \begin{linenomath*}
 \begin{subequations}\label{eq:2nd.chain}
 \begin{align}
-  \gradtheta\log\lik(\thetavec)
-  &= \gradtheta\log\Pop\big(\{\xvec_{t_\ell}:\ell=1,\dots,n_t\} \mid \xvec(t,\thetavec),\,\thetavec\big) \\
-  &= \gradtheta\log\prod_{\ell=1}^{n_t} \Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec),\,\thetavec\big) \\
-  &= \sum_{\ell=1}^{n_t} \gradtheta\log \Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec),\,\thetavec\big) \\
-  &= \sum_{\ell=1}^{n_t} \frac{1}{\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec),\,\thetavec\big)}
-     \gradx\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec),\,\thetavec\big) \, \sensmat(t)
+  \dd{\,\log\lik(\thetavec)}{\thetavec}
+  &= \dd{}{\thetavec}\Big(\log\Pop\big(\{\xvec[\ti]:\tindex=1,\dots,\tindexmax\} \mid \xvec(\ti,\thetavec),\,\thetavec\big)\Big) \\
+  &= \dd{}{\thetavec}\Big(\log\prod_{\tindex=1}^{\tindexmax} \Pop\big(\xvec[\ti] \mid \xvec(\ti,\thetavec),\,\thetavec\big)\Big) \\
+  &= \dd{}{\thetavec}\sum_{\tindex=1}^{\tindexmax} \Big(\log \Pop\big(\xvec[\ti] \mid \xvec(\ti,\thetavec),\,\thetavec\big)\Big) \\
+  &= \sum_{\tindex=1}^{\tindexmax} \dd{}{\thetavec}\Big(\log \Pop_\tindex(\xvec,\thetavec)\Big)
+     \qquad [\text{\footnotesize abbreviating $\Pop_\tindex(\xvec,\thetavec) \equiv
+       \Pop\big(\xvec[\ti] \mid \xvec(\ti,\thetavec),\,\thetavec\big)$}]
+       \\
+  &= \sum_{\tindex=1}^{\tindexmax} \frac{1}{\Pop_\tindex(\xvec,\thetavec)}
+  \Big( \gradx\Pop_\tindex(\xvec,\thetavec) \, \gradtheta\xvec
+  + \gradtheta\Pop_\tindex(\xvec,\thetavec) \Big)\Big|_{\xvec=\xvec(\ti,\thetavec)} \\
+  &= \sum_{\tindex=1}^{\tindexmax} \frac{1}{\Pop_\tindex(\xvec,\thetavec)}
+  \Big( \gradx\Pop_\tindex(\xvec,\thetavec) \, \sensmat(\ti)
+  + \gradtheta\Pop_\tindex(\xvec,\thetavec) \Big)\Big|_{\xvec=\xvec(\ti,\thetavec)}
  \,,
 \end{align}
 \end{subequations}
 \end{linenomath*}
-%%
-\djde{there should be another term on the RHS associated with differentiating
-  wrt the component that does not depend on $\xvec$; notation $\partial/\partial\thetavec$
-  is problematic... need to think this through}
-where we typically assume [\emph{cf.}~\cref{eq:NB}]
-\djde{need to clarify that NB parameter $k$ is one of the params in $\thetavec$}
-\begin{equation}
-\Pop\big(\xvec_{t_\ell} \mid \xvec(t,\thetavec),\,\thetavec\big) =
-\prod_{i=1}^n\texttt{NB}(x_{i,t_\ell};x_i(t_\ell,\thetavec),\,\thetavec) \,.
+where we typically assume the probability distribution
+\begin{equation}\label{eq:PopNB}
+\Pop\big(\xvec[\ti] \mid \xvec(\ti,\thetavec),\,\thetavec\big) =
+\prod_{\xindex=1}^\xindexmax\texttt{NB}(x_\xindex[\ti];\, x_\xindex(\ti,\thetavec),\,\thetavec) \,.
 \end{equation}
-\djde{$k$ should be one of the parameters in $\thetavec$... awkward...
-  I'm also not sure about the embedded assumptions above when fitting
-to multiple time series ($n>1$).}
-Integrating the sensitivity equations \eqref{eq:senseqns.S}
-in parallel with the ODEs \eqref{eq:genericODE} is a
-computationally efficient and numerically stable way to calculate the
-overall gradients of the log-likelihood with respect to the
-parameters, which makes nonlinear estimation more robust and
-efficient. We can also use these gradients to calculate CIs using the
-Delta method.  Raue \emph{et al.} \cite{raue2013lessons} give a
-detailed comparison between using the sensitivity equations and
-computing gradients by finite-difference approximations.
- (Bj{\o}rnstad \cite{bjorn2018} Chapter 9 also gives
-an introduction to trajectory matching.)
+We have slightly abused notation here, compared with \cref{eq:NB}; we
+have written $\thetavec$ rather than $k$ as the final argument of the
+negative binomial distribution, since there might be a different $k$
+for each observed variable $x_\xindex$, and we collect all parameters
+into the single vector $\thetavec$.  (The examples we discuss in this
+paper involve only a single observe time series, so $\xindexmax=1$.)
 
+Integrating the sensitivity equations \eqref{eq:senseqns.S} in
+parallel with the ODEs \eqref{eq:genericODE} is a computationally
+efficient and numerically stable way to calculate the overall
+gradients of the log-likelihood with respect to the parameters, which
+makes nonlinear estimation more robust and efficient. We can also use
+these gradients to calculate CIs using the Delta method.  Raue
+\emph{et al.} \cite{raue2013lessons} give a detailed comparison
+between using the sensitivity equations and computing gradients by
+finite-difference approximations.  (Bj{\o}rnstad
+\cite[Chapter~9]{bjorn2018} also gives an introduction to trajectory
+matching.)
 
 The \code{fitode} package\footnote{\code{fitode} is available on
-  \href{https://cran.r-project.org/}{CRAN}, and can be
-  installed via \code{install.packages("fitode")}.} does all of this
-computational work under the hood, and makes it as easy for a user to
-fit an ODE to data as it was for us to use \code{nls} above to fit a
-curve based on an analytical formula.  We illustrate the use of the
-package by fitting the SIR model~\eqref{eq:SIR} to the Bombay plague
-epidemic.
+\href{https://cran.r-project.org/}{CRAN}, and can be installed via
+\code{install.packages("fitode")}.} does all of this computational
+work under the hood, and makes it as easy for a user to fit an ODE to
+data as it was for us to use \code{nls} above to fit a curve based on
+an analytical formula.  We illustrate the use of the package by
+fitting the SIR model~\eqref{eq:SIR} to the Bombay plague epidemic.
 
 We begin by loading the package
 <<load fitode, message=FALSE>>=
@@ -1869,18 +1905,6 @@ would be worth writing a paper (and accompanying software) that could
 draw more dynamicists working on epidemic models into the world of
 data.
 
-\bmb{do we need this paragraph? Seems irrelevant to the average reader \ldots}
-\swp{It seems like a good practice to give credit to Dora who first started fitsir?
-I wonder if it's more appropriate to do that in the acknowledgements though.
-We also already mention fitsir in the main text.}
-Initially, we developed \code{fitsir} (which fits the standard SIR
-model \eqref{eq:SIR} to a single time series) as a purely pedagogical
-tool, but we then found it tremendously useful for a research project
-\cite{Rosa+21}.  That experience motivated BB and SWP to develop
-\code{fitode}, which can be used to fit any ODE model to (multiple)
-time series, making it much more broadly useful for both pedagogy and
-research.
-
 We have provided two answers to Fred's question of ``how'' to fit
 models to data (via \code{nls} or \code{fitode}), and through examples
 we have hinted at some of the reasons ``why'' such fitting can be very
@@ -2153,7 +2177,7 @@ legend("topleft", bty="n", lwd=c(2,lwd*0.60,lwd,lwd*0.6),
       The fitted trajectory
       and confidence band are shown in \cref{fig:phila}.
       See \cref{sec:phila}.}
-      %%\label{tab:philanls}
+      \label{tab:philanls}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
