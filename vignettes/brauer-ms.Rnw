@@ -2187,7 +2187,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       eventually die if everyone in the city were infected, \ie the
       product of the population size of Philadelphia in 1918
       (\Sexpr{prettyNum(philapop1918, big.mark=",")}) and an assumed
-      CFP of $0.025$\needref.
+      CFP of $\Sexpr{philacfp}$ \cite{TaubMore06}.
       %%
       The fitted trajectory and confidence band are shown in
       \cref{fig:phila}.  See \cref{sec:phila}.}
