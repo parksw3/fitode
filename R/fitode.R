@@ -347,9 +347,16 @@ fitode <- function(model, data,
     if (any(vapply(model@observation, get_head, character(1))=="ols")) {
         resids <- list()
         for (i in seq_along(model@observation)) {
+            ll_fun <- model@loglik[[i]]
+
+            nn <- !is.na(eval(parse(text=ll_fun@observation), data))
+
             pred <- predict(out)[[i]]$estimate
+
+            tmp <- pred - eval(out@model@observation[[i]][[2]], data)
+
             resids <- c(resids,
-                        list(pred - eval(out@model@observation[[i]][[2]], data)))
+                        list(tmp[nn]))
         }
         estvar <- var(unlist(resids))
         out@vcov <- out@vcov * estvar * 2
