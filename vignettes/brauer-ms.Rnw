@@ -366,10 +366,10 @@ the data.  Thus, a natural \term{objective function} to
 minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
-\sum_{\tindex=1}^n \big(\traj(\ti;\thetavec) - y_\tindex\big)^2 \,,
+\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - y_\tindex\big)^2 \,,
 \end{equation}
 \end{linenomath*}
-where the observed data are the points $\{(\ti,y_\tindex):\tindex=1,\ldots,n\}$,
+where the observed data are the points $\{(\ti,y_\tindex):\tindex=1,\ldots,\tindexmax\}$,
 $\traj(t;\thetavec)$ is the model \eqref{eq:sech}, and the parameter
 vector for \KM's problem is
 $\thetavec=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
@@ -779,10 +779,10 @@ yields an estimate,
 &= \argmax_\thetavec \lik(\thetavec) \\
 &= \argmin_\thetavec \big(\!\!-\log{\lik(\thetavec)}\big) \\
 &= \argmin_\thetavec\Big(
-\sum_{\tindex=1}^n \big(\traj(\ti;\thetavec) - y_\tindex\big)^2
+\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - y_\tindex\big)^2
 \;+\; \text{constant}
 \Big) \\
-&= \argmin_\thetavec\sum_{\tindex=1}^n \big(\traj(\ti;\thetavec) - y_\tindex\big)^2
+&= \argmin_\thetavec\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - y_\tindex\big)^2
  \,,
 \end{align}
 \end{subequations}
@@ -845,7 +845,7 @@ The maximum likelihood estimate is, therefore,
 \label{eq:negbinomMLE}
 \begin{split}
  \thetavechat
- &= \argmin_\thetavec\sum_{\tindex=1}^n \Big(\!\!
+ &= \argmin_\thetavec\sum_{\tindex=1}^{\tindexmax} \Big(\!\!
                 -\log\Gamma\big(y_\tindex+k\big)
                 +\log\Gamma(k) + \log(y_\tindex!) \\
                 &\hspace{3cm}
