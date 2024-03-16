@@ -266,8 +266,10 @@
 \def\author#1{\def\and{and }\gdef\@author{#1}}
 \def\received#1{\gdef\@received{#1}}
 \def\history#1{\gdef\@received{#1}}
-\gdef\@history{\bfseries{ARTICLE HISTORY\\}\par}
-\gdef\@received{Compiled \today}
+%%\gdef\@history{\bfseries{ARTICLE HISTORY\\}\par}
+\gdef\@history{\bfseries{Article compiled:\ }\par}
+%%\gdef\@received{Compiled \today}
+\gdef\@received{\today}
 %
 \long\def\name#1{#1\\\vspace{6pt}}%
 \long\def\affil#1{\affilfont{#1}\\}
@@ -302,7 +304,8 @@
     {\authorfont\@author\par}%
     \ifsuppldata\else
     \vskip17pt
-    {\receivedfont{\bfseries ARTICLE HISTORY\\}\@received\par}%
+    %%{\receivedfont{\bfseries ARTICLE HISTORY\\}\@received\par}%
+    {\receivedfont{\@history}\@received\par}%
     \fi
     \vskip13pt
   \egroup}
