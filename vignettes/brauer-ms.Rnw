@@ -124,6 +124,7 @@
 \newcommand{\sensmat}{{\bm{\sens}}}
 \newcommand{\tindex}{{\ell}}
 \newcommand{\ti}{t_\tindex}
+\newcommand{\timo}{t_{\tindex-1}}
 \newcommand{\tindexmax}{{n_t}}
 \newcommand{\xindex}{{i}}
 \newcommand{\xindexmax}{{n_{{}_x}}}
@@ -369,10 +370,10 @@ the data.  Thus, a natural \term{objective function} to
 minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
-\sum_{i=1}^n \big(\traj(t_i;\thetavec) - y_i\big)^2 \,,
+\sum_{\tindex=1}^n \big(\traj(\ti;\thetavec) - y_\tindex\big)^2 \,,
 \end{equation}
 \end{linenomath*}
-where the observed data are the points $\{(t_i,y_i):i=1,\ldots,n\}$,
+where the observed data are the points $\{(\ti,y_\tindex):\tindex=1,\ldots,n\}$,
 $\traj(t;\thetavec)$ is the model \eqref{eq:sech}, and the parameter
 vector for \KM's problem is
 $\thetavec=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
@@ -696,18 +697,18 @@ mortality to the \emph{instantaneous} rate, $\dbydt{R}$
 what \KM did, and we wanted to be able to compare formal nonlinear
 least squares fits to \KM's results\footnote{In his reanalysis of
   \KM's results, Baca\"er \cite{bacaermodel2012} also retained this
-  conceptual error.}.  Weekly mortality reported at time $t_i$ should
+  conceptual error.}.  Weekly mortality reported at time $\ti$ should
 really be modelled as the aggregation of $\dbydt{R}$ over the
 preceding week, i.e., it would be better to define
 \begin{linenomath*}
   \begin{subequations}\label{eq:sechcorrect}
     \begin{align}
-      \traj(t_i;\thetavec) &=
-                         \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
+      \traj(\ti;\thetavec) &=
+                         \int_{\timo}^{\ti} \ddt{R}\,\dt
 \label{eq:correct.mortality} \\
-                       &= \int_{t_{i-1}}^{t_i}  a \sech^2{(\omega\,t - \phi)}\,\dt \\
-                       &= \frac{a}{\omega}\Big(\tanh{(\omega\,t_i - \phi)}
-                         - \tanh{(\omega\,t_{i-1} - \phi)}\Big) \,.
+                       &= \int_{\timo}^{\ti}  a \sech^2{(\omega\,t - \phi)}\,\dt \\
+                       &= \frac{a}{\omega}\Big(\tanh{(\omega\,\ti - \phi)}
+                         - \tanh{(\omega\,\timo - \phi)}\Big) \,.
     \end{align}
   \end{subequations}
 \end{linenomath*}
@@ -737,7 +738,7 @@ the top panel of \cref{fig:Bombay} is a 95\% \term{confidence
   band}, which shows CIs for each point of the fitted model curve.
 
 To understand how to estimate CIs, we will start by thinking about the
-probability of observing the data $\{y_i\}$.  We imagine that the
+probability of observing the data $\{y_\tindex\}$.  We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
 consider the deviations from the model curve in
 \cref{fig:Bombay} to be observation errors.  We then imagine
@@ -752,9 +753,9 @@ model is
 \begin{equation}\label{eq:prob.data.given.model}
 \Pop(\text{data} \mid \text{model})
 =
-\prod_{i=1}^n
+\prod_{\tindex=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
-\exp\left(-\frac{\big(\traj(t_i;\thetavec) - y_i\big)^2}{2\sigma^2} \right) \Delta{y_i}
+\exp\left(-\frac{\big(\traj(\ti;\thetavec) - y_\tindex\big)^2}{2\sigma^2} \right) \Delta{y_\tindex}
 \right]
 \,.
 \end{equation}
@@ -769,7 +770,7 @@ a set of parameter values $\thetavec$ as
 \begin{linenomath*}
 \begin{equation}\label{eq:lik}
 \lik(\thetavec)
-= \Pop (\{y_i\} \mid \thetavec) \,.
+= \Pop (\{y_\tindex\} \mid \thetavec) \,.
 \end{equation}
 \end{linenomath*}
 Maximizing $\lik$ with respect to $\thetavec$ or, equivalently,
@@ -782,10 +783,10 @@ yields an estimate,
 &= \argmax_\thetavec \lik(\thetavec) \\
 &= \argmin_\thetavec \big(\!\!-\log{\lik(\thetavec)}\big) \\
 &= \argmin_\thetavec\Big(
-\sum_{i=1}^n \big(\traj(t_i;\thetavec) - y_i\big)^2
+\sum_{\tindex=1}^n \big(\traj(\ti;\thetavec) - y_\tindex\big)^2
 \;+\; \text{constant}
 \Big) \\
-&= \argmin_\thetavec\sum_{i=1}^n \big(\traj(t_i;\thetavec) - y_i\big)^2
+&= \argmin_\thetavec\sum_{\tindex=1}^n \big(\traj(\ti;\thetavec) - y_\tindex\big)^2
  \,,
 \end{align}
 \end{subequations}
@@ -838,8 +839,8 @@ The probability mass function for the \term{negative binomial
   \left(\frac{\mu}{k+\mu}\right)^x \,.
 \end{equation}
 \end{linenomath*}
-The predicted variance of a particular observation $y_i$ is given by
-$\mu_i (1+\mu_i/k)$, where $\mu_i(\thetavec) = \traj(t_i;\thetavec)$ is the
+The predicted variance of a particular observation $y_\tindex$ is given by
+$\mu_i (1+\mu_i/k)$, where $\mu_i(\thetavec) = \traj(\ti;\thetavec)$ is the
 model evaluated at the $i$\textsuperscript{th} observed data point
 [\emph{cf.}\ \eqref{eq:leastsquares} and \eqref{eq:sechcorrect}].
 The maximum likelihood estimate is, therefore,
@@ -848,12 +849,12 @@ The maximum likelihood estimate is, therefore,
 \label{eq:negbinomMLE}
 \begin{split}
  \thetavechat
- &= \argmin_\thetavec\sum_{i=1}^n \Big(\!\!
-                -\log\Gamma\big(y_i+k\big)
-                +\log\Gamma(k) + \log(y_i!) \\
+ &= \argmin_\thetavec\sum_{\tindex=1}^n \Big(\!\!
+                -\log\Gamma\big(y_\tindex+k\big)
+                +\log\Gamma(k) + \log(y_\tindex!) \\
                 &\hspace{3cm}
                 -k \log\left(\frac{k}{k+\mu_i(\thetavec)}\right)
-                -y_i \log\left(\frac{\mu_i(\thetavec)}{k+\mu_i(\thetavec)}\right)
+                -y_\tindex \log\left(\frac{\mu_i(\thetavec)}{k+\mu_i(\thetavec)}\right)
                 \Big)
   \,.
 \end{split}
@@ -941,8 +942,8 @@ $g(\thetavechat)=(\hat{\Reff}, \hat{\gamma},\hat{S_0})$.  This is
 precisely how we obtained the CIs on the derived parameters listed in
 \cref{tab:Bombay}.  Perhaps less obviously, we can also use the
 Delta method to obtain CIs on the fitted trajectory at each
-observation time $t_i$ (and hence obtain a confidence band) by
-considering $g(\thetavec)=\traj(t_i;\thetavec)$.  This is how we obtained
+observation time $\ti$ (and hence obtain a confidence band) by
+considering $g(\thetavec)=\traj(\ti;\thetavec)$.  This is how we obtained
 the pink confidence band shown in \cref{fig:Bombay}.
 
 Better confidence intervals can be obtained using the \term{profile
@@ -1138,8 +1139,8 @@ In the model definition above:
   the fitted model trajectory [\cref{eq:correct.mortality}],
 \begin{linenomath*}
 \begin{equation}
-  \mu(t_i) = \int_{t_{i-1}}^{t_i} \ddt{R}\,\dt
-  = R(t_i) - R(t_{i-1})
+  \mu(\ti) = \int_{\timo}^{\ti} \ddt{R}\,\dt
+  = R(\ti) - R(\timo)
   \label{eq:correct.mortality2}
  \,,
 \end{equation}
@@ -1147,13 +1148,13 @@ In the model definition above:
 Fitting to such differences is implemented by using the
 \code{diffnames} argument to specify the state variable for which
 consecutive differences are to be used (so, if the focal variable is
-$R$ then \code{fitode} fits to $R(t_i) - R(t_{i-1})$ rather than
-$R(t_i)$).
+$R$ then \code{fitode} fits to $R(\ti) - R(\timo)$ rather than
+$R(\ti)$).
 \item[\code{initial}]conditions are expressed as numbers of individuals.
 \item[\code{par}]refers to the parameters to be fitted:
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
 \end{description}
-Since we are taking the difference $\mu(t_i) = R(t_i) - R(t_{i-1})$ to
+Since we are taking the difference $\mu(\ti) = R(\ti) - R(\timo)$ to
 calculate the mortality trajectory,\footnote{Modelers often
   fit trajectories to cumulative curves.  However, doing so is ill-advised because
   points in a cumulative time series are not independent, making it
