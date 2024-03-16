@@ -152,18 +152,20 @@ options(warnPartialMatchArgs = FALSE,
 \begin{document}
 
 \articletype{ORIGINAL ARTICLE}% Specify the article type or omit as appropriate
+\articletype{Article type: \ EDUCATION}
 
 \title{Fitting epidemic models to data -- a tutorial\\in memory of Fred
   Brauer}
 
 \author{
-\name{David J.\,D.~Earn\textsuperscript{a}\thanks{CONTACT D.J.D.~Earn. Email: earn@math.mcmaster.ca. ORCID:
-    0000-0002-7562-1341, Twitter: @David.J.D.Earn},
-    Sang Woo Park\textsuperscript{b}\thanks{S.W.~Park. ORCID 0000-0003-2202-3361, Mastodon: @sangwoopark@ecoevo.social},
-    and Benjamin M.~Bolker\textsuperscript{a,c}\thanks{B.M.~Bolker. ORCID: 0000-0002-2127-0443, Twitter: @bolkerb, Mastodon: @bbolker@fediscience.org}}
-\affil{\textsuperscript{a}Department of Mathematics and Statistics,
-  McMaster University, Hamilton, Ontario, Canada, L8S 4K1; \textsuperscript{b}Department of Ecology and Evolutionary Biology, Princeton University, Princeton, NJ 08544; \textsuperscript{c}Department of Biology,
-  McMaster University, Hamilton, Ontario, Canada, L8S 4K1}
+  \name{David J.\,D.~Earn\textsuperscript{a}\thanks{%%CONTACT
+    D.J.D.~Earn. \href{mailto:earn@math.mcmaster.ca}{earn@math.mcmaster.ca}. ORCID: 0000-0002-7562-1341}, %%%Twitter: @David.J.D.Earn},
+    Sang Woo Park\textsuperscript{b}\thanks{S.W.~Park. \href{mailto:swp2@princeton.edu}{swp2@princeton.edu}. ORCID 0000-0003-2202-3361,} %%% Mastodon: @sangwoopark@ecoevo.social},
+    and Benjamin M.~Bolker\textsuperscript{a,c}\thanks{B.M.~Bolker. \href{mailto:bolkerb@mcmaster.ca}{bolkerb@mcmaster.ca}. ORCID: 0000-0002-2127-0443}, %%%Twitter: @bolkerb, Mastodon: @bbolker@fediscience.org}}
+  }
+  \affil{\textsuperscript{a}Department of Mathematics and Statistics, McMaster University,\\\ Hamilton, Ontario, Canada, L8S 4K1;\\\medskip
+    \textsuperscript{b}Department of Ecology and Evolutionary Biology, Princeton University,\\\ Princeton, NJ 08544;\\\medskip
+    \textsuperscript{c}Department of Biology, McMaster University,\\\ Hamilton, Ontario, Canada, L8S 4K1}
 }
 
 \maketitle
@@ -196,12 +198,6 @@ options(warnPartialMatchArgs = FALSE,
   epidemic models; infectious diseases; ordinary differential
   equations; parameter estimation; maximum likelihood; \code{fitode}
 \end{keywords}
-
-\section*{Remaining items on ToDo list}
-
-\begin{itemize}
-\item switch to Bull Math Biol template
-\end{itemize}
 
 \section{Introduction}
 
