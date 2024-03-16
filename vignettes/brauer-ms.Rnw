@@ -130,6 +130,7 @@
 \newcommand{\xindexmax}{{n_{{}_x}}}
 \newcommand{\thetaindex}{{j}}
 \newcommand{\thetaindexmax}{{n_{{}_\theta}}}
+\newcommand{\colfitodeols}{grey\xspace} % orange
 
 <<setup, echo=FALSE, include=FALSE>>=
 ## set default base-graphics plotting options
@@ -1942,7 +1943,7 @@ lwd <- 5
 col.KM <- my.blue
 col.nls <- my.red
 col.fitode.nb <- my.yellow
-col.fitode.ols <- "orange" # my.orange
+col.fitode.ols <- "grey80" # "orange" # my.orange
 transparent_colour <- function(col,alpha=150/255) {
     alpha <- round(alpha * 255)
     v <- col2rgb(col)[,1] # color as rgb vector
@@ -2165,7 +2166,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
   because the model \eqref{eq:SIR} is fitted to incidence at discrete
   time points rather than to a continuous curve representation of the
   instantaneous death rate.  The dotted red curve is identical to the
-  solid red curve in the top panel. The orange curve shows the
+  solid red curve in the top panel. The \colfitodeols curve shows the
   \code{fitode} fit obtained by minimizing the ordinary least squares.
   We have separated the two panels because the confidence band overlap
   would make the plots difficult to interpret.}
