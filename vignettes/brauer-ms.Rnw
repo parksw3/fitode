@@ -1203,12 +1203,13 @@ SIR_fit <- fitode(
   to interpret, we have fixed $\gamma$ to the value we estimated via
   \code{nls} fits of the \KM approximation
   \eqref{eq:sech}.\label{foot:fixedgamma}}).
-\item[\code{start}]specifies starting parameter set for the
+\item[\code{start}]specifies the starting parameter set for the
   optimization\footnote{In general, worse models (providing a poorer
   or less identifiable fit to the data) and worse data (fewer data
   points and more noise) will increase the sensitivity of fits to the
   starting values.}.
-\item[\code{tcol}]specifies the time column of the data frame.
+\item[\code{tcol}]specifies the name of the time column of the data
+  frame.
 \end{description}
 The resulting fits are plotted in \cref{fig:Bombay} and summarized in
 \cref{tab:bombay.fitode}.  The estimated parameter values (the
