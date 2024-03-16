@@ -440,22 +440,22 @@ print(nls.parameters <- coef(nlsfit))
 
 \noindent
 However, if you experiment with starting values, you will find that if
-you pick sufficiently \emph{bad} starting values, then \code{nls} will fail.
-For example, starting from $a=2000$, $\tpeak=5$, and $\omega=0.1$
-yields a ``singular gradient'' error.  More interestingly, starting
-from $a=500$, $\tpeak=5$, and $\omega=0.1$ yields $a=869$,
-$\omega=-0.19$, $\phi=-3.48$, which is far from our fitted values and
-illustrates a very important fact: there is \emph{not necessarily a
-  unique best fit set of parameters!}  In this case, the alternative
-solution exists because $\sech^2(x)$ is symmetric about the $y$ axis,
-but in general, there can be multiple local minima that cause
-nonlinear optimizers to converge to points that may or may not
-represent equally good fits to the data.  The potential existence of
-multiple local optima makes fitting to data hard; you need to
-be cautious, and use common sense, in interpreting the solutions found
-by your software (always plot the solutions!). Raue \emph{et al.}\/
-\cite{raue2013lessons} give suggestions for how to diagnose and handle
-multiple optima.
+you pick sufficiently \emph{bad} starting values, then \code{nls} will
+fail.  For example, starting from $a=2000$, $\tpeak=5$, and
+$\omega=0.1$ yields a ``singular gradient'' error.  More
+interestingly, starting from $a=500$, $\tpeak=5$, and $\omega=0.1$
+yields $a=869$, $\omega=-0.19$, $\phi=-3.48$, which is far from our
+fitted values and illustrates a very important fact: there is
+\emph{not necessarily a unique best fit set of parameters!}  In this
+case, the alternative solution exists because $\sech^2(x)$ is
+symmetric about the $y$ axis, but in general, there can be multiple
+local minima that cause nonlinear optimizers to converge to points
+that may or may not represent equally good fits to the data.  The
+potential existence of multiple local optima makes fitting to data
+hard; you need to be cautious, and use common sense, in interpreting
+the solutions found by your software (always plot the
+solutions!). Raue \emph{et al.}\/ \cite{raue2013lessons} give
+suggestions for how to diagnose and handle multiple optima.
 
 If you know that your parameters should be in a certain range, then
 you can exclude values outside that range.  For example, to ensure
@@ -1176,8 +1176,8 @@ SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
 SIR_fit <- fitode(
     model = SIR_model,
     data = bombay2,
-    start = SIR_start,
     fixed = list(gamma=gamma.nls),
+    start = SIR_start,
     tcol = "week"
 )
 @
@@ -1185,10 +1185,9 @@ SIR_fit <- fitode(
 \begin{description}
 \item[\code{model}]specifies the ODE model to be fitted.
 \item[\code{data}]specifies the data.
-\item[\code{start}]specifies starting parameter set for the optimization.
 \item[\code{fixed}]specifies parameter values to be fixed (and
-  therefore not estimated). Here, we chose to assume that the recovery
-  rate is known (using the \code{fixed} argument) due to parameter
+  therefore not estimated); above, we chose to assume that the
+  recovery rate $\gamma$ is known (due to parameter
   unidentifiability\footnote{In short, unidentifiability of $\gamma$
   means that we can obtain nearly identical fits across a wide range
   of $\gamma$.  While it is possible to fit the model without fixing
@@ -1202,7 +1201,12 @@ SIR_fit <- fitode(
   independent data sources; here, to make comparisons of fits easier
   to interpret, we have fixed $\gamma$ to the value we estimated via
   \code{nls} fits of the \KM approximation
-  \eqref{eq:sech}.\label{foot:fixedgamma}}.
+  \eqref{eq:sech}.\label{foot:fixedgamma}}).
+\item[\code{start}]specifies starting parameter set for the
+  optimization\footnote{In general, worse models (providing a poorer
+  or less identifiable fit to the data) and worse data (fewer data
+  points and more noise) will increase the sensitivity of fits to the
+  starting values.}.
 \item[\code{tcol}]specifies the time column of the data frame.
 \end{description}
 The resulting fits are plotted in \cref{fig:Bombay} and summarized in
@@ -2057,18 +2061,10 @@ ci_fmt("a", cc)
       unidentifiability (see \cref{foot:fixedgamma}); we fixed
       $\gamma$ to the value obtained from our \code{nls} fit of the
       \KM approximation [\cref{tab:Bombay}] for the purpose of fair
-      comparison of the fits.  We do not report CIs associated with
-      our \code{ols} fit in the final column because fixing $\gamma$
-      was not sufficient to yield numerically stable calculations of
-      CIs in this case.  \swp{this is quite random; if I start from
-        some other starting value, ols works fine but dnbinom doesn’t
-        work} \djde{Are the estimates and CIs you get with the
-        different starting conditions reasonable? Is the lesson that
-        with weak data it may be necessary to fiddle with starting
-        values to obtain decent fits including CIs?}
+      comparison of the fits.
       %%
-      The \code{nbinom}-fitted trajectory and confidence band, and
-      the \code{ols}-fitted trajectory, are shown in the lower panel
+      The \code{fitode}-fitted trajectories and confidence bands---for
+      both \code{nbinom} and \code{ols}---are shown in the lower panel
       of \cref{fig:Bombay}.
       %%
       As in \cref{tab:Bombay}, a population size $N$ must be assumed
