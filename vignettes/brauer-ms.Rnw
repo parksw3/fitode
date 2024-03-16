@@ -1512,12 +1512,12 @@ particular, $\R_0\approx \Sexpr{signif(R0.phila.fitode,2)}$ and $\Tg\approx
 \Sexpr{signif(Tg.phila.fitode*365,2)}$ days.
 
 If we convert the \code{fitode} estimates of the SIR parameters to the
-parameters of \KM's approximation, we obtain the orange curve in \cref{fig:phila}, which grossly
-underestimates the magnitude of the epidemic (the epidemic peak occurs much too
-soon).  The \KM approximation \eqref{eq:sech} is good initially, but
-becomes poorer and poorer over time as the underlying assumption
-on which it is based \eqref{eq:KMassumption} becomes less and less
-valid.
+parameters of \KM's approximation, we obtain the dotted yellow curve
+in \cref{fig:phila}, which grossly underestimates the magnitude of the
+epidemic (the epidemic peak occurs much too soon).  The \KM
+approximation \eqref{eq:sech} is good initially, but becomes poorer
+and poorer over time as the underlying assumption on which it is based
+\eqref{eq:KMassumption} becomes less and less valid.
 
 %%\section{Example for which \KM approximation is poor (via stochastic  SIR)}
 \section{Fitting the deterministic SIR model to stochastic simulations}\label{sec:stoch}
@@ -1597,14 +1597,15 @@ stochastic SIR model with initial state $(S_0,I_0,R_0)=(\Sexpr{iii})$,
 basic reproduction number $\R_0=\Sexpr{R0}$, and mean generation
 interval $\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top
 panel, $\dbydt{R}$ \eqref{eq:SIR;R} with the correct initial
-conditions and parameter values is shown in green, and the \KM
+conditions and parameter values is shown with solid green, and the \KM
 approximation \eqref{eq:sech} based on those parameter values is shown
-in orange.  The \code{fitode} fit (based on $\int (\dbydt{R}) \dt$) and
-confidence band are shown in yellow.  The time shift between the
-deterministic solution and the stochastic realization arises because
-the stochastic model captures the demographic noise (which causes a
-randomly distributed delay until the tipping point is reached, i.e.,
-until the epidemic takes off in a roughly deterministic fashion).
+with dotted green.  The \code{fitode} fit (based on $\int (\dbydt{R})
+\dt$) and confidence band are shown in yellow.  The time shift between
+the deterministic solution and the stochastic realization arises
+because the stochastic model captures the demographic noise (which
+causes a randomly distributed delay until the tipping point is
+reached, i.e., until the epidemic takes off in a roughly deterministic
+fashion).
 
 As expected, with the correct parameter values, \KM's approximation
 \eqref{eq:sech} fails once the requirement \eqref{eq:KMassumption}
