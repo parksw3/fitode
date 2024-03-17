@@ -60,7 +60,8 @@
 \newcommand{\thickredline}{{\color{red}\bigskip\begin{center}\linethickness{2mm}\line(1,0){250}\end{center}\bigskip}}
 \newcommand{\bmb}[1]{{\color{red}$\langle$\emph{BMB: #1}$\rangle$}}
 \newcommand{\swp}[1]{{\color{blue}$\langle$\emph{SWP: #1}$\rangle$}}
-\newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
+%%\newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
+\newcommand{\djde}[1]{\relax}
 \newcommand{\needref}{{\color{orange}[NEED REF]}}
 \newcommand{\term}[1]{{\bfseries\slshape#1}}
 
@@ -385,7 +386,7 @@ vector of parameters, and $\traj(t;\thetavec)$ is the model; for \KM's
 problem, the parameter vector is $\thetavec=(a,\omega,\phi)$ and the
 model is given by \cref{eq:sech}.  (Note that we write $\traj[\cdot]$
 when referring to observations of the variable $\traj$ and
-$\traj(\cdot;\cdot)$ when referring to the model.)  Minimizing
+$\traj(\cdot\,;\cdot)$ when referring to the model.)  Minimizing
 \eqref{eq:leastsquares} with respect to $\thetavec$ would have
 required some heroic arithmetic with a pencil and paper in 1927, but
 it is a simple task with the aid of a modern computer.
