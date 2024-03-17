@@ -118,7 +118,7 @@
 %%\usepackage{array} % for m{...}
 \newcommand\ttbackslash{{\tt\char`\\}}
 \newcommand{\macro}[1]{{\tt\ttbackslash#1}}
-\newcommand{\traj}{F}
+\newcommand{\traj}{x}
 \newcommand{\ie}{i.e., }
 \newcommand{\sens}{{\mathsf S}}
 \newcommand{\sensmat}{{\bm{\sens}}}
@@ -177,22 +177,25 @@ options(warnPartialMatchArgs = FALSE,
 
 \begin{abstract}
   Fred Brauer was an eminent mathematician who studied dynamical
-  systems, especially differential equations.
-  He made many contributions to mathematical epidemiology, a field
-  that is strongly connected to data, but he had no desire to touch
-  data.  Nevertheless, he recognized that fitting models to data is
-  usually necessary when attempting to apply infectious disease
-  transmission models to real public health problems.  He was curious
-  to know how one goes about fitting dynamical models to data, and why
-  it can be hard.  Initially in response to Fred's questions, we
-  developed a user-friendly \code{R} package, \code{fitode}, that
-  facilitates fitting ordinary differential equations to observed time
-  series.  Here, we use this package to provide a brief tutorial
-  introduction to fitting compartmental epidemic models to a single
-  observed time series.  We assume that, like Fred, the reader is
-  familiar with dynamical systems from a mathematical perspective, but
-  has limited experience with statistical methodology or
-  optimization techniques.
+  systems, especially differential equations.  He made many
+  contributions to mathematical epidemiology, a field that is strongly
+  connected to data, but he had no desire to touch data.
+  Nevertheless, he recognized that fitting models to data is usually
+  necessary when attempting to apply infectious disease transmission
+  models to real public health problems.  He was curious to know how
+  one goes about fitting dynamical models to data, and why it can be
+  hard.  Initially in response to Fred's questions, we developed a
+  user-friendly \code{R} package, \code{fitode}, that facilitates
+  fitting ordinary differential equations to observed time series.
+  Here, we use this package to provide a brief tutorial introduction
+  to fitting compartmental epidemic models to a single observed time
+  series.  We assume that, like Fred, the reader is familiar with
+  dynamical systems from a mathematical perspective, but has limited
+  experience with statistical methodology or optimization techniques.
+  \djde{We might want to mention in the abstract that we also explain
+    \code{nls}, and that we do more than provide recipes in the
+    tutorial, \ie we actually explain pedagogically where they come
+    from.}
 \end{abstract}
 
 \begin{keywords}
@@ -210,7 +213,7 @@ susceptible-infected-removed (SIR) epidemic model,
     \begin{align}
       \ddt{S} &= -\beta S I \,, \\
       \noalign{\vspace{5pt}}
-      \ddt{I} &= \beta S I - \gamma I \,, \\
+      \ddt{I} &= \beta S I - \gamma I \,, \label{eq:SIR;I} \\
       \noalign{\vspace{5pt}}
       \ddt{R} &= \gamma I\,, \label{eq:SIR;R}
     \end{align}
@@ -296,7 +299,9 @@ analytical form,
 \ddt{R} \approx a \sech^2{(\omega\,t - \phi)}\,.
 \end{equation}
 \end{linenomath*}
-Noting that the \term{basic reproduction number} is
+Noting that the \term{basic reproduction number} is\footnote{$\R_0$ is
+the expected number of secondary cases resulting from a primary case
+in a wholly susceptible population \cite{AndeMay91}.}
 \begin{linenomath*}
 \begin{equation}\label{eq:R0def}
 \R_0 = \frac{N\beta}{\gamma} \,,
@@ -313,6 +318,10 @@ can be written
 i.e., \cref{eq:sech} is a good approximation as long as
 the proportion of the population that has been infected and
 removed is much less than $1/\R_0$.
+\djde{We could add that this will be true initially for any $\R_0$,
+  and true for all time if $\R_0$ is sufficiently close to 1, which
+  can be quantified using the final size relation that \KM actually
+  derived.}
 
 Given \cref{eq:R0def}, the \term{effective reproduction number} at
 time $t=0$ is
@@ -367,16 +376,19 @@ the data.  Thus, a natural \term{objective function} to
 minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
-\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - y_\tindex\big)^2 \,,
+\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2 \,,
 \end{equation}
 \end{linenomath*}
-where the observed data are the points $\{(\ti,y_\tindex):\tindex=1,\ldots,\tindexmax\}$,
-$\traj(t;\thetavec)$ is the model \eqref{eq:sech}, and the parameter
-vector for \KM's problem is
-$\thetavec=(a,\omega,\phi)$.  Minimizing \eqref{eq:leastsquares} with
-respect to $\thetavec$ would have required some heroic arithmetic
-with a pencil and paper in 1927, but it is a simple task with the
-aid of a modern computer.
+where the observed data are the points
+$\{(\ti,\traj[\ti]):\tindex=1,\ldots,\tindexmax\}$, $\thetavec$ is the
+vector of parameters, and $\traj(t;\thetavec)$ is the model; for \KM's
+problem, the parameter vector is $\thetavec=(a,\omega,\phi)$ and the
+model is given by \cref{eq:sech}.  (Note that we write $\traj[\cdot]$
+when referring to observations of the variable $\traj$ and
+$\traj(\cdot;\cdot)$ when referring to the model.)  Minimizing
+\eqref{eq:leastsquares} with respect to $\thetavec$ would have
+required some heroic arithmetic with a pencil and paper in 1927, but
+it is a simple task with the aid of a modern computer.
 
 In the following segment of R code, we fit equation \eqref{eq:sech} to
 the Bombay plague data (which are included in the \code{fitode}
@@ -405,24 +417,28 @@ function is shown in \nlscol in \cref{fig:Bombay}.
 
 Starting from someone else's fit is not a great way to test the
 method, but fortunately the least squares fit for this problem is not
-very sensitive to the starting value.  To pick reasonable starting values,
-it often helps to think
-about the meaning of parameters.  For example, in the case of
-\cref{eq:sech}, it is useful to note that $a$ is the maximum
-of the function, and if write $\omega t - \phi$ as
-$\omega(t-\tpeak)$ then
+very sensitive to the starting value.  
+%%
+\djde{We could reference \cref{foot:startingvalue}, or move it here
+  and reference it where it currently is.}
+%%
+To pick reasonable starting values, it often helps to think about the
+meaning of parameters.  For example, in the case of \cref{eq:sech}, it
+is useful to note that $a$ is the maximum of the function, and if
+write $\omega t - \phi$ as $\omega(t-\tpeak)$ then
 \begin{linenomath*}
   \begin{equation}\label{eq:tpeak}
     \tpeak = \frac{\phi}{\omega}
   \end{equation}
 \end{linenomath*}
 is the \term{peak time} (at which the maximum occurs); both $a$ and
-$\tpeak$ can be approximated by looking at the plotted data.
-Assuming $I_0/S_0\ll1$, $\omega$ is half the initial exponential
-growth rate, so it can be approximated easily by plotting the data on
-a log scale, estimating the initial slope, and dividing by 2.
-Very rough guesses for $a$, $\tpeak$ and $\omega$
-are sufficient to converge on the same fit:
+$\tpeak$ can be approximated by looking at the plotted data.  Assuming
+$I_0/S_0\ll1$, $\omega$ is half the initial exponential growth
+rate\footnote{From \cref{eq:SIR;I}, the initial exponential growth
+rate is $\beta S_0 - \gamma = \gamma(\Reff-1)$.}, so it can be
+approximated easily by plotting the data on a log scale, estimating
+the initial slope, and dividing by 2.  Very rough guesses for $a$,
+$\tpeak$ and $\omega$ are sufficient to converge on the same fit:
 
 <<nls-bombay-2>>=
 a.guess <- 1000    # crude "by eye" estimate of peak value,
@@ -571,10 +587,10 @@ analytically\footnote{In (common) situations in which nonlinear
 Since there are four original parameters ($\beta$, $\gamma$, $S_0$,
 $I_0$) and only three parameters in \KM's approximation
 \eqref{eq:sech} ($a$, $\omega$, $\phi$), one of the four original
-parameters needs to be specified separately; above we have taken
-this to be the initial prevalence $I_0$.  From
-\cref{eq:invertparams}, we can compute the transmission
-rate,
+parameters needs to be specified separately; in
+\cref{eq:invertparams} above we have taken this to be the initial
+prevalence $I_0$.  From \cref{eq:invertparams}, we can compute the
+transmission rate,
 \begin{linenomath*}
 \begin{equation}\label{eq:beta}
   \beta = \frac{\Reff\gamma}{S_0} \,,
@@ -735,7 +751,7 @@ the top panel of \cref{fig:Bombay} is a 95\% \term{confidence
   band}, which shows CIs for each point of the fitted model curve.
 
 To understand how to estimate CIs, we will start by thinking about the
-probability of observing the data $\{y_\tindex\}$.  We imagine that the
+probability of observing the data $\{\traj[\ti]\}$.  We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
 consider the deviations from the model curve in
 \cref{fig:Bombay} to be observation errors.  We then imagine
@@ -752,7 +768,7 @@ model is
 =
 \prod_{\tindex=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
-\exp\left(-\frac{\big(\traj(\ti;\thetavec) - y_\tindex\big)^2}{2\sigma^2} \right) \Delta{y_\tindex}
+\exp\left(-\frac{\big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2}{2\sigma^2} \right) \Delta{\traj[\ti]}
 \right]
 \,.
 \end{equation}
@@ -767,7 +783,7 @@ a set of parameter values $\thetavec$ as
 \begin{linenomath*}
 \begin{equation}\label{eq:lik}
 \lik(\thetavec)
-= \Pop (\{y_\tindex\} \mid \thetavec) \,.
+= \Pop (\{\traj[\ti]\} \mid \thetavec) \,.
 \end{equation}
 \end{linenomath*}
 Maximizing $\lik$ with respect to $\thetavec$ or, equivalently,
@@ -780,10 +796,10 @@ yields an estimate,
 &= \argmax_\thetavec \lik(\thetavec) \\
 &= \argmin_\thetavec \big(\!\!-\log{\lik(\thetavec)}\big) \\
 &= \argmin_\thetavec\Big(
-\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - y_\tindex\big)^2
+\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2
 \;+\; \text{constant}
 \Big) \\
-&= \argmin_\thetavec\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - y_\tindex\big)^2
+&= \argmin_\thetavec\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2
  \,,
 \end{align}
 \end{subequations}
@@ -815,7 +831,7 @@ epidemic when mortality is low and $\pm 50$ at the peak.
 
 We could address both of these problems by using a
 Poisson distribution of observations with mean equal to the fitted
-model trajectory [\cref{eq:SIR;R}]. This handles
+model trajectory [\cref{eq:SIR;R} or \cref{eq:sech}]. This handles
 discrete observations and allows the variance to change as a function
 of the mean. However, the Poisson distribution assumes
 \term{equidispersion}---the variance is equal to the mean---while
@@ -836,22 +852,23 @@ The probability mass function for the \term{negative binomial
   \left(\frac{\mu}{k+\mu}\right)^x \,.
 \end{equation}
 \end{linenomath*}
-The predicted variance of a particular observation $y_\tindex$ is given by
-$\mu_i (1+\mu_i/k)$, where $\mu_i(\thetavec) = \traj(\ti;\thetavec)$ is the
-model evaluated at the $i$\textsuperscript{th} observed data point
-[\emph{cf.}\ \eqref{eq:leastsquares} and \eqref{eq:sechcorrect}].
-The maximum likelihood estimate is, therefore,
+The predicted variance of a particular observation $\traj[\ti]$ is
+given by $\mu_\tindex (1+\mu_\tindex/k)$, where
+$\mu_\tindex(\thetavec) = \traj(\ti;\thetavec)$ is the model evaluated
+at the $\tindex$\textsuperscript{th} observed data point
+[\emph{cf.}\ \eqref{eq:leastsquares} and \eqref{eq:sechcorrect}].  The
+maximum likelihood estimate is, therefore,
 \begin{linenomath*}
   \begin{equation}
 \label{eq:negbinomMLE}
 \begin{split}
  \thetavechat
  &= \argmin_\thetavec\sum_{\tindex=1}^{\tindexmax} \Big(\!\!
-                -\log\Gamma\big(y_\tindex+k\big)
-                +\log\Gamma(k) + \log(y_\tindex!) \\
+                -\log\Gamma\big(\traj[\ti]+k\big)
+                +\log\Gamma(k) + \log(\traj[\ti]!) \\
                 &\hspace{3cm}
-                -k \log\left(\frac{k}{k+\mu_i(\thetavec)}\right)
-                -y_\tindex \log\left(\frac{\mu_i(\thetavec)}{k+\mu_i(\thetavec)}\right)
+                -k \log\left(\frac{k}{k+\mu_\tindex(\thetavec)}\right)
+                -\traj[\ti] \log\left(\frac{\mu_\tindex(\thetavec)}{k+\mu_\tindex(\thetavec)}\right)
                 \Big)
   \,.
 \end{split}
@@ -884,8 +901,8 @@ parameter estimates, so we can take their (positive) square roots to
 get the standard error (SE) and compute approximate 95\% confidence
 intervals by adding $\pm1.96\,\mathrm{SE}$ to $\thetavechat$
 ($\pm 1.96$ represents a range containing 95\% of the probability of a
-standard Normal distribution).  To obtain CIs on functions of the
-fitted parameters (e.g., $\R_0$ or $\gamma$ if our model is \KM's
+standard Normal distribution).  To obtain CIs on \emph{functions of the
+fitted parameters} (e.g., $\R_0$ or $\gamma$ if our model is \KM's
 approximation \eqref{eq:sech}), we build on the idea that if the error
 in a parameter $a$ is $\Delta a$, then the associated error in a
 (differentiable) function $g(a)$ is $\Delta{g}\approx g'(a)\Delta{a}$.
@@ -975,7 +992,7 @@ a numerical solution of an ODE; we must simultaneously solve a set of
 alongside the main differential equations. Sensitivity equations
 define the time derivatives of the gradients of trajectories with
 respect to the parameters.  They can easily be derived using the chain
-rule; if we write a generic, autonomous ODE for $\xvec(t,\thetavec)$
+rule; if we write a generic, autonomous ODE for $\xvec(t;\thetavec)$
 as
 \begin{equation}\label{eq:genericODE}
   \ddt{\xvec} = \fvec(\xvec,\thetavec)\,,
@@ -985,12 +1002,12 @@ then the sensitivity equations are
 \begin{linenomath*}
 \begin{subequations}\label{eq:senseqns}
 \begin{align}
-\ddt{}\Big(\gradtheta\xvec(t,\thetavec)\Big)
-&= \gradtheta\Big( \ddt{\xvec(t,\thetavec)} \Big)
+\ddt{}\Big(\gradtheta\xvec(t;\thetavec)\Big)
+&= \gradtheta\Big( \ddt{\xvec(t;\thetavec)} \Big)
 = \gradtheta\Big( \fvec(\xvec,\thetavec) \Big) \\
 \noalign{\vspace{10pt}}
 &=  \gradx\fvec(\xvec,\thetavec)
-    \, \gradtheta\xvec(t,\thetavec)
+    \, \gradtheta\xvec(t;\thetavec)
    +  \gradtheta\fvec(\xvec,\thetavec) \,. \label{eq:senseqns;b}
 \end{align}
 \end{subequations}
@@ -999,7 +1016,7 @@ If $\xvec$ and $\thetavec$ are $\xindexmax$- and $\thetaindexmax$-dimensional,
 respectively, then the $\xindexmax\thetaindexmax$ \term{sensitivities} $\sens_{ij}(t)$
 are given by the $\xindexmax\times \thetaindexmax$ \term{sensitivity matrix},
 \begin{equation}
-\sensmat(t) = \gradtheta\xvec(t,\thetavec) \,.
+\sensmat(t) = \gradtheta\xvec(t;\thetavec) \,.
 \end{equation}
 \cref{eq:senseqns} defines a set of $\xindexmax\thetaindexmax$ differential
 equations for $\sens_{ij}$,
@@ -1019,47 +1036,48 @@ initial conditions
 %%
 We can then use a further chain-rule step to compute the (total)
 derivative of the log-likelihood of the observations with respect to
-the parameters.  To get this right, it helps to make explicit
+the parameters.  To get this right, it helps to make explicit the
 dependence on the trajectory ($\xvec$) versus dependence on the
-parameters ($\thetavec$, which includes parameters of the trajectory
-model and of the observation process model).  For a general function
-$\Phivec(\xvec,\thetavec)$, the total derivative with respect to
-$\thetavec$ is
+parameters ($\thetavec$, by which we will now mean all parameters,
+including parameters of the trajectory model and of the observation
+process model).  For a general function $\Phivec(\xvec,\thetavec)$,
+the total derivative with respect to $\thetavec$ is
 \begin{equation}
   \dd{\Phivec}{\thetavec}
   = \gradx\Phivec \; \gradtheta\xvec + \gradtheta\Phivec \,.
 \end{equation}
 To apply this to the log-likelihood, it is helpful to make dependence
-on the trajectory $\xvec$ explicit.  To reduce notational confusion,
-we write $\xvec[\ti]$ for the observations at times
+on the trajectory $\xvec$ explicit.
+Consistent with our notation above [e.g., \cref{eq:leastsquares}], we
+write $\xvec[\ti]$ for the observations at times
 $\ti\in\{t_1,t_2,\ldots,t_{\tindexmax}\}$, making it easier to
 distinguish them from the fitted model trajectory evaluated at these
-times, $\xvec(\ti,\thetavec)$.  Then
+times, $\xvec(\ti;\thetavec)$.  Then
 %%
 \begin{linenomath*}
 \begin{subequations}\label{eq:2nd.chain}
 \begin{align}
   \dd{\,\log\lik(\thetavec)}{\thetavec}
-  &= \dd{}{\thetavec}\Big(\log\Pop\big(\{\xvec[\ti]:\tindex=1,\dots,\tindexmax\} \mid \xvec(\ti,\thetavec),\,\thetavec\big)\Big) \\
-  &= \dd{}{\thetavec}\Big(\log\prod_{\tindex=1}^{\tindexmax} \Pop\big(\xvec[\ti] \mid \xvec(\ti,\thetavec),\,\thetavec\big)\Big) \\
-  &= \dd{}{\thetavec}\sum_{\tindex=1}^{\tindexmax} \Big(\log \Pop\big(\xvec[\ti] \mid \xvec(\ti,\thetavec),\,\thetavec\big)\Big) \\
+  &= \dd{}{\thetavec}\Big(\log\Pop\big(\{\xvec[\ti]:\tindex=1,\dots,\tindexmax\} \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
+  &= \dd{}{\thetavec}\Big(\log\prod_{\tindex=1}^{\tindexmax} \Pop\big(\xvec[\ti] \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
+  &= \dd{}{\thetavec}\sum_{\tindex=1}^{\tindexmax} \Big(\log \Pop\big(\xvec[\ti] \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
   &= \sum_{\tindex=1}^{\tindexmax} \dd{}{\thetavec}\Big(\log \Pop_\tindex(\xvec,\thetavec)\Big)
      \qquad [\text{\footnotesize abbreviating $\Pop_\tindex(\xvec,\thetavec) \equiv
-       \Pop\big(\xvec[\ti] \mid \xvec(\ti,\thetavec),\,\thetavec\big)$}]
+       \Pop\big(\xvec[\ti] \mid \xvec(\ti;\thetavec),\,\thetavec\big)$}]
        \\
   &= \sum_{\tindex=1}^{\tindexmax} \frac{1}{\Pop_\tindex(\xvec,\thetavec)}
   \Big( \gradx\Pop_\tindex(\xvec,\thetavec) \, \gradtheta\xvec
-  + \gradtheta\Pop_\tindex(\xvec,\thetavec) \Big)\Big|_{\xvec=\xvec(\ti,\thetavec)} \\
+  + \gradtheta\Pop_\tindex(\xvec,\thetavec) \Big)\Big|_{\xvec=\xvec(\ti;\thetavec)} \\
   &= \sum_{\tindex=1}^{\tindexmax} \frac{1}{\Pop_\tindex(\xvec,\thetavec)}
   \Big( \gradx\Pop_\tindex(\xvec,\thetavec) \, \sensmat(\ti)
-  + \gradtheta\Pop_\tindex(\xvec,\thetavec) \Big)\Big|_{\xvec=\xvec(\ti,\thetavec)}
+  + \gradtheta\Pop_\tindex(\xvec,\thetavec) \Big)\Big|_{\xvec=\xvec(\ti;\thetavec)}
  \,,
 \end{align}
 \end{subequations}
 \end{linenomath*}
 where we typically assume the probability distribution
 \begin{equation}\label{eq:PopNB}
-\Pop\big(\xvec[\ti] \mid \xvec(\ti,\thetavec),\,\thetavec\big) =
+\Pop\big(\xvec[\ti] \mid \xvec(\ti;\thetavec),\,\thetavec\big) =
 \prod_{\xindex=1}^\xindexmax\texttt{NB}(x_\xindex[\ti];\, x_\xindex(\ti,\thetavec),\,\thetavec) \,.
 \end{equation}
 We have slightly abused notation here, compared with \cref{eq:NB}; we
@@ -1086,15 +1104,15 @@ The \code{fitode} package\footnote{\code{fitode} is available on
 \code{install.packages("fitode")}.} does all of this computational
 work under the hood, and makes it as easy for a user to fit an ODE to
 data as it was for us to use \code{nls} above to fit a curve based on
-an analytical formula.  We illustrate the use of the package by
-fitting the SIR model~\eqref{eq:SIR} to the Bombay plague epidemic.
+an analytical formula.  We begin illustrating the use of the package
+by fitting the SIR model~\eqref{eq:SIR} to the Bombay plague epidemic.
 
-We begin by loading the package
+We first load the package
 <<load fitode, message=FALSE>>=
 library(fitode)
 @
 \noindent
-and defining a model object:
+and define a model object:
 
 \vbox{
 <<sirmortmodel_correct>>=
@@ -1166,19 +1184,16 @@ bombay2 <- rbind(
 )
 @
 
-Taking our previous parameter estimate from \code{nls}
-as our starting values, we can fit the model by calling the
-\code{fitode} function:
+\noindent
+Taking our previous parameter estimates from \code{nls} as starting
+values (and choosing a starting value for $k$), we can fit the model
+by calling the \code{fitode} function:
+
 <<sirmortfit,cache=TRUE,warning=FALSE,message=FALSE>>=
 SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
-SIR_fit <- fitode(
-    model = SIR_model,
-    data = bombay2,
-    fixed = list(gamma=gamma.nls),
-    start = SIR_start,
-    tcol = "week"
-)
-@
+SIR_fit <- fitode( model = SIR_model, data = bombay2, fixed = list(gamma=gamma.nls), start = SIR_start, tcol = "week" )
+@ 
+
 \noindent In the fitting function above:
 \begin{description}
 \item[\code{model}]specifies the ODE model to be fitted.
@@ -1204,7 +1219,7 @@ SIR_fit <- fitode(
   optimization\footnote{In general, worse models (providing a poorer
   or less identifiable fit to the data) and worse data (fewer data
   points and more noise) will increase the sensitivity of fits to the
-  starting values.}.
+  starting values.\label{foot:startingvalue}}.
 \item[\code{tcol}]specifies the name of the time column of the data
   frame.
 \end{description}
@@ -1334,6 +1349,8 @@ plot(gammavec, loglikvec,
      ylim=c(-140, -135.5))
 @
 
+\section{Cautionary remarks concerning fits to Bombay plague}
+
 We have highlighted the Bombay plague data because of their prominent
 role in \KM's paper \cite{KermMcKe27} and, consequently, for the
 history of mathematical epidemiology.  However, while they provide an
@@ -1349,7 +1366,7 @@ admitted were not ``strictly'' satisfied:
 
 \begin{quote}
   ``We are, in fact, assuming that plague in [humans] is a reflection
-  of plague in rats, and that with respect to the rat (1), the
+  of plague in rats, and that with respect to the rat (1) the
   uninfected population was uniformly susceptible; (2) that all
   susceptible rats in the island had an equal chance of being
   infected; (3) that the infectivity, recovery, and death rates were
@@ -1501,11 +1518,12 @@ to the Philadelphia influenza epidemic using nonlinear least squares,
 which yields the red curve in \cref{fig:phila}.  While this \code{nls}
 fit does not look unreasonable at a glance, the fitted parameter
 values (\cref{tab:philanls}) are absurd, including a basic
-reproduction number $\R_0\approx \Sexpr{signif(R0.phila.nls,2)}$ and a mean generation interval
-$\Tg\approx \Sexpr{signif(Tg.phila.nls,2)}$ years.
+reproduction number $\R_0\approx \Sexpr{signif(R0.phila.nls,2)}$ and a
+mean generation interval $\Tg\approx \Sexpr{signif(Tg.phila.nls,2)}$
+years.
 
 Matching trajectories of the exact SIR model using \code{fitode} gives
-a fit---the yellow curve in \cref{fig:phila}---that is visually
+a fit---the solid yellow curve in \cref{fig:phila}---that is visually
 similar to the (red) fit of \KM's approximation, but provides much
 more realistic parameter estimates (\cref{tab:phila.fitode}); in
 particular, $\R_0\approx \Sexpr{signif(R0.phila.fitode,2)}$ and $\Tg\approx
@@ -1596,11 +1614,11 @@ In \cref{fig:stoch}, the dots show a single realization of the
 stochastic SIR model with initial state $(S_0,I_0,R_0)=(\Sexpr{iii})$,
 basic reproduction number $\R_0=\Sexpr{R0}$, and mean generation
 interval $\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top
-panel, $\dbydt{R}$ \eqref{eq:SIR;R} with the correct initial
+panel, $\dbydt{R}$ [\cref{eq:SIR;R}] with the correct initial
 conditions and parameter values is shown with solid green, and the \KM
 approximation \eqref{eq:sech} based on those parameter values is shown
-with dotted green.  The \code{fitode} fit (based on $\int (\dbydt{R})
-\dt$) and confidence band are shown in yellow.  The time shift between
+with dotted green.  The \code{fitode} fit [based on $\int (\dbydt{R})
+\dt$] and confidence band are shown in yellow.  The time shift between
 the deterministic solution and the stochastic realization arises
 because the stochastic model captures the demographic noise (which
 causes a randomly distributed delay until the tipping point is
@@ -1840,6 +1858,8 @@ a number of useful advanced features. In particular,
   and for virus concentrations in wastewater, \code{fitode} can fit
   the model's parameters
   using all of the available data (as in \cite{Nour+2022}).
+  \djde{Maybe point out that our derivation of the sensitivity equations
+  \eqref{eq:senseqns} accounts for multiple data streams.}
 \item [compute confidence intervals via importance sampling:]
   While the Delta method can compute confidence intervals for derived
   quantities such as predicted trajectories, it rests on strong
@@ -1892,21 +1912,22 @@ encourage users of \code{fitode} who encounter these or other
 fitting challenges to open issues via the \code{fitode}
 GitHub repository (\url{https://github.com/parksw3/fitode}).
 
-As its name suggests, \code{fitode} is limited to fitting
-ODEs to time series.  Consequently, by design, \code{fitode} ignores
-\term{process error}, i.e., random variability that affects
-both current and future steps of the trajectory---as opposed to \term{observation error}, which
-arises from imperfect measurements or reporting and is usually assumed to
-be independent of the trajectory itself.  A key component of
-process error is the demographic stochasticity that is inherent to the
-discrete-state stochastic SIR model discussed above (and to any real host-pathogen
-system).  Parameters of models can also be subject to process error;
-for example, the transmission rate might depend on random fluctuations in weather.
-Properly accounting for process error can be
-critical for estimating uncertainties in parameter estimates
-and confidence bands on the projected dynamics of a system \citep{King+15,taylor2016stochasticity,li2018fitting}.
+As its name suggests, \code{fitode} is limited to fitting ODEs to time
+series.  Consequently, by design, \code{fitode} ignores \term{process
+  error}, i.e., random variability that affects both current and
+future steps of the trajectory---as opposed to \term{observation
+  error}, which arises from imperfect measurements or reporting and is
+usually assumed to be independent of the trajectory itself.  A key
+component of process error is the demographic stochasticity that is
+inherent to the discrete-state stochastic SIR model discussed above
+(and to any real host-pathogen system).  Parameters of models can also
+be subject to process error; for example, the transmission rate might
+depend on random fluctuations in weather.  Properly accounting for
+process error can be critical for estimating uncertainties in
+parameter estimates and confidence bands on the projected dynamics of
+a system \citep{King+15,taylor2016stochasticity,li2018fitting}.
 Popular \code{R} packages that can fit models with process error
-include \code{pomp} \citep{king2015statistical} and \code{mcstate}
+include \code{pomp} \citep{King+16} and \code{mcstate}
 \citep{mcstate}.
 
 \section{Closing remarks: from Fred Brauer to \code{fitode}}
@@ -1993,8 +2014,8 @@ ci_fmt("a", cc)
 %%\begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Fits of \KM's \cite{KermMcKe27} analytical SIR
-      approximation \eqref{eq:sech} to Bombay plague (see
+    \caption{\textbf{Fits of \KM's \cite{KermMcKe27} analytical SIR
+      approximation \eqref{eq:sech} to Bombay plague} (see
       \cref{fig:Bombay}).  The \KM column lists the parameter values
       estimated by \KM \cite[p.\,714]{KermMcKe27}; the \code{nls}
       column lists the values estimated by us, using nonlinear least
@@ -2052,11 +2073,11 @@ ci_fmt("a", cc)
 %%\begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Fits of numerical SIR model solutions to Bombay plague
-      (see \cref{fig:Bombay}).  Parameters values were estimated using
+    \caption{\textbf{Fits of numerical SIR model solutions to Bombay plague}
+      (see \cref{fig:Bombay}).  Parameter values were estimated using
       \code{fitode} to fit trajectories of \cref{eq:SIR}, assuming
       observation errors were distributed negative binomially
-      (\code{dnbinom}) or normally (\code{ols}).  The recovery rate
+      (\code{nbinom}) or normally (\code{ols}).  The recovery rate
       $\gamma$ was fixed rather than fitted due to parameter
       unidentifiability (see \cref{foot:fixedgamma}); we fixed
       $\gamma$ to the value obtained from our \code{nls} fit of the
@@ -2076,7 +2097,7 @@ ci_fmt("a", cc)
   \begin{tabular}{ m{3cm} | c | c | c c | c c}
   \bfseries Fixed\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
-    & {\footnotesize\bfseries \code{dnbinom}} & {\footnotesize\bfseries 95\% CI} & {\footnotesize\bfseries \code{ols}} & {\footnotesize\bfseries 95\% CI} \\\hline
+    & {\footnotesize\bfseries \code{nbinom}} & {\footnotesize\bfseries 95\% CI} & {\footnotesize\bfseries \code{ols}} & {\footnotesize\bfseries 95\% CI} \\\hline
     recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{gamma.nls} &
       -- & \Sexpr{gamma.nls} & -- \\
     %%
@@ -2148,37 +2169,43 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
        pt.bg=c("white",NA,NA,NA),
        legend=c("observed data","fitode (nbinom)", "fitode (ols)", "our nls fit"))
 @
-\caption{The plague epidemic in Bombay, 17 December 1905 to 21 July
+\caption{\textbf{The plague epidemic in Bombay}, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
   (dots) were digitized from \cite[Table~IX, p.\,753]{jhyg1907}.
   \emph{Top panel:} The \KMcol and red curves show the \KM
   approximation \eqref{eq:sech}, as fitted by \KM (\KMcol) and by us
-  using \code{nls} (red, with pink confidence band).  The associated
-  parameter estimates are given in \cref{tab:Bombay}.  The dotted
-  yellow curve shows the \code{fitode} fit of the SIR model
-  \eqref{eq:SIR}, for which the associated parameter estimates are
-  given in \cref{tab:bombay.fitode} (observation errors are assumed to
-  be negative binomially distributed; see \cref{sec:Uncertainty}).
+  using \code{nls} (red, with pink confidence band estimated using the
+  Delta method; see \cref{sec:Uncertainty}).  The associated parameter
+  estimates are given in \cref{tab:Bombay}.  The dotted yellow curve
+  shows the \code{fitode} fit of the SIR model \eqref{eq:SIR}, for
+  which the associated parameter estimates are given in
+  \cref{tab:bombay.fitode} [observation errors are assumed to be
+  negative binomially distributed \eqref{eq:NB}].
   %%
   \emph{Bottom panel:} The solid yellow curve is identical to the
-  dotted yellow curve in the top panel, and the light yellow band
-  shows the \code{fitode} confidence band; this confidence band is
-  shown as a linear interpolation between successive observation times
-  because the model \eqref{eq:SIR} is fitted to incidence at discrete
-  time points rather than to a continuous curve representation of the
-  instantaneous death rate.  The dotted red curve is identical to the
-  solid red curve in the top panel. The \colfitodeols curve shows the
-  \code{fitode} fit obtained by minimizing the ordinary least squares.
-  We have separated the two panels because the confidence band overlap
-  would make the plots difficult to interpret.}
+  dotted yellow curve in the top panel; the light yellow band is the
+  \code{fitode} confidence band obtained by the Delta method [the band
+    is shown as a linear interpolation between successive observation
+    times because the model \eqref{eq:SIR} is fitted to incidence at
+    discrete time points rather than to a continuous curve
+    representation of the instantaneous death rate].  The
+  \colfitodeols curve shows the \code{fitode} fit obtained by
+  minimizing the ordinary least squares \eqref{eq:leastsquares} [\ie
+    assuming observation errors are normally
+    \eqref{eq:prob.data.given.model} distributed with variance
+    $\sigma^2$ estimated from the residuals across all observation
+    times].  The dotted red curve is identical to the solid red curve
+  in the top panel.  We have separated the two panels because the
+  confidence band overlap would make the plots difficult to
+  interpret.}
 \label{fig:Bombay}
 \end{figure}
 
 %%\begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Fits of \KM's \cite{KermMcKe27} analytical SIR
-      approximation \eqref{eq:sech} to Philadelphia flu (see
+    \caption{\textbf{Fits of \KM's \cite{KermMcKe27} analytical SIR
+      approximation \eqref{eq:sech} to Philadelphia flu} (see
       \cref{fig:phila}).  Parameter estimates were obtained using
       nonlinear least squares (\code{nls}) to fit \cref{eq:sech} to
       the reported daily pneumonia and influenza (P\&I) mortality
@@ -2187,8 +2214,8 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       assumed the initial prevalence had the value estimated by
       \code{fitode} for the SIR model (see \cref{tab:phila.fitode}).
       %%
-      We do not use the raw population size in our estimate of $\R_0$.
-      Instead, we account for the fact that reported deaths are
+      We do not use the raw population size in our estimate of $\R_0$;
+      instead, we account for the fact that reported deaths are
       roughly equal to incidence times the case fatality proportion
       (CFP) by taking $N$ to be the size of population that would
       eventually die if everyone in the city were infected, \ie the
@@ -2243,7 +2270,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 %%\begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Fits of numerical SIR model solutions to Philadelphia flu
+    \caption{\textbf{Fits of numerical SIR model solutions to Philadelphia flu}
       (see \cref{fig:phila}).
       Parameter estimates are based on \code{fitode} fits of the SIR
       model \eqref{eq:SIR} to reported P\&I mortality during the main
@@ -2258,7 +2285,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
   \begin{tabular}{ m{3cm} | c | c | c c}
   \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
-    & {\footnotesize\bfseries \code{dnbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
+    & {\footnotesize\bfseries \code{nbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
     transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
       \Sexpr{beta.phila.fitode} & \Sexpr{ci_fmt("beta", ci.phila.fitode)} \\
       recovery rate & $\gamma$ & $\frac{1}{\textrm{years}}$ & \Sexpr{gamma.phila.fitode} &
@@ -2317,8 +2344,8 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
        legend=c("observed data","nls fit of KM approx",
                 "fitode (nbinom)","KM approx to fitode fit"))
 @
-\caption{The main wave of the 1918 influenza epidemic in the city of
-  Philadelphia, 1 September 1918 to 31 December 1918
+\caption{\textbf{The main wave of the 1918 influenza epidemic in the city of
+  Philadelphia}, 1 September 1918 to 31 December 1918
   \cite{Roge20,Gold+09}.  Reported daily deaths from pneumonia and
   influenza (P\&I) are shown with dots.  The red curve and pink
   confidence band show a nonlinear least squares (\code{nls}) fit of
@@ -2335,18 +2362,19 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
 %%\begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Fits of \KM's \cite{KermMcKe27} analytical SIR
+    \caption{\textbf{Fits of \KM's \cite{KermMcKe27} analytical SIR
       approximation \eqref{eq:sech} to an epidemic simulated using the
-      standard stochastic SIR model \cite{AndeBrit00b} (see
+      standard stochastic SIR model \cite{AndeBrit00b}} (see
       \cref{sec:stoch,fig:stoch}).
       %%
       The parameter values in the ``true'' column are those used to
       generate the stochastic simulation ($S_0$, $I_0$, $\R_0$ and
       $\Tg$) and the values of other parameters derived from these
       true parameter values using the indicated equations.  The
-      \code{nls} column lists our estimates obtained by fitting
-      \cref{eq:sech} to the simulated data using nonlinear least
-      squares and the Delta method.  }\label{tab:stoch.nls}
+      \code{nls} column lists our estimates and confidence intervals
+      obtained by fitting \cref{eq:sech} to the simulated data using
+      nonlinear least squares and the Delta method.
+    }\label{tab:stoch.nls}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
@@ -2391,20 +2419,21 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
 %%\begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{Fits of numerical (deterministic) SIR model solutions to
+    \caption{\textbf{Fits of numerical (deterministic) SIR model solutions to
       an epidemic simulated using the standard stochastic SIR model
-      \cite{AndeBrit00b} (see \cref{sec:stoch,fig:stoch}). Parameter
+      \cite{AndeBrit00b}} (see \cref{sec:stoch,fig:stoch}). Parameter
       estimates we obtained using \code{fitode} to fit the SIR model
       \eqref{eq:SIR} to the simulated data, assuming deviations from
       the determinsitic curve were generated by negative binomially
-      distributed observation errors.  }\label{tab:stoch.fitode}
+      \eqref{eq:NB} distributed observation errors.
+    }\label{tab:stoch.fitode}
 \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
   \begin{tabular}{ m{3cm} | c | c | c | c c}
   \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units} & {\footnotesize\bfseries true}
-    & {\footnotesize\bfseries \code{dnbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
+    & {\footnotesize\bfseries \code{nbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
     transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ & \Sexpr{52*R0*mm$gamma/2000} &
       \Sexpr{signif(52*beta.stoch.fitode,dig)} & \Sexpr{ci_fmt("beta", 52*ci.stoch.fitode, sn=FALSE, digits=dig)} \\
     recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{mm$gamma} &
@@ -2466,8 +2495,8 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
        pt.bg=c("white",NA,NA),
        legend=c("simulated data","fitode (nbinom)","nls fit of KM approx"))
 @
-\caption{Deterministic fits to daily incidence generated by a
-  stochastic SIR simulation with initial state
+\caption{\textbf{Deterministic fits to daily incidence generated by a
+  stochastic SIR simulation} with initial state
   $(S_0,I_0,R_0)=(1998,2,0)$, basic reproduction number $\R_0=5$, and
   mean generation interval $\Tg=1$ week.
   The simulated data points show the numbers of newly recovered
