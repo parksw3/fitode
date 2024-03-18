@@ -2543,8 +2543,7 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
   very similar fits across a wide range of values
   of the focal parameter ($\gamma$).  (\textsf{B--E}) The
   corresponding best parameter estimates for a given value of
-  $\gamma$. Panel \textsf{C} shows that the primary driver of
-  unidentifiability is the confounding between $\gamma$ and $S(0)$.}\label{fig:proflikgamma}
+  $\gamma$.}\label{fig:proflikgamma}
 \end{figure}
 
 \end{document}
