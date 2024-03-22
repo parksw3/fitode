@@ -204,6 +204,8 @@ options(warnPartialMatchArgs = FALSE,
   equations; parameter estimation; maximum likelihood; \code{fitode}
 \end{keywords}
 
+Submitted to \emph{Bulletin of Mathematical Biology}
+
 \section{Introduction}
 
 In their landmark 1927 paper, Kermack and McKendrick (\KM)
