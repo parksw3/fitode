@@ -60,8 +60,8 @@
 \newcommand{\thickredline}{{\color{red}\bigskip\begin{center}\linethickness{2mm}\line(1,0){250}\end{center}\bigskip}}
 \newcommand{\bmb}[1]{{\color{red}$\langle$\emph{BMB: #1}$\rangle$}}
 \newcommand{\swp}[1]{{\color{blue}$\langle$\emph{SWP: #1}$\rangle$}}
-%%\newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
-\newcommand{\djde}[1]{\relax}
+\newcommand{\djde}[1]{{\color{magenta}$\langle$\emph{DJDE: #1}$\rangle$}}
+%%\newcommand{\djde}[1]{\relax}
 \newcommand{\needref}{{\color{orange}[NEED REF]}}
 \newcommand{\term}[1]{{\bfseries\slshape#1}}
 
@@ -175,6 +175,18 @@ options(warnPartialMatchArgs = FALSE,
 \linenumbers
 
 \bigskip \bigskip
+
+\djde{Notation: $S_{\rm i}$ etc would be better than $S_0$ to further
+  reduce potential confusion with $\R_0$.  I often do this.  Not sure
+  why I didn't here.}
+
+\djde{Peak prevalence $I_{\rm p}=a/\gamma$ might be something we want
+  to mention, so the meaning of $a$ is $I_{\rm p}\times\Tg$.  ``Peak
+  removal rate'' might not be the best description of $a$.}
+
+\djde{Maybe clarify, at least in a footnote, that the KM approximation
+  is valid provided $\frac{R(t)-R_{\rm i}}{N}\ll \frac{1}{\R_0}$.  KM
+  assumed implicitly that $R_{\rm i}=0$.}
 
 \begin{abstract}
   Fred Brauer was an eminent mathematician who studied dynamical
