@@ -1888,6 +1888,8 @@ a number of useful advanced features. In particular,
   had access to time series of case reports, hospitalization reports, and
   wastewater sampling for the same geographic region. If we
   build a model that includes state variables for hospitalized individuals
+  and for virus concentrations in wastewater, \code{fitode} can fit
+  the model's parameters using all of the available data (as in \cite{Nour+2022}).
 \item [compute confidence intervals via importance sampling:]
   While the Delta method can compute confidence intervals for derived
   quantities such as predicted trajectories, it rests on strong
