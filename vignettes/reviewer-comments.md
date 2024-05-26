@@ -33,6 +33,8 @@ growth phase. In that case, the parameter $r$ will be confidently estimated, but
 
 5. Related to the above comment, on line 603, it might be useful to call this procedure the "multistart method" (as it is sometimes called) and to mention that it is not only useful for diagnosing convergence issues (where you would see dissimilar "best" parameter sets with differing likelihood values), but it's also useful for detecting identifiability issues (here, differing best parameter sets would show very similar likelihood values).
 
+**Done**
+
 6. Consider mentioning some other distribution options above eq. (17), around line 242-244, like the various Generalized Poisson distributions. Include references (some of these are available in other R packages that might be worth mentioning). I find that mathematicians often are unaware that these other options exist, and so they only consider Normal, Poisson, and Negative Binomial.
 
 7. Minor inconsistencies in referring to equations: These include model (2), Equation (2), equation (2), distance (7), approximation (6), dR/dt (2), etc. I don't recall this journal having strict guidelines for equation referencing, so at a minimum I would ask the authors to consider dropping the instances of capital-E "Equation" to lower case.
@@ -50,6 +52,8 @@ This manuscript introduces the software package fitode, an R-based tool develope
 ### Major Comments:
 
 1. The authors acknowledge the issue of non-uniqueness in parameter values achieving the minimum error in model fitting. This is a critical limitation as it affects the reliability of the model predictions and the interpretability of the results. To address this challenge, the authors might consider incorporating regularization techniques which can help in constraining the parameter space and reducing the likelihood of overfitting. It would also be helpful if the manuscript could discuss strategies to identify and handle the impact of parameter correlations, which often contribute to this non-uniqueness.
+
+**Partly done** (added para. on identifiability, expanded comment about regularization slightly)
 
 2. While fitode is presented as a user-friendly tool tailored for epidemiologists, a systematic comparison with existing methods available in platforms like MATLAB or Berkeley Madonna is missing. Each of these tools has its strengths and limitations which could significantly influence user choice depending on their specific needs. For instance, MATLAB offers a broad range of built-in functions for optimization and model fitting along with high computational power, but it may not be as accessible due to licensing costs. On the other hand, Berkeley Madonna is known for its ease of use and speed in running complex dynamic models but might lack some of the advanced statistical tools provided by R. The authors should elaborate on the comparative advantages of fitode, possibly in terms of its ease of integration with other statistical methods in R, its specific utility for epidemiological models, or any unique features that address the nuances of fitting disease transmission
 models to data.

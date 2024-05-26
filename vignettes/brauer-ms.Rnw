@@ -1831,7 +1831,7 @@ computational challenge that---in the absence of additional
 information about the Bombay plague outbreak---would likely limit how
 much can be learned from a model selection exercise: the mean
 generation interval ($\Tg$) appears to be \term{unidentifiable}, i.e.,
-impossible to estimate reliably from the reported weekly plague deaths
+difficult to estimate reliably from the reported weekly plague deaths
 alone (see \cref{fig:proflikgamma}).
 
 Our second example was the main wave of the 1918 influenza pandemic in
@@ -1917,7 +1917,7 @@ a number of useful advanced features. In particular,
   parameters; these priors
   can either reflect previous knowledge of a disease system, or can be used to
   \emph{regularize} a fitting procedure by downweighting extreme values of parameters
-  \cite{Lemo2019}.
+  \cite{Lemo2019}, which can help mitigate problems with identifiability (see below).
 
   Bayesian modelers typically use \emph{Markov chain Monte Carlo} algorithms
   to explore the parameter space and approximate the target distribution. \code{fitode} implements
@@ -1934,8 +1934,8 @@ Even with these extensions, modelers may face many challenges when
 fitting ODEs to data with the \code{fitode} package, as with
 fitting any nonlinear model to data.  For example, it is often
 difficult to ensure that the model has converged properly or reached
-its true maximum.  More generally, naive and optimistic epidemic modelers often run into problems of \term{structural identifiability} (the impossibility of estimating particular sets of parameters from data, regardless of how much data is available \citep{TuncTrang2018,Chow2023}) and \term{practical identifiability} (the impossibility of reliably estimating parameters from a particular small, noisy data set \cite{Gall+2022, Chow2023}) when they first start attempting to fit models to data.
-In addition to the rigorous methods described by \cite{Chow2023}, using a \term{multistart method} (performing optimization from multiple starting conditions: \cite{raue2013lessons}), or plotting likelihood surfaces, can help diagnose these problems.  Using different optimization methods or reparameterizing the model can also help \cite{raue2013lessons,Bolk+2013}.  We encourage users of \code{fitode} who encounter these or other
+its true maximum.  More generally, naive and optimistic epidemic modelers often run into problems of \term{structural identifiability} (the impossibility of estimating particular sets of parameters from data, regardless of how much data is available \citep{TuncTrang2018,Chow+2023}) and \term{practical identifiability} (the impossibility of reliably estimating parameters from a particular small, noisy data set \cite{Gall+2022, Chow+2023}) when they first start attempting to fit models to data.
+In addition to the rigorous methods described by \cite{Chow+2023}, using a \term{multistart method} (performing optimization from multiple starting conditions: \cite{raue2013lessons}), or plotting likelihood surfaces, can help diagnose these problems.  Using different optimization methods or reparameterizing the model can also help \cite{raue2013lessons,Bolk+2013}.  We encourage users of \code{fitode} who encounter these or other
 fitting challenges to open issues via the \code{fitode}
 GitHub repository (\url{https://github.com/parksw3/fitode}).
 
