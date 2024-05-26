@@ -3,3 +3,6 @@ brauer-ms.pdf: brauer-ms.Rnw brauer-ms.bib
 
 post: brauer-ms.pdf
 	scp brauer-ms.pdf ms.mcmaster.ca:~/public_html/misc/fitode_EarnParkBolker.pdf
+
+clean:
+	rm -f *.log *.aux *.bbl *.blg *.out *~
