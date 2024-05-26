@@ -1,4 +1,4 @@
-RSCRIPT="Rscript --vanilla -e"
+RSCRIPT=Rscript --vanilla -e
 brauer-ms.pdf: brauer-ms.Rnw brauer-ms.bib
 	$(RSCRIPT) "knitr::knit2pdf('brauer-ms.Rnw')"
 
