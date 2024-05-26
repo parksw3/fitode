@@ -13,7 +13,7 @@ clean:
 ## (i.e., commit changes first ...)
 ## Makefile has to be removed when reverting to HEAD, not 100% clear why
 ##  this is the case
-diff:
+diff: brauer-ms.Rnw brauer-ms.bib
 	git checkout $(OLDVERSION)
 	$(RSCRIPT) "knitr::knit('brauer-ms.Rnw')"
 	mv brauer-ms.tex brauer-ms-old.tex
