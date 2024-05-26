@@ -1,4 +1,5 @@
 RSCRIPT=Rscript --vanilla -e
+OLDVERSION=1ed1332e
 brauer-ms.pdf: brauer-ms.Rnw brauer-ms.bib
 	$(RSCRIPT) "knitr::knit2pdf('brauer-ms.Rnw')"
 
@@ -8,8 +9,12 @@ post: brauer-ms.pdf
 clean:
 	rm -f *.log *.aux *.bbl *.blg *.out *~
 
+## make PDF of diff. This will fail if repo is not in a clean state
+## (i.e., commit changes first ...)
+## Makefile has to be removed when reverting to HEAD, not 100% clear why
+##  this is the case
 diff:
-	git checkout 1ed1332e
+	git checkout $(OLDVERSION)
 	$(RSCRIPT) "knitr::knit('brauer-ms.Rnw')"
 	mv brauer-ms.tex brauer-ms-old.tex
 	git checkout master
