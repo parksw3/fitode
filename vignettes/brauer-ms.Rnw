@@ -1458,7 +1458,18 @@ phila1918b <- data.frame(
     date=c(as.Date("1918-09-10"), phila1918a$date),
     mort=c(NA, phila1918a$mort)
 )
-phila1918b$time <- lubridate::decimal_date(phila1918b$date)
+## avoids dependence on lubridate
+## not reliable for leap years!
+mk_dec_date <- function(x) {
+    p <- as.POSIXlt(x)
+    1900 + p$year + p$yday/365
+}
+phila1918b$time <- mk_dec_date(phila1918b$date)
+if (requireNamespace("lubridate")) {
+    stopifnot(all.equal(
+        phila1918b$time, lubridate::decimal_date(phila1918b$date)))
+}
+    
 @
 
 <<phila.fit,cache=TRUE,warning=FALSE, include=FALSE>>=
@@ -1917,15 +1928,12 @@ a number of useful advanced features. In particular,
 
 \end{description}
 
-Even with these extensions, modelers will face many challenges when
+Even with these extensions, modelers may face many challenges when
 fitting ODEs to data with the \code{fitode} package, as with
 fitting any nonlinear model to data.  For example, it is often
 difficult to ensure that the model has converged properly or reached
-its true maximum.  Performing optimization from multiple starting
-conditions and drawing likelihood surfaces can help diagnose these
-problems.  Using different optimization methods or reparameterizing
-the model can also help \cite{raue2013lessons,Bolk+2013}.  We also
-encourage users of \code{fitode} who encounter these or other
+its true maximum.  More generally, naive and optimistic epidemic modelers often run into problems of \term{structural identifiability} (the impossibility of estimating particular sets of parameters from data, regardless of how much data is available \citep{TuncTrang2018,Chow2023}) and \term{practical identifiability} (the impossibility of reliably estimating parameters from a particular small, noisy data set \cite{Gall+2022, Chow2023}) when they first start attempting to fit models to data.
+In addition to the rigorous methods described by \cite{Chow2023}, using a \term{multistart method} (performing optimization from multiple starting conditions: \cite{raue2013lessons}), or plotting likelihood surfaces, can help diagnose these problems.  Using different optimization methods or reparameterizing the model can also help \cite{raue2013lessons,Bolk+2013}.  We encourage users of \code{fitode} who encounter these or other
 fitting challenges to open issues via the \code{fitode}
 GitHub repository (\url{https://github.com/parksw3/fitode}).
 

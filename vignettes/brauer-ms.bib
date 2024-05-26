@@ -731,3 +731,72 @@ Gill76,
 mortality; evolution; sequences; strains; segment},
    Year = {2006} }
 
+
+@article{Chow2017,
+  title = {Fitting Dynamic Models to Epidemic Outbreaks with Quantified Uncertainty: {{A}} Primer for Parameter Uncertainty, Identifiability, and Forecasts},
+  shorttitle = {Fitting Dynamic Models to Epidemic Outbreaks with Quantified Uncertainty},
+  author = {Chowell, Gerardo},
+  year = {2017},
+  month = aug,
+  journal = {Infectious Disease Modelling},
+  volume = {2},
+  number = {3},
+  pages = {379--398},
+  issn = {2468-0427},
+  doi = {10.1016/j.idm.2017.08.001},
+  urldate = {2024-05-26},
+  abstract = {Mathematical models provide a quantitative framework with which scientists can assess hypotheses on the potential underlying mechanisms that explain patterns in observed data at different spatial and temporal scales, generate estimates of key kinetic parameters, assess the impact of interventions, optimize the impact of control strategies, and generate forecasts. We review and illustrate a simple data assimilation framework for calibrating mathematical models based on ordinary differential equation models using time series data describing the temporal progression of case counts relating, for instance, to population growth or infectious disease transmission dynamics. In contrast to Bayesian estimation approaches that always raise the question of how to set priors for the parameters, this frequentist approach relies on modeling the error structure in the data. We discuss issues related to parameter identifiability, uncertainty quantification and propagation as well as model performance and forecasts along examples based on phenomenological and mechanistic models parameterized using simulated and real datasets.},
+  keywords = {Bootstrap,Forecasts,Model performance,Parameter estimation,Parameter identifiability,Uncertainty propagation,Uncertainty quantification},
+  file = {/home/bolker/Zotero/storage/U4FRU62I/S2468042717300234.html}
+}
+
+@article{Chow2023,
+  title = {Structural Identifiability Analysis of Epidemic Models Based on Differential Equations: A Tutorial-Based Primer},
+  shorttitle = {Structural Identifiability Analysis of Epidemic Models Based on Differential Equations},
+  author = {Chowell, Gerardo and Dahal, Sushma and Liyanage, Yuganthi R. and Tariq, Amna and Tuncer, Necibe},
+  year = {2023},
+  month = nov,
+  journal = {Journal of Mathematical Biology},
+  volume = {87},
+  number = {6},
+  pages = {79},
+  issn = {1432-1416},
+  doi = {10.1007/s00285-023-02007-2},
+  urldate = {2024-05-26},
+  abstract = {The successful application of epidemic models hinges on our ability to estimate model parameters from limited observations reliably. An often-overlooked step before estimating model parameters consists of ensuring that the model parameters are structurally identifiable from the observed states of the system. In this tutorial-based primer, intended for a diverse audience, including students training in dynamic systems, we review and provide detailed guidance for conducting structural identifiability analysis of differential equation epidemic models based on a differential algebra approach using differential algebra for identifiability of systems (DAISY) and Mathematica (Wolfram Research). This approach aims to uncover any existing parameter correlations that preclude their estimation from the observed variables. We demonstrate this approach through examples, including tutorial videos of compartmental epidemic models previously employed to study transmission dynamics and control. We show that the lack of structural identifiability may be remedied by incorporating additional observations from different model states, assuming that the system's initial conditions are known, using prior information to fix some parameters involved in parameter correlations, or modifying the model based on existing parameter correlations. We also underscore how the results of structural identifiability analysis can help enrich compartmental diagrams of differential-equation models by indicating the observed state variables and the results of the structural identifiability analysis.},
+  langid = {english},
+  keywords = {12H05,34A34,34M15,92D40,DAISY,Differential algebra,Differential equations,Epidemic models,Parameter correlations,Structural identifiability},
+  file = {/home/bolker/Zotero/storage/TLF7F5DC/Chowell et al. - 2023 - Structural identifiability analysis of epidemic mo.pdf}
+}
+
+@article{Gall+2022,
+  title = {Lack of Practical Identifiability May Hamper Reliable Predictions in {{COVID-19}} Epidemic Models},
+  author = {Gallo, Luca and Frasca, Mattia and Latora, Vito and Russo, Giovanni},
+  year = {2022},
+  month = jan,
+  journal = {Science Advances},
+  volume = {8},
+  number = {3},
+  pages = {eabg5234},
+  issn = {2375-2548},
+  doi = {10.1126/sciadv.abg5234},
+  urldate = {2024-05-26},
+  abstract = {Compartmental models are widely adopted to describe and predict the spreading of infectious diseases. The unknown parameters of these models need to be estimated from the data. Furthermore, when some of the model variables are not empirically accessible, as in the case of asymptomatic carriers of coronavirus disease 2019 (COVID-19), they have to be obtained as an outcome of the model. Here, we introduce a framework to quantify how the uncertainty in the data affects the determination of the parameters and the evolution of the unmeasured variables of a given model. We illustrate how the method is able to characterize different regimes of identifiability, even in models with few compartments. Last, we discuss how the lack of identifiability in a realistic model for COVID-19 may prevent reliable predictions of the epidemic dynamics.           ,              Lack of practical identifiability may hamper reliable predictions in COVID-19 epidemic models.},
+  langid = {english},
+  file = {/home/bolker/Zotero/storage/5MRXZ3FU/Gallo et al. - 2022 - Lack of practical identifiability may hamper relia.pdf}
+}
+
+@article{TuncTrang2018,
+  title = {Structural and Practical Identifiability Analysis of Outbreak Models},
+  author = {Tuncer, Necibe and Le, Trang T.},
+  year = {2018},
+  month = may,
+  journal = {Mathematical Biosciences},
+  volume = {299},
+  pages = {1--18},
+  issn = {0025-5564},
+  doi = {10.1016/j.mbs.2018.02.004},
+  urldate = {2024-05-26},
+  abstract = {Estimating the reproduction number of an emerging infectious disease from an epidemiological data is becoming more essential in evaluating the current status of an outbreak. However, these studies are lacking the fundamental prerequisite in parameter estimation problem, namely the structural identifiability of the epidemic model, which determines the possibility of uniquely determining the model parameters from the epidemic data. In this paper, we perform both structural and practical identifiability analysis to classical epidemic models such as SIR (Susceptible-Infected-Recovered), SEIR (Susceptible-Exposed-Infected-Recovered) and an epidemic model with the treatment class (SITR). We performed structural identifiability analysis on these epidemic models using a differential algebra approach to investigate the well-posedness of the parameter estimation problem. Parameters of these models are estimated from different data types, namely prevalence, cumulative incidences and treated individuals. Furthermore, we carried out practical identifiability analysis on these models using Monte Carlo simulations and Fisher's Information Matrix. Our study shows that the SIR model is both structurally and practically identifiable from the prevalence data. It is also structurally identifiable to cumulative incidence observations, but due to high correlations of the parameters, it is practically unidentifiable from the cumulative incidence data. Furthermore, we found that none of these simple epidemic models are practically identifiable from the cumulative incidence data which is the standard type of epidemiological data provided by CDC or WHO. Our analysis with simple SIR model suggest that the health agencies, if possible, should report prevalence rather than incidence data.},
+  keywords = {Cumulative incidence,Emerging infectious disease,Outbreak models,Practical identifiability,Structural identifiability}
+}
