@@ -45,9 +45,11 @@ growth phase. In that case, the parameter $r$ will be confidently estimated, but
 
 8. There are a few places where table captions and R code run off into the margins.
 
-**Not done**
+**Hmm, I don't see where table captions overrun. The bodies of Tables 1 and 2 were a bit too wide, I tweaked them a bit, not sure how much (more) effort this is worth ...**
 
 9. Generally speaking, there might be room to include a few more references throughout, especially given the tutorial nature of this manuscript. Readers looking to apply this approach would benefit from some extra guidance finding literature related to some of the concepts or methods that are only briefly mentioned here.
+
+**Any thoughts?**
 
 
 ## Reviewer 2 
@@ -67,4 +69,4 @@ models to data.
 **Not done. I don't think a "systematic comparison" is worth it, but we could try to say something brief. Looked at Berkeley Madonna; it does have a 'curve fitting' option, but there's almost nothing in the docs about what it's actually doing ...** See @Marc+2020, also https://github.com/topics/epidemiology?l=matlab
 
 
-
+**I'm still not crazy about the colour choices for the figures. Can we use an Okabe-Ito palette instead?**
