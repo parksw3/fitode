@@ -84,6 +84,7 @@
 \newcommand{\Ipeak}{I_{\rm p}}
 \newcommand{\tpeak}{t_{\rm p}}
 \newcommand{\R}{{\mathcal R}}
+\newcommand{\Rn}{\R_0}
 \newcommand{\Tg}{T_{\rm g}}
 \newcommand{\Reff}{\R_{\rm e}}
 \usepackage{xspace}
@@ -183,7 +184,7 @@ options(warnPartialMatchArgs = FALSE,
 \bigskip \bigskip
 
 \djde{Notation: $S_{\rm i}$ etc would be better than $S_0$ to further
-  reduce potential confusion with $\R_0$.  I often do this.  Not sure
+  reduce potential confusion with $\Rn$.  I often do this.  Not sure
   why I didn't here.}
 
 \djde{Peak prevalence $I_{\rm p}=a/\gamma$ might be something we want
@@ -316,12 +317,12 @@ analytical form,
 \ddt{R} \approx a \sech^2{(\omega\,t - \phi)}\,.
 \end{equation}
 \end{linenomath*}
-Noting that the \term{basic reproduction number} is\footnote{$\R_0$ is
+Noting that the \term{basic reproduction number} is\footnote{$\Rn$ is
 the expected number of secondary cases resulting from a primary case
 in a wholly susceptible population \cite{AndeMay91}.}
 \begin{linenomath*}
 \begin{equation}\label{eq:R0def}
-\R_0 = \frac{N\beta}{\gamma} \,,
+\Rn = \frac{N\beta}{\gamma} \,,
 \end{equation}
 \end{linenomath*}
 where $N$ is the total population size,
@@ -329,15 +330,15 @@ the assumption that yields \KM's approximation \eqref{eq:sech}
 can be written
 \begin{linenomath*}
 \begin{equation}\label{eq:KMassumption}
-\frac{R(t)-R(0)}{N} \ll \frac{1}{\R_0} \,,
+\frac{R(t)-R(0)}{N} \ll \frac{1}{\Rn} \,,
 \end{equation}
 \end{linenomath*}
 i.e., \cref{eq:sech} is a good approximation as long as
 the proportion of the population that has been infected and
-removed since the initial time is much less than $1/\R_0$.
+removed since the initial time is much less than $1/\Rn$.
 (\KM assumed $R(0)=0$.)
-\djde{We could add that this will be true initially for any $\R_0$,
-  and true for all time if $\R_0$ is sufficiently close to 1, which
+\djde{We could add that this will be true initially for any $\Rn$,
+  and true for all time if $\Rn$ is sufficiently close to 1, which
   can be quantified using the final size relation that \KM actually
   derived.}
 
@@ -930,7 +931,7 @@ get the standard error (SE) and compute approximate 95\% confidence
 intervals by adding $\pm1.96\,\mathrm{SE}$ to $\thetavechat$
 ($\pm 1.96$ represents a range containing 95\% of the probability of a
 standard Normal distribution).  To obtain CIs on \emph{functions of the
-fitted parameters} (e.g., $\R_0$ or $\gamma$ if our model is \KM's
+fitted parameters} (e.g., $\Rn$ or $\gamma$ if our model is \KM's
 approximation \eqref{eq:sech}), we build on the idea that if the error
 in a parameter $a$ is $\Delta a$, then the associated error in a
 (differentiable) function $g(a)$ is $\Delta{g}\approx g'(a)\Delta{a}$.
@@ -1561,7 +1562,7 @@ to the Philadelphia influenza epidemic using nonlinear least squares,
 which yields the red curve in \cref{fig:phila}.  While this \code{nls}
 fit does not look unreasonable at a glance, the fitted parameter
 values (\cref{tab:philanls}) are absurd, including a basic
-reproduction number $\R_0\approx \Sexpr{signif(R0.phila.nls,2)}$ and a
+reproduction number $\Rn\approx \Sexpr{signif(R0.phila.nls,2)}$ and a
 mean generation interval $\Tg\approx \Sexpr{signif(Tg.phila.nls,2)}$
 years.
 
@@ -1569,7 +1570,7 @@ Matching trajectories of the exact SIR model using \code{fitode} gives
 a fit---the solid yellow curve in \cref{fig:phila}---that is visually
 similar to the (red) fit of \KM's approximation, but provides much
 more realistic parameter estimates (\cref{tab:phila.fitode}); in
-particular, $\R_0\approx \Sexpr{signif(R0.phila.fitode,2)}$ and $\Tg\approx
+particular, $\Rn\approx \Sexpr{signif(R0.phila.fitode,2)}$ and $\Tg\approx
 \Sexpr{signif(Tg.phila.fitode*365,2)}$ days.
 
 If we convert the \code{fitode} estimates of the SIR parameters to the
@@ -1618,7 +1619,7 @@ the true underlying values of the parameters we are trying to estimate.
 
 The most basic test is essentially a consistency check: in the context
 of the SIR model, we choose initial conditions $(\Sinit,\Iinit)$ and
-parameter values ($\R_0,\Tg$), compute the associated trajectory by
+parameter values ($\Rn,\Tg$), compute the associated trajectory by
 solving \cref{eq:SIR} numerically, and then use \code{fitode} to
 estimate the parameters.  At least if we choose starting values
 reasonably close to the correct underlying values, \code{fitode} should converge
@@ -1629,13 +1630,13 @@ solution and artificially ``observe'' it with error, i.e., using a
 noise distribution that we specify.  For example, we could take
 observation errors to be negative binomially distributed with
 overdispersion parameter $k$, and then use \code{fitode} to estimate
-$k$ together with the other parameters ($\Sinit,\Iinit,\R_0,\Tg$).
+$k$ together with the other parameters ($\Sinit,\Iinit,\Rn,\Tg$).
 
 A still more stringent test is to simulate data from a model
 that is more complex and realistic than the idealized model that we
 want to fit, and then see if we can nevertheless recover parameters
 that correspond to those of our idealized
-model (e.g., $\R_0$ and $\Tg$ for the SIR model).  We will take a step
+model (e.g., $\Rn$ and $\Tg$ for the SIR model).  We will take a step
 in this direction in this section by fitting the deterministic SIR
 model \eqref{eq:SIR} to data generated by a fully stochastic version
 of the model.
@@ -1655,7 +1656,7 @@ possibility that an epidemic can burn out \cite{Pars+24}).
 
 In \cref{fig:stoch}, the dots show a single realization of the
 stochastic SIR model with initial state $(\Sinit,\Iinit,R_0)=(\Sexpr{iii})$,
-basic reproduction number $\R_0=\Sexpr{R0}$, and mean generation
+basic reproduction number $\Rn=\Sexpr{R0}$, and mean generation
 interval $\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top
 panel, $\dbydt{R}$ [\cref{eq:SIR;R}] with the correct initial
 conditions and parameter values is shown with solid green, and the \KM
@@ -1670,7 +1671,7 @@ fashion).
 
 As expected, with the correct parameter values, \KM's approximation
 \eqref{eq:sech} fails once the requirement \eqref{eq:KMassumption}
-that $R(t)/N\ll1/\R_0$ is violated.  We can, of course, find values of
+that $R(t)/N\ll1/\Rn$ is violated.  We can, of course, find values of
 the parameters $(a,\omega,\phi)$ such that the function
 $a\sech^2{(\omega\,t - \phi)}$ [\cref{eq:sech}] more closely matches
 the shape of the full simulated epidemic.  Using nonlinear least
@@ -2102,7 +2103,7 @@ ci_fmt("a", cc)
       \Sexpr{signif(beta.KM*52,dig)} & \Sexpr{signif(beta.nls*52,dig)} & \Sexpr{ci_fmt("beta", cc.delta*52, sn=FALSE, digits=dig)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
       \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta)} \\
-    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
+    basic reproduction number & $\Rn$ & \eqref{eq:R0def} & -- &
       \Sexpr{signif(10^6*Reff.KM/S0.KM,dig)}
       & \Sexpr{signif(10^6*Reff.nls/S0.nls,dig)} & \Sexpr{ci_fmt("R0", cc.delta)}
   \end{tabular}
@@ -2130,7 +2131,7 @@ ci_fmt("a", cc)
       of \cref{fig:Bombay}.
       %%
       As in \cref{tab:Bombay}, a population size $N$ must be assumed
-      to derive $\R_0$ estimates.
+      to derive $\Rn$ estimates.
       \bmb{tweaked table to make it fit within margins.
       (See comment above at
       \texttt{\textbackslash usepackage\{makecell\}} for breaking lines
@@ -2174,7 +2175,7 @@ ci_fmt("a", cc)
       \Sexpr{Reff.bombay.fitode.nb} &  \Sexpr{ci_fmt("Reff", ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(beta.bombay.fitode.ols*as.integer(S0.bombay.fitode.ols)/gamma.nls,dig)}  &  \Sexpr{ci_fmt("Reff", ci.derived.bombay.fitode.ols[,-1])} \\
       mean generation interval & $\Tg$ & days &
       \Sexpr{signif(7*Tg.bombay.fitode.nb,dig)} & -- & \Sexpr{signif(7/gamma.nls,dig)} & -- \\
-    basic reproduction number & $\R_0$ & -- &
+    basic reproduction number & $\Rn$ & -- &
       \Sexpr{signif(R0.bombay.fitode.nb,dig)}
       &  \Sexpr{ci_fmt("R0", ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(beta.bombay.fitode.ols*1e6/gamma.nls, dig)} &  \Sexpr{ci_fmt("R0", ci.derived.bombay.fitode.ols[,-1])}
   \end{tabular}
@@ -2267,7 +2268,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       assumed the initial prevalence had the value estimated by
       \code{fitode} for the SIR model (see \cref{tab:phila.fitode}).
       %%
-      We do not use the raw population size in our estimate of $\R_0$;
+      We do not use the raw population size in our estimate of $\Rn$;
       instead, we account for the fact that reported deaths are
       roughly equal to incidence times the case fatality proportion
       (CFP) by taking $N$ to be the size of population that would
@@ -2313,7 +2314,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
        \Sexpr{beta.phila.nls} & \Sexpr{ci_fmt("beta", cc.phila.delta)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & years &
       \Sexpr{signif(Tg.phila.nls,dig)} & \Sexpr{ci_fmt("Tg", cc.phila.delta)} \\
-    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
+    basic reproduction number & $\Rn$ & \eqref{eq:R0def} & -- &
        \Sexpr{signif(R0.phila.nls,dig)} & \Sexpr{ci_fmt("R0", cc.phila.delta, sn=FALSE, digits=dig)}
   \end{tabular}
   \end{center}
@@ -2329,7 +2330,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       model \eqref{eq:SIR} to reported P\&I mortality during the main
       wave of the 1918 influenza pandemic in the city of Philadelphia.
       As in \cref{tab:philanls}, in order to derive an estimate of
-      $\R_0$, we assume an effective population size that accounts for
+      $\Rn$, we assume an effective population size that accounts for
       the data representing deaths rather than cases.
     }\label{tab:phila.fitode}
     \medskip
@@ -2359,7 +2360,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       \Sexpr{Reff.phila.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.phila.fitode[,-1])} \\
       mean generation interval & $\Tg$ & days &
       \Sexpr{signif(Tg.phila.fitode*365,dig)} & \Sexpr{ci_fmt("Tg", ci.derived.phila.fitode[,-1]*365)} \\
-    basic reproduction number & $\R_0$ & -- &
+    basic reproduction number & $\Rn$ & -- &
       \Sexpr{signif(R0.phila.fitode,dig)}
       &  \Sexpr{ci_fmt("R0", ci.derived.phila.fitode[,-1])}
   \end{tabular}
@@ -2421,7 +2422,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
       \cref{sec:stoch,fig:stoch}).
       %%
       The parameter values in the ``true'' column are those used to
-      generate the stochastic simulation ($\Sinit$, $\Iinit$, $\R_0$ and
+      generate the stochastic simulation ($\Sinit$, $\Iinit$, $\Rn$ and
       $\Tg$) and the values of other parameters derived from these
       true parameter values using the indicated equations.  The
       \code{nls} column lists our estimates and confidence intervals
@@ -2461,7 +2462,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
       \Sexpr{52*beta.KM.stoch} & \Sexpr{signif(52*beta.nls.stoch,dig)} & \Sexpr{ci_fmt("beta", 52*cc.delta.stoch)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
       \Sexpr{signif(7*Tg.KM.stoch,dig)} & \Sexpr{signif(7*Tg.nls.stoch,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta.stoch)} \\
-    basic reproduction number & $\R_0$ & \eqref{eq:R0def} & -- &
+    basic reproduction number & $\Rn$ & \eqref{eq:R0def} & -- &
       \Sexpr{signif(2000*Reff.KM.stoch/S0.KM.stoch,dig)}
       & \Sexpr{signif(2000*Reff.nls.stoch/S0.nls.stoch,dig)} & \Sexpr{ci_fmt("R0", cc.delta.stoch)}
   \end{tabular}
@@ -2502,7 +2503,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
       mean generation interval & $\Tg$ & days & \Sexpr{7/mm$gamma} & \Sexpr{signif(7*1/gamma.stoch.fitode,dig)} & \Sexpr{ci_fmt("gamma", 7*1/ci.stoch.fitode)}\\
       effective reproduction number & $\Reff$ & -- & \Sexpr{R0*iii[[1]]/2000} &
       \Sexpr{Reff.stoch.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.stoch.fitode[,-1])} \\
-    basic reproduction number & $\R_0$ & -- & \Sexpr{R0} &
+    basic reproduction number & $\Rn$ & -- & \Sexpr{R0} &
       \Sexpr{signif(R0.stoch.fitode,dig)}
       &  \Sexpr{ci_fmt("R0", ci.derived.stoch.fitode[,-1])}
   \end{tabular}
@@ -2551,7 +2552,7 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
 @
 \caption{\textbf{Deterministic fits to daily incidence generated by a
   stochastic SIR simulation} with initial state
-  $(\Sinit,\Iinit,R_0)=(1998,2,0)$, basic reproduction number $\R_0=5$, and
+  $(\Sinit,\Iinit,R_0)=(1998,2,0)$, basic reproduction number $\Rn=5$, and
   mean generation interval $\Tg=1$ week.
   The simulated data points show the numbers of newly recovered
   individuals each day.
