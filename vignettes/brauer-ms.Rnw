@@ -192,6 +192,9 @@ options(warnPartialMatchArgs = FALSE,
 \djde{Peak prevalence $I_{\rm p}=a/\gamma$ might be something we want
   to mention, so the meaning of $a$ is $I_{\rm p}\times\Tg$.  ``Peak
   removal rate'' might not be the best description of $a$.}
+\djde{The issue is that we follow \KM and present a formula for
+  $\dbyd{R}{t}$ rather than $I(t)$.  In practice, is is the prevalence
+  curve that people care about.  hmmm.}
 
 \begin{abstract}
   Fred Brauer was an eminent mathematician who studied dynamical
