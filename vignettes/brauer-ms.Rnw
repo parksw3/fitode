@@ -183,9 +183,11 @@ options(warnPartialMatchArgs = FALSE,
 
 \bigskip \bigskip
 
-\djde{Notation: $S_{\rm i}$ etc would be better than $S_0$ to further
-  reduce potential confusion with $\Rn$.  I often do this.  Not sure
-  why I didn't here.}
+\djde{Notation: I've introduced macros \macro{Sinit}, \macro{Iinit},
+  \macro{Rinit}, which are currently set to $\Sinit,\Iinit,\Rinit$.
+  We can discuss whether this is good.  I also defined \macro{Rn}
+  for $\Rn$, to reduce potential confusion with \macro{Rinit}.
+  Hopefully I got this right\dots}
 
 \djde{Peak prevalence $I_{\rm p}=a/\gamma$ might be something we want
   to mention, so the meaning of $a$ is $I_{\rm p}\times\Tg$.  ``Peak
@@ -330,13 +332,14 @@ the assumption that yields \KM's approximation \eqref{eq:sech}
 can be written
 \begin{linenomath*}
 \begin{equation}\label{eq:KMassumption}
-\frac{R(t)-R(0)}{N} \ll \frac{1}{\Rn} \,,
+\frac{R(t)-\Rinit}{N} \ll \frac{1}{\Rn} \,,
 \end{equation}
 \end{linenomath*}
-i.e., \cref{eq:sech} is a good approximation as long as
+where $\Rinit=R(0)$ (\KM assumed $\Rinit=0$); thus,
+\cref{eq:sech} is a good approximation as long as
 the proportion of the population that has been infected and
 removed since the initial time is much less than $1/\Rn$.
-(\KM assumed $R(0)=0$.)
+
 \djde{We could add that this will be true initially for any $\Rn$,
   and true for all time if $\Rn$ is sufficiently close to 1, which
   can be quantified using the final size relation that \KM actually
