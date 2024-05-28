@@ -135,6 +135,8 @@
 \newcommand{\thetaindexmax}{{n_{{}_\theta}}}
 \newcommand{\colfitodeols}{grey\xspace} % orange
 %%initial state:
+\newcommand{\Sinit}{S_{\rm i}}
+\newcommand{\Iinit}{I_{\rm i}}
 \newcommand{\Rinit}{R_{\rm i}}
 
 <<setup, echo=FALSE, include=FALSE>>=
@@ -343,10 +345,10 @@ Given \cref{eq:R0def}, the \term{effective reproduction number} at
 time $t=0$ is
 \begin{linenomath*}
 \begin{equation}\label{eq:Reffdef}
-\Reff = \frac{S_0\beta}{\gamma} \,.
+\Reff = \frac{\Sinit\beta}{\gamma} \,.
 \end{equation}
 \end{linenomath*}
-In terms of $\Reff$, $\gamma$, $S_0$ and $I_0$,
+In terms of $\Reff$, $\gamma$, $\Sinit$ and $\Iinit$,
 the parameters in \cref{eq:sech} can be
 written\footnote{There is a typographical error in equation (31) of
   \KM \cite{KermMcKe27}: their factor $\sqrt{-q}$ should be $(-q)$ in
@@ -356,11 +358,11 @@ written\footnote{There is a typographical error in equation (31) of
 \begin{subequations}\label{eq:sechparams}
 \begin{align}
   \omega &= \frac{\gamma}{2} \sqrt{(\Reff-1)^2 +
-           \frac{2I_0}{S_0}\Reff^2}\,, \label{eq:omega} \\
+           \frac{2\Iinit}{\Sinit}\Reff^2}\,, \label{eq:omega} \\
   \phi &= \textrm{arctanh}\left(\frac{\Reff - 1}{2\,\omega/\gamma}
          \right)\,, \label{eq:phi} \\
   \text{and}\qquad
-  a &= \frac{2\,\omega^2 S_0}{\gamma\,\Reff^2} \label{eq:a} \,.
+  a &= \frac{2\,\omega^2 \Sinit}{\gamma\,\Reff^2} \label{eq:a} \,.
 \end{align}
 \end{subequations}
 \end{linenomath*}
@@ -453,9 +455,9 @@ write $\omega t - \phi$ as $\omega(t-\tpeak)$ then
 \end{linenomath*}
 is the \term{peak time} (at which the maximum occurs); both $a$ and
 $\tpeak$ can be approximated by looking at the plotted data.  Assuming
-$I_0/S_0\ll1$, $\omega$ is half the initial exponential growth
+$\Iinit/\Sinit\ll1$, $\omega$ is half the initial exponential growth
 rate\footnote{From \cref{eq:SIR;I}, the initial exponential growth
-rate is $\beta S_0 - \gamma = \gamma(\Reff-1)$.}, so it can be
+rate is $\beta \Sinit - \gamma = \gamma(\Reff-1)$.}, so it can be
 approximated easily by plotting the data on a log scale, estimating
 the initial slope, and dividing by 2.  Very rough guesses for $a$,
 $\tpeak$ and $\omega$ are sufficient to converge on the same fit:
@@ -578,7 +580,7 @@ dynamics of plague that \KM were attempting to capture with the SIR
 model \eqref{eq:SIR}?  We need to convert the parameters of \KM's
 approximation \eqref{eq:sechparams} back to the original parameters
 that are directly related to the mechanism of disease spread formalized by the model (i.e., $\beta$ and $\gamma$, and initial conditions
-$S_0$ and $I_0$).
+$\Sinit$ and $\Iinit$).
 
 \FloatBarrier
 
@@ -596,24 +598,24 @@ analytically\footnote{In (common) situations in which nonlinear
 \begin{linenomath*}
 \begin{subequations}\label{eq:invertparams}
 \begin{align}
-  \Reff &= 1 + \frac{2\, \omega I_0 \sinh(\phi) \cosh(\phi)}{a} \,,
+  \Reff &= 1 + \frac{2\, \omega \Iinit \sinh(\phi) \cosh(\phi)}{a} \,,
           \label{eq:Reff} \\
   \gamma &= \frac{2\,\omega\tanh{\phi}}{\Reff-1} \,, \label{eq:gamma} \\
-  S_0 &= \frac{2\,\Reff^2\,I_0 \sinh^2\!{\phi}}{(\Reff-1)^2} \,. % Bacaer eq. (3)
+  \Sinit &= \frac{2\,\Reff^2\,\Iinit \sinh^2\!{\phi}}{(\Reff-1)^2} \,. % Bacaer eq. (3)
       \label{eq:S0}
 \end{align}
 \end{subequations}
 \end{linenomath*}
-Since there are four original parameters ($\beta$, $\gamma$, $S_0$,
-$I_0$) and only three parameters in \KM's approximation
+Since there are four original parameters ($\beta$, $\gamma$, $\Sinit$,
+$\Iinit$) and only three parameters in \KM's approximation
 \eqref{eq:sech} ($a$, $\omega$, $\phi$), one of the four original
 parameters needs to be specified separately; in
 \cref{eq:invertparams} above we have taken this to be the initial
-prevalence $I_0$.  From \cref{eq:invertparams}, we can compute the
+prevalence $\Iinit$.  From \cref{eq:invertparams}, we can compute the
 transmission rate,
 \begin{linenomath*}
 \begin{equation}\label{eq:beta}
-  \beta = \frac{\Reff\gamma}{S_0} \,,
+  \beta = \frac{\Reff\gamma}{\Sinit} \,,
 \end{equation}
 \end{linenomath*}
 and the mean intrinsic generation interval \cite{ChamDush15},
@@ -978,7 +980,7 @@ Given a fit of \KM's approximation \eqref{eq:sech} to the time series
 data, which yields $\thetavechat=(\hat{a},\hat{\omega},\hat{\phi})$, we
 can apply the Delta method \eqref{eq:DeltaMethod} to the nonlinear
 relationships \eqref{eq:invertparams} to obtain CIs on
-$g(\thetavechat)=(\hat{\Reff}, \hat{\gamma},\hat{S_0})$.  This is
+$g(\thetavechat)=(\hat{\Reff}, \hat{\gamma},\hat{\Sinit})$.  This is
 precisely how we obtained the CIs on the derived parameters listed in
 \cref{tab:Bombay}.  Perhaps less obviously, we can also use the
 Delta method to obtain CIs on the fitted trajectory at each
@@ -1615,7 +1617,7 @@ to data that have been generated from a known model, so we know
 the true underlying values of the parameters we are trying to estimate.
 
 The most basic test is essentially a consistency check: in the context
-of the SIR model, we choose initial conditions $(S_0,I_0)$ and
+of the SIR model, we choose initial conditions $(\Sinit,\Iinit)$ and
 parameter values ($\R_0,\Tg$), compute the associated trajectory by
 solving \cref{eq:SIR} numerically, and then use \code{fitode} to
 estimate the parameters.  At least if we choose starting values
@@ -1627,7 +1629,7 @@ solution and artificially ``observe'' it with error, i.e., using a
 noise distribution that we specify.  For example, we could take
 observation errors to be negative binomially distributed with
 overdispersion parameter $k$, and then use \code{fitode} to estimate
-$k$ together with the other parameters ($S_0,I_0,\R_0,\Tg$).
+$k$ together with the other parameters ($\Sinit,\Iinit,\R_0,\Tg$).
 
 A still more stringent test is to simulate data from a model
 that is more complex and realistic than the idealized model that we
@@ -1652,7 +1654,7 @@ when the number of infected individuals is small (especially the
 possibility that an epidemic can burn out \cite{Pars+24}).
 
 In \cref{fig:stoch}, the dots show a single realization of the
-stochastic SIR model with initial state $(S_0,I_0,R_0)=(\Sexpr{iii})$,
+stochastic SIR model with initial state $(\Sinit,\Iinit,R_0)=(\Sexpr{iii})$,
 basic reproduction number $\R_0=\Sexpr{R0}$, and mean generation
 interval $\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top
 panel, $\dbydt{R}$ [\cref{eq:SIR;R}] with the correct initial
@@ -2056,7 +2058,7 @@ ci_fmt("a", cc)
       column lists the values estimated by us, using nonlinear least
       squares with confidence intervals obtained by the Delta method
       (see \cref{sec:Uncertainty}).  Values for the initial prevalence
-      $I_0$ and population size $N$ are assumed in order to derive
+      $\Iinit$ and population size $N$ are assumed in order to derive
       estimates of the standard SIR model parameters from the
       parameters of \KM's approximation (using the indicated
       equations).  Like Baca\"er \cite[p.\,408]{bacaermodel2012}, we
@@ -2081,7 +2083,7 @@ ci_fmt("a", cc)
       \Sexpr{signif(phi.nls,dig)} & \Sexpr{ci_fmt("phi", cc)} \\
     \noalign{\vspace{10pt}}
     \bfseries Assumed\break parameter \\\hline
-    initial prevalence & $I_0$ & -- & -- &
+    initial prevalence & $\Iinit$ & -- & -- &
       \Sexpr{I0.KM} & \Sexpr{I0.nls} & -- \\
       population size & $N$ & -- & -- & $10^6$ & $10^6$ & -- \\
     %%
@@ -2094,7 +2096,7 @@ ci_fmt("a", cc)
       \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & \Sexpr{ci_fmt("Reff", cc.delta)} \\
     removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & \Sexpr{ci_fmt("gamma", cc.delta)} \\
-    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
+    initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
       \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta, max_ord = 6)} \\
     transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{signif(beta.KM*52,dig)} & \Sexpr{signif(beta.nls*52,dig)} & \Sexpr{ci_fmt("beta", cc.delta*52, sn=FALSE, digits=dig)} \\
@@ -2156,9 +2158,9 @@ ci_fmt("a", cc)
     \bfseries Estimated\break parameter \\\hline
     transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
       \Sexpr{beta.bombay.fitode.nb*52} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.nb*52, sn=FALSE, digits=dig)}  & \Sexpr{beta.bombay.fitode.ols*52} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.ols*52, sn=FALSE, digits=dig)}  \\
-    initial\break susceptibles & $S_0$& -- &
+    initial\break susceptibles & $\Sinit$& -- &
       \Sexpr{as.integer(S0.bombay.fitode.nb)} & \Sexpr{ci_fmt("S0", ci.bombay.fitode.nb, max_ord = 6)} & \Sexpr{as.integer(S0.bombay.fitode.ols)} & \Sexpr{ci_fmt("S0", ci.bombay.fitode.ols, max_ord = 6)}\\
-      initial prevalence & $I_0$ & -- &
+      initial prevalence & $\Iinit$ & -- &
       \Sexpr{I0.bombay.fitode.nb} & \Sexpr{ci_fmt("I0", ci.bombay.fitode.nb)} & \Sexpr{I0.bombay.fitode.ols} & \Sexpr{ci_fmt("I0", ci.bombay.fitode.ols)} \\
       overdispersion\break parameter & $k$ & -- &
       \Sexpr{k.bombay.fitode.nb} & \Sexpr{ci_fmt("k", ci.bombay.fitode.nb)} & -- & -- \\
@@ -2292,7 +2294,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       \Sexpr{signif(phi.phila.nls,dig)} & \Sexpr{ci_fmt("phi", ci.phila.nls)} \\
     \noalign{\vspace{10pt}}
     \bfseries Assumed\break parameter \\\hline
-    initial prevalence & $I_0$ & -- & -- &
+    initial prevalence & $\Iinit$ & -- & -- &
       \Sexpr{I0.phila.fitode} & -- \\
     effective population size & $N$ & -- & -- &
       \Sexpr{prettyNum(philaS0, big.mark=",")} & -- \\
@@ -2305,7 +2307,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       \Sexpr{Reff.phila.nls} & \Sexpr{ci_fmt("Reff", cc.phila.delta)} \\
     removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{gamma.phila.nls} & \Sexpr{ci_fmt("gamma", cc.phila.delta)} \\
-    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
+    initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
        \Sexpr{as.integer(S0.phila.nls)} & \Sexpr{ci_fmt("S0", cc.phila.delta, max_ord = 6)} \\
     transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
        \Sexpr{beta.phila.nls} & \Sexpr{ci_fmt("beta", cc.phila.delta)} \\
@@ -2341,9 +2343,9 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       \Sexpr{beta.phila.fitode} & \Sexpr{ci_fmt("beta", ci.phila.fitode)} \\
       recovery rate & $\gamma$ & $\frac{1}{\textrm{years}}$ & \Sexpr{gamma.phila.fitode} &
       \Sexpr{ci_fmt("gamma", ci.phila.fitode)} \\
-    initial\break susceptibles & $S_0$& -- &
+    initial\break susceptibles & $\Sinit$& -- &
       \Sexpr{as.integer(S0.phila.fitode)} & \Sexpr{ci_fmt("S0", ci.phila.fitode, max_ord = 6)}\\
-      initial prevalence & $I_0$ & -- &
+      initial prevalence & $\Iinit$ & -- &
       \Sexpr{I0.phila.fitode} & \Sexpr{ci_fmt("I0", ci.phila.fitode)}\\
       overdispersion\break parameter & $k$ & -- &
       \Sexpr{k.phila.fitode} & \Sexpr{ci_fmt("k", ci.phila.fitode)}\\
@@ -2419,7 +2421,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
       \cref{sec:stoch,fig:stoch}).
       %%
       The parameter values in the ``true'' column are those used to
-      generate the stochastic simulation ($S_0$, $I_0$, $\R_0$ and
+      generate the stochastic simulation ($\Sinit$, $\Iinit$, $\R_0$ and
       $\Tg$) and the values of other parameters derived from these
       true parameter values using the indicated equations.  The
       \code{nls} column lists our estimates and confidence intervals
@@ -2433,7 +2435,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
   \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units} & {\footnotesize\bfseries true}
     & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
-    initial prevalence & $I_0$ & -- & -- &
+    initial prevalence & $\Iinit$ & -- & -- &
       \Sexpr{iii[[2]]} & \Sexpr{iii[[2]]} & -- \\
     %%
     \noalign{\vspace{10pt}}
@@ -2453,7 +2455,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
       \Sexpr{Reff.KM.stoch} & \Sexpr{Reff.nls.stoch} & \Sexpr{ci_fmt("Reff", cc.delta.stoch)} \\
     removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{gamma.KM.stoch} & \Sexpr{gamma.nls.stoch} & \Sexpr{ci_fmt("gamma", cc.delta.stoch)} \\
-    initial\break susceptibles & $S_0$ & \eqref{eq:S0} & -- &
+    initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
       \Sexpr{as.integer(S0.KM.stoch)} & \Sexpr{as.integer(S0.nls.stoch)} & \Sexpr{ci_fmt("S0", cc.delta.stoch, max_ord = 6)} \\
     transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{52*beta.KM.stoch} & \Sexpr{signif(52*beta.nls.stoch,dig)} & \Sexpr{ci_fmt("beta", 52*cc.delta.stoch)} \\
@@ -2489,9 +2491,9 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
       \Sexpr{signif(52*beta.stoch.fitode,dig)} & \Sexpr{ci_fmt("beta", 52*ci.stoch.fitode, sn=FALSE, digits=dig)} \\
     recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{mm$gamma} &
         \Sexpr{gamma.stoch.fitode} & \Sexpr{ci_fmt("gamma", ci.stoch.fitode)}\\
-    initial\break susceptibles & $S_0$& -- & \Sexpr{iii[[1]]} &
+    initial\break susceptibles & $\Sinit$& -- & \Sexpr{iii[[1]]} &
       \Sexpr{as.integer(S0.stoch.fitode)} & \Sexpr{ci_fmt("S0", ci.stoch.fitode, max_ord = 6)}\\
-      initial prevalence & $I_0$ & -- & \Sexpr{iii[[2]]} &
+      initial prevalence & $\Iinit$ & -- & \Sexpr{iii[[2]]} &
       \Sexpr{I0.stoch.fitode} & \Sexpr{ci_fmt("I0", ci.stoch.fitode)}\\
       overdispersion\break parameter & $k$ & -- & -- &
       \Sexpr{k.stoch.fitode} & \Sexpr{ci_fmt("k", ci.stoch.fitode, sn=FALSE, digits=dig)}\\
@@ -2549,7 +2551,7 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
 @
 \caption{\textbf{Deterministic fits to daily incidence generated by a
   stochastic SIR simulation} with initial state
-  $(S_0,I_0,R_0)=(1998,2,0)$, basic reproduction number $\R_0=5$, and
+  $(\Sinit,\Iinit,R_0)=(1998,2,0)$, basic reproduction number $\R_0=5$, and
   mean generation interval $\Tg=1$ week.
   The simulated data points show the numbers of newly recovered
   individuals each day.
