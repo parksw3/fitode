@@ -597,7 +597,7 @@ Gill76,
 }
 
 @article{taylor2016stochasticity,
-  title={{Stochasticity and the limits to confidence when estimating R0 of Ebola and other emerging infectious diseases}},
+  title={{Stochasticity and the limits to confidence when estimating $R_0$ of Ebola and other emerging infectious diseases}},
   author={Taylor, Bradford P and Dushoff, Jonathan and Weitz, Joshua S},
   journal={Journal of theoretical biology},
   volume={408},
@@ -799,4 +799,49 @@ mortality; evolution; sequences; strains; segment},
   urldate = {2024-05-26},
   abstract = {Estimating the reproduction number of an emerging infectious disease from an epidemiological data is becoming more essential in evaluating the current status of an outbreak. However, these studies are lacking the fundamental prerequisite in parameter estimation problem, namely the structural identifiability of the epidemic model, which determines the possibility of uniquely determining the model parameters from the epidemic data. In this paper, we perform both structural and practical identifiability analysis to classical epidemic models such as SIR (Susceptible-Infected-Recovered), SEIR (Susceptible-Exposed-Infected-Recovered) and an epidemic model with the treatment class (SITR). We performed structural identifiability analysis on these epidemic models using a differential algebra approach to investigate the well-posedness of the parameter estimation problem. Parameters of these models are estimated from different data types, namely prevalence, cumulative incidences and treated individuals. Furthermore, we carried out practical identifiability analysis on these models using Monte Carlo simulations and Fisher's Information Matrix. Our study shows that the SIR model is both structurally and practically identifiable from the prevalence data. It is also structurally identifiable to cumulative incidence observations, but due to high correlations of the parameters, it is practically unidentifiable from the cumulative incidence data. Furthermore, we found that none of these simple epidemic models are practically identifiable from the cumulative incidence data which is the standard type of epidemiological data provided by CDC or WHO. Our analysis with simple SIR model suggest that the health agencies, if possible, should report prevalence rather than incidence data.},
   keywords = {Cumulative incidence,Emerging infectious disease,Outbreak models,Practical identifiability,Structural identifiability}
+}
+
+@article{Broo+2019,
+  title = {Statistical Modeling of Patterns in Annual Reproductive Rates},
+  author = {Brooks, Mollie E. and Kristensen, Kasper and Darrigo, Maria Rosa and Rubim, Paulo and Uriarte, Mar{\'i}a and Bruna, Emilio and Bolker, Benjamin M.},
+  year = {2019},
+  journal = {Ecology},
+  volume = {100},
+  number = {7},
+  pages = {e02706},
+  issn = {1939-9170},
+  doi = {10.1002/ecy.2706},
+  urldate = {2021-06-11},
+  abstract = {Reproduction by individuals is typically recorded as count data (e.g., number of fledglings from a nest or inflorescences on a plant) and commonly modeled using Poisson or negative binomial distributions, which assume that variance is greater than or equal to the mean. However, distributions of reproductive effort are often underdispersed (i.e., variance {$<$} mean). When used in hypothesis tests, models that ignore underdispersion will be overly conservative and may fail to detect significant patterns. Here we show that generalized Poisson (GP) and Conway-Maxwell-Poisson (CMP) distributions are better choices for modeling reproductive effort because they can handle both overdispersion and underdispersion; we provide examples of how ecologists can use GP and CMP distributions in generalized linear models (GLMs) and generalized linear mixed models (GLMMs) to quantify patterns in reproduction. Using a new R package, glmmTMB, we construct GLMMs to investigate how rainfall and population density influence the number of fledglings in the warbler Oreothlypis celata and how flowering rate of Heliconia acuminata differs between fragmented and continuous forest. We also demonstrate how to deal with zero-inflation, which occurs when there are more zeros than expected in the distribution, e.g., due to complete reproductive failure by some individuals.},
+  copyright = {{\copyright} 2019 by the Ecological Society of America},
+  langid = {english},
+  keywords = {Conway-Maxwell-Poisson,fecundity,generalized Poisson,Heliconia acuminata,Oreothlypis celata,overdispersion,regression,underdispersion,zero-inflation},
+  file = {/home/bolker/Zotero/storage/P2B5ZX8M/Brooks et al. - 2019 - Statistical modeling of patterns in annual reprodu.pdf;/home/bolker/Zotero/storage/4VEGNP8H/ecy.html}
+}
+
+@Manual{Marc+2020,
+  title = 	 {Berkeley {Madonna} User’s Guide, version 10.1.2},
+  author = 	 {Frank Marcoline and Michael Grabe and Smita Nayak and Tim Zahnley and George Oster and Robert Macey},
+  year =	 {2020},
+  url = {https://www.berkeleymadonna.com/downloads/BM_Users_Guide_10.1.pdf}
+}
+
+
+@article{Kim+2022,
+	title = {Prediction intervals for {Poisson}-based regression models},
+	volume = {14},
+	copyright = {© 2021 Wiley Periodicals LLC.},
+	issn = {1939-0068},
+	url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/wics.1568},
+	doi = {10.1002/wics.1568},
+	abstract = {This paper provides a review of the literature regarding methods for constructing prediction intervals for counting variables, with particular focus on those whose distributions are Poisson or derived from Poisson and with an over-dispersion property. Independent and identically distributed models and regression models are both considered. The motivating problem for this review is that of predicting the number of daily and cumulative cases or deaths attributable to COVID-19 at a future date. This article is categorized under: Applications of Computational Statistics {\textgreater} Clinical Trials Statistical Learning and Exploratory Methods of the Data Sciences {\textgreater} Modeling Methods Statistical Models {\textgreater} Generalized Linear Models},
+	language = {en},
+	number = {5},
+	urldate = {2024-05-28},
+	journal = {WIREs Computational Statistics},
+	author = {Kim, Taeho and Lieberman, Benjamin and Luta, George and Peña, Edsel A.},
+	year = {2022},
+	note = {\_eprint: https://wires.onlinelibrary.wiley.com/doi/pdf/10.1002/wics.1568},
+	keywords = {COVID-19, over-dispersion, Poisson model, Poisson regression, prediction interval},
+	pages = {e1568}
 }

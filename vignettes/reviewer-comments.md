@@ -37,11 +37,19 @@ growth phase. In that case, the parameter $r$ will be confidently estimated, but
 
 6. Consider mentioning some other distribution options above eq. (17), around line 242-244, like the various Generalized Poisson distributions. Include references (some of these are available in other R packages that might be worth mentioning). I find that mathematicians often are unaware that these other options exist, and so they only consider Normal, Poisson, and Negative Binomial.
 
+**Added something. Not sure how important this really is ... all applications of more exotic count data distributions are for non-dynamic/regression models ...**
+
 7. Minor inconsistencies in referring to equations: These include model (2), Equation (2), equation (2), distance (7), approximation (6), dR/dt (2), etc. I don't recall this journal having strict guidelines for equation referencing, so at a minimum I would ask the authors to consider dropping the instances of capital-E "Equation" to lower case.
+
+**Not done**
 
 8. There are a few places where table captions and R code run off into the margins.
 
+**The bodies of Tables 1 and 2 were a bit too wide, I tweaked them a bit, not sure how much (more) effort this is worth ... Figure 1 caption is too long and overruns the page number/bottom margin**
+
 9. Generally speaking, there might be room to include a few more references throughout, especially given the tutorial nature of this manuscript. Readers looking to apply this approach would benefit from some extra guidance finding literature related to some of the concepts or methods that are only briefly mentioned here.
+
+**Any thoughts?**
 
 
 ## Reviewer 2 
@@ -58,3 +66,6 @@ This manuscript introduces the software package fitode, an R-based tool develope
 2. While fitode is presented as a user-friendly tool tailored for epidemiologists, a systematic comparison with existing methods available in platforms like MATLAB or Berkeley Madonna is missing. Each of these tools has its strengths and limitations which could significantly influence user choice depending on their specific needs. For instance, MATLAB offers a broad range of built-in functions for optimization and model fitting along with high computational power, but it may not be as accessible due to licensing costs. On the other hand, Berkeley Madonna is known for its ease of use and speed in running complex dynamic models but might lack some of the advanced statistical tools provided by R. The authors should elaborate on the comparative advantages of fitode, possibly in terms of its ease of integration with other statistical methods in R, its specific utility for epidemiological models, or any unique features that address the nuances of fitting disease transmission
 models to data.
 
+**Not done. I don't think a "systematic comparison" is worth it, but we could try to say something brief. Looked at Berkeley Madonna; it does have a 'curve fitting' option, but there's almost nothing in the docs about what it's actually doing ...** See @Marc+2020, also https://github.com/topics/epidemiology?l=matlab
+
+**I'm still not crazy about the colour choices for the figures. Can we use an Okabe-Ito palette instead?**

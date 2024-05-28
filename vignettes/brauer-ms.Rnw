@@ -3,6 +3,8 @@
 
 \documentclass[]{interact}
 
+% https://tex.stackexchange.com/questions/2441/how-to-add-a-forced-line-break-inside-a-table-cell
+\usepackage{makecell}
 \usepackage{epstopdf}% To incorporate .eps illustrations using PDFLaTeX, etc.
 \usepackage[caption=false]{subfig}% Support for small, `sub' figures and tables
 %\usepackage[nolists,tablesfirst]{endfloat}% To `separate' figures and tables from text if required
@@ -861,8 +863,10 @@ typical observation errors are \term{overdispersed}, meaning that
 the variance is greater than the mean. Ignoring overdispersion
 will underestimate the uncertainty in the parameters and lead
 to overly narrow confidence intervals on parameters and predictions.
-The negative binomial distribution is one way to generalize
-the Poisson to allow for overdispersion \citep{linden2011using}.
+The negative binomial distribution is the most common way to generalize
+the Poisson to allow for overdispersion \citep{linden2011using}, although
+other distributions such as the generalized Poisson are occasionally used
+\citep{Broo+2019,Kim+2022}.
 
 The probability mass function for the \term{negative binomial
   distribution} (for counts $x=0,1,2,\ldots$) is
@@ -1212,9 +1216,12 @@ Taking our previous parameter estimates from \code{nls} as starting
 values (and choosing a starting value for $k$), we can fit the model
 by calling the \code{fitode} function:
 
-<<sirmortfit,cache=TRUE,warning=FALSE,message=FALSE>>=
-SIR_start <- c(beta=beta.nls, gamma=gamma.nls, I0=I0.KM, S0=S0.nls, k=50)
-SIR_fit <- fitode( model = SIR_model, data = bombay2, fixed = list(gamma=gamma.nls), start = SIR_start, tcol = "week" )
+<<sirmortfit,cache=TRUE,warning=FALSE,message=FALSE, tidy = FALSE>>=
+SIR_start <- c(beta=beta.nls, gamma=gamma.nls,
+               I0=I0.KM, S0=S0.nls, k=50)
+SIR_fit <- fitode( model = SIR_model, data = bombay2,
+                  fixed = list(gamma=gamma.nls),
+                  start = SIR_start, tcol = "week" )
 @ 
 
 \noindent In the fitting function above:
@@ -2054,6 +2061,10 @@ ci_fmt("a", cc)
       parameters of \KM's approximation (using the indicated
       equations).  Like Baca\"er \cite[p.\,408]{bacaermodel2012}, we
       assume the population of Bombay was $N=1$ million.
+      \bmb{Could also play with formatting here to narrow the table
+        slightly, as in Table 2, but
+        this one is only slightly too wide \ldots (include symbol in
+        parentheses at the end  of the parameter-name text here and in next fig?)}
     }\label{tab:Bombay}
 \medskip
     %% making use of ragged2e and array packages:
@@ -2061,7 +2072,7 @@ ci_fmt("a", cc)
   \begin{tabular}{ m{3cm} | c | c | c | c | c c}
   \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
-    & {\footnotesize\bfseries KM} & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
+    & \thead{\footnotesize\bfseries KM \\ \bfseries estimate} & \thead{\footnotesize\bfseries \code{nls} \\ \bfseries estimate} & {\footnotesize\bfseries 95\% CI} \\\hline
     peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{a.KM} &
       \Sexpr{signif(a.nls,dig)} & \Sexpr{ci_fmt("a", cc)} \\
     outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
@@ -2118,14 +2129,26 @@ ci_fmt("a", cc)
       %%
       As in \cref{tab:Bombay}, a population size $N$ must be assumed
       to derive $\R_0$ estimates.
+      \bmb{tweaked table to make it fit within margins.
+      (See comment above at
+      \texttt{\textbackslash usepackage\{makecell\}} for breaking lines
+      in header columns).
+      Would be nice to tweak 95\% CI columns slightly
+      wider but we're probably at the limit there.
+      Could add an
+      appropriate (optional) \texttt{\textbackslash hspace} in
+      \texttt{ci\_fmt()} to align line-broken CIs more nicely ... ?
+      Maybe not worth fussing too much over table formatting since
+      typesetters will be redoing it anyway?
+      }
     }\label{tab:bombay.fitode}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c c | c c}
+  \begin{tabular}{ m{3cm} | c | c | c m{1.8cm} | c m{1.8cm}}
   \bfseries Fixed\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
-    & {\footnotesize\bfseries \code{nbinom}} & {\footnotesize\bfseries 95\% CI} & {\footnotesize\bfseries \code{ols}} & {\footnotesize\bfseries 95\% CI} \\\hline
+    & \thead{\footnotesize\bfseries \code{nbinom}\\ estimate} & {\footnotesize\bfseries 95\% CI} & \thead{\footnotesize\bfseries \code{ols}\\ estimate} & {\footnotesize\bfseries 95\% CI} \\\hline
     recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{gamma.nls} &
       -- & \Sexpr{gamma.nls} & -- \\
     %%
@@ -2503,7 +2526,8 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.6),
        col=c("black",col.fitode.nb,my.green,my.green),
        pch=c(21,NA,NA,NA),
        pt.bg=c("white",NA,NA,NA),
-       legend=c("simulated data","fitode (nbinom)","deterministic","KM approx"))
+       adj = c(0, 0.8),  ## shift text so first line aligns with guide line
+       legend=c("simulated data","fitode (nbinom)","deterministic","KM approx\nto deterministic fit"))
 
 plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
      ##xlim=range(tt),
