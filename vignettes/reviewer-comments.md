@@ -37,7 +37,7 @@ growth phase. In that case, the parameter $r$ will be confidently estimated, but
 
 6. Consider mentioning some other distribution options above eq. (17), around line 242-244, like the various Generalized Poisson distributions. Include references (some of these are available in other R packages that might be worth mentioning). I find that mathematicians often are unaware that these other options exist, and so they only consider Normal, Poisson, and Negative Binomial.
 
-**Not done yet. This seems like a fairly minor detail, but on the other hand it might not take much extra space. Could reference Broo+2019 (generalized P, and COM-P, although in the context of under- rather than overdispersion. Not aware offhand of epi models that use these distributions, but we could look ....**
+**Added something. Not sure how important this really is ... all applications of more exotic count data distributions are for non-dynamic/regression models ...**
 
 7. Minor inconsistencies in referring to equations: These include model (2), Equation (2), equation (2), distance (7), approximation (6), dR/dt (2), etc. I don't recall this journal having strict guidelines for equation referencing, so at a minimum I would ask the authors to consider dropping the instances of capital-E "Equation" to lower case.
 
@@ -67,6 +67,5 @@ This manuscript introduces the software package fitode, an R-based tool develope
 models to data.
 
 **Not done. I don't think a "systematic comparison" is worth it, but we could try to say something brief. Looked at Berkeley Madonna; it does have a 'curve fitting' option, but there's almost nothing in the docs about what it's actually doing ...** See @Marc+2020, also https://github.com/topics/epidemiology?l=matlab
-
 
 **I'm still not crazy about the colour choices for the figures. Can we use an Okabe-Ito palette instead?**

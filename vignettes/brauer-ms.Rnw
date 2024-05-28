@@ -862,8 +862,10 @@ typical observation errors are \term{overdispersed}, meaning that
 the variance is greater than the mean. Ignoring overdispersion
 will underestimate the uncertainty in the parameters and lead
 to overly narrow confidence intervals on parameters and predictions.
-The negative binomial distribution is one way to generalize
-the Poisson to allow for overdispersion \citep{linden2011using}.
+The negative binomial distribution is the most common way to generalize
+the Poisson to allow for overdispersion \citep{linden2011using}, although
+other distributions such as the generalized Poisson are occasionally used
+\citep{Broo+2019,Kim+2022}.
 
 The probability mass function for the \term{negative binomial
   distribution} (for counts $x=0,1,2,\ldots$) is
