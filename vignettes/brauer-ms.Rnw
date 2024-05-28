@@ -788,12 +788,16 @@ with zero mean and standard deviation $\sigma$ equal to the standard
 deviation of the residuals (the differences between the model curve
 and the observed data).  Then the probability density of the data given the
 model is
+\djde{Why {\upshape\textbf{Prob}} rather than $\Pop$?
+and why $dx$ rather than $\Delta x$?
+and why is there a $d{\traj[\ti]}$ in the second line?
+I've added a missing $+dx$ in the first line (and $\le$ instead of $<$ on the left), and reformated a bit.}
 %%
 \begin{linenomath*}
   \begin{equation}\label{eq:prob.data.given.model}
     \begin{split}
       \Pop(\text{data} \mid \text{model})
-      & = \lim_{dx \to 0} \left(\frac{1}{dx} \right) \textbf{Prob}\left(\traj(\ti;\theta) < \traj[\ti] < \traj(\ti;\theta)\right) \\
+      & = \lim_{dx \to 0} \frac{\textbf{Prob}\left(\traj(\ti;\theta) \le \traj[\ti] < \traj(\ti;\theta) + dx \right)}{dx} \\
       & = \prod_{\tindex=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
 \exp\left(-\frac{\big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2}{2\sigma^2} \right) d{\traj[\ti]}
