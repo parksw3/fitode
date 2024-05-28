@@ -45,7 +45,7 @@ growth phase. In that case, the parameter $r$ will be confidently estimated, but
 
 8. There are a few places where table captions and R code run off into the margins.
 
-**Hmm, I don't see where table captions overrun. The bodies of Tables 1 and 2 were a bit too wide, I tweaked them a bit, not sure how much (more) effort this is worth ...**
+**The bodies of Tables 1 and 2 were a bit too wide, I tweaked them a bit, not sure how much (more) effort this is worth ... Figure 1 caption is too long and overruns the page number/bottom margin**
 
 9. Generally speaking, there might be room to include a few more references throughout, especially given the tutorial nature of this manuscript. Readers looking to apply this approach would benefit from some extra guidance finding literature related to some of the concepts or methods that are only briefly mentioned here.
 
