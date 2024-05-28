@@ -132,6 +132,8 @@
 \newcommand{\thetaindex}{{j}}
 \newcommand{\thetaindexmax}{{n_{{}_\theta}}}
 \newcommand{\colfitodeols}{grey\xspace} % orange
+%%initial state:
+\newcommand{\Rinit}{R_{\rm i}}
 
 <<setup, echo=FALSE, include=FALSE>>=
 ## set default base-graphics plotting options
@@ -183,10 +185,6 @@ options(warnPartialMatchArgs = FALSE,
 \djde{Peak prevalence $I_{\rm p}=a/\gamma$ might be something we want
   to mention, so the meaning of $a$ is $I_{\rm p}\times\Tg$.  ``Peak
   removal rate'' might not be the best description of $a$.}
-
-\djde{Maybe clarify, at least in a footnote, that the KM approximation
-  is valid provided $\frac{R(t)-R_{\rm i}}{N}\ll \frac{1}{\R_0}$.  KM
-  assumed implicitly that $R_{\rm i}=0$.}
 
 \begin{abstract}
   Fred Brauer was an eminent mathematician who studied dynamical
@@ -327,12 +325,13 @@ the assumption that yields \KM's approximation \eqref{eq:sech}
 can be written
 \begin{linenomath*}
 \begin{equation}\label{eq:KMassumption}
-\frac{R(t)}{N} \ll \frac{1}{\R_0} \,,
+\frac{R(t)-R(0)}{N} \ll \frac{1}{\R_0} \,,
 \end{equation}
 \end{linenomath*}
 i.e., \cref{eq:sech} is a good approximation as long as
 the proportion of the population that has been infected and
-removed is much less than $1/\R_0$.
+removed since the initial time is much less than $1/\R_0$.
+(\KM assumed $R(0)=0$.)
 \djde{We could add that this will be true initially for any $\R_0$,
   and true for all time if $\R_0$ is sufficiently close to 1, which
   can be quantified using the final size relation that \KM actually
@@ -437,7 +436,9 @@ method, but fortunately the least squares fit for this problem is not
 very sensitive to the starting value.  
 %%
 \djde{We could reference \cref{foot:startingvalue}, or move it here
-  and reference it where it currently is.}
+  and reference it where it currently is.}  \djde{Actually, moving
+  \cref{foot:startingvalue} here might be complicated because it
+  refers to unidentifiability, which we haven't mentioned yet.}
 %%
 To pick reasonable starting values, it often helps to think about the
 meaning of parameters.  For example, in the case of \cref{eq:sech}, it
