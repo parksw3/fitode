@@ -68,4 +68,3 @@ models to data.
 
 **Not done. I don't think a "systematic comparison" is worth it, but we could try to say something brief. Looked at Berkeley Madonna; it does have a 'curve fitting' option, but there's almost nothing in the docs about what it's actually doing ...** See @Marc+2020, also https://github.com/topics/epidemiology?l=matlab
 
-**I'm still not crazy about the colour choices for the figures. Can we use an Okabe-Ito palette instead?**
