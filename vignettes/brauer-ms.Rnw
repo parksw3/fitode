@@ -101,9 +101,12 @@
 \newcommand{\gradx}{\nabla_{{}_{\!\!\xvec}}}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \usepackage{xspace}
-\newcommand{\KMcol}{blue\xspace}
-\newcommand{\nlscol}{red\xspace}
-\newcommand{\fitodecol}{yellow\xspace}
+%% modify these based on whether we're using Okabe-Ito or not
+\newcommand{\KMcol}{blue\xspace}  %% the same both ways
+\newcommand{\nlscol}{orange\xspace}  %% was: red
+\newcommand{\FOolscol}{light blue\xspace} % was: grey
+\newcommand{\FOnbcol}{gold\xspace}
+\newcommand{\determcol}{green\xspace}
 \newcommand{\Pop}{{\mathbb{P}}} % probability operator
 \newcommand{\lik}{{\mathcal L}}
 \newcommand{\transpose}{{\textsf{T}}}
@@ -134,7 +137,6 @@
 \newcommand{\xindexmax}{{n_{{}_x}}}
 \newcommand{\thetaindex}{{j}}
 \newcommand{\thetaindexmax}{{n_{{}_\theta}}}
-\newcommand{\colfitodeols}{grey\xspace} % orange
 %%initial state:
 \newcommand{\Sinit}{S_{\rm i}}
 \newcommand{\Iinit}{I_{\rm i}}
@@ -188,12 +190,12 @@ options(warnPartialMatchArgs = FALSE,
   We can discuss whether this is good.  I also defined \macro{Rn}
   for $\Rn$, to reduce potential confusion with \macro{Rinit}.
   Hopefully I got this right\dots}
-
+\bmb{the Roman ``i'' in $\Sinit$ etc. does look a little odd, but I see the point. It might (?) be worth a short remark the first time it's used to emphasize that we're using it to differentiate (especially) $\Rinit$ from $\Rn$}
 \djde{Peak prevalence $I_{\rm p}=a/\gamma$ might be something we want
   to mention, so the meaning of $a$ is $I_{\rm p}\times\Tg$.  ``Peak
   removal rate'' might not be the best description of $a$.}
 \djde{The issue is that we follow \KM and present a formula for
-  $\dbyd{R}{t}$ rather than $I(t)$.  In practice, is is the prevalence
+  $\dbyd{R}{t}$ rather than $I(t)$.  In practice, it is the prevalence
   curve that people care about.  hmmm.}
 
 \begin{abstract}
@@ -791,26 +793,24 @@ with zero mean and standard deviation $\sigma$ equal to the standard
 deviation of the residuals (the differences between the model curve
 and the observed data).  Then the probability density of the data given the
 model is
-\djde{Why {\upshape\textbf{Prob}} rather than $\Pop$?
-and why $dx$ rather than $\Delta x$?
-and why is there a $d{\traj[\ti]}$ in the second line?
-I've added a missing $+dx$ in the first line (and $\le$ instead of $<$ on the left), and reformated a bit.}
+\djde{$\le$ instead of $<$ on the left), and reformatted a bit.}
+\bmb{Some issues addressed/deleted. I guess $\le$ is OK.  In the continuous limit it doesn't matter \ldots}
 %%
 \begin{linenomath*}
   \begin{equation}\label{eq:prob.data.given.model}
     \begin{split}
       \Pop(\text{data} \mid \text{model})
-      & = \lim_{dx \to 0} \frac{\textbf{Prob}\left(\traj(\ti;\theta) \le \traj[\ti] < \traj(\ti;\theta) + dx \right)}{dx} \\
+      & = \lim_{\Delta x \to 0} \frac{\Pop\left(\traj(\ti;\theta) \le \traj[\ti] < \traj(\ti;\theta) + \Delta x \right)}{\Delta x} \\
       & = \prod_{\tindex=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
-\exp\left(-\frac{\big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2}{2\sigma^2} \right) d{\traj[\ti]}
+\exp\left(-\frac{\big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2}{2\sigma^2} \right)
 \right]
 \,.
 \end{split}
 \end{equation}
 \end{linenomath*}
 %%
-We use a probability density function here because the Normal is a continuous distribution; we would use a probability mass function for a discrete response distribution such as the Poisson. In practice, we don't have to worry about this distinction much in practice when we are estimating the parameters of an epidemic model, and we will refer to ``probability'' rather than ``probability density'' from now on.
+We use a probability density function here because the Normal is a continuous distribution; we would use a probability mass function for a discrete response distribution such as the Poisson. In practice, we don't have to worry about this distinction much when we are estimating the parameters of an epidemic model, and we will refer to ``probability'' rather than ``probability density'' from now on.
 
 Using these assumptions we can adopt a \emph{maximum likelihood}
 framework, where we consider parameter values that maximize the
@@ -842,7 +842,9 @@ yields an estimate,
 \end{subequations}
 \end{linenomath*}
 which---lo and behold---agrees exactly with \eqref{eq:leastsquares},
-the least squares solution!  The standard way of expressing this is to
+the least squares solution!
+\bmb{There's a subtle point we might want to mention here, which is that we are sweeping the estimation of $\sigma$ under the rug; everything that's here is mathematically correct (we don't have to worry about constant scaling factors when we are only looking for arg min) \ldots Thinking about whether there is a short/simple/clear comment we can make to reflect that we are not including $\sigma$ in the set of estimated parameters here}
+The standard way of expressing this is to
 say that the least squares solution $\thetavechat$ is the
 \term{maximum likelihood estimate} (MLE) of $\thetavec$, under the
 assumption of independent, identically distributed
@@ -997,7 +999,7 @@ precisely how we obtained the CIs on the derived parameters listed in
 Delta method to obtain CIs on the fitted trajectory at each
 observation time $\ti$ (and hence obtain a confidence band) by
 considering $g(\thetavec)=\traj(\ti;\thetavec)$.  This is how we obtained
-the pink confidence band shown in \cref{fig:Bombay}.
+the confidence band for the nonlinear least squares fit (light \nlscol) shown in \cref{fig:Bombay}.
 
 Better confidence intervals can be obtained using the \term{profile
   likelihood}, which is calculated by fixing a set of model parameters
@@ -1569,7 +1571,7 @@ R0.phila.nls <- Reff.phila.nls/S0.phila.nls*philaS0
 
 As for Bombay plague, we can fit \KM's approximation \eqref{eq:sech}
 to the Philadelphia influenza epidemic using nonlinear least squares,
-which yields the red curve in \cref{fig:phila}.  While this \code{nls}
+which yields the \nlscol curve in \cref{fig:phila}.  While this \code{nls}
 fit does not look unreasonable at a glance, the fitted parameter
 values (\cref{tab:philanls}) are absurd, including a basic
 reproduction number $\Rn\approx \Sexpr{signif(R0.phila.nls,2)}$ and a
@@ -1577,14 +1579,14 @@ mean generation interval $\Tg\approx \Sexpr{signif(Tg.phila.nls,2)}$
 years.
 
 Matching trajectories of the exact SIR model using \code{fitode} gives
-a fit---the solid yellow curve in \cref{fig:phila}---that is visually
-similar to the (red) fit of \KM's approximation, but provides much
+a fit---the solid \FOnbcol curve in \cref{fig:phila}---that is visually
+similar to the (\nlscol) fit of \KM's approximation, but provides much
 more realistic parameter estimates (\cref{tab:phila.fitode}); in
 particular, $\Rn\approx \Sexpr{signif(R0.phila.fitode,2)}$ and $\Tg\approx
 \Sexpr{signif(Tg.phila.fitode*365,2)}$ days.
 
 If we convert the \code{fitode} estimates of the SIR parameters to the
-parameters of \KM's approximation, we obtain the dotted yellow curve
+parameters of \KM's approximation, we obtain the dotted \FOnbcol curve
 in \cref{fig:phila}, which grossly underestimates the magnitude of the
 epidemic (the epidemic peak occurs much too soon).  The \KM
 approximation \eqref{eq:sech} is good initially, but becomes poorer
@@ -1669,10 +1671,10 @@ stochastic SIR model with initial state $(\Sinit,\Iinit,\Rinit)=(\Sexpr{iii})$,
 basic reproduction number $\Rn=\Sexpr{R0}$, and mean generation
 interval $\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top
 panel, $\dbydt{R}$ [\cref{eq:SIR;R}] with the correct initial
-conditions and parameter values is shown with solid green, and the \KM
+conditions and parameter values is shown with solid \determcol, and the \KM
 approximation \eqref{eq:sech} based on those parameter values is shown
-with dotted green.  The \code{fitode} fit [based on $\int (\dbydt{R})
-\dt$] and confidence band are shown in yellow.  The time shift between
+with dotted \determcol.  The \code{fitode} fit [based on $\int (\dbydt{R})
+\dt$] and confidence band are shown in \FOnbcol.  The time shift between
 the deterministic solution and the stochastic realization arises
 because the stochastic model captures the demographic noise (which
 causes a randomly distributed delay until the tipping point is
@@ -1695,7 +1697,7 @@ yield the red curve in \cref{fig:stoch} are far from the true
 parameters that were used in the simulation (\cref{tab:stoch.nls}).
 
 The excellent fit of the deterministic trajectory that \code{fitode}
-finds (yellow) is achieved by estimating an initial prevalence that is
+finds (\FOnbcol) is achieved by estimating an initial prevalence that is
 only a third of the true initial prevalence, thereby mimicking the
 stochastic delay with the deterministic model; all other parameter
 estimates are nearly identical to the true parameter values used to
@@ -2010,10 +2012,27 @@ want to dig into data, will benefit from this exposition.
 
 <<figfuns, echo=FALSE>>=
 lwd <- 5
-col.KM <- my.blue
-col.nls <- my.red
-col.fitode.nb <- my.yellow
-col.fitode.ols <- "grey80" # "orange" # my.orange
+use_OI <- TRUE
+pp <- palette.colors()
+if (FALSE) plot(1:8, 1:8, cex = 5, pch = 16, col = pp)
+if (use_OI) {
+    ## these were chosen from the O-I palette to approximately
+    ## match the previous choices (substituted an orange for yellow,
+    ## as I found the yellow a bit too light)
+    col.KM <- pp[6]
+    col.nls <- pp[7]
+    col.fitode.nb <- pp[2]
+    col.fitode.ols <- pp[3]
+    col.determ <- pp[4]
+} else {
+    col.KM <- my.blue
+    col.nls <- my.red
+    col.fitode.nb <- my.yellow
+    col.fitode.ols <- "grey80" # "orange" # my.orange
+    col.determ <- my.green
+}
+
+
 transparent_colour <- function(col,alpha=150/255) {
     alpha <- round(alpha * 255)
     v <- col2rgb(col)[,1] # color as rgb vector
@@ -2236,29 +2255,30 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 \caption{\textbf{The plague epidemic in Bombay}, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
   (dots) were digitized from \cite[Table~IX, p.\,753]{jhyg1907}.
-  \emph{Top panel:} The \KMcol and red curves show the \KM
-  approximation \eqref{eq:sech}, as fitted by \KM (\KMcol) and by us
-  using \code{nls} (red, with pink confidence band estimated using the
+  \emph{Top panel:} The \KM
+  approximation \eqref{eq:sech}, as fitted by \KM (\KMcol line) and by us
+  using \code{nls} (\nlscol line, with confidence band estimated using the
   Delta method; see \cref{sec:Uncertainty}).  The associated parameter
-  estimates are given in \cref{tab:Bombay}.  The dotted yellow curve
+  estimates are given in \cref{tab:Bombay}.  The dotted \FOnbcol curve
   shows the \code{fitode} fit of the SIR model \eqref{eq:SIR}, for
   which the associated parameter estimates are given in
   \cref{tab:bombay.fitode} [observation errors are assumed to be
-  negative binomially distributed \eqref{eq:NB}].
+    negative binomially distributed \eqref{eq:NB}]; this curve happens to
+  coincide almost exactly with KM's fit \bmb{check this - I think it's a coincidence, and doesn't look exactly identical, but is close enough to make me nervous!}.
   %%
-  \emph{Bottom panel:} The solid yellow curve is identical to the
-  dotted yellow curve in the top panel; the light yellow band is the
+  \emph{Bottom panel:} The solid \FOnbcol curve is identical to the
+  dotted \FOnbcol curve in the top panel; its confidence band is the
   \code{fitode} confidence band obtained by the Delta method [the band
     is shown as a linear interpolation between successive observation
     times because the model \eqref{eq:SIR} is fitted to incidence at
     discrete time points rather than to a continuous curve
     representation of the instantaneous death rate].  The
-  \colfitodeols curve shows the \code{fitode} fit obtained by
+  \FOolscol curve shows the \code{fitode} fit obtained by
   minimizing the ordinary least squares \eqref{eq:leastsquares} [\ie
     assuming observation errors are normally
     \eqref{eq:prob.data.given.model} distributed with variance
     $\sigma^2$ estimated from the residuals across all observation
-    times].  The dotted red curve is identical to the solid red curve
+    times].  The dotted \nlscol curve is identical to the solid \nlscol curve
   in the top panel.  We have separated the two panels because the
   confidence band overlap would make the plots difficult to
   interpret.}
@@ -2269,7 +2289,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 \begin{table}
   \begin{center}
     \caption{\textbf{Fits of \KM's \cite{KermMcKe27} analytical SIR
-      approximation \eqref{eq:sech} to Philadelphia flu} (see
+        approximation \eqref{eq:sech} to Philadelphia flu} (see
       \cref{fig:phila}).  Parameter estimates were obtained using
       nonlinear least squares (\code{nls}) to fit \cref{eq:sech} to
       the reported daily pneumonia and influenza (P\&I) mortality
@@ -2289,44 +2309,44 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       %%
       The fitted trajectory and confidence band are shown in
       \cref{fig:phila}.  See \cref{sec:phila}.}
-      \label{tab:philanls}
+    \label{tab:philanls}
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c | c c}
-    \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
-    & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
-    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{years}}$ &
+    \begin{tabular}{ m{3cm} | c | c | c | c c}
+      \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
+      & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
+      & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
+      peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{signif(a.phila.nls,dig)} & \Sexpr{ci_fmt("a", ci.phila.nls)} \\
-    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{years}}$ &
+      outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{signif(omega.phila.nls,dig-1)} & \Sexpr{ci_fmt("omega", ci.phila.nls)} \\
-    outbreak centre & $\phi$ & \eqref{eq:phi} & -- &
+      outbreak centre & $\phi$ & \eqref{eq:phi} & -- &
       \Sexpr{signif(phi.phila.nls,dig)} & \Sexpr{ci_fmt("phi", ci.phila.nls)} \\
-    \noalign{\vspace{10pt}}
-    \bfseries Assumed\break parameter \\\hline
-    initial prevalence & $\Iinit$ & -- & -- &
+      \noalign{\vspace{10pt}}
+      \bfseries Assumed\break parameter \\\hline
+      initial prevalence & $\Iinit$ & -- & -- &
       \Sexpr{I0.phila.fitode} & -- \\
-    effective population size & $N$ & -- & -- &
+      effective population size & $N$ & -- & -- &
       \Sexpr{prettyNum(philaS0, big.mark=",")} & -- \\
-    \noalign{\vspace{10pt}}
-    \bfseries Derived\break parameter \\\hline
-    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
+      \noalign{\vspace{10pt}}
+      \bfseries Derived\break parameter \\\hline
+      peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
       \Sexpr{tpeak.phila.nls*52} & \Sexpr{ci_fmt("tpeak", cc.phila.delta*52)} \\
-    effective reproduction number & $\Reff$
+      effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
       \Sexpr{Reff.phila.nls} & \Sexpr{ci_fmt("Reff", cc.phila.delta)} \\
-    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{years}}$ &
+      removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{gamma.phila.nls} & \Sexpr{ci_fmt("gamma", cc.phila.delta)} \\
-    initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
-       \Sexpr{as.integer(S0.phila.nls)} & \Sexpr{ci_fmt("S0", cc.phila.delta, max_ord = 6)} \\
-    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
-       \Sexpr{beta.phila.nls} & \Sexpr{ci_fmt("beta", cc.phila.delta)} \\
-    mean generation interval & $\Tg$ & \eqref{eq:Tg} & years &
+      initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
+      \Sexpr{as.integer(S0.phila.nls)} & \Sexpr{ci_fmt("S0", cc.phila.delta, max_ord = 6)} \\
+      transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
+      \Sexpr{beta.phila.nls} & \Sexpr{ci_fmt("beta", cc.phila.delta)} \\
+      mean generation interval & $\Tg$ & \eqref{eq:Tg} & years &
       \Sexpr{signif(Tg.phila.nls,dig)} & \Sexpr{ci_fmt("Tg", cc.phila.delta)} \\
-    basic reproduction number & $\Rn$ & \eqref{eq:R0def} & -- &
-       \Sexpr{signif(R0.phila.nls,dig)} & \Sexpr{ci_fmt("R0", cc.phila.delta, sn=FALSE, digits=dig)}
-  \end{tabular}
+      basic reproduction number & $\Rn$ & \eqref{eq:R0def} & -- &
+      \Sexpr{signif(R0.phila.nls,dig)} & \Sexpr{ci_fmt("R0", cc.phila.delta, sn=FALSE, digits=dig)}
+    \end{tabular}
   \end{center}
 \end{table}
 %%\end{landscape}
@@ -2346,15 +2366,15 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c c}
-  \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries units}
-    & {\footnotesize\bfseries \code{nbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
-    transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
+    \begin{tabular}{ m{3cm} | c | c | c c}
+      \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
+      & {\footnotesize\bfseries units}
+      & {\footnotesize\bfseries \code{nbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
+      transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
       \Sexpr{beta.phila.fitode} & \Sexpr{ci_fmt("beta", ci.phila.fitode)} \\
       recovery rate & $\gamma$ & $\frac{1}{\textrm{years}}$ & \Sexpr{gamma.phila.fitode} &
       \Sexpr{ci_fmt("gamma", ci.phila.fitode)} \\
-    initial\break susceptibles & $\Sinit$& -- &
+      initial\break susceptibles & $\Sinit$& -- &
       \Sexpr{as.integer(S0.phila.fitode)} & \Sexpr{ci_fmt("S0", ci.phila.fitode, max_ord = 6)}\\
       initial prevalence & $\Iinit$ & -- &
       \Sexpr{I0.phila.fitode} & \Sexpr{ci_fmt("I0", ci.phila.fitode)}\\
@@ -2370,65 +2390,65 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       \Sexpr{Reff.phila.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.phila.fitode[,-1])} \\
       mean generation interval & $\Tg$ & days &
       \Sexpr{signif(Tg.phila.fitode*365,dig)} & \Sexpr{ci_fmt("Tg", ci.derived.phila.fitode[,-1]*365)} \\
-    basic reproduction number & $\Rn$ & -- &
+      basic reproduction number & $\Rn$ & -- &
       \Sexpr{signif(R0.phila.fitode,dig)}
       &  \Sexpr{ci_fmt("R0", ci.derived.phila.fitode[,-1])}
-  \end{tabular}
+    \end{tabular}
   \end{center}
 \end{table}
 %%\end{landscape}
 
 
 \begin{figure}
-<<phila-figure, echo=FALSE, fig.height=5>>=
-setup_plot(ylim = c(0, 800), xlim = range(phila1918b$time), ylab="daily P&I deaths",
-           xaxt='n')
-axis(side=1, at=phila1918b$time[c(1, 31, 62)],
-     labels=c("Sep", "Oct", "Nov"))
-draw_confband(ppp)
-tvals <- with(phila1918b, seq(min(time),max(time), length=1000))
-t0 <- min(tvals)
-tt_phila <- traj_ci(tvals-t0, phila.nls.parameters, vcov(phila.nlsfit))
+  <<phila-figure, echo=FALSE, fig.height=5>>=
+  setup_plot(ylim = c(0, 800), xlim = range(phila1918b$time), ylab="daily P&I deaths",
+             xaxt='n')
+  axis(side=1, at=phila1918b$time[c(1, 31, 62)],
+       labels=c("Sep", "Oct", "Nov"))
+  draw_confband(ppp)
+  tvals <- with(phila1918b, seq(min(time),max(time), length=1000))
+  t0 <- min(tvals)
+  tt_phila <- traj_ci(tvals-t0, phila.nls.parameters, vcov(phila.nlsfit))
 
-tt_phila$times <- tt_phila$times + t0
+  tt_phila$times <- tt_phila$times + t0
 
-draw_confband(tt_phila, col=col.nlsCI)
-curve(KM_approx(x-t0, a=a.phila, omega=omega.phila, phi=phi.phila)/365, from=t0, to=max(tvals), n=1000, add=TRUE, xpd=NA, col=col.fitode.nb, lty="dotted", lwd=lwd*0.60)
-lines(tvals,
-      with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
-      xpd=NA, lwd=lwd, col=col.nls)
-lines(estimate ~ times, data=ppp, col=col.fitode.nb, lwd=lwd*0.8, lty="solid")
-points(mort ~ time,
-       data = phila1918b, xpd=NA, pch=21, bg="white", lwd=2)
-legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
-       lty=c(NA,"solid","solid","dotted"),
-       col=c("black",col.nls,col.fitode.nb,col.fitode.nb),
-       pch=c(21,NA,NA,NA),
-       pt.bg=c("white",NA,NA,NA),
-       legend=c("observed data","nls fit of KM approx",
-                "fitode (nbinom)","KM approx to fitode fit"))
-@
-\caption{\textbf{The main wave of the 1918 influenza epidemic in the city of
-  Philadelphia}, 1 September 1918 to 31 December 1918
-  \cite{Roge20,Gold+09}.  Reported daily deaths from pneumonia and
-  influenza (P\&I) are shown with dots.  The red curve and pink
-  confidence band show a nonlinear least squares (\code{nls}) fit of
-  \KM's approximation \eqref{eq:sech}; the parameter estimates are
-  given in \cref{tab:philanls}.  The solid yellow curve and light
-  yellow confidence band show the \code{fitode} fit of the SIR model
-  \eqref{eq:SIR}, for which the parameter estimates are given in
-  \cref{tab:phila.fitode}.  The dotted yellow curve shows the \KM
-  approximation using the parameters estimated with \code{fitode}.
-}
-\label{fig:phila}
+  draw_confband(tt_phila, col=col.nlsCI)
+  curve(KM_approx(x-t0, a=a.phila, omega=omega.phila, phi=phi.phila)/365, from=t0, to=max(tvals), n=1000, add=TRUE, xpd=NA, col=col.fitode.nb, lty="dotted", lwd=lwd*0.60)
+  lines(tvals,
+        with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
+        xpd=NA, lwd=lwd, col=col.nls)
+  lines(estimate ~ times, data=ppp, col=col.fitode.nb, lwd=lwd*0.8, lty="solid")
+  points(mort ~ time,
+         data = phila1918b, xpd=NA, pch=21, bg="white", lwd=2)
+  legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
+         lty=c(NA,"solid","solid","dotted"),
+         col=c("black",col.nls,col.fitode.nb,col.fitode.nb),
+         pch=c(21,NA,NA,NA),
+         pt.bg=c("white",NA,NA,NA),
+         legend=c("observed data","nls fit of KM approx",
+                  "fitode (nbinom)","KM approx to fitode fit"))
+  @
+  \caption{\textbf{The main wave of the 1918 influenza epidemic in the city of
+      Philadelphia}, 1 September 1918 to 31 December 1918
+    \cite{Roge20,Gold+09}.  Reported daily deaths from pneumonia and
+    influenza (P\&I) are shown with dots.  The \nlscol curve and corresponding
+    confidence band show a nonlinear least squares (\code{nls}) fit of
+    \KM's approximation \eqref{eq:sech}; the parameter estimates are
+    given in \cref{tab:philanls}.  The solid \FOnbcol curve and corresponding
+    confidence band show the \code{fitode} fit of the SIR model
+    \eqref{eq:SIR}, for which the parameter estimates are given in
+    \cref{tab:phila.fitode}.  The dotted \FOnbcol curve shows the \KM
+    approximation using the parameters estimated with \code{fitode}.
+  }
+  \label{fig:phila}
 \end{figure}
 
 %%\begin{landscape}
 \begin{table}
   \begin{center}
     \caption{\textbf{Fits of \KM's \cite{KermMcKe27} analytical SIR
-      approximation \eqref{eq:sech} to an epidemic simulated using the
-      standard stochastic SIR model \cite{AndeBrit00b}} (see
+        approximation \eqref{eq:sech} to an epidemic simulated using the
+        standard stochastic SIR model \cite{AndeBrit00b}} (see
       \cref{sec:stoch,fig:stoch}).
       %%
       The parameter values in the ``true'' column are those used to
@@ -2442,40 +2462,40 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
     \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c | c | c c}
-  \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units} & {\footnotesize\bfseries true}
-    & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
-    initial prevalence & $\Iinit$ & -- & -- &
+    \begin{tabular}{ m{3cm} | c | c | c | c | c c}
+      \bfseries Assumed\break parameter & {\footnotesize\bfseries symbol}
+      & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units} & {\footnotesize\bfseries true}
+      & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
+      initial prevalence & $\Iinit$ & -- & -- &
       \Sexpr{iii[[2]]} & \Sexpr{iii[[2]]} & -- \\
-    %%
-    \noalign{\vspace{10pt}}
-    \bfseries Estimated\break parameter \\\hline
-    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{signif(a.det,dig)} &
+      %%
+      \noalign{\vspace{10pt}}
+      \bfseries Estimated\break parameter \\\hline
+      peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{signif(a.det,dig)} &
       \Sexpr{signif(a.nls.stoch,dig)} & \Sexpr{ci_fmt("a", cc.nls.stoch)} \\
-    outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
+      outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{signif(omega.det,dig)} & \Sexpr{signif(omega.nls.stoch,dig-1)} & \Sexpr{ci_fmt("omega", cc.nls.stoch)} \\
-    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{signif(phi.det,dig)} &
+      outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{signif(phi.det,dig)} &
       \Sexpr{signif(phi.nls.stoch,dig)} & \Sexpr{ci_fmt("phi", cc.nls.stoch)} \\
-    \noalign{\vspace{10pt}}
-    \bfseries Derived\break parameter \\\hline
-    peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
+      \noalign{\vspace{10pt}}
+      \bfseries Derived\break parameter \\\hline
+      peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
       \Sexpr{tpeak.KM.stoch} & \Sexpr{tpeak.nls.stoch} & \Sexpr{ci_fmt("tpeak", cc.delta.stoch)} \\
-    effective reproduction number & $\Reff$
+      effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
       \Sexpr{Reff.KM.stoch} & \Sexpr{Reff.nls.stoch} & \Sexpr{ci_fmt("Reff", cc.delta.stoch)} \\
-    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
+      removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{gamma.KM.stoch} & \Sexpr{gamma.nls.stoch} & \Sexpr{ci_fmt("gamma", cc.delta.stoch)} \\
-    initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
+      initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
       \Sexpr{as.integer(S0.KM.stoch)} & \Sexpr{as.integer(S0.nls.stoch)} & \Sexpr{ci_fmt("S0", cc.delta.stoch, max_ord = 6)} \\
-    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
+      transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{52*beta.KM.stoch} & \Sexpr{signif(52*beta.nls.stoch,dig)} & \Sexpr{ci_fmt("beta", 52*cc.delta.stoch)} \\
-    mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
+      mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
       \Sexpr{signif(7*Tg.KM.stoch,dig)} & \Sexpr{signif(7*Tg.nls.stoch,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta.stoch)} \\
-    basic reproduction number & $\Rn$ & \eqref{eq:R0def} & -- &
+      basic reproduction number & $\Rn$ & \eqref{eq:R0def} & -- &
       \Sexpr{signif(2000*Reff.KM.stoch/S0.KM.stoch,dig)}
       & \Sexpr{signif(2000*Reff.nls.stoch/S0.nls.stoch,dig)} & \Sexpr{ci_fmt("R0", cc.delta.stoch)}
-  \end{tabular}
+    \end{tabular}
   \end{center}
 \end{table}
 %%\end{landscape}
@@ -2484,25 +2504,25 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
 \begin{table}
   \begin{center}
     \caption{\textbf{Fits of numerical (deterministic) SIR model solutions to
-      an epidemic simulated using the standard stochastic SIR model
-      \cite{AndeBrit00b}} (see \cref{sec:stoch,fig:stoch}). Parameter
+        an epidemic simulated using the standard stochastic SIR model
+        \cite{AndeBrit00b}} (see \cref{sec:stoch,fig:stoch}). Parameter
       estimates we obtained using \code{fitode} to fit the SIR model
       \eqref{eq:SIR} to the simulated data, assuming deviations from
       the deterministic curve were generated by negative binomially
       \eqref{eq:NB} distributed observation errors.
     }\label{tab:stoch.fitode}
-\medskip
+    \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
-  \begin{tabular}{ m{3cm} | c | c | c | c c}
-  \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
-    & {\footnotesize\bfseries units} & {\footnotesize\bfseries true}
-    & {\footnotesize\bfseries \code{nbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
-    transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ & \Sexpr{52*R0*mm$gamma/2000} &
+    \begin{tabular}{ m{3cm} | c | c | c | c c}
+      \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
+      & {\footnotesize\bfseries units} & {\footnotesize\bfseries true}
+      & {\footnotesize\bfseries \code{nbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
+      transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ & \Sexpr{52*R0*mm$gamma/2000} &
       \Sexpr{signif(52*beta.stoch.fitode,dig)} & \Sexpr{ci_fmt("beta", 52*ci.stoch.fitode, sn=FALSE, digits=dig)} \\
-    recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{mm$gamma} &
-        \Sexpr{gamma.stoch.fitode} & \Sexpr{ci_fmt("gamma", ci.stoch.fitode)}\\
-    initial\break susceptibles & $\Sinit$& -- & \Sexpr{iii[[1]]} &
+      recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{mm$gamma} &
+      \Sexpr{gamma.stoch.fitode} & \Sexpr{ci_fmt("gamma", ci.stoch.fitode)}\\
+      initial\break susceptibles & $\Sinit$& -- & \Sexpr{iii[[1]]} &
       \Sexpr{as.integer(S0.stoch.fitode)} & \Sexpr{ci_fmt("S0", ci.stoch.fitode, max_ord = 6)}\\
       initial prevalence & $\Iinit$ & -- & \Sexpr{iii[[2]]} &
       \Sexpr{I0.stoch.fitode} & \Sexpr{ci_fmt("I0", ci.stoch.fitode)}\\
@@ -2513,76 +2533,76 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
       mean generation interval & $\Tg$ & days & \Sexpr{7/mm$gamma} & \Sexpr{signif(7*1/gamma.stoch.fitode,dig)} & \Sexpr{ci_fmt("gamma", 7*1/ci.stoch.fitode)}\\
       effective reproduction number & $\Reff$ & -- & \Sexpr{R0*iii[[1]]/2000} &
       \Sexpr{Reff.stoch.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.stoch.fitode[,-1])} \\
-    basic reproduction number & $\Rn$ & -- & \Sexpr{R0} &
+      basic reproduction number & $\Rn$ & -- & \Sexpr{R0} &
       \Sexpr{signif(R0.stoch.fitode,dig)}
       &  \Sexpr{ci_fmt("R0", ci.derived.stoch.fitode[,-1])}
-  \end{tabular}
+    \end{tabular}
   \end{center}
 \end{table}
 %%\end{landscape}
 
 \begin{figure}
-<<plot_stochastic_SIR, echo=FALSE, fig.height=5, fig.show="hold", out.width="95%">>=
-my.tmax <- 8
-plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
-     ##xlim=range(tt),
-     xlim=c(0,my.tmax), # FIX: hack: max(tt) in sirstoch.RData is 10, which is too large
-     ylim=range(sir.stoch.data$mort, na.rm=TRUE))
-draw_confband(sss, col=col.fitodenbCI)
-lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
-lines(sir.det$tau, 1 * sir.det$I * N/7, col=my.green, lwd=lwd*0.8) ## dR/dt
-curve(KM_approx(x, a=a.det, omega=omega.det, phi=phi.det)/7, from=0, to=my.tmax, n=1000, add=TRUE,
-      xpd=NA, col=my.green, lty="dotted", lwd=lwd*0.6)
-points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
-legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.6),
-       lty=c(NA,"solid","solid","dotted"),
-       col=c("black",col.fitode.nb,my.green,my.green),
-       pch=c(21,NA,NA,NA),
-       pt.bg=c("white",NA,NA,NA),
-       adj = c(0, 0.8),  ## shift text so first line aligns with guide line
-       legend=c("simulated data","fitode (nbinom)","deterministic","KM approx\nto deterministic fit"))
+  <<plot_stochastic_SIR, echo=FALSE, fig.height=5, fig.show="hold", out.width="95%">>=
+  my.tmax <- 8
+  plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
+       ##xlim=range(tt),
+       xlim=c(0,my.tmax), # FIX: hack: max(tt) in sirstoch.RData is 10, which is too large
+       ylim=range(sir.stoch.data$mort, na.rm=TRUE))
+  draw_confband(sss, col=col.fitodenbCI)
+  lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
+  lines(sir.det$tau, 1 * sir.det$I * N/7, col=col.determ, lwd=lwd*0.8) ## dR/dt
+  curve(KM_approx(x, a=a.det, omega=omega.det, phi=phi.det)/7, from=0, to=my.tmax, n=1000, add=TRUE,
+        xpd=NA, col=col.determ, lty="dotted", lwd=lwd*0.6)
+  points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
+  legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.6),
+         lty=c(NA,"solid","solid","dotted"),
+         col=c("black",col.fitode.nb,col.determ,col.determ),
+         pch=c(21,NA,NA,NA),
+         pt.bg=c("white",NA,NA,NA),
+         adj = c(0, 0.8),  ## shift text so first line aligns with guide line
+         legend=c("simulated data","fitode (nbinom)","deterministic","KM approx\nto deterministic fit"))
 
-plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
-     ##xlim=range(tt),
-     xlim=c(0,my.tmax), # FIX: hack: max(tt) in sirstoch.RData is 10, which is too large
-     ylim=range(sir.stoch.data$mort, na.rm=TRUE))
-draw_confband(traj_ci((0:(my.tmax*7))/7, nls.stoch.parameters, vcov(nlsfit.stoch)), col=col.nlsCI)
-draw_confband(sss, col=col.fitodenbCI)
-lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
-curve(KM_approx(x, a=a.nls.stoch, omega=omega.nls.stoch, phi=phi.nls.stoch),
-      from=0, to=my.tmax, n=1000, add=TRUE,
-      xpd=NA, col=col.nls, lwd=lwd*0.8, lty="solid")
-points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
-legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
-       lty=c(NA,"solid","solid"),
-       col=c("black",col.fitode.nb,col.nls),
-       pch=c(21,NA,NA),
-       pt.bg=c("white",NA,NA),
-       legend=c("simulated data","fitode (nbinom)","nls fit of KM approx"))
-@
-\caption{\textbf{Deterministic fits to daily incidence generated by a
-  stochastic SIR simulation} with initial state
-  $(\Sinit,\Iinit,\Rinit)=(1998,2,0)$, basic reproduction number $\Rn=5$, and
-  mean generation interval $\Tg=1$ week.
-  The simulated data points show the numbers of newly recovered
-  individuals each day.
-  %%
-  In both panels, the yellow curve and confidence band show the
-  \code{fitode} fit to the simulated data.  \emph{Top panel:} The
-  solid green curve shows the solution of deterministic SIR model
-  \eqref{eq:SIR} with the initial conditions and parameters used for
-  the stochastic simulation.  The dotted green curve shows the \KM
-  approximation \eqref{eq:sech} to this deterministic trajectory.  The
-  time shift between the green and yellow curves arises because there
-  is a random delay until the stochastic trajectory begins to grow
-  exponentially.
-  %%
-  \emph{Bottom panel:} The red curve shows the \KM approximation
-  \eqref{eq:sech}, fitted to the stochastic simulation using \code{nls}.
-  Since the \KM approximation is symmetric about its maximum, it is
-  impossible to obtain a good fit in situations like this, where
-  the rise of the epidemic is faster than the fall.
-}\label{fig:stoch}
+  plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
+       ##xlim=range(tt),
+       xlim=c(0,my.tmax), # FIX: hack: max(tt) in sirstoch.RData is 10, which is too large
+       ylim=range(sir.stoch.data$mort, na.rm=TRUE))
+  draw_confband(traj_ci((0:(my.tmax*7))/7, nls.stoch.parameters, vcov(nlsfit.stoch)), col=col.nlsCI)
+  draw_confband(sss, col=col.fitodenbCI)
+  lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
+  curve(KM_approx(x, a=a.nls.stoch, omega=omega.nls.stoch, phi=phi.nls.stoch),
+        from=0, to=my.tmax, n=1000, add=TRUE,
+        xpd=NA, col=col.nls, lwd=lwd*0.8, lty="solid")
+  points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
+  legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
+         lty=c(NA,"solid","solid"),
+         col=c("black",col.fitode.nb,col.nls),
+         pch=c(21,NA,NA),
+         pt.bg=c("white",NA,NA),
+         legend=c("simulated data","fitode (nbinom)","nls fit of KM approx"))
+  @
+  \caption{\textbf{Deterministic fits to daily incidence generated by a
+      stochastic SIR simulation} with initial state
+    $(\Sinit,\Iinit,\Rinit)=(1998,2,0)$, basic reproduction number $\Rn=5$, and
+    mean generation interval $\Tg=1$ week.
+    The simulated data points show the numbers of newly recovered
+    individuals each day.
+    %%
+    In both panels, the \FOnbcol curve and confidence band show the
+    \code{fitode} fit to the simulated data.  \emph{Top panel:} The
+    solid \determcol curve shows the solution of deterministic SIR model
+    \eqref{eq:SIR} with the initial conditions and parameters used for
+    the stochastic simulation.  The dotted \determcol curve shows the \KM
+    approximation \eqref{eq:sech} to this deterministic trajectory.  The
+    time shift between the \determcol and \FOnbcol curves arises because there
+    is a random delay until the stochastic trajectory begins to grow
+    exponentially.
+    %%
+    \emph{Bottom panel:} The \nlscol curve shows the \KM approximation
+    \eqref{eq:sech}, fitted to the stochastic simulation using \code{nls}.
+    Since the \KM approximation is symmetric about its maximum, it is
+    impossible to obtain a good fit in situations like this, where
+    the rise of the epidemic is faster than the fall.
+  }\label{fig:stoch}
 \end{figure}
 
 \pagebreak
@@ -2592,22 +2612,22 @@ legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
 %% \renewcommand{\thefigure}{S\arabic{figure}}
 
 \begin{figure}[!h]
-\includegraphics[width=\textwidth]{../misc/bombay_confint_dnbinom.pdf}
-\caption{\textbf{Unidentifiability of the mean generation interval
-    $\Tg$ (or, equivalently, the removal rate $\gamma$) for the Bombay
-    plague epidemic shown in \cref{fig:Bombay}.}
+  \includegraphics[width=\textwidth]{../misc/bombay_confint_dnbinom.pdf}
+  \caption{\textbf{Unidentifiability of the mean generation interval
+      $\Tg$ (or, equivalently, the removal rate $\gamma$) for the Bombay
+      plague epidemic shown in \cref{fig:Bombay}.}
     %%
-  (\textsf{A}) The profile likelihood---briefly discussed at the end
-  of \cref{sec:Uncertainty}---is calculated by fixing $\gamma$ to a
-  series of given values and, for each value,
-  maximizing the likelihood by estimating all other
-  parameters \cite{Bolk08}. (The maximum value is shifted to 0
-  without loss of generality.) A flat profile-likelihood surface
-  indicates parameter unidentifiability, meaning that we can obtain
-  very similar fits across a wide range of values
-  of the focal parameter ($\gamma$).  (\textsf{B--E}) The
-  corresponding best parameter estimates for a given value of
-  $\gamma$.}\label{fig:proflikgamma}
+    (\textsf{A}) The profile likelihood---briefly discussed at the end
+    of \cref{sec:Uncertainty}---is calculated by fixing $\gamma$ to a
+    series of given values and, for each value,
+    maximizing the likelihood by estimating all other
+    parameters \cite{Bolk08}. (The maximum value is shifted to 0
+    without loss of generality.) A flat profile-likelihood surface
+    indicates parameter unidentifiability, meaning that we can obtain
+    very similar fits across a wide range of values
+    of the focal parameter ($\gamma$).  (\textsf{B--E}) The
+    corresponding best parameter estimates for a given value of
+    $\gamma$.}\label{fig:proflikgamma}
 \end{figure}
 
 \end{document}
