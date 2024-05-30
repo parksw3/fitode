@@ -188,19 +188,6 @@ options(warnPartialMatchArgs = FALSE,
 
 \bigskip \bigskip
 
-\djde{Notation: I've introduced macros \macro{Sinit}, \macro{Iinit},
-  \macro{Rinit}, which are currently set to $\Sinit,\Iinit,\Rinit$.
-  We can discuss whether this is good.  I also defined \macro{Rn}
-  for $\Rn$, to reduce potential confusion with \macro{Rinit}.
-  Hopefully I got this right\dots}
-\bmb{the Roman ``i'' in $\Sinit$ etc. does look a little odd, but I see the point. It might (?) be worth a short remark the first time it's used to emphasize that we're using it to differentiate (especially) $\Rinit$ from $\Rn$}
-\djde{Peak prevalence $I_{\rm p}=a/\gamma$ might be something we want
-  to mention, so the meaning of $a$ is $I_{\rm p}\times\Tg$.  ``Peak
-  removal rate'' might not be the best description of $a$.}
-\djde{The issue is that we follow \KM and present a formula for
-  $\dbyd{R}{t}$ rather than $I(t)$.  In practice, it is the prevalence
-  curve that people care about.  hmmm.}
-
 \begin{abstract}
   Fred Brauer was an eminent mathematician who studied dynamical
   systems, especially differential equations.  He made many
@@ -233,15 +220,18 @@ Submitted to \emph{Bulletin of Mathematical Biology}
 
 \section{Introduction}
 
+\djde{I clarified total vs \emph{per capita} removal rates ($a$ vs
+  $\gamma$), but we have ``recovery rate'' in a number of places.}
+
 In their landmark 1927 paper, Kermack and McKendrick (\KM)
 \cite[p.\,713]{KermMcKe27} introduced the now-standard
 susceptible-infected-removed (SIR) epidemic model,
 \begin{linenomath*}
   \begin{subequations}\label{eq:SIR}
     \begin{align}
-      \ddt{S} &= -\beta S I \,, \\
+      \ddt{S} &= -\beta S I \,, \label{eq:SIR;S} \\
       \noalign{\vspace{5pt}}
-      \ddt{I} &= \beta S I - \gamma I \,, \label{eq:SIR;I} \\
+      \ddt{I} &= \beta S I - \gamma I \,, \label{eq:SIR;I}\\
       \noalign{\vspace{5pt}}
       \ddt{R} &= \gamma I\,, \label{eq:SIR;R}
     \end{align}
@@ -2115,7 +2105,7 @@ ci_fmt("a", cc)
   \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
     & \thead{\footnotesize\bfseries KM \\ \bfseries estimate} & \thead{\footnotesize\bfseries \code{nls} \\ \bfseries estimate} & {\footnotesize\bfseries 95\% CI} \\\hline
-    peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{a.KM} &
+    total removal rate at epidemic peak & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{a.KM} &
       \Sexpr{signif(a.nls,dig)} & \Sexpr{ci_fmt("a", cc)} \\
     outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} & \Sexpr{ci_fmt("omega", cc)} \\
@@ -2134,11 +2124,11 @@ ci_fmt("a", cc)
     effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
       \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & \Sexpr{ci_fmt("Reff", cc.delta)} \\
-    removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
+    \emph{per capita} removal rate & $\gamma$ & \eqref{eq:SIR}, \ref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & \Sexpr{ci_fmt("gamma", cc.delta)} \\
     initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
       \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta, max_ord = 6)} \\
-    transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
+    transmission rate & $\beta$ & \eqref{eq:SIR}, \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{signif(beta.KM*52,dig)} & \Sexpr{signif(beta.nls*52,dig)} & \Sexpr{ci_fmt("beta", cc.delta*52, sn=FALSE, digits=dig)} \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
       \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta)} \\
@@ -2327,7 +2317,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
       & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
       & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
-      peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{years}}$ &
+      total removal rate at epidemic peak & $a$& \eqref{eq:a} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{signif(a.phila.nls,dig)} & \Sexpr{ci_fmt("a", ci.phila.nls)} \\
       outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{signif(omega.phila.nls,dig-1)} & \Sexpr{ci_fmt("omega", ci.phila.nls)} \\
@@ -2346,7 +2336,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
       \Sexpr{Reff.phila.nls} & \Sexpr{ci_fmt("Reff", cc.phila.delta)} \\
-      removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{years}}$ &
+      \emph{per capita} removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{years}}$ &
       \Sexpr{gamma.phila.nls} & \Sexpr{ci_fmt("gamma", cc.phila.delta)} \\
       initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
       \Sexpr{as.integer(S0.phila.nls)} & \Sexpr{ci_fmt("S0", cc.phila.delta, max_ord = 6)} \\
@@ -2481,7 +2471,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       %%
       \noalign{\vspace{10pt}}
       \bfseries Estimated\break parameter \\\hline
-      peak removal rate & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{signif(a.det,dig)} &
+      total removal rate at epidemic peak & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{signif(a.det,dig)} &
       \Sexpr{signif(a.nls.stoch,dig)} & \Sexpr{ci_fmt("a", cc.nls.stoch)} \\
       outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{signif(omega.det,dig)} & \Sexpr{signif(omega.nls.stoch,dig-1)} & \Sexpr{ci_fmt("omega", cc.nls.stoch)} \\
@@ -2494,7 +2484,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
       \Sexpr{Reff.KM.stoch} & \Sexpr{Reff.nls.stoch} & \Sexpr{ci_fmt("Reff", cc.delta.stoch)} \\
-      removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
+      \emph{per capita} removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
       \Sexpr{gamma.KM.stoch} & \Sexpr{gamma.nls.stoch} & \Sexpr{ci_fmt("gamma", cc.delta.stoch)} \\
       initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
       \Sexpr{as.integer(S0.KM.stoch)} & \Sexpr{as.integer(S0.nls.stoch)} & \Sexpr{ci_fmt("S0", cc.delta.stoch, max_ord = 6)} \\
@@ -2624,7 +2614,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 \begin{figure}[!h]
   \includegraphics[width=\textwidth]{../misc/bombay_confint_dnbinom.pdf}
   \caption{\textbf{Unidentifiability of the mean generation interval
-      $\Tg$ (or, equivalently, the removal rate $\gamma$) for the Bombay
+      $\Tg$ (or, equivalently, the \emph{per capita} removal rate $\gamma$) for the Bombay
       plague epidemic shown in \cref{fig:Bombay}.}
     %%
     (\textsf{A}) The profile likelihood---briefly discussed at the end
