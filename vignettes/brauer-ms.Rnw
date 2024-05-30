@@ -138,9 +138,12 @@
 \newcommand{\thetaindex}{{j}}
 \newcommand{\thetaindexmax}{{n_{{}_\theta}}}
 %%initial state:
-\newcommand{\Sinit}{S_{\rm i}}
-\newcommand{\Iinit}{I_{\rm i}}
-\newcommand{\Rinit}{R_{\rm i}}
+%% \newcommand{\Sinit}{S_{\rm i}}
+%% \newcommand{\Iinit}{I_{\rm i}}
+%% \newcommand{\Rinit}{R_{\rm i}}
+\newcommand{\Sinit}{S(0)}
+\newcommand{\Iinit}{I(0)}
+\newcommand{\Rinit}{R(0)}
 
 <<setup, echo=FALSE, include=FALSE>>=
 ## set default base-graphics plotting options
@@ -340,7 +343,7 @@ can be written
 \frac{R(t)-\Rinit}{N} \ll \frac{1}{\Rn} \,,
 \end{equation}
 \end{linenomath*}
-where $\Rinit=R(0)$ (\KM assumed $\Rinit=0$); thus,
+(\KM assumed $\Rinit=0$); thus,
 \cref{eq:sech} is a good approximation as long as
 the proportion of the population that has been infected and
 removed since the initial time is much less than $1/\Rn$.
@@ -1000,7 +1003,7 @@ Given a fit of \KM's approximation \eqref{eq:sech} to the time series
 data, which yields $\thetavechat=(\hat{a},\hat{\omega},\hat{\phi})$, we
 can apply the Delta method \eqref{eq:DeltaMethod} to the nonlinear
 relationships \eqref{eq:invertparams} to obtain CIs on
-$g(\thetavechat)=(\hat{\Reff}, \hat{\gamma},\hat{\Sinit})$.  This is
+$g(\thetavechat)=(\widehat{\Reff}, \widehat{\gamma},\widehat{\Sinit})$.  This is
 precisely how we obtained the CIs on the derived parameters listed in
 \cref{tab:Bombay}.  Perhaps less obviously, we can also use the
 Delta method to obtain CIs on the fitted trajectory at each
