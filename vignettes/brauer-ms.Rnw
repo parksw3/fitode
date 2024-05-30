@@ -216,10 +216,6 @@ options(warnPartialMatchArgs = FALSE,
   series.  We assume that, like Fred, the reader is familiar with
   dynamical systems from a mathematical perspective, but has limited
   experience with statistical methodology or optimization techniques.
-  \djde{We might want to mention in the abstract that we also explain
-    \code{nls}, and that we do more than provide recipes in the
-    tutorial, \ie we actually explain pedagogically where they come
-    from.}
 \end{abstract}
 
 \begin{keywords}
@@ -349,11 +345,6 @@ can be written
 the proportion of the population that has been infected and
 removed since the initial time is much less than $1/\Rn$.
 
-\djde{We could add that this will be true initially for any $\Rn$,
-  and true for all time if $\Rn$ is sufficiently close to 1, which
-  can be quantified using the final size relation that \KM actually
-  derived.}
-
 Given \cref{eq:R0def}, the \term{effective reproduction number} at
 time $t=0$ is
 \begin{linenomath*}
@@ -451,12 +442,6 @@ function is shown in \nlscol in \cref{fig:Bombay}.
 Starting from someone else's fit is not a great way to test the
 method, but fortunately the least squares fit for this problem is not
 very sensitive to the starting value.  
-%%
-\djde{We could reference \cref{foot:startingvalue}, or move it here
-  and reference it where it currently is.}  \djde{Actually, moving
-  \cref{foot:startingvalue} here might be complicated because it
-  refers to unidentifiability, which we haven't mentioned yet.}
-%%
 To pick reasonable starting values, it often helps to think about the
 meaning of parameters.  For example, in the case of \cref{eq:sech}, it
 is useful to note that $a$ is the maximum of the function, and if
@@ -602,7 +587,7 @@ The nonlinear algebraic relationships specified by
   slightly different from those of Baca\"er
   \cite[eq.~(3)]{bacaermodel2012} because we have corrected a minor
   error.  At the start of \S3 of \cite{bacaermodel2012}, in the
-  expression for $Q$, the term $2Ry_0/x_0$ should be $2R^2y_0/x_0$ and
+  expression for $Q$, the term $2Ry_0/x_0$ should be $2R^2y_0/x_0$; 
   this missing square is propagated through to the inversion formulae.}
 analytically\footnote{In (common) situations in which nonlinear
   algebraic equations cannot be solved analytically, they can still be
@@ -786,8 +771,7 @@ the top panel of \cref{fig:Bombay} is a 95\% \term{confidence
   band}, which shows CIs for each point of the fitted model curve.
 
 To understand how to estimate CIs, we will start by thinking about our observation model, the
-probability of observing the data $\{\trajobsti\}$ given $\{\traj(\ti)\}$.
-\djde{Should $\{\traj(\ti)\}$ be $\traj(t,\thetavec)$?}
+probability of observing the data $\{\trajobsti\}$ given the ODE trajectory $\{\traj(\ti, \thetavec)\}$.
 We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
 consider the deviations from the model curve in
