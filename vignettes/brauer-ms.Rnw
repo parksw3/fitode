@@ -413,7 +413,7 @@ problem, the parameter vector is $\thetavec=(a,\omega,\phi)$ and the
 model is given by \cref{eq:sech}.  (Note that we write $\traj[\cdot]$
 when referring to observations of the variable $\traj$ and
 $\traj(\cdot\,;\cdot)$ when referring to the model.)
-Choosing this objective function is equivalent to assuming that the $\traj[\ti]$ values are direct (but noisy) observations of the state variable $\traj(t)$. When the connection between the dynamical system and our observations is more complicated, we need to define an explicit \term{observation process}; see Section~\ref{sec:Uncertainty}.
+Choosing this objective function is equivalent to assuming that the $\traj[\ti]$ values are direct (but noisy) observations of the state variable $\traj(t)$. When the connection between the dynamical system and our observations is more complicated, we need to define an explicit \term{observation process}; see \cref{sec:Uncertainty}.
 Minimizing
 \eqref{eq:leastsquares} with respect to $\thetavec$ would have
 required some heroic arithmetic with a pencil and paper in 1927, but
