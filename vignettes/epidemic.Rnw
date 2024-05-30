@@ -1,8 +1,11 @@
 \documentclass{article}
+%% vignette index specifications need to be *after* \documentclass{}
 %\VignetteEngine{knitr::knitr}
-%\VignetteDepends{fitode}
-%\VignetteDepends{ggplot2}
 %\VignetteIndexEntry{Fitting epidemic models}
+%\VignettePackage{fitode}
+%\VignetteDepends{ggplot2}
+%\VignetteDepends{propagate}
+%\VignetteDepends{nleqslv}
 \title{Fitting epidemic models}
 \author{Sang Woo Park}
 \usepackage{amsmath}

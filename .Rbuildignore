@@ -22,4 +22,7 @@ vignettes/figure/
 vignettes/fitode-ms.*
 vignettes/brauer-ms.*
 outputs/*
-vignettes/*.md
+vignettes/.*[.]md
+vignettes/.*[.]pdf
+vignettes/.*[.]rda
+vignettes/mkdiff

@@ -1813,14 +1813,15 @@ We focused here on three illustrative examples of epidemic time
 series.  The first was the reported weekly mortality from plague in
 Bombay in 1906 (\cref{fig:Bombay}), which was examined by \KM in their
 original paper \cite{KermMcKe27}.  Although historically important, it
-is certainly debatable whether any inferences we might draw from
-fitting the simple SIR model \eqref{eq:SIR} to these plague data can
-be trusted.  As we quoted at the end of \cref{sec:fitode}, to justify
+is certainly debatable whether we can trust any inferences we might draw from
+fitting the simple SIR model \eqref{eq:SIR} to these plague data.
+As we quoted at the end of \cref{sec:fitode}, to justify
 the application of their SIR model to these data, \KM highlighted five
-implicit assumptions, any or all of which might be violated.  In
-addition, Baca\"er investigated the longer term pattern of plague
-mortality in Bombay and found that there were seasonal epidemics every
-year from 1897 to 1911 \cite[Fig.\,2]{bacaermodel2012}, suggesting
+implicit assumptions, any or all of which might be violated.  
+Furthermore, Baca\"er found that over the longer term seasonal
+epidemics of plague
+occurred in Bombay every year from 1897 to 1911 \cite[Fig.\,2]{bacaermodel2012},
+suggesting
 that the 1906 epidemic was just one in a long sequence of epidemics
 that were ``driven by seasonality'' \cite[p.\,403]{bacaermodel2012}.
 Of course, other mechanisms (e.g., heterogeneity in contact patterns)
@@ -1904,6 +1905,8 @@ than the deterministic limit of the model that generated the data
 \cite{Rosa+21}; a good fit is not, on its own, sufficient to conclude
 that a model matches the underlying processes of a dynamical system.
 
+While \code{fitode} provides a relatively easy way to specify ODEs and estimate their parameters from data, any programming language will work to implement the steps we have outlined above, including both free general-purpose languages such as Python \citep{Bati+2022,Gupta2023} or commercial, domain-specific tools such as Matlab \citep{Chow2017} or Berkeley Madonna \citep{Zha+2020}. As long as a language provides tools for integrating arbitrary sets of ODEs (e.g. Matlab's \code{ode45}) and optimizing nonlinear functions (e.g. Matlab's \code{fminunc} or \code{lsqnonlin}), it can be used to estimate parameters of ODEs. However, \code{fitode}'s simple interface, automatic derivation of sensitivity equations, flexible specification of observation models, and provision of confidence intervals make it both convenient and powerful.
+
 Beyond the basics that we have discussed here, \code{fitode} contains
 a number of useful advanced features. In particular,
 \code{fitode} can
@@ -1930,7 +1933,7 @@ a number of useful advanced features. In particular,
   size of the epidemic); an average value and confidence intervals
   are derived from weighted moments (means) or quantiles (medians
   or extremes such as 10th and 90th percentiles).
-\item [apply Bayesian inference:]
+\item [specify priors and apply Bayesian inference:]
   Unlike maximum likelihood approaches, which seek to estimate the best-fitting
   parameter set, Bayesian methods aim to estimate a distribution of
   parameters (also known as the posterior distribution) that are consistent with our
@@ -2097,10 +2100,6 @@ ci_fmt("a", cc)
       parameters of \KM's approximation (using the indicated
       equations).  Like Baca\"er \cite[p.\,408]{bacaermodel2012}, we
       assume the population of Bombay was $N=1$ million.
-      \bmb{Could also play with formatting here to narrow the table
-        slightly, as in Table 2, but
-        this one is only slightly too wide \ldots (include symbol in
-        parentheses at the end  of the parameter-name text here and in next fig?)}
     }\label{tab:Bombay}
 \medskip
     %% making use of ragged2e and array packages:
@@ -2165,18 +2164,6 @@ ci_fmt("a", cc)
       %%
       As in \cref{tab:Bombay}, a population size $N$ must be assumed
       to derive $\Rn$ estimates.
-      \bmb{tweaked table to make it fit within margins.
-      (See comment above at
-      \texttt{\textbackslash usepackage\{makecell\}} for breaking lines
-      in header columns).
-      Would be nice to tweak 95\% CI columns slightly
-      wider but we're probably at the limit there.
-      Could add an
-      appropriate (optional) \texttt{\textbackslash hspace} in
-      \texttt{ci\_fmt()} to align line-broken CIs more nicely ... ?
-      Maybe not worth fussing too much over table formatting since
-      typesetters will be redoing it anyway?
-      }
     }\label{tab:bombay.fitode}
     \medskip
     %% making use of ragged2e and array packages:
@@ -2268,7 +2255,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
   which the associated parameter estimates are given in
   \cref{tab:bombay.fitode} [observation errors are assumed to be
     negative binomially distributed \eqref{eq:NB}]; this curve happens to
-  coincide almost exactly with KM's fit \bmb{check this - I think it's a coincidence, and doesn't look exactly identical, but is close enough to make me nervous!}.
+  coincide almost exactly with KM's fit.
   %%
   \emph{Bottom panel:} The solid \FOnbcol curve is identical to the
   dotted \FOnbcol curve in the top panel; its confidence band is the
