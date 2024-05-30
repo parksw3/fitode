@@ -800,7 +800,7 @@ model is
   \begin{equation}\label{eq:prob.data.given.model}
     \begin{split}
       \Pop(\text{data} \mid \text{model})
-      & = \lim_{\Delta x \to 0} \frac{\Pop\left(\traj(\ti;\theta) \le \traj[\ti] < \traj(\ti;\theta) + \Delta x \right)}{\Delta x} \\
+      & = \lim_{\Delta x \to 0} \frac{\Pop\big(\traj(\ti;\theta) \le \traj[\ti] < \traj(\ti;\theta) + \Delta x \big)}{\Delta x} \\
       & = \prod_{\tindex=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
 \exp\left(-\frac{\big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2}{2\sigma^2} \right)
@@ -810,6 +810,13 @@ model is
 \end{equation}
 \end{linenomath*}
 %%
+\djde{The reason for writing $\Delta x[\ti]$ previously was to allow
+  for unevenly spaced time points.  It's obviously cleaner the above way.
+  Not sure if this simplification issue is worth mentioning.  We could
+  say ``(assuming for simplicity that the observation times are evenly
+  spaced)'' or something like that.}
+\djde{We are now using $\Pop$ for both probability and probability density.
+  hmmm.}
 We use a probability density function here because the Normal is a continuous distribution; we would use a probability mass function for a discrete response distribution such as the Poisson. In practice, we don't have to worry about this distinction much when we are estimating the parameters of an epidemic model, and we will refer to ``probability'' rather than ``probability density'' from now on.
 
 Using these assumptions we can adopt a \emph{maximum likelihood}
