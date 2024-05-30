@@ -782,7 +782,7 @@ the top panel of \cref{fig:Bombay} is a 95\% \term{confidence
   band}, which shows CIs for each point of the fitted model curve.
 
 To understand how to estimate CIs, we will start by thinking about our observation model, the
-probability of observing the data $\{\traj[\ti]\}$ given $\{\traj(ti)\}$.
+probability of observing the data $\{\traj[\ti]\}$ given $\{\traj(\ti)\}$.
 We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
 consider the deviations from the model curve in
