@@ -1964,16 +1964,18 @@ inherent to the discrete-state stochastic SIR model discussed above
 (and to any real host-pathogen system).  Parameters of models can also
 be subject to process error; for example, the transmission rate might
 depend on random fluctuations in weather.  Properly accounting for
-process error can be critical for estimating uncertainties in
-parameter estimates and confidence bands on the projected dynamics of
-a system \citep{King+15,taylor2016stochasticity,li2018fitting}.
+process error can be critical for accurately quantifying uncertainties in
+parameter estimates and model forecasts
+\citep{King+15,taylor2016stochasticity,li2018fitting};
+however, the required statistical and computational procedures are
+significantly more challenging than the approaches considered here.
 Popular \code{R} packages that can fit models with process error
 include \code{pomp} \citep{King+16} and \code{mcstate}
 \citep{mcstate}.
 
 \section{Closing remarks: from Fred Brauer to \code{fitode}}
 
-The idea of digging into to data seemed like punishment to Fred
+The idea of digging into data seemed like punishment to Fred
 Brauer, but while he never---to our knowledge---did any data analysis
 himself, he did develop a sincere appreciation for the value of data
 in epidemiological research.  Fred's curiosity---about how dynamical
