@@ -137,7 +137,12 @@
 \newcommand{\xindexmax}{{n_{{}_x}}}
 \newcommand{\thetaindex}{{j}}
 \newcommand{\thetaindexmax}{{n_{{}_\theta}}}
-%%initial state:
+%% observed values
+\newcommand{\xobssymbol}{x_{{\rm {\color{red}obs}}}}
+\newcommand{\xobs}[1]{\xobssymbol\left(#1\right)}
+\newcommand{\xobsti}{\xobs{\ti}}
+
+%% initial state:
 %% \newcommand{\Sinit}{S_{\rm i}}
 %% \newcommand{\Iinit}{I_{\rm i}}
 %% \newcommand{\Rinit}{R_{\rm i}}
@@ -786,8 +791,6 @@ with zero mean and standard deviation $\sigma$ equal to the standard
 deviation of the residuals (the differences between the model curve
 and the observed data).  Then the probability density of the data given the
 model is
-\djde{$\le$ instead of $<$ on the left), and reformatted a bit.}
-\bmb{Some issues addressed/deleted. I guess $\le$ is OK.  In the continuous limit it doesn't matter \ldots}
 %%
 \begin{linenomath*}
   \begin{equation}\label{eq:prob.data.given.model}
@@ -803,11 +806,6 @@ model is
 \end{equation}
 \end{linenomath*}
 %%
-\djde{The reason for writing $\Delta x[\ti]$ previously was to allow
-  for unevenly spaced time points.  It's obviously cleaner the above way.
-  Not sure if this simplification issue is worth mentioning.  We could
-  say ``(assuming for simplicity that the observation times are evenly
-  spaced)'' or something like that.}
 \djde{We are now using $\Pop$ for both probability and probability density.
   hmmm.}
 We use a probability density function here because the Normal is a continuous distribution; we would use a probability mass function for a discrete response distribution such as the Poisson. In practice, we don't have to worry about this distinction much when we are estimating the parameters of an epidemic model, and we will refer to ``probability'' rather than ``probability density'' from now on.
@@ -843,7 +841,6 @@ yields an estimate,
 \end{linenomath*}
 which---lo and behold---agrees exactly with \eqref{eq:leastsquares},
 the least squares solution!
-\bmb{There's a subtle point we might want to mention here, which is that we are sweeping the estimation of $\sigma$ under the rug; everything that's here is mathematically correct (we don't have to worry about constant scaling factors when we are only looking for arg min) \ldots Thinking about whether there is a short/simple/clear comment we can make to reflect that we are not including $\sigma$ in the set of estimated parameters here}
 The standard way of expressing this is to
 say that the least squares solution $\thetavechat$ is the
 \term{maximum likelihood estimate} (MLE) of $\thetavec$, under the
