@@ -787,7 +787,7 @@ model is
   \begin{equation}\label{eq:prob.data.given.model}
     \begin{split}
       \Pop(\text{data} \mid \text{model})
-      & = \lim_{\Delta x \to 0} \frac{\Pop\big(\traj(\ti;\thetavec) \le \trajobsti < \traj(\ti;\thetavec) + \Delta x \big)}{\Delta x} \\
+      & = \lim_{\Delta x \to 0} \frac{\textrm{Prob}\big(\traj(\ti;\thetavec) \le \trajobsti < \traj(\ti;\thetavec) + \Delta x \big)}{\Delta x} \\
       & = \prod_{\tindex=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
 \exp\left(-\frac{\big(\traj(\ti;\thetavec) - \trajobsti\big)^2}{2\sigma^2} \right)
@@ -799,7 +799,8 @@ model is
 %%
 \djde{We are now using $\Pop$ for both probability and probability density.
   hmmm.}
-We use a probability density function here because the Normal is a continuous distribution; we would use a probability mass function for a discrete response distribution such as the Poisson. In practice, we don't have to worry about this distinction much when we are estimating the parameters of an epidemic model, and we will refer to ``probability'' rather than ``probability density'' from now on.
+\bmb{what do you think about this solution?}
+We use a probability density function here because the Normal is a continuous distribution; we would use a probability mass function for a discrete response distribution such as the Poisson. In practice, we don't have to worry about this distinction when we are estimating the parameters of an epidemic model (the infinitesimal $dx$ will always appear as a constant multiplier or divisor and doesn't affect any of our conclusions). In a mild abuse of notation, we will use $\Pop$ interchangeably for both probability  and probability density, referring to this quantity as``probability'' rather than ``probability density''.
 
 Using these assumptions we can adopt a \emph{maximum likelihood}
 framework, where we consider parameter values that maximize the
