@@ -138,9 +138,15 @@
 \newcommand{\thetaindex}{{j}}
 \newcommand{\thetaindexmax}{{n_{{}_\theta}}}
 %% observed values
-\newcommand{\xobssymbol}{x_{{\rm {\color{red}obs}}}}
-\newcommand{\xobs}[1]{\xobssymbol\left(#1\right)}
-\newcommand{\xobsti}{\xobs{\ti}}
+\newcommand{\trajobssymbol}{\traj_{{\rm{\color{red}\scalebox{0.5}{obs}}}}}
+\newcommand{\trajobs}[1]{\trajobssymbol\!\left(#1\right)}
+\newcommand{\trajobsti}{\trajobs{\ti}}
+%%\newcommand{\trajobsiti}{{\trajobssymbol}_{,\xindex}(\ti)}
+\newcommand{\trajobsi}{\traj_{{\rm{\color{red}\scalebox{0.5}{obs}}},\xindex}}
+\newcommand{\trajobsiti}{\trajobsi(\ti)}
+\newcommand{\xvecobssymbol}{\xvec_{{\rm{\color{red}\scalebox{0.5}{obs}}}}}
+\newcommand{\xvecobs}[1]{\xvecobssymbol\!\left(#1\right)}
+\newcommand{\xvecobsti}{\xvecobs{\ti}}
 
 %% initial state:
 %% \newcommand{\Sinit}{S_{\rm i}}
@@ -401,17 +407,17 @@ the data.  Thus, a natural \term{objective function} to
 minimize is
 \begin{linenomath*}
 \begin{equation}\label{eq:leastsquares}
-\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2 \,,
+\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - \trajobsti\big)^2 \,,
 \end{equation}
 \end{linenomath*}
 where the observed data are the points
-$\{(\ti,\traj[\ti]):\tindex=1,\ldots,\tindexmax\}$, $\thetavec$ is the
+$\{(\ti,\trajobsti):\tindex=1,\ldots,\tindexmax\}$, $\thetavec$ is the
 vector of parameters, and $\traj(t;\thetavec)$ is the model; for \KM's
 problem, the parameter vector is $\thetavec=(a,\omega,\phi)$ and the
-model is given by \cref{eq:sech}.  (Note that we write $\traj[\cdot]$
+model is given by \cref{eq:sech}.  (Note that we write $\trajobs{\cdot}$
 when referring to observations of the variable $\traj$ and
 $\traj(\cdot\,;\cdot)$ when referring to the model.)
-Choosing this objective function is equivalent to assuming that the $\traj[\ti]$ values are direct (but noisy) observations of the state variable $\traj(t)$. When the connection between the dynamical system and our observations is more complicated, we need to define an explicit \term{observation process}; see \cref{sec:Uncertainty}.
+Choosing this objective function is equivalent to assuming that the $\trajobsti$ values are direct (but noisy) observations of the state variable $\traj(t)$. When the connection between the dynamical system and our observations is more complicated, we need to define an explicit \term{observation process}; see \cref{sec:Uncertainty}.
 Minimizing
 \eqref{eq:leastsquares} with respect to $\thetavec$ would have
 required some heroic arithmetic with a pencil and paper in 1927, but
@@ -780,7 +786,8 @@ the top panel of \cref{fig:Bombay} is a 95\% \term{confidence
   band}, which shows CIs for each point of the fitted model curve.
 
 To understand how to estimate CIs, we will start by thinking about our observation model, the
-probability of observing the data $\{\traj[\ti]\}$ given $\{\traj(\ti)\}$.
+probability of observing the data $\{\trajobsti\}$ given $\{\traj(\ti)\}$.
+\djde{Should $\{\traj(\ti)\}$ be $\traj(t,\thetavec)$?}
 We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
 consider the deviations from the model curve in
@@ -796,10 +803,10 @@ model is
   \begin{equation}\label{eq:prob.data.given.model}
     \begin{split}
       \Pop(\text{data} \mid \text{model})
-      & = \lim_{\Delta x \to 0} \frac{\Pop\big(\traj(\ti;\theta) \le \traj[\ti] < \traj(\ti;\theta) + \Delta x \big)}{\Delta x} \\
+      & = \lim_{\Delta x \to 0} \frac{\Pop\big(\traj(\ti;\thetavec) \le \trajobsti < \traj(\ti;\thetavec) + \Delta x \big)}{\Delta x} \\
       & = \prod_{\tindex=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
-\exp\left(-\frac{\big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2}{2\sigma^2} \right)
+\exp\left(-\frac{\big(\traj(\ti;\thetavec) - \trajobsti\big)^2}{2\sigma^2} \right)
 \right]
 \,.
 \end{split}
@@ -818,7 +825,7 @@ a set of parameter values $\thetavec$ as
 \begin{linenomath*}
 \begin{equation}\label{eq:lik}
 \lik(\thetavec)
-= \Pop (\{\traj[\ti]\} \mid \thetavec) \,.
+= \Pop (\{\trajobsti\} \mid \thetavec) \,.
 \end{equation}
 \end{linenomath*}
 Maximizing $\lik$ with respect to $\thetavec$ or, equivalently,
@@ -831,10 +838,10 @@ yields an estimate,
 &= \argmax_\thetavec \lik(\thetavec) \\
 &= \argmin_\thetavec \big(\!\!-\log{\lik(\thetavec)}\big) \\
 &= \argmin_\thetavec\Big(
-\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2
+\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - \trajobsti\big)^2
 \;+\; \text{constant}
 \Big) \\
-&= \argmin_\thetavec\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - \traj[\ti]\big)^2
+&= \argmin_\thetavec\sum_{\tindex=1}^{\tindexmax} \big(\traj(\ti;\thetavec) - \trajobsti\big)^2
  \,,
 \end{align}
 \end{subequations}
@@ -890,7 +897,7 @@ The probability mass function for the \term{negative binomial
   \left(\frac{\mu}{k+\mu}\right)^x \,.
 \end{equation}
 \end{linenomath*}
-The predicted variance of a particular observation $\traj[\ti]$ is
+The predicted variance of a particular observation $\trajobsti$ is
 given by $\mu_\tindex (1+\mu_\tindex/k)$, where
 $\mu_\tindex(\thetavec) = \traj(\ti;\thetavec)$ is the model evaluated
 at the $\tindex$\textsuperscript{th} observed data point
@@ -902,11 +909,11 @@ maximum likelihood estimate is, therefore,
 \begin{split}
  \thetavechat
  &= \argmin_\thetavec\sum_{\tindex=1}^{\tindexmax} \Big(\!\!
-                -\log\Gamma\big(\traj[\ti]+k\big)
-                +\log\Gamma(k) + \log(\traj[\ti]!) \\
+                -\log\Gamma\big(\trajobsti+k\big)
+                +\log\Gamma(k) + \log(\trajobsti!) \\
                 &\hspace{3cm}
                 -k \log\left(\frac{k}{k+\mu_\tindex(\thetavec)}\right)
-                -\traj[\ti] \log\left(\frac{\mu_\tindex(\thetavec)}{k+\mu_\tindex(\thetavec)}\right)
+                -\trajobsti \log\left(\frac{\mu_\tindex(\thetavec)}{k+\mu_\tindex(\thetavec)}\right)
                 \Big)
   \,.
 \end{split}
@@ -1087,7 +1094,7 @@ the total derivative with respect to $\thetavec$ is
 To apply this to the log-likelihood, it is helpful to make dependence
 on the trajectory $\xvec$ explicit.
 Consistent with our notation above [e.g., \cref{eq:leastsquares}], we
-write $\xvec[\ti]$ for the observations at times
+write $\xvecobsti$ for the observations at times
 $\ti\in\{t_1,t_2,\ldots,t_{\tindexmax}\}$, making it easier to
 distinguish them from the fitted model trajectory evaluated at these
 times, $\xvec(\ti;\thetavec)$.  Then
@@ -1096,12 +1103,12 @@ times, $\xvec(\ti;\thetavec)$.  Then
 \begin{subequations}\label{eq:2nd.chain}
 \begin{align}
   \dd{\,\log\lik(\thetavec)}{\thetavec}
-  &= \dd{}{\thetavec}\Big(\log\Pop\big(\{\xvec[\ti]:\tindex=1,\dots,\tindexmax\} \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
-  &= \dd{}{\thetavec}\Big(\log\prod_{\tindex=1}^{\tindexmax} \Pop\big(\xvec[\ti] \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
-  &= \dd{}{\thetavec}\sum_{\tindex=1}^{\tindexmax} \Big(\log \Pop\big(\xvec[\ti] \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
+  &= \dd{}{\thetavec}\Big(\log\Pop\big(\{\xvecobsti:\tindex=1,\dots,\tindexmax\} \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
+  &= \dd{}{\thetavec}\Big(\log\prod_{\tindex=1}^{\tindexmax} \Pop\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
+  &= \dd{}{\thetavec}\sum_{\tindex=1}^{\tindexmax} \Big(\log \Pop\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
   &= \sum_{\tindex=1}^{\tindexmax} \dd{}{\thetavec}\Big(\log \Pop_\tindex(\xvec,\thetavec)\Big)
      \qquad [\text{\footnotesize abbreviating $\Pop_\tindex(\xvec,\thetavec) \equiv
-       \Pop\big(\xvec[\ti] \mid \xvec(\ti;\thetavec),\,\thetavec\big)$}]
+       \Pop\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big)$}]
        \\
   &= \sum_{\tindex=1}^{\tindexmax} \frac{1}{\Pop_\tindex(\xvec,\thetavec)}
   \Big( \gradx\Pop_\tindex(\xvec,\thetavec) \, \gradtheta\xvec
@@ -1115,8 +1122,8 @@ times, $\xvec(\ti;\thetavec)$.  Then
 \end{linenomath*}
 where we typically assume the probability distribution
 \begin{equation}\label{eq:PopNB}
-\Pop\big(\xvec[\ti] \mid \xvec(\ti;\thetavec),\,\thetavec\big) =
-\prod_{\xindex=1}^\xindexmax\texttt{NB}(x_\xindex[\ti];\, x_\xindex(\ti,\thetavec),\,\thetavec) \,.
+\Pop\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big) =
+\prod_{\xindex=1}^\xindexmax\texttt{NB}(\trajobsiti;\, x_\xindex(\ti,\thetavec),\,\thetavec) \,.
 \end{equation}
 We have slightly abused notation here, compared with \cref{eq:NB}; we
 have written $\thetavec$ rather than $k$ as the final argument of the
