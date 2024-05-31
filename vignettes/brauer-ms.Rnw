@@ -117,6 +117,8 @@
 \usepackage{bbm} % lower case blackboard bold
 \newcommand{\pdens}{{\mathbbm{p}}} % probability density
 \newcommand{\pdenstindex}{\pdens_{{}_{\tindex}}}
+%% keep this one around for building diffs
+\newcommand{\Pop}{{\mathbbm{P}}} % probability density
 \newcommand{\lik}{{\mathcal L}}
 \newcommand{\transpose}{{\textsf{T}}}
 \DeclareMathOperator*{\argmax}{arg\,max}
