@@ -257,7 +257,7 @@ where $S$, $I$ and $R$ represent the numbers of individuals who are
 susceptible, infected or removed\footnote{In the words of \KM
   \cite[p.\,701]{KermMcKe27}, ``removed from the number of those who
   are sick, by recovery or by death''.}, $\beta$ is the transmission rate, and $\gamma$ is
-the recovery rate.  In that original paper, \KM
+the removal (or recovery) rate.  In that original paper, \KM
 \cite[p.\,714]{KermMcKe27} also fit their model to plague mortality
 data from an epidemic in Bombay (now Mumbai) that occurred about 20
 years before their paper was written.
