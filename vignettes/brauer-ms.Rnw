@@ -778,10 +778,7 @@ the top panel of \cref{fig:Bombay} is a 95\% \term{confidence
 
 To understand how to estimate CIs, we will start by thinking about our observation model, the
 probability of observing the data $\{\trajobsti\}$ given the ODE trajectory 
-$\{\traj(\ti; \thetavec)\}$.
-\djde{The ODE trajectory is $\traj(t; \thetavec)$, not $\{\traj(\ti; \thetavec)\}$.
-  Do statisticians think of $\{\traj(\ti; \thetavec)\}$ as the model
-  in this context?  I think of $\traj(t; \thetavec)$ as the model.}
+$\{\traj(t; \thetavec)\}$.
 We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
 consider the deviations from the model curve in
@@ -2145,13 +2142,12 @@ ci_fmt("a", cc)
     \caption{\textbf{Fits of numerical SIR model solutions to Bombay plague}
       (see \cref{fig:Bombay}).  Parameter values were estimated using
       \code{fitode} to fit trajectories of \cref{eq:SIR}, assuming
-      observation errors were distributed negative binomially
-      (\code{nbinom}) or normally (\code{ols}).  The recovery rate
+      observation errors were negative binomially
+      (\code{nbinom}) or normally (\code{ols}) distributed.  The recovery rate
       $\gamma$ was fixed rather than fitted due to parameter
       unidentifiability (see \cref{foot:fixedgamma}); we fixed
       $\gamma$ to the value obtained from our \code{nls} fit of the
-      \KM approximation [\cref{tab:Bombay}] for the purpose of fair
-      comparison of the fits.
+      \KM approximation [\cref{tab:Bombay}] in order to compare fits fairly.
       %%
       The \code{fitode}-fitted trajectories and confidence bands---for
       both \code{nbinom} and \code{ols}---are shown in the lower panel
