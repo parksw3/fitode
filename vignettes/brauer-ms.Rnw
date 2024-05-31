@@ -107,7 +107,16 @@
 \newcommand{\FOolscol}{light blue\xspace} % was: grey
 \newcommand{\FOnbcol}{gold\xspace}
 \newcommand{\determcol}{green\xspace}
-\newcommand{\Pop}{{\mathbb{P}}} % probability operator
+\newcommand{\Prob}{{\mathbb{P}}} % probability operator (measure)
+%% two ways to get lower case black board bold:
+%% this one just allows lower case in \mathbb:
+%%\usepackage{bbold} % lower case blackboard bold
+%%\newcommand{\pdens}{{\mathbm{p}}} % probability density
+%% I like this bb font better, which requires the \mathbbm macro for
+%% lower case:
+\usepackage{bbm} % lower case blackboard bold
+\newcommand{\pdens}{{\mathbbm{p}}} % probability density
+\newcommand{\pdenstindex}{\pdens_{{}_{\tindex}}}
 \newcommand{\lik}{{\mathcal L}}
 \newcommand{\transpose}{{\textsf{T}}}
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -138,7 +147,7 @@
 \newcommand{\thetaindex}{{j}}
 \newcommand{\thetaindexmax}{{n_{{}_\theta}}}
 %% observed values
-\newcommand{\trajobssymbol}{\traj_{{\rm{\color{red}\scalebox{0.5}{obs}}}}}
+\newcommand{\trajobssymbol}{\traj_{{\rm{\color{black}\scalebox{0.5}{obs}}}}}
 \newcommand{\trajobs}[1]{\trajobssymbol\!\left(#1\right)}
 \newcommand{\trajobsti}{\trajobs{\ti}}
 %%\newcommand{\trajobsiti}{{\trajobssymbol}_{,\xindex}(\ti)}
@@ -587,7 +596,7 @@ The nonlinear algebraic relationships specified by
   slightly different from those of Baca\"er
   \cite[eq.~(3)]{bacaermodel2012} because we have corrected a minor
   error.  At the start of \S3 of \cite{bacaermodel2012}, in the
-  expression for $Q$, the term $2Ry_0/x_0$ should be $2R^2y_0/x_0$; 
+  expression for $Q$, the term $2R\,y_0/x_0$ should be $2R^2y_0/x_0$; 
   this missing square is propagated through to the inversion formulae.}
 analytically\footnote{In (common) situations in which nonlinear
   algebraic equations cannot be solved analytically, they can still be
@@ -771,7 +780,11 @@ the top panel of \cref{fig:Bombay} is a 95\% \term{confidence
   band}, which shows CIs for each point of the fitted model curve.
 
 To understand how to estimate CIs, we will start by thinking about our observation model, the
-probability of observing the data $\{\trajobsti\}$ given the ODE trajectory $\{\traj(\ti; \thetavec)\}$.
+probability of observing the data $\{\trajobsti\}$ given the ODE trajectory 
+$\{\traj(\ti; \thetavec)\}$.
+\djde{The ODE trajectory is $\traj(t; \thetavec)$, not $\{\traj(\ti; \thetavec)\}$.
+  Do statisticians think of $\{\traj(\ti; \thetavec)\}$ as the model
+  in this context?  I think of $\traj(t; \thetavec)$ as the model.}
 We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
 consider the deviations from the model curve in
@@ -780,14 +793,14 @@ A simple observation model assumes that the observation error for each data poin
 identically distributed (iid), and drawn from a Normal distribution
 with zero mean and standard deviation $\sigma$ equal to the standard
 deviation of the residuals (the differences between the model curve
-and the observed data).  Then the probability density of the data given the
+and the observed data).  Then the probability density $\pdens$ of the data given the
 model is
 %%
 \begin{linenomath*}
   \begin{equation}\label{eq:prob.data.given.model}
     \begin{split}
-      \Pop(\text{data} \mid \text{model})
-      & = \lim_{\Delta x \to 0} \frac{\textrm{Prob}\big(\traj(\ti;\thetavec) \le \trajobsti < \traj(\ti;\thetavec) + \Delta x \big)}{\Delta x} \\
+      \pdens(\text{data} \mid \text{model})
+      & = \lim_{\Delta x \to 0} \frac{\Prob\big(\traj(\ti;\thetavec) \le \trajobsti < \traj(\ti;\thetavec) + \Delta x \big)}{\Delta x} \\
       & = \prod_{\tindex=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
 \exp\left(-\frac{\big(\traj(\ti;\thetavec) - \trajobsti\big)^2}{2\sigma^2} \right)
@@ -797,10 +810,14 @@ model is
 \end{equation}
 \end{linenomath*}
 %%
-\djde{We are now using $\Pop$ for both probability and probability density.
-  hmmm.}
-\bmb{what do you think about this solution?}
-We use a probability density function here because the Normal is a continuous distribution; we would use a probability mass function for a discrete response distribution such as the Poisson. In practice, we don't have to worry about this distinction when we are estimating the parameters of an epidemic model (the infinitesimal $dx$ will always appear as a constant multiplier or divisor and doesn't affect any of our conclusions). In a mild abuse of notation, we will use $\Pop$ interchangeably for both probability  and probability density, referring to this quantity as``probability'' rather than ``probability density''.
+(Note that we write $\Prob$ for the probability measure and $\pdens$ for
+the probability density.)  We use a probability density function here
+because the Normal is a continuous distribution; we would use a
+probability mass function for a discrete response distribution such as
+the Poisson. In practice, we don't have to worry about this
+distinction when we are estimating the parameters of an epidemic model
+(the increment $\Delta x$ will always appear as a constant multiplier
+or divisor and doesn't affect any of our conclusions). 
 
 Using these assumptions we can adopt a \emph{maximum likelihood}
 framework, where we consider parameter values that maximize the
@@ -810,7 +827,7 @@ a set of parameter values $\thetavec$ as
 \begin{linenomath*}
 \begin{equation}\label{eq:lik}
 \lik(\thetavec)
-= \Pop (\{\trajobsti\} \mid \thetavec) \,.
+= \pdens (\{\trajobsti\} \mid \thetavec) \,.
 \end{equation}
 \end{linenomath*}
 Maximizing $\lik$ with respect to $\thetavec$ or, equivalently,
@@ -1088,26 +1105,26 @@ times, $\xvec(\ti;\thetavec)$.  Then
 \begin{subequations}\label{eq:2nd.chain}
 \begin{align}
   \dd{\,\log\lik(\thetavec)}{\thetavec}
-  &= \dd{}{\thetavec}\Big(\log\Pop\big(\{\xvecobsti:\tindex=1,\dots,\tindexmax\} \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
-  &= \dd{}{\thetavec}\Big(\log\prod_{\tindex=1}^{\tindexmax} \Pop\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
-  &= \dd{}{\thetavec}\sum_{\tindex=1}^{\tindexmax} \Big(\log \Pop\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
-  &= \sum_{\tindex=1}^{\tindexmax} \dd{}{\thetavec}\Big(\log \Pop_\tindex(\xvec,\thetavec)\Big)
-     \qquad [\text{\footnotesize abbreviating $\Pop_\tindex(\xvec,\thetavec) \equiv
-       \Pop\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big)$}]
+  &= \dd{}{\thetavec}\Big(\log\pdens\big(\{\xvecobsti:\tindex=1,\dots,\tindexmax\} \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
+  &= \dd{}{\thetavec}\Big(\log\prod_{\tindex=1}^{\tindexmax} \pdens\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
+  &= \dd{}{\thetavec}\sum_{\tindex=1}^{\tindexmax} \Big(\log \pdens\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big)\Big) \\
+  &= \sum_{\tindex=1}^{\tindexmax} \dd{}{\thetavec}\Big(\log \pdenstindex(\xvec,\thetavec)\Big)
+     \qquad [\text{\footnotesize abbreviating $\pdenstindex(\xvec,\thetavec) \equiv
+       \pdens\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big)$}]
        \\
-  &= \sum_{\tindex=1}^{\tindexmax} \frac{1}{\Pop_\tindex(\xvec,\thetavec)}
-  \Big( \gradx\Pop_\tindex(\xvec,\thetavec) \, \gradtheta\xvec
-  + \gradtheta\Pop_\tindex(\xvec,\thetavec) \Big)\Big|_{\xvec=\xvec(\ti;\thetavec)} \\
-  &= \sum_{\tindex=1}^{\tindexmax} \frac{1}{\Pop_\tindex(\xvec,\thetavec)}
-  \Big( \gradx\Pop_\tindex(\xvec,\thetavec) \, \sensmat(\ti)
-  + \gradtheta\Pop_\tindex(\xvec,\thetavec) \Big)\Big|_{\xvec=\xvec(\ti;\thetavec)}
+  &= \sum_{\tindex=1}^{\tindexmax} \frac{1}{\pdenstindex(\xvec,\thetavec)}
+  \Big( \gradx\pdenstindex(\xvec,\thetavec) \, \gradtheta\xvec
+  + \gradtheta\pdenstindex(\xvec,\thetavec) \Big)\Big|_{\xvec=\xvec(\ti;\thetavec)} \\
+  &= \sum_{\tindex=1}^{\tindexmax} \frac{1}{\pdenstindex(\xvec,\thetavec)}
+  \Big( \gradx\pdenstindex(\xvec,\thetavec) \, \sensmat(\ti)
+  + \gradtheta\pdenstindex(\xvec,\thetavec) \Big)\Big|_{\xvec=\xvec(\ti;\thetavec)}
  \,,
 \end{align}
 \end{subequations}
 \end{linenomath*}
 where we typically assume the probability distribution
 \begin{equation}\label{eq:PopNB}
-\Pop\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big) =
+\pdens\big(\xvecobsti \mid \xvec(\ti;\thetavec),\,\thetavec\big) =
 \prod_{\xindex=1}^\xindexmax\texttt{NB}(\trajobsiti;\, x_\xindex(\ti,\thetavec),\,\thetavec) \,.
 \end{equation}
 We have slightly abused notation here, compared with \cref{eq:NB}; we
