@@ -780,7 +780,7 @@ the top panel of \cref{fig:Bombay} is a 95\% \term{confidence
 
 To understand how to estimate CIs, we will start by thinking about our observation model, the
 probability of observing the data $\{\trajobsti\}$ given the ODE trajectory 
-$\{\traj(t; \thetavec)\}$.
+$\traj(t; \thetavec)$.
 We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
 consider the deviations from the model curve in
