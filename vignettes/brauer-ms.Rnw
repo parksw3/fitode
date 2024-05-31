@@ -153,9 +153,9 @@
 \newcommand{\trajobs}[1]{\trajobssymbol\!\left(#1\right)}
 \newcommand{\trajobsti}{\trajobs{\ti}}
 %%\newcommand{\trajobsiti}{{\trajobssymbol}_{,\xindex}(\ti)}
-\newcommand{\trajobsi}{\traj_{{\rm{\color{red}\scalebox{0.5}{obs}}},\xindex}}
+\newcommand{\trajobsi}{\traj_{{\rm{\color{black}\scalebox{0.5}{obs}}},\xindex}}
 \newcommand{\trajobsiti}{\trajobsi(\ti)}
-\newcommand{\xvecobssymbol}{\xvec_{{\rm{\color{red}\scalebox{0.5}{obs}}}}}
+\newcommand{\xvecobssymbol}{\xvec_{{\rm{\color{black}\scalebox{0.5}{obs}}}}}
 \newcommand{\xvecobs}[1]{\xvecobssymbol\!\left(#1\right)}
 \newcommand{\xvecobsti}{\xvecobs{\ti}}
 
