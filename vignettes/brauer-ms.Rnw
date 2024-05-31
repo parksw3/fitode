@@ -236,9 +236,6 @@ Submitted to \emph{Bulletin of Mathematical Biology}
 
 \section{Introduction}
 
-\djde{I clarified total vs \emph{per capita} removal rates ($a$ vs
-  $\gamma$), but we have ``recovery rate'' in a number of places.}
-
 In their landmark 1927 paper, Kermack and McKendrick (\KM)
 \cite[p.\,713]{KermMcKe27} introduced the now-standard
 susceptible-infected-removed (SIR) epidemic model,
@@ -801,6 +798,8 @@ model is
 \begin{linenomath*}
 \begin{align}
       \pdens(\text{data} \mid \text{model})
+      & = \pdens(\{\trajobsti\} \mid \thetavec) \\
+      \noalign{\vspace{5pt}}
       & = \prod_{\tindex=1}^n \left[ \lim_{\Delta x_{\tindex} \to 0} \frac{\Prob\big(\traj(\ti;\thetavec) \le \trajobsti < \traj(\ti;\thetavec) + \Delta x_{\tindex} \big)}{\Delta x_{\tindex}} 
 \right]
 \\
@@ -819,7 +818,7 @@ because the Normal is a continuous distribution; we would use a
 probability mass function for a discrete response distribution such as
 the Poisson. In practice, we don't have to worry about this
 distinction when we are estimating the parameters of an epidemic model
-(the elements $\Delta x_{\tindex}$ will always appear as a constant multipliers
+(the elements $\Delta x_{\tindex}$ will always appear as constant multipliers
 or divisors and don't affect any of our conclusions). 
 
 Using these assumptions we can adopt a \emph{maximum likelihood}
@@ -2082,7 +2081,7 @@ ci_fmt("a", cc)
 \begin{table}
   \begin{center}
     \caption{\textbf{Fits of \KM's \cite{KermMcKe27} analytical SIR
-      approximation \eqref{eq:sech} to Bombay plague} (see
+        approximation \eqref{eq:sech} to Bombay plague} (see
       \cref{fig:Bombay}).  The \KM column lists the parameter values
       estimated by \KM \cite[p.\,714]{KermMcKe27}; the \code{nls}
       column lists the values estimated by us, using nonlinear least
@@ -2092,8 +2091,11 @@ ci_fmt("a", cc)
       estimates of the standard SIR model parameters from the
       parameters of \KM's approximation (using the indicated
       equations).  Like Baca\"er \cite[p.\,408]{bacaermodel2012}, we
-      assume the population of Bombay was $N=1$ million.
-    }\label{tab:Bombay}
+      assume the population of Bombay was $N=1$ million.  We emphasize
+      in this table that $\gamma$ is the \emph{per capita} removal
+      rate, in order to contrast it with $a$, the \emph{total} removal
+      rate at the epidemic peak; elsewhere we refer to $\gamma$ simply
+      as the recovery rate.  }\label{tab:Bombay}
 \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
