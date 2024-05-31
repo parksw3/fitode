@@ -793,22 +793,25 @@ A simple observation model assumes that the observation error for each data poin
 identically distributed (iid), and drawn from a Normal distribution
 with zero mean and standard deviation $\sigma$ equal to the standard
 deviation of the residuals (the differences between the model curve
-and the observed data).  Then the probability density $\pdens$ of the data given the
+and the observed data).  Then the joint probability 
+density $\pdens$ of the data given the
 model is
 %%
+\begin{subequations}\label{eq:prob.data.given.model}
 \begin{linenomath*}
-  \begin{equation}\label{eq:prob.data.given.model}
-    \begin{split}
+\begin{align}
       \pdens(\text{data} \mid \text{model})
-      & = \lim_{\Delta x \to 0} \frac{\Prob\big(\traj(\ti;\thetavec) \le \trajobsti < \traj(\ti;\thetavec) + \Delta x \big)}{\Delta x} \\
+      & = \prod_{\tindex=1}^n \left[ \lim_{\Delta x_{\tindex} \to 0} \frac{\Prob\big(\traj(\ti;\thetavec) \le \trajobsti < \traj(\ti;\thetavec) + \Delta x_{\tindex} \big)}{\Delta x_{\tindex}} 
+\right]
+\\
       & = \prod_{\tindex=1}^n
 \left[\frac{1}{\sqrt{2\pi\sigma^2}}
 \exp\left(-\frac{\big(\traj(\ti;\thetavec) - \trajobsti\big)^2}{2\sigma^2} \right)
 \right]
 \,.
-\end{split}
-\end{equation}
+\end{align}
 \end{linenomath*}
+\end{subequations}
 %%
 (Note that we write $\Prob$ for the probability measure and $\pdens$ for
 the probability density.)  We use a probability density function here
@@ -816,8 +819,8 @@ because the Normal is a continuous distribution; we would use a
 probability mass function for a discrete response distribution such as
 the Poisson. In practice, we don't have to worry about this
 distinction when we are estimating the parameters of an epidemic model
-(the increment $\Delta x$ will always appear as a constant multiplier
-or divisor and doesn't affect any of our conclusions). 
+(the elements $\Delta x_{\tindex}$ will always appear as a constant multipliers
+or divisors and don't affect any of our conclusions). 
 
 Using these assumptions we can adopt a \emph{maximum likelihood}
 framework, where we consider parameter values that maximize the
