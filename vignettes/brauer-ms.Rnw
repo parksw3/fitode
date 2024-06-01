@@ -2248,8 +2248,8 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
   (dots) were digitized from \cite[Table~IX, p.\,753]{jhyg1907}.
   \emph{Top panel:} The \KM
-  approximation \eqref{eq:sech}, as fitted by \KM (\KMcol line) and by us
-  using \code{nls} (\nlscol line, with confidence band estimated using the
+  approximation \eqref{eq:sech}, as fitted by \KM (\KMcol curve) and by us
+  using \code{nls} (\nlscol curve, with confidence band estimated using the
   Delta method; see \cref{sec:Uncertainty}).  The associated parameter
   estimates are given in \cref{tab:Bombay}.  The dotted \FOnbcol curve
   shows the \code{fitode} fit of the SIR model \eqref{eq:SIR}, for
