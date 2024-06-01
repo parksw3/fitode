@@ -289,7 +289,7 @@ models are used for the development and analysis of policy options for
 infectious disease management \cite{elderd2006uncertainty}, a
 challenge that began to absorb the attention of many mathematical
 epidemiologists as soon as the emergence of SARS-CoV-2 ignited the
-COVID-19 pandemic \cite{Broo+21,Hill+21,Nixo+22}.
+COVID-19 pandemic \cite{Broo+21,Hill+21,Nixo+22,howerton2023evaluation}.
 
 While visiting the University of British Columbia in 2014--2015, one
 of us (DE) had many conversations with Fred Brauer about epidemic
@@ -449,7 +449,7 @@ function is shown in \nlscol in \cref{fig:Bombay}.
 
 Starting from someone else's fit is not a great way to test the
 method, but fortunately the least squares fit for this problem is not
-very sensitive to the starting value.  
+very sensitive to the starting value.
 To pick reasonable starting values, it often helps to think about the
 meaning of parameters.  For example, in the case of \cref{eq:sech}, it
 is useful to note that $a$ is the maximum of the function, and if
@@ -595,7 +595,7 @@ The nonlinear algebraic relationships specified by
   slightly different from those of Baca\"er
   \cite[eq.~(3)]{bacaermodel2012} because we have corrected a minor
   error.  At the start of \S3 of \cite{bacaermodel2012}, in the
-  expression for $Q$, the term $2R\,y_0/x_0$ should be $2R^2y_0/x_0$; 
+  expression for $Q$, the term $2R\,y_0/x_0$ should be $2R^2y_0/x_0$;
   this missing square is propagated through to the inversion formulae.}
 analytically\footnote{In (common) situations in which nonlinear
   algebraic equations cannot be solved analytically, they can still be
@@ -631,7 +631,7 @@ and the mean intrinsic generation interval \cite{ChamDush15},
 \end{equation}
 \end{linenomath*}
 which is the same as the mean infectious period in this simple model
-\cite{KrylEarn13,Cham+18}.  \cref{tab:Bombay} lists the values of
+\cite{pybus2001epidemic,roberts2007model,wallinga2007generation,KrylEarn13,Cham+18}.  \cref{tab:Bombay} lists the values of
 the parameters as estimated by \KM and by us using \code{nls}.
 
 <<invert-KM-analytically, echo=FALSE>>=
@@ -780,7 +780,7 @@ region in the top panel of \cref{fig:Bombay} is a 95\%
 model curve.
 
 To understand how to estimate CIs, we will start by thinking about our observation model, the
-probability of observing the data $\{\trajobsti\}$ given the ODE trajectory 
+probability of observing the data $\{\trajobsti\}$ given the ODE trajectory
 $\traj(t; \thetavec)$.
 We imagine that the
 model \eqref{eq:sech} is a perfect representation of reality, and we
@@ -790,7 +790,7 @@ A simple observation model assumes that the observation error for each data poin
 identically distributed (iid), and drawn from a Normal distribution
 with zero mean and standard deviation $\sigma$ equal to the standard
 deviation of the residuals (the differences between the model curve
-and the observed data).  Then the joint probability 
+and the observed data).  Then the joint probability
 density $\pdens$ of the data given the
 model is
 %%
@@ -800,7 +800,7 @@ model is
       \pdens(\text{data} \mid \text{model})
       & = \pdens(\{\trajobsti\} \mid \thetavec) \\
       \noalign{\vspace{5pt}}
-      & = \prod_{\tindex=1}^n \left[ \lim_{\Delta x_{\tindex} \to 0} \frac{\Prob\big(\traj(\ti;\thetavec) \le \trajobsti < \traj(\ti;\thetavec) + \Delta x_{\tindex} \big)}{\Delta x_{\tindex}} 
+      & = \prod_{\tindex=1}^n \left[ \lim_{\Delta x_{\tindex} \to 0} \frac{\Prob\big(\traj(\ti;\thetavec) \le \trajobsti < \traj(\ti;\thetavec) + \Delta x_{\tindex} \big)}{\Delta x_{\tindex}}
 \right]
 \\
       & = \prod_{\tindex=1}^n
@@ -889,7 +889,7 @@ of the mean. However, the Poisson distribution assumes
 typical observation errors are \term{overdispersed}, meaning that
 the variance is greater than the mean. Ignoring overdispersion
 will underestimate the uncertainty in the parameters and lead
-to overly narrow confidence intervals on parameters and predictions.
+to overly narrow confidence intervals on parameters and predictions \citep{li2018fitting}.
 The negative binomial distribution is the most common way to generalize
 the Poisson to allow for overdispersion \citep{linden2011using}, although
 other distributions such as the generalized Poisson are occasionally used
@@ -1251,7 +1251,7 @@ SIR_start <- c(beta=beta.nls, gamma=gamma.nls,
 SIR_fit <- fitode( model = SIR_model, data = bombay2,
                   fixed = list(gamma=gamma.nls),
                   start = SIR_start, tcol = "week" )
-@ 
+@
 
 \noindent In the fitting function above:
 \begin{description}
@@ -1506,7 +1506,7 @@ if (requireNamespace("lubridate")) {
     stopifnot(all.equal(
         phila1918b$time, lubridate::decimal_date(phila1918b$date)))
 }
-    
+
 @
 
 <<phila.fit,cache=TRUE,warning=FALSE, include=FALSE>>=
@@ -1828,7 +1828,7 @@ is certainly debatable whether we can trust any inferences we might draw from
 fitting the simple SIR model \eqref{eq:SIR} to these plague data.
 As we quoted at the end of \cref{sec:fitode}, to justify
 the application of their SIR model to these data, \KM highlighted five
-implicit assumptions, any or all of which might be violated.  
+implicit assumptions, any or all of which might be violated.
 Furthermore, Baca\"er found that over the longer term seasonal
 epidemics of plague
 occurred in Bombay every year from 1897 to 1911 \cite[Fig.\,2]{bacaermodel2012},
