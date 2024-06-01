@@ -811,14 +811,18 @@ model is
 \end{linenomath*}
 \end{subequations}
 %%
-(Note that we write $\Prob$ for the probability measure and $\pdens$ for
-the probability density.)  We use a probability density function here
-because the Normal is a continuous distribution; we would use a
-probability mass function for a discrete response distribution such as
-the Poisson. In practice, we don't have to worry about this
-distinction when we are estimating the parameters of an epidemic model
-(the elements $\Delta x_{\tindex}$ will always appear as constant multipliers
-or divisors and don't affect any of our conclusions). 
+Note that we write $\Prob$ for the probability measure and $\pdens$
+for the probability density above.  We use a probability density
+function here because the Normal is a continuous distribution; we
+would use a probability mass function for a discrete response
+distribution such as the Poisson. In practice, we don't have to worry
+about this distinction when we are estimating the parameters of an
+epidemic model (the elements $\Delta x_{\tindex}$ will always appear
+as constant multipliers or divisors and don't affect any of our
+conclusions).  Consequently, in the interests of brevity, below we
+interpret $\pdens$ as either probability mass or probability density,
+depending on whether the associated distribution is discrete or
+continuous, and refer simply to ``probability''.
 
 Using these assumptions we can adopt a \emph{maximum likelihood}
 framework, where we consider parameter values that maximize the
@@ -1028,7 +1032,7 @@ Until now, we have focused on fitting \KM's approximation
 \eqref{eq:SIR}.  If we had an exact analytical solution of the SIR
 ODE~\eqref{eq:SIR} then we could proceed as above, replacing the
 approximate analytical expression \eqref{eq:sech} with the exact
-formula.  Since we do not have an exact solution, we must instead rely
+formula.  Since we do not have an exact solution, we instead rely
 on numerical solutions of the ODE.  Fitting numerical solutions of
 ODEs to data introduces significant coding/computational challenges,
 but conceptually the problem is the same as if we did have an
