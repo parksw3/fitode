@@ -42,15 +42,17 @@
 %% "§ 3" rather than "§3", so when using § it looks better to
 %% define the cref format explicitly:
 %% https://tex.stackexchange.com/questions/247538/remove-space-in-the-default-cref-command
-\crefformat{section}{\S#2#1#3}
+%% \crefformat{section}{\S#2#1#3}
 %% A space is still included when multiple sections are referenced,
 %% but I think removing the space for multiple section refs would look
 %% worse.
-\crefname{section}{\S}{\S\S}
+%% revised for BMB:
+%%\crefname{section}{\S}{\S\S}
+\crefname{section}{Sect.}{Sects.}
 \Crefname{section}{Section}{Sections}
-\crefname{equation}{Equation}{Equations}
+\crefname{equation}{Eq.}{Eqs.}
 \Crefname{equation}{Equation}{Equations}
-\crefname{figure}{Figure}{Figures}
+\crefname{figure}{Fig.}{Figs.}
 \Crefname{figure}{Figure}{Figures}
 \Crefname{appsec}{Appendix}{appendices}
 
