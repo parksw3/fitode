@@ -773,10 +773,11 @@ estimates of the values of the parameters of the model
 To quantify uncertainty in our estimates, we need a statistical
 framework.  The typical output of such a framework is a
 \term{confidence interval} (CI) within which our best estimate lies.
-For example, the final column of \cref{tab:Bombay} lists 95\% CIs
-on our \code{nls} parameter estimates, and the pink shaded region in
-the top panel of \cref{fig:Bombay} is a 95\% \term{confidence
-  band}, which shows CIs for each point of the fitted model curve.
+For example, the final column of \cref{tab:Bombay} lists 95\% CIs on
+our \code{nls} parameter estimates, and the light \nlscol shaded
+region in the top panel of \cref{fig:Bombay} is a 95\%
+\term{confidence band}, which shows CIs for each point of the fitted
+model curve.
 
 To understand how to estimate CIs, we will start by thinking about our observation model, the
 probability of observing the data $\{\trajobsti\}$ given the ODE trajectory 
@@ -1001,16 +1002,18 @@ We can again get the 95\% CIs by taking square roots and computing
 $g(\thetavechat) \pm1.96\,\mathrm{SE}$.
 
 Given a fit of \KM's approximation \eqref{eq:sech} to the time series
-data, which yields $\thetavechat=(\hat{a},\hat{\omega},\hat{\phi})$, we
-can apply the Delta method \eqref{eq:DeltaMethod} to the nonlinear
+data, which yields $\thetavechat=(\hat{a},\hat{\omega},\hat{\phi})$,
+we can apply the Delta method \eqref{eq:DeltaMethod} to the nonlinear
 relationships \eqref{eq:invertparams} to obtain CIs on
-$g(\thetavechat)=(\widehat{\Reff}, \widehat{\gamma},\widehat{\Sinit})$.  This is
-precisely how we obtained the CIs on the derived parameters listed in
-\cref{tab:Bombay}.  Perhaps less obviously, we can also use the
-Delta method to obtain CIs on the fitted trajectory at each
-observation time $\ti$ (and hence obtain a confidence band) by
-considering $g(\thetavec)=\traj(\ti;\thetavec)$.  This is how we obtained
-the confidence band for the nonlinear least squares fit (light \nlscol) shown in \cref{fig:Bombay}.
+$g(\thetavechat)=(\widehat{\Reff},
+\widehat{\gamma},\widehat{\Sinit})$.  This is precisely how we
+obtained the CIs on the derived parameters listed in
+\cref{tab:Bombay}.  Perhaps less obviously, we can also use the Delta
+method to obtain CIs on the fitted trajectory at each observation time
+$\ti$ (and hence obtain a confidence band) by considering
+$g(\thetavec)=\traj(\ti;\thetavec)$.  This is how we obtained the
+confidence band for the nonlinear least squares fit (light \nlscol)
+shown in \cref{fig:Bombay}.
 
 Better confidence intervals can be obtained using the \term{profile
   likelihood}, which is calculated by fixing a set of model parameters
@@ -1685,7 +1688,7 @@ panel, $\dbydt{R}$ [\cref{eq:SIR;R}] with the correct initial
 conditions and parameter values is shown with solid \determcol, and the \KM
 approximation \eqref{eq:sech} based on those parameter values is shown
 with dotted \determcol.  The \code{fitode} fit [based on $\int (\dbydt{R})
-\dt$] and confidence band are shown in \FOnbcol.  The time shift between
+\,\dt$] and confidence band are shown in \FOnbcol.  The time shift between
 the deterministic solution and the stochastic realization arises
 because the stochastic model captures the demographic noise (which
 causes a randomly distributed delay until the tipping point is
@@ -1708,11 +1711,12 @@ yield the red curve in \cref{fig:stoch} are far from the true
 parameters that were used in the simulation (\cref{tab:stoch.nls}).
 
 The excellent fit of the deterministic trajectory that \code{fitode}
-finds (\FOnbcol) is achieved by estimating an initial prevalence that is
-only a third of the true initial prevalence, thereby mimicking the
-stochastic delay with the deterministic model; all other parameter
-estimates are nearly identical to the true parameter values used to
-generate the stochastic trajectory (\cref{tab:stoch.fitode}).
+finds (\FOnbcol in \cref{fig:stoch}) is achieved by estimating an
+initial prevalence that is only a third of the true initial
+prevalence, thereby mimicking the stochastic delay with the
+deterministic model; all other parameter estimates are nearly
+identical to the true parameter values used to generate the stochastic
+trajectory (\cref{tab:stoch.fitode}).
 
 <<colours, include=FALSE>>=
 my.red <- "#E41A1C"     # colour-blind friendly red
