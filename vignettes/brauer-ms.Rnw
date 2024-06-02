@@ -871,9 +871,11 @@ yields an estimate,
 \end{subequations}
 \end{linenomath*}
 which---lo and behold---agrees exactly with \eqref{eq:leastsquares},
-the least squares solution!
+the \term{ordinary least squares} (OLS)
+solution!
 The standard way of expressing this is to
-say that the least squares solution $\thetavechat$ is the
+say that the OLS
+solution $\thetavechat$ is the
 \term{maximum likelihood estimate} (MLE) of $\thetavec$, under the
 assumption of independent, identically distributed
 (i.e., mean-zero, constant-variance) Normal observation errors in the time series.
@@ -1608,12 +1610,13 @@ reproduction number $\Rn\approx \Sexpr{signif(R0.phila.nls,2)}$ and a
 mean generation interval $\Tg\approx \Sexpr{signif(Tg.phila.nls,2)}$
 years.
 
-Matching trajectories of the exact SIR model using \code{fitode} gives
-a fit---the solid \FOnbcol curve in \cref{fig:phila}---that is visually
-similar to the (\nlscol) fit of \KM's approximation, but provides much
-more realistic parameter estimates (\cref{tab:phila.fitode}); in
-particular, $\Rn\approx \Sexpr{signif(R0.phila.fitode,2)}$ and $\Tg\approx
-\Sexpr{signif(Tg.phila.fitode*365,2)}$ days.
+Matching numerically computed trajectories of the exact SIR model
+using \code{fitode} gives a fit---the solid \FOnbcol curve in
+\cref{fig:phila}---that is visually similar to the (\nlscol) fit of
+\KM's approximation, but provides much more realistic parameter
+estimates (\cref{tab:phila.fitode}); in particular,
+$\Rn\approx \Sexpr{signif(R0.phila.fitode,2)}$ and
+$\Tg\approx \Sexpr{signif(Tg.phila.fitode*365,2)}$ days.
 
 If we convert the \code{fitode} estimates of the SIR parameters to the
 parameters of \KM's approximation, we obtain the dotted \FOnbcol curve
@@ -1876,8 +1879,8 @@ alone (see \cref{fig:proflikgamma}).
 
 Our second example was the main wave of the 1918 influenza pandemic in
 the city of Philadelphia, for which daily mortality from pneumonia and
-influenza (P\&I) was reported (\cref{fig:phila}).  Again we fitted the
-exact solution of the SIR model \eqref{eq:SIR} using \code{fitode},
+influenza (P\&I) was reported (\cref{fig:phila}).  Again we fitted a
+numerical solution of the SIR model \eqref{eq:SIR} using \code{fitode},
 and \KM's analytical approximation \eqref{eq:sech}, but found---unlike
 the situation for Bombay plague---that only the \code{fitode} fit
 yielded plausible parameter estimates (see
@@ -2295,7 +2298,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 @
 \caption{\textbf{The plague epidemic in Bombay}, 17 December 1905 to 21 July
   1906, used as an example by \KMpage{714}.  The data
-  (dots) were digitized from \citet[Table~IX, p.\,753]{jhyg1907}.
+  (large dots) were digitized from \citet[Table~IX, p.\,753]{jhyg1907}.
   \emph{Top panel:} The \KM
   approximation \eqref{eq:sech}, as fitted by \KM (\KMcol curve) and by us
   using \code{nls} (\nlscol curve, with confidence band estimated using the
@@ -2472,7 +2475,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
   \caption{\textbf{The main wave of the 1918 influenza epidemic in the city of
       Philadelphia}, 1 September 1918 to 31 December 1918
     \citep{Roge20,Gold+09}.  Reported daily deaths from pneumonia and
-    influenza (P\&I) are shown with dots.  The \nlscol curve and corresponding
+    influenza (P\&I) are shown with large dots.  The \nlscol curve and corresponding
     confidence band show a nonlinear least squares (\code{nls}) fit of
     \KM's approximation \eqref{eq:sech}; the parameter estimates are
     given in \cref{tab:philanls}.  The solid \FOnbcol curve and corresponding
