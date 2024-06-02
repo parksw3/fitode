@@ -106,6 +106,8 @@
 %%\newcommand{\KMpage}[1]{\KM [p.\,#1]}
 \newcommand{\KM}{\protect\hyperlink{cite.KermMcKe27}{KM}\xspace}
 \newcommand{\KMpage}[1]{\protect\hyperlink{cite.KermMcKe27}{KM [p.\,#1]}\xspace}
+%% similar style to \citep:
+\newcommand{\KMpagep}[1]{[\protect\hyperlink{cite.KermMcKe27}{KM, p.\,#1}]\xspace}
 \usepackage{bm} % bold math
 \newcommand{\fvec}{{\bm{f}}}
 \newcommand{\Phivec}{{\bm{\Phi}}}
@@ -231,7 +233,7 @@ options(warnPartialMatchArgs = FALSE,
   Fred Brauer was an eminent mathematician who studied dynamical
   systems, especially differential equations.  He made many
   contributions to mathematical epidemiology, a field that is strongly
-  connected to data, but he had no desire to touch data.
+  connected to data, but he always chose to avoid data analysis.
   Nevertheless, he recognized that fitting models to data is usually
   necessary when attempting to apply infectious disease transmission
   models to real public health problems.  He was curious to know how
@@ -341,7 +343,7 @@ fatally, the ordinate may be taken as approximately representing
 [$\dbydt{R}$] as a function of $t$.''  Since (non-human) computers did
 not yet exist \citep{Camp09}, and an exact analytical form for this
 function could not be found, they proceeded to assume
-\cite[p.\,713]{KermMcKe27} that $\frac{\beta}{\gamma}R(t)\ll1$, which
+\KMpagep{713} that $\frac{\beta}{\gamma}R(t)\ll1$, which
 yields the approximate analytical form,
 \begin{linenomath*}
 \begin{equation}\label{eq:sech}
@@ -794,20 +796,19 @@ region in the top panel of \cref{fig:Bombay} is a 95\%
 \term{confidence band}, which shows CIs for each point of the fitted
 model curve.
 
-To understand how to estimate CIs, we will start by thinking about our observation model, the
-probability of observing the data $\{\trajobsti\}$ given the ODE trajectory
-$\traj(t; \thetavec)$.
-We imagine that the
-model \eqref{eq:sech} is a perfect representation of reality, and we
-consider the deviations from the model curve in
-\cref{fig:Bombay} to be observation errors.
-A simple observation model assumes that the observation error for each data point is independent and
-identically distributed (iid), and drawn from a Normal distribution
-with zero mean and standard deviation $\sigma$ equal to the standard
-deviation of the residuals (the differences between the model curve
-and the observed data).  Then the joint probability
-density $\pdens$ of the data given the
-model is
+To understand how to estimate CIs, we will start by thinking about our
+observation model, the probability of observing the data
+$\{\trajobsti\}$ given the model trajectory $\traj(t; \thetavec)$.  We
+imagine that the model---for now, \KM's approximation
+\eqref{eq:sech}---is a perfect representation of reality, and we
+consider the deviations from the model curve in \cref{fig:Bombay} to
+be observation errors.  A simple observation model assumes that the
+observation error for each data point is independent and identically
+distributed (iid), and drawn from a Normal distribution with zero mean
+and standard deviation $\sigma$ equal to the standard deviation of the
+residuals (the differences between the model curve and the observed
+data).  Then the joint probability density $\pdens$ of the data given
+the model is
 %%
 \begin{subequations}\label{eq:prob.data.given.model}
 \begin{linenomath*}
@@ -840,7 +841,7 @@ interpret $\pdens$ as either probability mass or probability density,
 depending on whether the associated distribution is discrete or
 continuous, and refer simply to ``probability''.
 
-Using these assumptions we can adopt a \emph{maximum likelihood}
+Using these assumptions we can adopt a \term{maximum likelihood}
 framework, where we consider parameter values that maximize the
 probability of observing the data \eqref{eq:prob.data.given.model} to
 be the best \citep{Bolk08}.  We define the \term{likelihood} $\lik$ of
@@ -1476,9 +1477,10 @@ pneumonia \citep{Earn+02}, so influenza mortality studies typically
 combine pneumonia and influenza (P\&I).  Among published tables
 summarizing P\&I mortality during the 1918 pandemic, a particularly
 valuable example concerns the main wave in the city of Philadelphia
-\citep{Roge20}.  These data are exceptional because they are restricted
-to a single, large city, and because they provide \emph{daily} counts
-that capture the detailed temporal pattern (dots in \cref{fig:phila}).
+\citep{Roge20}.  These data are exceptional because they are
+restricted to a single, large city, and because they provide
+\emph{daily} counts that capture the detailed temporal pattern (large
+dots in \cref{fig:phila}).
 <<philapop, echo=TRUE, include=FALSE>>=
 ## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
 philapop <- data.frame(year = c(1910,1920), population = c(1549008, 1823779))
@@ -1693,20 +1695,21 @@ algorithms simulate is essential to capture real effects that occur
 when the number of infected individuals is small (especially the
 possibility that an epidemic can burn out \citep{Pars+24}).
 
-In \cref{fig:stoch}, the dots show a single realization of the
-stochastic SIR model with initial state $(\Sinit,\Iinit,\Rinit)=(\Sexpr{iii})$,
-basic reproduction number $\Rn=\Sexpr{R0}$, and mean generation
-interval $\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top
-panel, $\dbydt{R}$ [\cref{eq:SIR;R}] with the correct initial
-conditions and parameter values is shown with solid \determcol, and the \KM
+In \cref{fig:stoch}, the simulated data points show a single
+realization of the stochastic SIR model with initial state
+$(\Sinit,\Iinit,\Rinit)=(\Sexpr{iii})$, basic reproduction number
+$\Rn=\Sexpr{R0}$, and mean generation interval
+$\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top panel,
+$\dbydt{R}$ [\cref{eq:SIR;R}] with the correct initial conditions and
+parameter values is shown with solid \determcol, and the \KM
 approximation \eqref{eq:sech} based on those parameter values is shown
-with dotted \determcol.  The \code{fitode} fit [based on $\int (\dbydt{R})
-\,\dt$] and confidence band are shown in \FOnbcol.  The time shift between
-the deterministic solution and the stochastic realization arises
-because the stochastic model captures the demographic noise (which
-causes a randomly distributed delay until the tipping point is
-reached, i.e., until the epidemic takes off in a roughly deterministic
-fashion).
+with dotted \determcol.  The \code{fitode} fit [based on
+$\int (\dbydt{R}) \,\dt$] and confidence band are shown in \FOnbcol.
+The time shift between the deterministic solution and the stochastic
+realization arises because the stochastic model captures the
+demographic noise (which causes a randomly distributed delay until the
+tipping point is reached, i.e., until the epidemic takes off in a
+roughly deterministic fashion).
 
 As expected, with the correct parameter values, \KM's approximation
 \eqref{eq:sech} fails once the requirement \eqref{eq:KMassumption}
@@ -1715,12 +1718,12 @@ the parameters $(a,\omega,\phi)$ such that the function
 $a\sech^2{(\omega\,t - \phi)}$ [\cref{eq:sech}] more closely matches
 the shape of the full simulated epidemic.  Using nonlinear least
 squares (\code{nls}) as in previous sections, we obtain visually
-reasonable agreement (\cref{fig:stoch}, bottom panel, red curve;
+reasonable agreement (\cref{fig:stoch}, bottom panel, \nlscol curve;
 \cref{tab:stoch.nls}). This \code{nls} fit cannot be improved further
 because the function we are fitting \eqref{eq:sech} is symmetric about
 its peak, whereas the rise is steeper than the fall in the simulated
 epidemic.  It is also worth emphasizing that the parameter values that
-yield the red curve in \cref{fig:stoch} are far from the true
+yield the \nlscol curve in \cref{fig:stoch} are far from the true
 parameters that were used in the simulation (\cref{tab:stoch.nls}).
 
 The excellent fit of the deterministic trajectory that \code{fitode}
@@ -1882,25 +1885,28 @@ yielded plausible parameter estimates (see
 
 Finally, we conducted a kind of test that truly makes most sense to
 perform \emph{before} fitting to a real, empirically observed time
-series: we fit models to a simulation that we ran, so we knew
-the parameter values used to generate the simulated ``observations''.
-The simulation was a realization of the stochastic SIR model, to
-which, again, we fit both the deterministic SIR model \eqref{eq:SIR}
-using \code{fitode} and \KM's analytical approximation \eqref{eq:sech}
-using \code{nls}.  Both provide visually reasonable fits
-(\cref{fig:stoch}) but \KM's approximation yields absurd parameter
-values, whereas \code{fitode} estimates the correct values of the
-underlying disease-related parameters
-(\cref{tab:stoch.fitode,tab:stoch.nls}).
-(We did find a discrepancy in the estimates of
-initial conditions; this was driven by the failure of
-the stochastic outbreak simulation to take off immediately.
-A lower initial prevalence is the only mechanism by which
-the deterministic model can capture the delayed onset of the epidemic.
-In practice, modelers fitting to epidemic time series by trajectory
-matching usually pick an ``epidemic window'' that corresponds to
-the part of the epidemic that can be reasonably captured by
-a deterministic model \citep{Earn+20}.)
+series: we fit models to a simulation that we ran, so we knew the
+parameter values used to generate the simulated ``observations''.  The
+simulation was a realization of the stochastic SIR model, to which,
+again, we fit both the deterministic SIR model \eqref{eq:SIR} using
+\code{fitode} and \KM's analytical approximation \eqref{eq:sech} using
+\code{nls}.  At a glance, both provide visually roughly reasonable fits
+(\cref{fig:stoch}, bottom panel) but \KM's approximation cannot
+represent the asymmetry about the peak in the epidemic curve and
+yields absurd
+parameter values, whereas \code{fitode} estimates an epidemic curve
+with the correct shape
+and the correct values
+of the underlying disease-related parameters
+(\cref{tab:stoch.fitode,tab:stoch.nls}).  (We did find a discrepancy
+in the estimates of initial conditions; this was driven by the failure
+of the stochastic outbreak simulation to take off immediately.  A
+lower initial prevalence is the only mechanism by which the
+deterministic model can capture the delayed onset of the epidemic.  In
+practice, modelers fitting to epidemic time series by trajectory
+matching usually pick an ``epidemic window'' that corresponds to the
+part of the epidemic that can be reasonably captured by a
+deterministic model \citep{Earn+20}.)
 
 \KM's approximation \eqref{eq:sech} estimates the simulation
 parameters badly because the assumption on which it is based
@@ -1961,22 +1967,22 @@ a number of useful advanced features. In particular,
   parameter set, Bayesian methods aim to estimate a distribution of
   parameters (also known as the posterior distribution) that are
   consistent with our previous knowledge about the system
-  (encapsulated in \emph{prior distributions}) as well as the observed
+  (encapsulated in \term{prior distributions}) as well as the observed
   data.  These approaches are generally better at handling parameter
   uncertainties \citep{elderd2006uncertainty} but are usually much
   more computationally expensive.
 
   \code{fitode} allows the user to specify prior distributions on
   parameters; these priors can either reflect previous knowledge of a
-  disease system, or can be used to \emph{regularize} a fitting
+  disease system, or can be used to \term{regularize} a fitting
   procedure by downweighting extreme values of parameters
   \citep{Lemo2019}, which can help mitigate problems with
   identifiability (see below).
 
-  Bayesian modelers typically use \emph{Markov chain Monte Carlo}
+  Bayesian modelers typically use \term{Markov chain Monte Carlo}
   algorithms to explore the parameter space and approximate the target
   distribution. \code{fitode} implements a simple
-  \emph{Metropolis-Hasting} sampler \citep[\S7.3.1]{Bolk08}.  (The
+  \term{Metropolis-Hasting} sampler \citep[\S7.3.1]{Bolk08}.  (The
   Stan platform provides a much more powerful Bayesian sampling
   algorithm using sensitivity equations, built on top of a fully
   general system for specifying ODEs; however, this tool requires
@@ -1989,14 +1995,16 @@ Even with these extensions, modelers may face many challenges when
 fitting ODEs to data with the \code{fitode} package, as with fitting
 any nonlinear model to data.  For example, it is often difficult to
 ensure that the model has converged properly or reached its true
-maximum.  More generally, naive and optimistic epidemic modelers often
+maximum.  More generally, 
+when they first
+start attempting to fit models to data,
+na\"{\i}ve and optimistic epidemic modelers often
 run into problems of \term{structural identifiability} (the
 impossibility of estimating particular sets of parameters from data,
 regardless of how much data is available
 \citep{TuncTrang2018,Chow+2023}) and \term{practical identifiability}
 (the impossibility of reliably estimating parameters from a particular
-small, noisy data set \citep{Gall+2022, Chow+2023}) when they first
-start attempting to fit models to data.  In addition to the rigorous
+small, noisy data set \citep{Gall+2022, Chow+2023}).  In addition to the rigorous
 methods described by \citet{Chow+2023}, using a \term{multistart
   method} (performing optimization from multiple starting conditions
 \citep{raue2013lessons}), or plotting likelihood surfaces, can help
@@ -2592,8 +2600,8 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
          col=c("black",col.fitode.nb,col.determ,col.determ),
          pch=c(21,NA,NA,NA),
          pt.bg=c("white",NA,NA,NA),
-         adj = c(0, 0.8),  ## shift text so first line aligns with guide line
-         legend=c("simulated data","fitode (nbinom)","deterministic","KM approx\nto deterministic fit"))
+         ##adj = c(0, 0.8),  ## shift text so first line aligns with guide line
+         legend=c("simulated data","fitode (nbinom)","deterministic","KM approx"))
 
   plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
        ##xlim=range(tt),
