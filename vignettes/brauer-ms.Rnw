@@ -37,6 +37,17 @@
 %%%%%%%%%%%%%%
 %% order matters: hyperref before cleverref, and biblatex last
 \usepackage{hyperref}
+% Set up hyperref with desired link colors and border colors
+\hypersetup{
+  colorlinks=false,          % Disable colored text for links
+  %%citebordercolor=0 1 0,     % RGB color for citation link border (green)
+  %%citebordercolor=0 0 1,     % RGB color for citation link border (blue)
+  %%linkbordercolor=0 0 1,     % RGB color for internal link border (blue)
+  citebordercolor=0 1 1,     % RGB color for citation link border (cyan)
+  linkbordercolor=0 1 1,     % RGB color for internal link border (cyan)
+  urlbordercolor=0 1 1       % RGB color for URL link border (cyan)
+}
+%%
 %% cleveref package for convenient hyper-referencing/citing:
 \usepackage[nameinlink,capitalize]{cleveref}
 %% The default cref format includes a space before the number, e.g.,
@@ -91,7 +102,10 @@
 \newcommand{\Tg}{T_{\rm g}}
 \newcommand{\Reff}{\R_{\rm e}}
 \usepackage{xspace}
-\newcommand{\KM}{KM\xspace}
+%%\newcommand{\KM}{{KM}\xspace}
+%%\newcommand{\KMpage}[1]{\KM [p.\,#1]}
+\newcommand{\KM}{\protect\hyperlink{cite.KermMcKe27}{KM}\xspace}
+\newcommand{\KMpage}[1]{\protect\hyperlink{cite.KermMcKe27}{KM [p.\,#1]}\xspace}
 \usepackage{bm} % bold math
 \newcommand{\fvec}{{\bm{f}}}
 \newcommand{\Phivec}{{\bm{\Phi}}}
@@ -241,9 +255,9 @@ Submitted to \emph{Bulletin of Mathematical Biology}
 
 \section{Introduction}
 
-In their landmark 1927 paper, Kermack and McKendrick (\KM)
-\cite[p.\,713]{KermMcKe27} introduced the now-standard
-susceptible-infected-removed (SIR) epidemic model,
+In their landmark 1927 paper, \citet[p.\,713]{KermMcKe27} (\KM)
+introduced the now-standard susceptible-infected-removed (SIR)
+epidemic model,
 \begin{linenomath*}
   \begin{subequations}\label{eq:SIR}
     \begin{align}
@@ -256,22 +270,22 @@ susceptible-infected-removed (SIR) epidemic model,
   \end{subequations}
 \end{linenomath*}
 where $S$, $I$ and $R$ represent the numbers of individuals who are
-susceptible, infected or removed\footnote{In the words of \KM
-  \cite[p.\,701]{KermMcKe27}, ``removed from the number of those who
-  are sick, by recovery or by death''.}, $\beta$ is the transmission rate, and $\gamma$ is
-the removal (or recovery) rate.  In that original paper, \KM
-\cite[p.\,714]{KermMcKe27} also fit their model to plague mortality
-data from an epidemic in Bombay (now Mumbai) that occurred about 20
-years before their paper was written.
+susceptible, infected or removed\footnote{In the words of
+  \KMpage{701}, ``removed from the number of those who are sick, by
+  recovery or by death''.}, $\beta$ is the transmission rate, and
+$\gamma$ is the removal (or recovery) rate.  In that original paper,
+\KMpage{714} also fit their model to plague mortality data from an
+epidemic in Bombay (now Mumbai) that occurred about 20 years before
+their paper was written.
 
 In the century that has elapsed since publication of \KM's initial
 paper, the field of mathematical epidemiology has expanded and
 matured, and has been the subject of many books
 \citep{Bart60,Bail75,AndeMay91,AndeBrit00b,DiekHees00,BrauCast01,Brau+19}
-and review articles \cite{Heth00,Earn+02,Earn08,Earn09}.  Researchers
+and review articles \citep{Heth00,Earn+02,Earn08,Earn09}.  Researchers
 have primarily focused on \term{compartmental models} like the SIR
 model, cast either as differential equations following the tradition
-of \KM \cite{KermMcKe27}, or as \term{stochastic processes} in the
+of \KM, or as \term{stochastic processes} in the
 tradition of \citet{McKe26} and \citet{Bart60}.  In
 recent years, as the power of computers has grown, some researchers
 have turned to \term{agent-based models}, which represent each
@@ -316,20 +330,19 @@ intended to submit this paper to a collection in honour of Fred's memory
 
 \section{Kermack and McKendrick's fit}
 
-We begin by revisiting \KM's \cite{KermMcKe27}
+We begin by revisiting \KM's
 application of their SIR model \eqref{eq:SIR} to the epidemic of
 plague in Bombay in 1905--1906.  The observed data (dots in
 \cref{fig:Bombay}) were weekly numbers of deaths from plague.
 
-Referring to their version of \cref{fig:Bombay}, \KM
-\cite[p.\,714]{KermMcKe27} argued that ``As at least 80 to 90 per
-cent.\ of the cases reported terminate fatally, the ordinate may be
-taken as approximately representing [$\dbydt{R}$] as a function of
-$t$.''  Since (non-human) computers did not yet exist \citep{Camp09},
-and an exact analytical form for this function could not be found,
-they proceeded to assume \cite[p.\,713]{KermMcKe27} that
-$\frac{\beta}{\gamma}R(t)\ll1$, which yields the approximate
-analytical form,
+Referring to their version of \cref{fig:Bombay}, \KMpage{714} argued
+that ``As at least 80 to 90 per cent.\ of the cases reported terminate
+fatally, the ordinate may be taken as approximately representing
+[$\dbydt{R}$] as a function of $t$.''  Since (non-human) computers did
+not yet exist \citep{Camp09}, and an exact analytical form for this
+function could not be found, they proceeded to assume
+\cite[p.\,713]{KermMcKe27} that $\frac{\beta}{\gamma}R(t)\ll1$, which
+yields the approximate analytical form,
 \begin{linenomath*}
 \begin{equation}\label{eq:sech}
 \ddt{R} \approx a \sech^2{(\omega\,t - \phi)}\,.
@@ -365,7 +378,7 @@ time $t=0$ is
 \end{linenomath*}
 In terms of $\Reff$, $\gamma$, $\Sinit$ and $\Iinit$, the parameters
 in \cref{eq:sech} can be written\footnote{There is a typographical
-  error in equation (31) of \KM \cite{KermMcKe27}: their factor
+  error in equation (31) of \KM: their factor
   $\sqrt{-q}$ should be $(-q)$ in their equivalent of the parameter we
   call $a$.  \citet[\S3]{bacaermodel2012} corrected this error without
   comment.}
@@ -382,7 +395,7 @@ in \cref{eq:sech} can be written\footnote{There is a typographical
 \end{subequations}
 \end{linenomath*}
 The values of these parameters that \KM estimated for the Bombay
-plague epidemic are listed in the \KM column of \cref{tab:Bombay}.
+plague epidemic are listed in the KM column of \cref{tab:Bombay}.
 Using these values, \KM plotted their ``calculated'' curve, which we
 have reproduced in \KMcol in \cref{fig:Bombay}.
 
@@ -398,7 +411,7 @@ a_fun <- function(Reff, gamma, S0, I0)
 \section{How to fit the model to the data}
 
 The \KMcol curve in \cref{fig:Bombay} does appear to provide a
-reasonable fit to the data, but \KM \cite{KermMcKe27} gave no
+reasonable fit to the data, but \KM gave no
 indication of how their parameter estimates were obtained.
 Whatever their process, they must have engaged in some
 sort of \term{trajectory matching}, i.e., adjusting parameter values
@@ -1413,14 +1426,14 @@ plot(gammavec, loglikvec,
 \section{Cautionary remarks concerning fits to Bombay plague}
 
 We have highlighted the Bombay plague data because of their prominent
-role in \KM's paper \cite{KermMcKe27} and, consequently, for the
+role in \KM's paper \citep{KermMcKe27} and, consequently, for the
 history of mathematical epidemiology.  However, while they provide an
 interesting example with which to illustrate the process of fitting an
 epidemiological model to data, modelling plague dynamics with the
 simple SIR model is, at best, difficult to justify:
 \citet{bacaermodel2012} argues that the trajectory of the Bombay
 plague epidemic was primarily governed by seasonality rather than SIR
-dynamics.  Indeed, \KM\ themselves recognized that their model
+dynamics.  Indeed, \KM themselves recognized that their model
 involves a sequence of optimistic assumptions, which they admitted
 were not ``strictly'' satisfied:
 
@@ -1443,7 +1456,7 @@ were not ``strictly'' satisfied:
   %%that the rates did not vary during the period of the epidemic,
   %%conforms roughly to the observed figures.
 
-  \rightline{--- \KM \cite[p.\,715]{KermMcKe27}}
+  \rightline{--- \KMpage{715}}
 \end{quote}
 
 \noindent
@@ -1608,7 +1621,6 @@ approximation \eqref{eq:sech} is good initially, but becomes poorer
 and poorer over time as the underlying assumption on which it is based
 \eqref{eq:KMassumption} becomes less and less valid.
 
-%%\section{Example for which \KM approximation is poor (via stochastic  SIR)}
 \section{Fitting the deterministic SIR model to stochastic simulations}\label{sec:stoch}
 
 <<compute-stochastic-SIR-via-sirr, include=FALSE>>=
@@ -1804,7 +1816,7 @@ standard methods for fitting dynamical models to time series, in the
 context of infectious disease epidemiology.  We explained how to use
 nonlinear least squares (\code{nls}) to fit a given function to a time
 series, and illustrated the approach using the Kermack and McKendrick
-(\KM, \cite{KermMcKe27}) analytical approximation \eqref{eq:sech} to
+(\KM) analytical approximation \eqref{eq:sech} to
 the solution of the standard SIR model \eqref{eq:SIR}.  We also
 explained how to fit solutions of ordinary differential equations
 (ODEs) to a time series---using our R package \code{fitode}---and
@@ -2116,10 +2128,10 @@ ci_fmt("a", cc)
 %%\begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{\textbf{Fits of \KM's \cite{KermMcKe27} analytical SIR
+    \caption{\textbf{Fits of \KM's analytical SIR
         approximation \eqref{eq:sech} to Bombay plague} (see
-      \cref{fig:Bombay}).  The \KM column lists the parameter values
-      estimated by \KM \cite[p.\,714]{KermMcKe27}; the \code{nls}
+      \cref{fig:Bombay}).  The KM column lists the parameter values
+      estimated by \KMpage{714}; the \code{nls}
       column lists the values estimated by us, using nonlinear least
       squares with confidence intervals obtained by the Delta method
       (see \cref{sec:Uncertainty}).  Values for the initial prevalence
@@ -2274,7 +2286,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
        legend=c("observed data","fitode (nbinom)", "fitode (ols)", "our nls fit"))
 @
 \caption{\textbf{The plague epidemic in Bombay}, 17 December 1905 to 21 July
-  1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
+  1906, used as an example by \KMpage{714}.  The data
   (dots) were digitized from \citet[Table~IX, p.\,753]{jhyg1907}.
   \emph{Top panel:} The \KM
   approximation \eqref{eq:sech}, as fitted by \KM (\KMcol curve) and by us
@@ -2309,7 +2321,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 %%\begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{\textbf{Fits of \KM's \cite{KermMcKe27} analytical SIR
+    \caption{\textbf{Fits of \KM's analytical SIR
         approximation \eqref{eq:sech} to Philadelphia flu} (see
       \cref{fig:phila}).  Parameter estimates were obtained using
       nonlinear least squares (\code{nls}) to fit \cref{eq:sech} to
@@ -2467,7 +2479,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 %%\begin{landscape}
 \begin{table}
   \begin{center}
-    \caption{\textbf{Fits of \KM's \cite{KermMcKe27} analytical SIR
+    \caption{\textbf{Fits of \KM's analytical SIR
         approximation \eqref{eq:sech} to an epidemic simulated using the
         standard stochastic SIR model \citep{AndeBrit00b}} (see
       \cref{sec:stoch,fig:stoch}).
@@ -2627,10 +2639,6 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 \end{figure}
 
 \pagebreak
-
-%% \section*{Supplementary figures}
-%% \setcounter{figure}{0}
-%% \renewcommand{\thefigure}{S\arabic{figure}}
 
 \begin{figure}[!h]
   \includegraphics[width=\textwidth]{../misc/bombay_confint_dnbinom.pdf}
