@@ -633,7 +633,7 @@ and the mean intrinsic generation interval \citep{ChamDush15},
 \end{equation}
 \end{linenomath*}
 which is the same as the mean infectious period in this simple model
-\citep{pybus2001epidemic,roberts2007model,wallinga2007generation,KrylEarn13,Cham+18}.  \cref{tab:Bombay} lists the values of
+\citep{pybus2001epidemic,roberts2007model,wallinga2007generation,KrylEarn13,Cham+18}.  \Cref{tab:Bombay} lists the values of
 the parameters as estimated by \KM and by us using \code{nls}.
 
 <<invert-KM-analytically, echo=FALSE>>=
