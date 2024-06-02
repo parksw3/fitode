@@ -13,8 +13,9 @@
 %\setlength\parindent{24pt}% To increase paragraph indentation when line spacing is doubled
 %\setlength\bibindent{2em}% To increase hanging indent in bibliography when line spacing is doubled
 
-\usepackage[numbers,sort&compress]{natbib}% Citation support using natbib.sty
-\bibpunct[, ]{[}{]}{,}{n}{,}{,}% Citation support using natbib.sty
+%%\usepackage[numbers,sort&compress]{natbib}% Citation support using natbib.sty
+\usepackage[authoryear]{natbib} % For author-year citations
+%%\bibpunct[, ]{[}{]}{,}{n}{,}{,}% Citation support using natbib.sty
 \renewcommand\bibfont{\fontsize{10}{12}\selectfont}% Bibliography support using natbib.sty
 
 \theoremstyle{plain}% Theorem-like structures provided by amsthm.sty
@@ -266,16 +267,16 @@ years before their paper was written.
 In the century that has elapsed since publication of \KM's initial
 paper, the field of mathematical epidemiology has expanded and
 matured, and has been the subject of many books
-\cite{Bart60,Bail75,AndeMay91,AndeBrit00b,DiekHees00,BrauCast01,Brau+19}
+\citep{Bart60,Bail75,AndeMay91,AndeBrit00b,DiekHees00,BrauCast01,Brau+19}
 and review articles \cite{Heth00,Earn+02,Earn08,Earn09}.  Researchers
 have primarily focused on \term{compartmental models} like the SIR
 model, cast either as differential equations following the tradition
 of \KM \cite{KermMcKe27}, or as \term{stochastic processes} in the
-tradition of McKendrick \cite{McKe26} and Bartlett \cite{Bart60}.  In
+tradition of \citet{McKe26} and \citet{Bart60}.  In
 recent years, as the power of computers has grown, some researchers
 have turned to \term{agent-based models}, which represent each
 individual as a separate unit that can have unique properties
-\cite{eubank2004modelling}.
+\citep{eubank2004modelling}.
 
 Throughout the history of the subject, and regardless of the modelling
 frameworks they have exploited, mathematical epidemiologists have
@@ -285,13 +286,13 @@ na\"{\i}ve, with limited consideration of their quality. Over the
 years, however, there has been a trend towards greater sophistication
 and statistical rigour in parameter estimation for infectious disease
 models; books that explain these methods have begun to appear in
-recent decades \cite{Bolk08,bjorn2018}.  Careful
+recent decades \citep{Bolk08,bjorn2018}.  Careful
 consideration of uncertainty is especially important when epidemic
 models are used for the development and analysis of policy options for
-infectious disease management \cite{elderd2006uncertainty}, a
+infectious disease management \citep{elderd2006uncertainty}, a
 challenge that began to absorb the attention of many mathematical
 epidemiologists as soon as the emergence of SARS-CoV-2 ignited the
-COVID-19 pandemic \cite{Broo+21,Hill+21,Nixo+22,howerton2023evaluation}.
+COVID-19 pandemic \citep{Broo+21,Hill+21,Nixo+22,howerton2023evaluation}.
 
 While visiting the University of British Columbia in 2014--2015, one
 of us (DE) had many conversations with Fred Brauer about epidemic
@@ -311,7 +312,7 @@ we have lost the opportunity to present our work to Fred, but it seems
 fitting (!) to highlight Fred's role in the history of this work, and
 to dedicate this tutorial to his memory.\footnote{We had originally
 intended to submit this paper to a collection in honour of Fred's memory
-\cite{Kribvand23}.}
+\citep{Kribvand23}.}
 
 \section{Kermack and McKendrick's fit}
 
@@ -324,7 +325,7 @@ Referring to their version of \cref{fig:Bombay}, \KM
 \cite[p.\,714]{KermMcKe27} argued that ``As at least 80 to 90 per
 cent.\ of the cases reported terminate fatally, the ordinate may be
 taken as approximately representing [$\dbydt{R}$] as a function of
-$t$.''  Since (non-human) computers did not yet exist \cite{Camp09},
+$t$.''  Since (non-human) computers did not yet exist \citep{Camp09},
 and an exact analytical form for this function could not be found,
 they proceeded to assume \cite[p.\,713]{KermMcKe27} that
 $\frac{\beta}{\gamma}R(t)\ll1$, which yields the approximate
@@ -336,7 +337,7 @@ analytical form,
 \end{linenomath*}
 Noting that the \term{basic reproduction number} is\footnote{$\Rn$ is
 the expected number of secondary cases resulting from a primary case
-in a wholly susceptible population \cite{AndeMay91}.}
+in a wholly susceptible population \citep{AndeMay91}.}
 \begin{linenomath*}
 \begin{equation}\label{eq:R0def}
 \Rn = \frac{N\beta}{\gamma} \,,
@@ -362,12 +363,12 @@ time $t=0$ is
 \Reff = \frac{\Sinit\beta}{\gamma} \,.
 \end{equation}
 \end{linenomath*}
-In terms of $\Reff$, $\gamma$, $\Sinit$ and $\Iinit$,
-the parameters in \cref{eq:sech} can be
-written\footnote{There is a typographical error in equation (31) of
-  \KM \cite{KermMcKe27}: their factor $\sqrt{-q}$ should be $(-q)$ in
-  their equivalent of the parameter we call $a$.  Baca\"er
-  \cite[\S3]{bacaermodel2012} corrected this error without comment.}
+In terms of $\Reff$, $\gamma$, $\Sinit$ and $\Iinit$, the parameters
+in \cref{eq:sech} can be written\footnote{There is a typographical
+  error in equation (31) of \KM \cite{KermMcKe27}: their factor
+  $\sqrt{-q}$ should be $(-q)$ in their equivalent of the parameter we
+  call $a$.  \citet[\S3]{bacaermodel2012} corrected this error without
+  comment.}
 \begin{linenomath*}
 \begin{subequations}\label{eq:sechparams}
 \begin{align}
@@ -489,17 +490,16 @@ fail.  For example, starting from $a=2000$, $\tpeak=5$, and
 $\omega=0.1$ yields a ``singular gradient'' error.  More
 interestingly, starting from $a=500$, $\tpeak=5$, and $\omega=0.1$
 yields $a=869$, $\omega=-0.19$, $\phi=-3.48$, which is far from our
-fitted values and illustrates an important fact: there is
-not necessarily a unique best fit set of parameters!  In this
-case, the alternative solution exists because $\sech^2(x)$ is
-symmetric about the $y$ axis, but in general, there can be multiple
-local minima that cause nonlinear optimizers to converge to points
-that may or may not represent equally good fits to the data.  The
-potential existence of multiple local optima makes fitting to data
-hard; you need to be cautious, and use common sense, in interpreting
-the solutions found by your software (always plot the
-solutions!). Raue \emph{et al.}\/ \cite{raue2013lessons} give
-suggestions for how to diagnose and handle multiple optima.
+fitted values and illustrates an important fact: there is not
+necessarily a unique best fit set of parameters!  In this case, the
+alternative solution exists because $\sech^2(x)$ is symmetric about
+the $y$ axis, but in general, there can be multiple local minima that
+cause nonlinear optimizers to converge to points that may or may not
+represent equally good fits to the data.  The potential existence of
+multiple local optima makes fitting to data hard; you need to be
+cautious, and use common sense, in interpreting the solutions found by
+your software (always plot the solutions!). \citet{raue2013lessons}
+give suggestions for how to diagnose and handle multiple optima.
 
 If you know that your parameters should be in a certain range, then
 you can exclude values outside that range.  For example, to ensure
@@ -594,15 +594,15 @@ $\Sinit$ and $\Iinit$).
 
 The nonlinear algebraic relationships specified by
 \cref{eq:sechparams} can be inverted\footnote{Our expressions are
-  slightly different from those of Baca\"er
-  \cite[eq.~(3)]{bacaermodel2012} because we have corrected a minor
-  error.  At the start of \S3 of \cite{bacaermodel2012}, in the
+  slightly different from those of 
+  \citet[eq.~(3)]{bacaermodel2012} because we have corrected a minor
+  error.  At the start of \S3 of \citet{bacaermodel2012}, in the
   expression for $Q$, the term $2R\,y_0/x_0$ should be $2R^2y_0/x_0$;
   this missing square is propagated through to the inversion formulae.}
 analytically\footnote{In (common) situations in which nonlinear
   algebraic equations cannot be solved analytically, they can still be
   solved numerically, for example with the \code{nleqslv} package in
-  R.} \cite[\S3]{bacaermodel2012}, to obtain
+  R.} \citep[\S3]{bacaermodel2012}, to obtain
 \begin{linenomath*}
 \begin{subequations}\label{eq:invertparams}
 \begin{align}
@@ -626,14 +626,14 @@ transmission rate,
   \beta = \frac{\Reff\gamma}{\Sinit} \,,
 \end{equation}
 \end{linenomath*}
-and the mean intrinsic generation interval \cite{ChamDush15},
+and the mean intrinsic generation interval \citep{ChamDush15},
 \begin{linenomath*}
 \begin{equation}\label{eq:Tg}
   \Tg = \frac{1}{\gamma} \,,
 \end{equation}
 \end{linenomath*}
 which is the same as the mean infectious period in this simple model
-\cite{pybus2001epidemic,roberts2007model,wallinga2007generation,KrylEarn13,Cham+18}.  \cref{tab:Bombay} lists the values of
+\citep{pybus2001epidemic,roberts2007model,wallinga2007generation,KrylEarn13,Cham+18}.  \cref{tab:Bombay} lists the values of
 the parameters as estimated by \KM and by us using \code{nls}.
 
 <<invert-KM-analytically, echo=FALSE>>=
@@ -739,7 +739,7 @@ mortality to the \emph{instantaneous} rate, $\dbydt{R}$
 \eqref{eq:sech}, which is not observed.  We did this because it is
 what \KM did, and we wanted to be able to compare formal nonlinear
 least squares fits to \KM's results\footnote{In his reanalysis of
-  \KM's results, Baca\"er \cite{bacaermodel2012} also retained this
+  \KM's results, \citet{bacaermodel2012} also retained this
   conceptual error.}.  Weekly mortality reported at time $\ti$ should
 really be modelled as the aggregation of $\dbydt{R}$ over the
 preceding week, i.e., it would be better to define
@@ -830,7 +830,7 @@ continuous, and refer simply to ``probability''.
 Using these assumptions we can adopt a \emph{maximum likelihood}
 framework, where we consider parameter values that maximize the
 probability of observing the data \eqref{eq:prob.data.given.model} to
-be the best \cite{Bolk08}.  We define the \term{likelihood} $\lik$ of
+be the best \citep{Bolk08}.  We define the \term{likelihood} $\lik$ of
 a set of parameter values $\thetavec$ as
 \begin{linenomath*}
 \begin{equation}\label{eq:lik}
@@ -891,7 +891,8 @@ of the mean. However, the Poisson distribution assumes
 typical observation errors are \term{overdispersed}, meaning that
 the variance is greater than the mean. Ignoring overdispersion
 will underestimate the uncertainty in the parameters and lead
-to overly narrow confidence intervals on parameters and predictions \citep{li2018fitting}.
+to overly narrow confidence intervals on parameters and predictions 
+\citep{li2018fitting}.
 The negative binomial distribution is the most common way to generalize
 the Poisson to allow for overdispersion \citep{linden2011using}, although
 other distributions such as the generalized Poisson are occasionally used
@@ -947,8 +948,8 @@ partial derivatives of $-\log{\lik}$, also known as the \term{Fisher
 \term{variance-covariance matrix} $\mathrm{Cov}(\thetavec)$ that
 specifies the desired multivariate Normal with mean $\thetavechat$.
 This relationship between $\mathrm{Cov}(\thetavec)$ and the Hessian of
-$-\log{\lik}$ is, admittedly, not obvious!  See \citep[\S6.5]{Bolk08}
-for a heuristic explanation or \cite[][\S\S9.7, 9.10]{Wassermanall2010} for a rigorous (if terse) explanation.
+$-\log{\lik}$ is, admittedly, not obvious!  See \citet[\S6.5]{Bolk08}
+for a heuristic explanation or \citet[\S\S9.7, 9.10]{Wassermanall2010} for a rigorous (if terse) explanation.
 
 \hypertarget{DeltaMethod}{} The diagonal elements of
 $\mathrm{Cov}(\thetavec)$ are the (estimated) variances of the
@@ -962,10 +963,10 @@ approximation \eqref{eq:sech}), we build on the idea that if the error
 in a parameter $a$ is $\Delta a$, then the associated error in a
 (differentiable) function $g(a)$ is $\Delta{g}\approx g'(a)\Delta{a}$.
 Given a (smooth) nonlinear function $g(\thetavec)$ of the parameters,
-the \term{Delta Method} \cite{Dorf38,VerH12} expands
+the \term{Delta Method} \citep{Dorf38,VerH12} expands
 $\textrm{Var}(g(\thetavec))$ to first order about $\thetavechat$,
 which gives us the variance-covariance matrix of $g(\thetavec)$
-\cite[][\S7.5.2]{Bolk08} \cite[][\S9.9]{Wassermanall2010}.  In
+\citep[\S7.5.2]{Bolk08} \citep[\S9.9]{Wassermanall2010}.  In
 particular, the variance of $g(\thetavec)$ is
 \begin{linenomath*}
 \begin{subequations}\label{eq:DeltaMethod}
@@ -1020,14 +1021,14 @@ shown in \cref{fig:Bombay}.
 Better confidence intervals can be obtained using the \term{profile
   likelihood}, which is calculated by fixing a set of model parameters
 to specific values and fitting the remaining parameters to maximize
-the likelihood \citep[][\S 7.5.1]{Bolk08}.  By calculating the profile
+the likelihood \citep[\S 7.5.1]{Bolk08}.  By calculating the profile
 likelihood across a range of parameter values, we obtain the profile
 likelihood surface, from which confidence intervals can be estimated
-using the likelihood ratio test \citep[][\S 6.4.1.1]{Bolk08}.  While
+using the likelihood ratio test \citep[\S 6.4.1.1]{Bolk08}.  While
 profile likelihoods generally give more accurate estimates of
 confidence intervals, calculating the profile likelihood can be
 challenging, if not practically impossible, for derived parameters or
-epidemic trajectories \cite[][\S 7.5.1.2]{Bolk08}.  Consequently, we
+epidemic trajectories \cite[\S 7.5.1.2]{Bolk08}.  Consequently, we
 rely on the Delta Method here.
 
 \section{Fitting the ODE}\label{sec:fitode}
@@ -1045,7 +1046,7 @@ analytical formula.  We can still use the Delta method
 \eqref{eq:DeltaMethod} to estimate uncertainty, but calculating the
 gradient $(\gradtheta g)(\thetavec)$ is not straightforward if $g$ is
 a numerical solution of an ODE; we must simultaneously solve a set of
-\term{sensitivity equations} \cite[Eq.\,(6)]{raue2013lessons}
+\term{sensitivity equations} \citep[Eq.\,(6)]{raue2013lessons}
 alongside the main differential equations. Sensitivity equations
 define the time derivatives of the gradients of trajectories with
 respect to the parameters.  They can easily be derived using the chain
@@ -1149,12 +1150,11 @@ parallel with the ODEs \eqref{eq:genericODE} is a computationally
 efficient and numerically stable way to calculate the overall
 gradients of the log-likelihood with respect to the parameters, which
 makes nonlinear estimation more robust and efficient. We can also use
-these gradients to calculate CIs using the Delta method.  Raue
-\emph{et al.} \cite{raue2013lessons} give a detailed comparison
-between using the sensitivity equations and computing gradients by
-finite-difference approximations.  (Bj{\o}rnstad
-\cite[Chapter~9]{bjorn2018} also gives an introduction to trajectory
-matching.)
+these gradients to calculate CIs using the Delta method.
+\citet{raue2013lessons} give a detailed comparison between using the
+sensitivity equations and computing gradients by finite-difference
+approximations.  (\citet[Chapter~9]{bjorn2018} also gives an
+introduction to trajectory matching.)
 
 The \code{fitode} package\footnote{\code{fitode} is available on
 \href{https://cran.r-project.org/}{CRAN}, and can be installed via
@@ -1228,11 +1228,11 @@ $R(\ti)$).
   $\beta$, $\gamma$, initial conditions $S(0)$ and $I(0)$, and the overdispersion parameter $k$.
 \end{description}
 Since we are taking the difference $\mu(\ti) = R(\ti) - R(\timo)$ to
-calculate the mortality trajectory,\footnote{Modelers often
-  fit trajectories to cumulative curves.  However, doing so is ill-advised because
-  points in a cumulative time series are not independent, making it
-  difficult to define CIs \cite{King+15}.}  we have to add an extra
-row representing $t_0$ to the data set in order to compute
+calculate the mortality trajectory,\footnote{Modelers often fit
+  trajectories to cumulative curves.  However, doing so is ill-advised
+  because points in a cumulative time series are not independent,
+  making it difficult to define CIs \citep{King+15}.}  we have to add
+an extra row representing $t_0$ to the data set in order to compute
 $\mu(t_1) = R(t_1) - R(t_0)$:
 <<sirmortfit_data, cache=TRUE, warning=FALSE>>=
 bombay2 <- rbind(
@@ -1416,14 +1416,13 @@ We have highlighted the Bombay plague data because of their prominent
 role in \KM's paper \cite{KermMcKe27} and, consequently, for the
 history of mathematical epidemiology.  However, while they provide an
 interesting example with which to illustrate the process of fitting an
-epidemiological model to data, modelling plague dynamics
-with the simple SIR model is, at best,
-difficult to justify: Baca\"er \cite{bacaermodel2012} argues that
-the trajectory of the Bombay plague epidemic was primarily governed
-by seasonality rather than SIR dynamics.
-Indeed, \KM\ themselves recognized that their model involves a
-sequence of optimistic assumptions, which they
-admitted were not ``strictly'' satisfied:
+epidemiological model to data, modelling plague dynamics with the
+simple SIR model is, at best, difficult to justify:
+\citet{bacaermodel2012} argues that the trajectory of the Bombay
+plague epidemic was primarily governed by seasonality rather than SIR
+dynamics.  Indeed, \KM\ themselves recognized that their model
+involves a sequence of optimistic assumptions, which they admitted
+were not ``strictly'' satisfied:
 
 \begin{quote}
   ``We are, in fact, assuming that plague in [humans] is a reflection
@@ -1455,16 +1454,16 @@ especially extreme given that the most salient infectious disease
 epidemic in the 1920s would have been the 1918 influenza pandemic,
 which did involve direct human-to-human transmission, and for which
 much more detailed data were available at the time
-\cite{Roge20,Fros20,Eich23}.
+\citep{Roge20,Fros20,Eich23}.
 
 \section{Influenza in Philadelphia, October 1918}\label{sec:phila}
 
 Deaths caused ultimately by influenza are often attributed to
-pneumonia \cite{Earn+02}, so influenza mortality studies typically
+pneumonia \citep{Earn+02}, so influenza mortality studies typically
 combine pneumonia and influenza (P\&I).  Among published tables
 summarizing P\&I mortality during the 1918 pandemic, a particularly
 valuable example concerns the main wave in the city of Philadelphia
-\cite{Roge20}.  These data are exceptional because they are restricted
+\citep{Roge20}.  These data are exceptional because they are restricted
 to a single, large city, and because they provide \emph{daily} counts
 that capture the detailed temporal pattern (dots in \cref{fig:phila}).
 <<philapop, echo=TRUE, include=FALSE>>=
@@ -1669,18 +1668,18 @@ in this direction in this section by fitting the deterministic SIR
 model \eqref{eq:SIR} to data generated by a fully stochastic version
 of the model.
 
-The standard stochastic SIR model \cite{AndeBrit00b} can be defined by
+The standard stochastic SIR model \citep{AndeBrit00b} can be defined by
 interpreting the individual terms in \cref{eq:SIR} as event rates for
 stochastic processes in a population of $N$ individuals (in the limit
 $N\to\infty$ the stochastic model approaches the ODEs \eqref{eq:SIR};
-see \cite{EthiKurt86}).  Realizations of this discrete-state model can
-be generated exactly using the Gillespie algorithm \cite{Gill76}, or
+see \citet{EthiKurt86}).  Realizations of this discrete-state model can
+be generated exactly using the Gillespie algorithm \citep{Gill76}, or
 approximately (as we do here) using the ``$\tau$-leaping'' approach
-\cite{Gill01}, which is implemented in the \code{adaptivetau} R
-package \cite{adaptivetau}.  The demographic stochasticity that these
+\citep{Gill01}, which is implemented in the \code{adaptivetau} R
+package \citep{adaptivetau}.  The demographic stochasticity that these
 algorithms simulate is essential to capture real effects that occur
 when the number of infected individuals is small (especially the
-possibility that an epidemic can burn out \cite{Pars+24}).
+possibility that an epidemic can burn out \citep{Pars+24}).
 
 In \cref{fig:stoch}, the dots show a single realization of the
 stochastic SIR model with initial state $(\Sinit,\Iinit,\Rinit)=(\Sexpr{iii})$,
@@ -1814,43 +1813,42 @@ whether analytical solutions of the ODEs are available.
 
 \code{fitode} is flexible enough to handle most compartmental
 epidemiological and ecological models
-\cite{BrauCast01,BrauKrib16,Brau+19}, including non-autonomous models,
-such as seasonally forced epidemic models
-\cite{LondYork73,Earn+00,HeEarn07,HeEarn16,PapsEarn19}.  We hope the
+\citep{BrauCast01,BrauKrib16,Brau+19}, including non-autonomous
+models, such as seasonally forced epidemic models
+\citep{LondYork73,Earn+00,HeEarn07,HeEarn16,PapsEarn19}.  We hope the
 package will be useful for many readers, not only as a pedagogical
 tool but also to fit models to novel data.  Potential applications
 abound (we have ourselves used \code{fitode}'s predecessor,
-\code{fitsir}, to study music popularity \cite{Rosa+21}).
+\code{fitsir}, to study music popularity \citep{Rosa+21}).
 
 We focused here on three illustrative examples of epidemic time
 series.  The first was the reported weekly mortality from plague in
 Bombay in 1906 (\cref{fig:Bombay}), which was examined by \KM in their
-original paper \cite{KermMcKe27}.  Although historically important, it
-is certainly debatable whether we can trust any inferences we might draw from
-fitting the simple SIR model \eqref{eq:SIR} to these plague data.
-As we quoted at the end of \cref{sec:fitode}, to justify
-the application of their SIR model to these data, \KM highlighted five
+original paper \citep{KermMcKe27}.  Although historically important,
+it is certainly debatable whether we can trust any inferences we might
+draw from fitting the simple SIR model \eqref{eq:SIR} to these plague
+data.  As we quoted at the end of \cref{sec:fitode}, to justify the
+application of their SIR model to these data, \KM highlighted five
 implicit assumptions, any or all of which might be violated.
 Furthermore, Baca\"er found that over the longer term seasonal
-epidemics of plague
-occurred in Bombay every year from 1897 to 1911 \cite[Fig.\,2]{bacaermodel2012},
-suggesting
-that the 1906 epidemic was just one in a long sequence of epidemics
-that were ``driven by seasonality'' \cite[p.\,403]{bacaermodel2012}.
-Of course, other mechanisms (e.g., heterogeneity in contact patterns)
-might play a role as well.
+epidemics of plague occurred in Bombay every year from 1897 to 1911
+\citep[Fig.\,2]{bacaermodel2012}, suggesting that the 1906 epidemic
+was just one in a long sequence of epidemics that were ``driven by
+seasonality'' \citep[p.\,403]{bacaermodel2012}.  Of course, other
+mechanisms (e.g., heterogeneity in contact patterns) might play a role
+as well.
 
 To obtain a deeper understanding of the Bombay plague epidemic, we
 could formulate a variety of models, fit them to the data using
 \code{fitode} or other software, and use a statistical framework for
-model selection \cite{BurnAnde02} to rank the relative importance
+model selection \citep{BurnAnde02} to rank the relative importance
 of the various mechanisms included in the sequence of models (see,
-e.g., He \emph{et al.} \cite{He+13a} for an example of using this
+e.g., \citet{He+13a} for an example of using this
 approach to understand the occurrence of three distinct waves in the
-1918 influenza pandemic. (Alternatively, we could formulate one model
+1918 influenza pandemic). Alternatively, we could formulate one model
 that included \emph{all} of the processes and attempt to measure
 their relative importance by comparing the magnitudes of parameters
-\cite{Bolk23}.)
+\citep{Bolk23}.
 We have not attempted such a study here, since our goal was simply to
 explain and illustrate the fitting methodology.  However, it is worth
 highlighting that our analysis using the SIR model did reveal a
@@ -1890,35 +1888,49 @@ the deterministic model can capture the delayed onset of the epidemic.
 In practice, modelers fitting to epidemic time series by trajectory
 matching usually pick an ``epidemic window'' that corresponds to
 the part of the epidemic that can be reasonably captured by
-a deterministic model \cite{Earn+20}.)
+a deterministic model \citep{Earn+20}.)
 
 \KM's approximation \eqref{eq:sech} estimates the simulation
-parameters badly because the assumption on which
-it is based \eqref{eq:KMassumption} is strongly
-violated in the simulation (\cref{fig:stoch}).  Consequently, the
-parameters of the \KM approximation cannot be interpreted biologically
-or mechanistically.  More generally, a purely
-phenomenological model with the same number of parameters can
-sometimes fit a stochastic simulation just as closely or even closer
-than the deterministic limit of the model that generated the data
-\cite{Rosa+21}; a good fit is not, on its own, sufficient to conclude
-that a model matches the underlying processes of a dynamical system.
+parameters badly because the assumption on which it is based
+\eqref{eq:KMassumption} is strongly violated in the simulation
+(\cref{fig:stoch}).  Consequently, the parameters of the \KM
+approximation cannot be interpreted biologically or mechanistically.
+More generally, a purely phenomenological model with the same number
+of parameters can sometimes fit a stochastic simulation just as
+closely or even closer than the deterministic limit of the model that
+generated the data \citep{Rosa+21}; a good fit is not, on its own,
+sufficient to conclude that a model matches the underlying processes
+of a dynamical system.
 
-While \code{fitode} provides a relatively easy way to specify ODEs and estimate their parameters from data, any programming language will work to implement the steps we have outlined above, including both free general-purpose languages such as Python \citep{Bati+2022,Gupta2023} or commercial, domain-specific tools such as Matlab \citep{Chow2017} or Berkeley Madonna \citep{Zha+2020}. As long as a language provides tools for integrating arbitrary sets of ODEs (e.g., Matlab's \code{ode45}) and optimizing nonlinear functions (e.g., Matlab's \code{fminunc} or \code{lsqnonlin}), it can be used to estimate parameters of ODEs. However, \code{fitode}'s simple interface, automatic derivation of sensitivity equations, flexible specification of observation models, and provision of confidence intervals make it both convenient and powerful.
+While \code{fitode} provides a relatively easy way to specify ODEs and
+estimate their parameters from data, any programming language will
+work to implement the steps we have outlined above, including both
+free general-purpose languages such as Python
+\citep{Bati+2022,Gupta2023} or commercial, domain-specific tools such
+as \textsc{matlab} \citep{Chow2017} or Berkeley Madonna
+\citep{Zha+2020}. As long as a language provides tools for integrating
+arbitrary sets of ODEs (e.g., \textsc{matlab}'s \code{ode45}) and
+optimizing nonlinear functions (e.g., \textsc{matlab}'s \code{fminunc}
+or \code{lsqnonlin}), it can be used to estimate parameters of
+ODEs. However, \code{fitode}'s simple interface, automatic derivation
+of sensitivity equations, flexible specification of observation
+models, and provision of confidence intervals make it both convenient
+and powerful.
 
 Beyond the basics that we have discussed here, \code{fitode} contains
 a number of useful advanced features. In particular,
 \code{fitode} can
 \begin{description}
-\item [fit to multiple data streams:] \code{fitode} is not
-  limited to fitting a trajectory to a single state variable, such
-  as incidence or prevalence of infected individuals. For example,
-  during the later stages of the COVID-19 pandemic modelers often
-  had access to time series of case reports, hospitalization reports, and
-  wastewater sampling for the same geographic region. If we
-  build a model that includes state variables for hospitalized individuals
-  and for virus concentrations in wastewater, \code{fitode} can fit
-  the model's parameters using all of the available data (as in \cite{Nour+2022}).
+\item [fit to multiple data streams:] \code{fitode} is not limited to
+  fitting a trajectory to a single state variable, such as incidence
+  or prevalence of infected individuals. For example, during the later
+  stages of the COVID-19 pandemic modelers often had access to time
+  series of case reports, hospitalization reports, and wastewater
+  sampling for the same geographic region. If we build a model that
+  includes state variables for hospitalized individuals and for virus
+  concentrations in wastewater, \code{fitode} can fit the model's
+  parameters using all of the available data (as in
+  \citet{Nour+2022}).
 \item [compute confidence intervals via importance sampling:]
   While the Delta method can compute confidence intervals for derived
   quantities such as predicted trajectories, it rests on strong
@@ -1932,41 +1944,56 @@ a number of useful advanced features. In particular,
   size of the epidemic); an average value and confidence intervals
   are derived from weighted moments (means) or quantiles (medians
   or extremes such as 10th and 90th percentiles).
-\item [specify priors and apply Bayesian inference:]
-  Unlike maximum likelihood approaches, which seek to estimate the best-fitting
+\item [specify priors and apply Bayesian inference:] Unlike maximum
+  likelihood approaches, which seek to estimate the best-fitting
   parameter set, Bayesian methods aim to estimate a distribution of
-  parameters (also known as the posterior distribution) that are consistent with our
-  previous knowledge about the system (encapsulated in \emph{prior distributions}) as well
-  as the observed data.
-  These approaches are generally
-  better at handling parameter uncertainties \citep{elderd2006uncertainty}
-  but are usually much more computationally expensive.
+  parameters (also known as the posterior distribution) that are
+  consistent with our previous knowledge about the system
+  (encapsulated in \emph{prior distributions}) as well as the observed
+  data.  These approaches are generally better at handling parameter
+  uncertainties \citep{elderd2006uncertainty} but are usually much
+  more computationally expensive.
 
   \code{fitode} allows the user to specify prior distributions on
-  parameters; these priors
-  can either reflect previous knowledge of a disease system, or can be used to
-  \emph{regularize} a fitting procedure by downweighting extreme values of parameters
-  \cite{Lemo2019}, which can help mitigate problems with identifiability (see below).
+  parameters; these priors can either reflect previous knowledge of a
+  disease system, or can be used to \emph{regularize} a fitting
+  procedure by downweighting extreme values of parameters
+  \citep{Lemo2019}, which can help mitigate problems with
+  identifiability (see below).
 
-  Bayesian modelers typically use \emph{Markov chain Monte Carlo} algorithms
-  to explore the parameter space and approximate the target distribution. \code{fitode} implements
-  a simple \emph{Metropolis-Hasting} sampler \citep[\S7.3.1]{Bolk08}.
-  (The Stan platform provides a much more powerful Bayesian sampling algorithm
-  using sensitivity equations,
-  built on top of a fully general system for specifying ODEs; however, this
-  tool requires significantly more computational and statistical background to
-  use effectively \cite{Grin+2021}.)
+  Bayesian modelers typically use \emph{Markov chain Monte Carlo}
+  algorithms to explore the parameter space and approximate the target
+  distribution. \code{fitode} implements a simple
+  \emph{Metropolis-Hasting} sampler \citep[\S7.3.1]{Bolk08}.  (The
+  Stan platform provides a much more powerful Bayesian sampling
+  algorithm using sensitivity equations, built on top of a fully
+  general system for specifying ODEs; however, this tool requires
+  significantly more computational and statistical background to use
+  effectively \citep{Grin+2021}.)
 
 \end{description}
 
 Even with these extensions, modelers may face many challenges when
-fitting ODEs to data with the \code{fitode} package, as with
-fitting any nonlinear model to data.  For example, it is often
-difficult to ensure that the model has converged properly or reached
-its true maximum.  More generally, naive and optimistic epidemic modelers often run into problems of \term{structural identifiability} (the impossibility of estimating particular sets of parameters from data, regardless of how much data is available \citep{TuncTrang2018,Chow+2023}) and \term{practical identifiability} (the impossibility of reliably estimating parameters from a particular small, noisy data set \cite{Gall+2022, Chow+2023}) when they first start attempting to fit models to data.
-In addition to the rigorous methods described by \cite{Chow+2023}, using a \term{multistart method} (performing optimization from multiple starting conditions: \cite{raue2013lessons}), or plotting likelihood surfaces, can help diagnose these problems.  Using different optimization methods or reparameterizing the model can also help \cite{raue2013lessons,Bolk+2013}.  We encourage users of \code{fitode} who encounter these or other
-fitting challenges to open issues via the \code{fitode}
-GitHub repository (\url{https://github.com/parksw3/fitode}).
+fitting ODEs to data with the \code{fitode} package, as with fitting
+any nonlinear model to data.  For example, it is often difficult to
+ensure that the model has converged properly or reached its true
+maximum.  More generally, naive and optimistic epidemic modelers often
+run into problems of \term{structural identifiability} (the
+impossibility of estimating particular sets of parameters from data,
+regardless of how much data is available
+\citep{TuncTrang2018,Chow+2023}) and \term{practical identifiability}
+(the impossibility of reliably estimating parameters from a particular
+small, noisy data set \citep{Gall+2022, Chow+2023}) when they first
+start attempting to fit models to data.  In addition to the rigorous
+methods described by \citet{Chow+2023}, using a \term{multistart
+  method} (performing optimization from multiple starting conditions
+\citep{raue2013lessons}), or plotting likelihood surfaces, can help
+diagnose these problems.  Using different optimization methods or
+reparameterizing the model can also help
+\citep{raue2013lessons,Bolk+2013}.  We encourage users of
+\code{fitode} who encounter these or other fitting challenges to open
+issues via the \code{fitode} GitHub repository
+(\url{https://github.com/parksw3/fitode}).
 
 As its name suggests, \code{fitode} is limited to fitting ODEs to time
 series.  Consequently, by design, \code{fitode} ignores \term{process
@@ -1979,14 +2006,13 @@ inherent to the discrete-state stochastic SIR model discussed above
 (and to any real host-pathogen system).  Parameters of models can also
 be subject to process error; for example, the transmission rate might
 depend on random fluctuations in weather.  Properly accounting for
-process error can be critical for accurately quantifying uncertainties in
-parameter estimates and model forecasts
-\citep{King+15,taylor2016stochasticity,li2018fitting};
-however, the required statistical and computational procedures are
-significantly more challenging than the approaches considered here.
-Popular \code{R} packages that can fit models with process error
-include \code{pomp} \citep{King+16} and \code{mcstate}
-\citep{mcstate}.
+process error can be critical for accurately quantifying uncertainties
+in parameter estimates and model forecasts
+\citep{King+15,taylor2016stochasticity,li2018fitting}; however, the
+required statistical and computational procedures are significantly
+more challenging than the approaches considered here.  Popular
+\code{R} packages that can fit models with process error include
+\code{pomp} \citep{King+16} and \code{mcstate} \citep{mcstate}.
 
 \section{Closing remarks: from Fred Brauer to \code{fitode}}
 
@@ -2006,8 +2032,8 @@ difficult.  A true understanding of ``why it is hard'' is something
 that builds over time with experience, but the key points are that
 finding optima of a complex multi-dimensional function is hard enough
 on its own \citep{raue2013lessons}, and estimating statistically
-meaningful uncertainty in those optima is extremely
-challenging \citep{elderd2006uncertainty,li2018fitting}.
+meaningful uncertainty in those optima is extremely challenging
+\citep{elderd2006uncertainty,li2018fitting}.
 
 Fred would never have used \code{fitode}, but would have delighted in
 seeing it demonstrated and in discussing the theoretical background on
@@ -2015,7 +2041,8 @@ model fitting that we have presented in this paper.  We hope that
 others like him, as well as students and researchers who actually do
 want to dig into data, will benefit from this exposition.
 
-\bibliographystyle{tfs}
+%%\bibliographystyle{tfs}
+\bibliographystyle{plainnat}
 \bibliography{brauer-ms,fitode}
 
 <<figfuns, echo=FALSE>>=
@@ -2099,13 +2126,13 @@ ci_fmt("a", cc)
       $\Iinit$ and population size $N$ are assumed in order to derive
       estimates of the standard SIR model parameters from the
       parameters of \KM's approximation (using the indicated
-      equations).  Like Baca\"er \cite[p.\,408]{bacaermodel2012}, we
+      equations).  Like \citet[p.\,408]{bacaermodel2012}, we
       assume the population of Bombay was $N=1$ million.  We emphasize
       in this table that $\gamma$ is the \emph{per capita} removal
       rate, in order to contrast it with $a$, the \emph{total} removal
       rate at the epidemic peak; elsewhere we refer to $\gamma$ simply
       as the recovery rate.  }\label{tab:Bombay}
-\medskip
+    \medskip
     %% making use of ragged2e and array packages:
     \RaggedRight
   \begin{tabular}{ m{3cm} | c | c | c | c | c c}
@@ -2248,7 +2275,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 @
 \caption{\textbf{The plague epidemic in Bombay}, 17 December 1905 to 21 July
   1906, used as an example by KM \cite[p.\,714]{KermMcKe27}.  The data
-  (dots) were digitized from \cite[Table~IX, p.\,753]{jhyg1907}.
+  (dots) were digitized from \citet[Table~IX, p.\,753]{jhyg1907}.
   \emph{Top panel:} The \KM
   approximation \eqref{eq:sech}, as fitted by \KM (\KMcol curve) and by us
   using \code{nls} (\nlscol curve, with confidence band estimated using the
@@ -2299,7 +2326,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       eventually die if everyone in the city were infected, \ie the
       product of the population size of Philadelphia in 1918
       (\Sexpr{prettyNum(philapop1918, big.mark=",")}) and an assumed
-      CFP of $\Sexpr{philacfp}$ \cite{TaubMore06}.
+      CFP of $\Sexpr{philacfp}$ \citep{TaubMore06}.
       %%
       The fitted trajectory and confidence band are shown in
       \cref{fig:phila}.  See \cref{sec:phila}.}
@@ -2424,7 +2451,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
   @
   \caption{\textbf{The main wave of the 1918 influenza epidemic in the city of
       Philadelphia}, 1 September 1918 to 31 December 1918
-    \cite{Roge20,Gold+09}.  Reported daily deaths from pneumonia and
+    \citep{Roge20,Gold+09}.  Reported daily deaths from pneumonia and
     influenza (P\&I) are shown with dots.  The \nlscol curve and corresponding
     confidence band show a nonlinear least squares (\code{nls}) fit of
     \KM's approximation \eqref{eq:sech}; the parameter estimates are
@@ -2442,7 +2469,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
   \begin{center}
     \caption{\textbf{Fits of \KM's \cite{KermMcKe27} analytical SIR
         approximation \eqref{eq:sech} to an epidemic simulated using the
-        standard stochastic SIR model \cite{AndeBrit00b}} (see
+        standard stochastic SIR model \citep{AndeBrit00b}} (see
       \cref{sec:stoch,fig:stoch}).
       %%
       The parameter values in the ``true'' column are those used to
@@ -2499,7 +2526,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
   \begin{center}
     \caption{\textbf{Fits of numerical (deterministic) SIR model solutions to
         an epidemic simulated using the standard stochastic SIR model
-        \cite{AndeBrit00b}} (see \cref{sec:stoch,fig:stoch}). Parameter
+        \citep{AndeBrit00b}} (see \cref{sec:stoch,fig:stoch}). Parameter
       estimates we obtained using \code{fitode} to fit the SIR model
       \eqref{eq:SIR} to the simulated data, assuming deviations from
       the deterministic curve were generated by negative binomially
@@ -2615,7 +2642,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
     of \cref{sec:Uncertainty}---is calculated by fixing $\gamma$ to a
     series of given values and, for each value,
     maximizing the likelihood by estimating all other
-    parameters \cite{Bolk08}. (The maximum value is shifted to 0
+    parameters \citep{Bolk08}. (The maximum value is shifted to 0
     without loss of generality.) A flat profile-likelihood surface
     indicates parameter unidentifiability, meaning that we can obtain
     very similar fits across a wide range of values
