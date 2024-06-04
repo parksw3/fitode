@@ -1,6 +1,8 @@
 ---
-title: "reviewer comments for fitode paper"
+title: "Response to reviewers of Earn et al (2024) Fitting epidemic models to data – a tutorial in memory of Fred Brauer"
 ---
+
+**We are very grateful to the reviewers for their very positive feedback and helpful suggestions for minor improvements, which we have attempted to implement.**
 
 ## Reviewer 1
 
@@ -18,12 +20,12 @@ the "observation" option in in fitode (see eq. (27)) could be modified to refer 
 
 2.  Notation: Somewhat related to observation model comments above is the use of "x()" for ODE state variable values, and "x[]" for data values. I find this to be atypical and probably not helpful to most readers.  I strongly encourage the authors to consider notation that is easier to grasp.  My recommendation: Using the upper case "X()" for data crossed my mind, however I think a better choice might be "y()", which greatly improves the readability compared to discerning "()" from "[]". While a lower level undergrad might find this use of "x vs y" notation a little problematic, I think the target audience here will find it much easier notation to follow than the current notation. Moreover, y is a commonly used symbol for the response values in statistics, so this use of "y()" will not be terribly foreign to readers familiar with existing statistical theory notation.
 
-**Let's discuss this further. DJDE really likes this notation. BMB is not convinced.**
+**Rather than $x[]$, we now use $x_{\textrm{obs}}$ to denote observed values of the variable $x$.**
 
-3. I'm confused by the $\Delta x[t_\ell]$ term at the end of eq. (14), which doesn't quite follow from the assumptions in the preceding text. It seems as if the authors were at one point assuming that the probability of an observation x[t] can be approximated with a discrete distribution, letting $P(x=x[t]) = f(x[y], \sigma) \Delta x$ and then this discretized Normal distribution could be used to construct the likelihood function. The rest of the text, however, does not reflect this, nor does it otherwise explain what the $\Delta x$ term represents. If this was the intention, then there needs to be (1) clarification in the preceding text that this is what is being assumed, and (2) some follow-up text after eq. (17) clarifying how this \Delta x term turns into a constant in the log-likelihood function and can ultimately be ignored in the optimization step that follows. However, as it stands, I'm not convinced that this is the most practical way to introduce the concept of
+3. I'm confused by the $\Delta x[t_\ell]$ term at the end of eq. (14), which doesn't quite follow from the assumptions in the preceding text. It seems as if the authors were at one point assuming that the probability of an observation x[t] can be approximated with a discrete distribution, letting $P(x=x[t]) = f(x[y], \sigma) \Delta x$ and then this discretized Normal distribution could be used to construct the likelihood function. The rest of the text, however, does not reflect this, nor does it otherwise explain what the $\Delta x$ term represents. If this was the intention, then there needs to be (1) clarification in the preceding text that this is what is being assumed, and (2) some follow-up text after eq. (17) clarifying how this $\Delta x$ term turns into a constant in the log-likelihood function and can ultimately be ignored in the optimization step that follows. However, as it stands, I'm not convinced that this is the most practical way to introduce the concept of
 likehood and MLE. Alternatively, please consider dropping the $\Delta x$ from eq. (14) and changing the left side of equation (14) to indicate that it's a joint density function, not a probability, and then define the likelihood from there with a followup sentence or footnote about how likelihoods are defined the discrete case usng PMFs instead of PDFs.  This approach (defining the likelihood using the joint PDF or PMF) is a common way to introduce the concept of a likelihood, and in this context, that approach might be preferable.
 
-**Done** (not in a footnote; I think we should minimize our use of footnotes).
+**Done**
 
 I should add that, for all three comments above, there is value in using notational conventions and other formalisms familiar to statisticians, where possible. This would help mathematicians who read this paper to more easily see how it relates to existing statistics literature, and likewise would make the paper more accessible to statisticians who have limited exposure to dynamic models and these techniques.
 
@@ -37,23 +39,21 @@ growth phase. In that case, the parameter $r$ will be confidently estimated, but
 
 6. Consider mentioning some other distribution options above eq. (17), around line 242-244, like the various Generalized Poisson distributions. Include references (some of these are available in other R packages that might be worth mentioning). I find that mathematicians often are unaware that these other options exist, and so they only consider Normal, Poisson, and Negative Binomial.
 
-**Added something. Not sure how important this really is ... all applications of more exotic count data distributions are for non-dynamic/regression models ...**
+**Done**
 
 7. Minor inconsistencies in referring to equations: These include model (2), Equation (2), equation (2), distance (7), approximation (6), dR/dt (2), etc. I don't recall this journal having strict guidelines for equation referencing, so at a minimum I would ask the authors to consider dropping the instances of capital-E "Equation" to lower case.
 
-**Not done**
+**We have now attempted to follow BMB style for everything.**
 
 8. There are a few places where table captions and R code run off into the margins.
 
-**The bodies of Tables 1 and 2 were a bit too wide, I tweaked them a bit, not sure how much (more) effort this is worth ... Figure 1 caption is too long and overruns the page number/bottom margin**
+**We adjusted these slightly, but this seems best to deal with at the copy-editing stage.**
 
 9. Generally speaking, there might be room to include a few more references throughout, especially given the tutorial nature of this manuscript. Readers looking to apply this approach would benefit from some extra guidance finding literature related to some of the concepts or methods that are only briefly mentioned here.
 
-**Any thoughts?**
-
+**We have added a few references.**
 
 ## Reviewer 2 
-
 
 This manuscript introduces the software package fitode, an R-based tool developed to aid the fitting of ODE models to observed time series data, particularly for epidemiological applications. The software serves as a practical response to the historical curiosity about how dynamic models fit to empirical data, a question posed by the late mathematical biologist Fred Brauer. The manuscript not only shows the functionality of fitode through examples involving compartmental epidemic models but also provides a tutorial approach to guide readers, presumably with a background in mathematics but less familiarity with statistical methods and optimization techniques. The discussion delves into the technical details of model fitting, parameter estimation, and the challenges inherent in this domain.
 
@@ -61,10 +61,10 @@ This manuscript introduces the software package fitode, an R-based tool develope
 
 1. The authors acknowledge the issue of non-uniqueness in parameter values achieving the minimum error in model fitting. This is a critical limitation as it affects the reliability of the model predictions and the interpretability of the results. To address this challenge, the authors might consider incorporating regularization techniques which can help in constraining the parameter space and reducing the likelihood of overfitting. It would also be helpful if the manuscript could discuss strategies to identify and handle the impact of parameter correlations, which often contribute to this non-uniqueness.
 
-**Partly done** (added para. on identifiability, expanded comment about regularization slightly)
+**We have added a paragraph on identifiability, and expanded a comment about regularization.**
 
 2. While fitode is presented as a user-friendly tool tailored for epidemiologists, a systematic comparison with existing methods available in platforms like MATLAB or Berkeley Madonna is missing. Each of these tools has its strengths and limitations which could significantly influence user choice depending on their specific needs. For instance, MATLAB offers a broad range of built-in functions for optimization and model fitting along with high computational power, but it may not be as accessible due to licensing costs. On the other hand, Berkeley Madonna is known for its ease of use and speed in running complex dynamic models but might lack some of the advanced statistical tools provided by R. The authors should elaborate on the comparative advantages of fitode, possibly in terms of its ease of integration with other statistical methods in R, its specific utility for epidemiological models, or any unique features that address the nuances of fitting disease transmission
 models to data.
 
-**Not done. I don't think a "systematic comparison" is worth it, but we could try to say something brief. Looked at Berkeley Madonna; it does have a 'curve fitting' option, but there's almost nothing in the docs about what it's actually doing ...** See @Marc+2020, also https://github.com/topics/epidemiology?l=matlab
+**We have added some comments about MATLAB and Berkeley Madonna.**
 
