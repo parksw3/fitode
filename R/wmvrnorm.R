@@ -13,6 +13,16 @@ wmvrnorm <- function(object,
     vv <- vcov(object, "links")
     vv[lower.tri(vv)] <- t(vv)[lower.tri(vv)]
 
+    ## if any components of the vcov < 0, then just use the diag
+
+    if (any(vv < 0)) {
+        vv_diag <- diag(vv)
+
+        vv <- matrix(0, nrow=nrow(vv), ncol=ncol(vv))
+
+        diag(vv) <- vv_diag
+    }
+
     simtraj <- vector('list', length(model@expr))
 
     for (j in 1:length(model@expr)) simtraj[[j]] <- matrix(NA, nrow=length(unique(object@data$times)), ncol=nsim)
