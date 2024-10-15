@@ -1,7 +1,7 @@
 Package: fitode
 Type: Package
 Title: Tools for Ordinary Differential Equations Model Fitting
-Version: 0.1.1
+Version: 0.1.1.9000
 Authors@R: c(
     person("Sang Woo", "Park", role=c("aut","cre"),
     email="swp2@princeton.edu",
