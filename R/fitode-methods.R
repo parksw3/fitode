@@ -231,6 +231,7 @@ setMethod("confint", "fitode",
               nsim=1000,
               seed,
               ...) {
+        if(any(vcov(object) < 0)) warnings("Some components of ")
 
         method <- match.arg(method)
 
