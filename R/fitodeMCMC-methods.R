@@ -50,7 +50,7 @@ setMethod("predict", "fitodeMCMC",
         if (!missing(level)) {
             ll <- (1-level)/2
 
-            clist <- lapply(simtraj, apply, 1, quantile, probs=c(ll, 1-ll))
+            clist <- lapply(simtraj, apply, 1, quantile, probs=c(ll, 1-ll), na.rm=TRUE)
 
             clist <- lapply(clist, function(cmat){
                 setNames(as.data.frame(t(cmat)), c(paste(100*ll, "%"), paste(100*(1-ll), "%")))
@@ -135,7 +135,7 @@ setMethod("confint","fitodeMCMC",
 
         res <- cbind(
             apply(expr.eval, 2, median),
-            t(apply(expr.eval, 2, quantile, prob=c(ll, 1-ll)))
+            t(apply(expr.eval, 2, quantile, prob=c(ll, 1-ll), na.rm = TRUE))
         )
 
         colnames(res) <- c("estimate", paste(100*ll, "%"), paste(100*(1-ll), "%"))

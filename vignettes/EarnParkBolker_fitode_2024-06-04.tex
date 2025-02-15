@@ -1,7 +1,57 @@
 % interacttfssample.tex
 % v1.05 - August 2017
 
-\documentclass[]{interact}
+\documentclass[]{interact}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
 
 % https://tex.stackexchange.com/questions/2441/how-to-add-a-forced-line-break-inside-a-table-cell
 \usepackage{makecell}
@@ -186,24 +236,9 @@
 \newcommand{\Iinit}{I(0)}
 \newcommand{\Rinit}{R(0)}
 
-<<setup, echo=FALSE, include=FALSE>>=
-## set default base-graphics plotting options
-knitr::knit_hooks$set(basefig=function(before, options, envir) {
-                   if (before) {
-                       oldpar <- par(bty="l",las=1)
-                       on.exit(par(oldpar))
-                   } else { }
-})
-knitr::opts_chunk$set(error = FALSE)
-## B&W format: https://stackoverflow.com/questions/22666475/how-to-achieve-blackwhite-friendly-syntax-highlighting-in-pdfs-produced-with-kn
-##knitr::opts_knit$set( out.format="latex" )
-##knitr::knit_theme$set("print")
-## override BMB's finicky settings
-options(warnPartialMatchArgs = FALSE,
-          warnPartialMatchAttr = FALSE,
-          warnPartialMatchDollar = FALSE)
 
-@
+
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
 
 \articletype{ORIGINAL ARTICLE}% Specify the article type or omit as appropriate
@@ -401,14 +436,7 @@ plague epidemic are listed in the KM column of \cref{tab:Bombay}.
 Using these values, \KM plotted their ``calculated'' curve, which we
 have reproduced in \KMcol in \cref{fig:Bombay}.
 
-<<functions to compute KM parameters, echo=FALSE>>=
-omega_fun <- function(Reff, gamma, S0, I0)
-    {(gamma/2)*sqrt((Reff-1)^2+(2*I0/S0)*Reff^2)}
-phi_fun <- function(Reff, gamma, S0, I0)
-    {atanh((Reff-1)/(2*omega_fun(Reff,gamma,S0,I0)/gamma))}
-a_fun <- function(Reff, gamma, S0, I0)
-    {(2 * S0/(gamma * Reff^2))*omega_fun(Reff,gamma,S0,I0)^2}
-@
+
 
 \section{How to fit the model to the data}
 
@@ -448,16 +476,24 @@ function (\code{nls}), which attempts to minimize the distance
 \eqref{eq:leastsquares} to the data, starting from an initial guess
 (\code{start}).
 
-<<nls-bombay>>=
-sech <- function(x) {1/cosh(x)}
-KM_approx <- function(t, a, omega, phi) {a * sech(omega*t - phi)^2}
-KM.parameters <- c(a = 890, omega = 0.2, phi = 3.4)
-nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
-              data = fitode::bombay,
-              start = KM.parameters)
-nls.parameters <- coef(nlsfit)
-print(nls.parameters)
-@
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{sech} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{) \{}\hlnum{1}\hlopt{/}\hlkwd{cosh}\hlstd{(x)\}}
+\hlstd{KM_approx} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{t}\hlstd{,} \hlkwc{a}\hlstd{,} \hlkwc{omega}\hlstd{,} \hlkwc{phi}\hlstd{) \{a} \hlopt{*} \hlkwd{sech}\hlstd{(omega}\hlopt{*}\hlstd{t} \hlopt{-} \hlstd{phi)}\hlopt{^}\hlnum{2}\hlstd{\}}
+\hlstd{KM.parameters} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlkwc{a} \hlstd{=} \hlnum{890}\hlstd{,} \hlkwc{omega} \hlstd{=} \hlnum{0.2}\hlstd{,} \hlkwc{phi} \hlstd{=} \hlnum{3.4}\hlstd{)}
+\hlstd{nlsfit} \hlkwb{<-} \hlkwd{nls}\hlstd{(mort} \hlopt{~} \hlkwd{KM_approx}\hlstd{(week, a, omega, phi),}
+              \hlkwc{data} \hlstd{= fitode}\hlopt{::}\hlstd{bombay,}
+              \hlkwc{start} \hlstd{= KM.parameters)}
+\hlstd{nls.parameters} \hlkwb{<-} \hlkwd{coef}\hlstd{(nlsfit)}
+\hlkwd{print}\hlstd{(nls.parameters)}
+\end{alltt}
+\begin{verbatim}
+##           a       omega         phi 
+## 874.7545749   0.1935916   3.3720557
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
 \noindent
 Above, we chose as our starting value the fitted parameter values of
@@ -486,17 +522,25 @@ approximated easily by plotting the data on a log scale, estimating
 the initial slope, and dividing by 2.  Very rough guesses for $a$,
 $\tpeak$ and $\omega$ are sufficient to converge on the same fit:
 
-<<nls-bombay-2>>=
-a.guess <- 1000    # crude "by eye" estimate of peak value,
-tpeak.guess <- 15  # peak time,
-omega.guess <- 1   # and half the initial growth rate
-phi.guess <- omega.guess * tpeak.guess
-nlsfit <- nls(mort ~ KM_approx(week, a, omega, phi),
-              data = fitode::bombay,
-              start = c(a = a.guess, omega = omega.guess,
-                        phi = phi.guess))
-print(nls.parameters <- coef(nlsfit))
-@
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{a.guess} \hlkwb{<-} \hlnum{1000}    \hlcom{# crude "by eye" estimate of peak value,}
+\hlstd{tpeak.guess} \hlkwb{<-} \hlnum{15}  \hlcom{# peak time,}
+\hlstd{omega.guess} \hlkwb{<-} \hlnum{1}   \hlcom{# and half the initial growth rate}
+\hlstd{phi.guess} \hlkwb{<-} \hlstd{omega.guess} \hlopt{*} \hlstd{tpeak.guess}
+\hlstd{nlsfit} \hlkwb{<-} \hlkwd{nls}\hlstd{(mort} \hlopt{~} \hlkwd{KM_approx}\hlstd{(week, a, omega, phi),}
+              \hlkwc{data} \hlstd{= fitode}\hlopt{::}\hlstd{bombay,}
+              \hlkwc{start} \hlstd{=} \hlkwd{c}\hlstd{(}\hlkwc{a} \hlstd{= a.guess,} \hlkwc{omega} \hlstd{= omega.guess,}
+                        \hlkwc{phi} \hlstd{= phi.guess))}
+\hlkwd{print}\hlstd{(nls.parameters} \hlkwb{<-} \hlkwd{coef}\hlstd{(nlsfit))}
+\end{alltt}
+\begin{verbatim}
+##           a       omega         phi 
+## 874.7550490   0.1935918   3.3720589
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
 \noindent
 However, if you experiment with starting values, you will find that if
@@ -521,9 +565,13 @@ you can exclude values outside that range.  For example, to ensure
 that all the parameters are non-negative (and exclude the alternative
 fit above), you would add the \code{nls} option
 
-<<eval=FALSE>>=
-lower = c(a = 0, omega = 0, phi = 0)
-@
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{lower} \hlkwb{=} \hlkwd{c}\hlstd{(}\hlkwc{a} \hlstd{=} \hlnum{0}\hlstd{,} \hlkwc{omega} \hlstd{=} \hlnum{0}\hlstd{,} \hlkwc{phi} \hlstd{=} \hlnum{0}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
 \noindent
 which would prevent convergence to negative $\omega$ and $\phi$.
@@ -551,54 +599,9 @@ represent proportions or probabilities.  (Requiring positivity is so
 common that \code{fitode} uses a log link for all parameters by
 default.)
 
-<<KM-fitted-values, echo=FALSE>>=
-dig <- 3 # number of significant digits for printing
-assignfun <- function(par,
-                      text=".KM") {
-    parnames <- names(par)
 
-    for (p in parnames) {
-        assign(paste0(p, text), signif(par[[p]], dig),
-               envir=globalenv())
-    }
-}
 
-assignfun(KM.parameters)
-tpeak.KM <- with(as.list(KM.parameters), signif(phi / omega,dig))
-@
 
-<<nls-fitted-values, echo=FALSE>>=
-assignfun(nls.parameters, text=".nls")
-tpeak.nls <- with(as.list(nls.parameters), signif(phi / omega,dig))
-cc <- suppressMessages(confint(nlsfit))
-## would like to use built-in knitr/Sexpr{} magic but ...
-## from https://stackoverflow.com/questions/8366324/r-sweave-formatting-numbers-with-sexpr-in-scientific-notation
-format_sn0 <- function(x, digits = dig,
-                      max_ord = 2,
-                      ensuremath = TRUE) {
-
-    if (x==0) return("0")
-    ord <- floor(log(abs(x), 10))
-    if (abs(ord) <= abs(max_ord)) return(as.character(signif(x, dig)))
-    x <- x / 10^ord
-    x <- signif(x, digits=dig)
-    r <- sprintf("%s\\times 10^{%s}", x, ord)
-    if (ensuremath) r <- sprintf("\\ensuremath{%s}", r)
-    return(r)
-}
-format_sn <- Vectorize(format_sn0,
-                       vectorize.args = "x")
-## format_sn <- knitr::knit_hooks$get("inline")
-ci_fmt  <- function(p, cc, sn = TRUE, ...) {
-    ffun <- if (sn) format_sn else format
-    ( ffun(cc[p,], ...)
-    |> paste(collapse = ", ")
-    |> sprintf(fmt = "(%s)")
-    )
-}
-assignfun(cc[,"2.5%"], text=".lwr")
-assignfun(cc[,"97.5%"], text=".upr")
-@
 
 If we accept our fit as satisfactory, what can we infer about the
 dynamics of plague that \KM were attempting to capture with the SIR
@@ -653,101 +656,11 @@ which is the same as the mean infectious period in this simple model
 \citep{pybus2001epidemic,roberts2007model,wallinga2007generation,KrylEarn13,Cham+18}.  \Cref{tab:Bombay} lists the values of
 the parameters as estimated by \KM and by us using \code{nls}.
 
-<<invert-KM-analytically, echo=FALSE>>=
-invert_params <- function(I0, params) {
-    with(as.list(params), {
-        tpeak <- phi / omega
-        Reff <- 1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a
-	q <- (Reff-1)/tanh(phi)
-        gamma <- 2 * omega/q ## gamma has units of 1/week
-	S0 <- 2 * Reff^2 * I0 * sinh(phi)^2/(Reff - 1)^2
-	beta <- Reff * gamma/S0
-	c(tpeak=tpeak, Reff=Reff, S0=S0, gamma=gamma, Tg=1/gamma, beta=beta)
-    })
-}
-N.KM <- 10^6
-I0.KM <- 1
-orig.params.KM <- invert_params(I0 = I0.KM, params = KM.parameters)
-orig.params.KM <- signif(orig.params.KM,dig)
-assignfun(orig.params.KM)
-R0.KM <- Reff.KM/S0.KM*N.KM
-I0.nls <- 1
-orig.params.nls <- invert_params(I0 = I0.nls, params = coef(nlsfit))
-orig.params.nls <- signif(orig.params.nls,dig)
-assignfun(orig.params.nls, ".nls")
-R0.nls <- Reff.nls/S0.nls*N.KM
-@
 
-<<delta-method-ci, echo=FALSE>>==
-convert_express <- list(
-    tpeak=expression(phi/omega),
-    Reff=expression((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a)),
-    gamma=expression(2 * omega/((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a)-1)/tanh(phi)),
-    S0=expression(2 * ((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a))^2 * I0 * sinh(phi)^2/(((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a)) - 1)^2),
-    beta=expression((2 * omega*tanh(phi))*((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a) - 1)/(2 * (1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a) * I0 * sinh(phi)^2)),
-    Tg=expression(1/(2 * omega/((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a)-1)/tanh(phi))),
-    R0=expression(((1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a) - 1)^2/(2 * (1 + 2 * omega * I0 * sinh(phi) * cosh(phi)/a) * I0 * sinh(phi)^2)*N)
-)
 
-KMcifun <- function(fit,
-                    I0,
-                    N) {
-    param <- coef(fit)
-    ##dg/dx
-    dgdx <- sapply(convert_express, function(x) {
-        dd <- deriv(x, c("a", "omega", "phi"))
-        ee <- eval(dd, c(as.list(param), I0=I0, N=N))
-        attr(ee, "gradient")
-    })
 
-    vcov <- vcov(fit)
-    est_vcov <- t(dgdx) %*% vcov %*% dgdx
-    est_err <- sqrt(diag(est_vcov))
-    est_par <- sapply(convert_express, eval, c(as.list(param), I0=I0, N=N))
-    z <- -qnorm((1-0.95)/2)
 
-    matrix(
-        c(est_par - z * est_err, est_par + z * est_err),
-        ncol=2,
-        dimnames=list(
-            c("tpeak", "Reff", "gamma", "S0", "beta", "Tg", "R0"),
-            c("2.5%", "97.5%")
-        )
-    )
-}
 
-cc.delta <- KMcifun(nlsfit, I0=I0.KM, N=N.KM)
-assignfun(cc.delta[,"2.5%"], text=".lwr")
-assignfun(cc.delta[,"97.5%"], text=".upr")
-@
-
-<<delta-method-band, echo=FALSE>>==
-traj_express <- expression(a * 1/cosh(omega*t - phi)^2)
-
-traj_ci <- function(t,
-                    parameters,
-                    vcov,
-                    level=0.95) {
-    traj <- eval(deriv(traj_express, c("a", "omega", "phi")), c(as.list(parameters), t=t))
-
-    traj_dgdx <- attr(traj, "gradient")
-
-    est_vcov <- traj_dgdx %*% vcov %*% t(traj_dgdx)
-    est_err <- sqrt(diag(est_vcov))
-    ll <- (1-level)/2
-    z <- -qnorm(ll)
-
-    dd <- data.frame(
-        times=t,
-        estimate=traj,
-        lwr=traj-est_err*z,
-        upr=traj+est_err*z
-    )
-    names(dd)[3:4] <- c(paste(100*ll, "%"), paste(100*(1-ll), "%"))
-
-    dd
-}
-@
 
 \paragraph*{Correctly handling weekly mortality.}
 
@@ -1183,33 +1096,41 @@ an analytical formula.  We begin illustrating the use of the package
 by fitting the SIR model~\eqref{eq:SIR} to the Bombay plague epidemic.
 
 We first load the package
-<<load fitode, message=FALSE>>=
-library(fitode)
-@
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(fitode)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 \noindent
 and define a model object:
 
 \vbox{
-<<sirmortmodel_correct>>=
-SIR_model <- odemodel(
-    name="SIR model",
-    model=list(
-        S ~ - beta * S * I,
-        I ~ beta * S * I - gamma * I,
-        R ~ gamma * I
-    ),
-    observation = list(
-        mort ~ dnbinom(mu = R, size = k)
-    ),
-    diffnames="R",
-    initial=list(
-        S ~ S0,
-        I ~ I0,
-        R ~ 0
-    ),
-    par=c("beta", "gamma", "S0", "I0", "k")
-)
-@
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{SIR_model} \hlkwb{<-} \hlkwd{odemodel}\hlstd{(}
+    \hlkwc{name}\hlstd{=}\hlstr{"SIR model"}\hlstd{,}
+    \hlkwc{model}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{S} \hlopt{~ -} \hlstd{beta} \hlopt{*} \hlstd{S} \hlopt{*} \hlstd{I,}
+        \hlstd{I} \hlopt{~} \hlstd{beta} \hlopt{*} \hlstd{S} \hlopt{*} \hlstd{I} \hlopt{-} \hlstd{gamma} \hlopt{*} \hlstd{I,}
+        \hlstd{R} \hlopt{~} \hlstd{gamma} \hlopt{*} \hlstd{I}
+    \hlstd{),}
+    \hlkwc{observation} \hlstd{=} \hlkwd{list}\hlstd{(}
+        \hlstd{mort} \hlopt{~} \hlkwd{dnbinom}\hlstd{(}\hlkwc{mu} \hlstd{= R,} \hlkwc{size} \hlstd{= k)}
+    \hlstd{),}
+    \hlkwc{diffnames}\hlstd{=}\hlstr{"R"}\hlstd{,}
+    \hlkwc{initial}\hlstd{=}\hlkwd{list}\hlstd{(}
+        \hlstd{S} \hlopt{~} \hlstd{S0,}
+        \hlstd{I} \hlopt{~} \hlstd{I0,}
+        \hlstd{R} \hlopt{~} \hlnum{0}
+    \hlstd{),}
+    \hlkwc{par}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"beta"}\hlstd{,} \hlstr{"gamma"}\hlstd{,} \hlstr{"S0"}\hlstd{,} \hlstr{"I0"}\hlstd{,} \hlstr{"k"}\hlstd{)}
+\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 }% end vbox
 \noindent
 In the model definition above:
@@ -1252,26 +1173,34 @@ calculate the mortality trajectory,\footnote{Modelers often fit
   making it difficult to define CIs \citep{King+15}.}  we have to add
 an extra row representing $t_0$ to the data set in order to compute
 $\mu(t_1) = R(t_1) - R(t_0)$:
-<<sirmortfit_data, cache=TRUE, warning=FALSE>>=
-bombay2 <- rbind(
-    c(times=bombay$week[1] -
-          diff(bombay$week)[1], mort=NA),
-    bombay
-)
-@
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{bombay2} \hlkwb{<-} \hlkwd{rbind}\hlstd{(}
+    \hlkwd{c}\hlstd{(}\hlkwc{times}\hlstd{=bombay}\hlopt{$}\hlstd{week[}\hlnum{1}\hlstd{]} \hlopt{-}
+          \hlkwd{diff}\hlstd{(bombay}\hlopt{$}\hlstd{week)[}\hlnum{1}\hlstd{],} \hlkwc{mort}\hlstd{=}\hlnum{NA}\hlstd{),}
+    \hlstd{bombay}
+\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
 \noindent
 Taking our previous parameter estimates from \code{nls} as starting
 values (and choosing a starting value for $k$), we can fit the model
 by calling the \code{fitode} function:
 
-<<sirmortfit,cache=TRUE,warning=FALSE,message=FALSE, tidy = FALSE>>=
-SIR_start <- c(beta=beta.nls, gamma=gamma.nls,
-               I0=I0.KM, S0=S0.nls, k=50)
-SIR_fit <- fitode( model = SIR_model, data = bombay2,
-                  fixed = list(gamma=gamma.nls),
-                  start = SIR_start, tcol = "week" )
-@
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{SIR_start} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlkwc{beta}\hlstd{=beta.nls,} \hlkwc{gamma}\hlstd{=gamma.nls,}
+               \hlkwc{I0}\hlstd{=I0.KM,} \hlkwc{S0}\hlstd{=S0.nls,} \hlkwc{k}\hlstd{=}\hlnum{50}\hlstd{)}
+\hlstd{SIR_fit} \hlkwb{<-} \hlkwd{fitode}\hlstd{(} \hlkwc{model} \hlstd{= SIR_model,} \hlkwc{data} \hlstd{= bombay2,}
+                  \hlkwc{fixed} \hlstd{=} \hlkwd{list}\hlstd{(}\hlkwc{gamma}\hlstd{=gamma.nls),}
+                  \hlkwc{start} \hlstd{= SIR_start,} \hlkwc{tcol} \hlstd{=} \hlstr{"week"} \hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
 \noindent In the fitting function above:
 \begin{description}
@@ -1313,120 +1242,25 @@ discrete predictions (rather than smooth curves) because we are
 calculating mortality at discrete (weekly) time intervals using
 \cref{eq:correct.mortality2}.
 
-<<sirmortfitcoef, include=FALSE>>==
-coef.bombay.fitode.nb <- coef(SIR_fit)
-ci.bombay.fitode.nb <- confint(SIR_fit)[,-1]
-assignfun(coef.bombay.fitode.nb, ".bombay.fitode.nb")
-@
 
-<<sirmortconfint, include=FALSE>>==
-ci.derived.bombay.fitode.nb <- confint(SIR_fit,
-        parm=list(
-            Reff~beta*S0/gamma.nls,
-            R0~beta*N.KM/gamma.nls,
-            Tg~1/gamma.nls
-        ))
-assignfun(ci.derived.bombay.fitode.nb[,1], ".bombay.fitode.nb")
-@
 
-<<confband, include=FALSE>>=
-tmax <- 33
-tvals <- 0:tmax
-SIR_confband <- predict(SIR_fit, times=tvals, level=0.95)$mort
-@
+
+
+
 
 % OLS:
-<<sirmortmodel, include=FALSE>>=
-SIR_model_ols <- odemodel(
-    name="SIR model",
-    model=list(
-        S ~ - beta * S * I,
-        I ~ beta * S * I - gamma * I,
-        R ~ gamma * I
-    ),
-    observation = list(
-        mort ~ ols(mean = R)
-    ),
-    initial=list(
-        S ~ S0,
-        I ~ I0,
-        R ~ 0
-    ),
-    par=c("beta", "gamma", "S0", "I0"),
-    diffnames="R"
-)
-@
+
 
 % Also fixing gamma for now:
-<<sirmortfit_correct, cache=TRUE, warning=FALSE, include=FALSE>>=
-SIR_start_ols <- coef(SIR_fit)[-5]
 
-SIR_fit_ols <- fitode(
-    SIR_model_ols,
-    data = bombay2,
-    start = SIR_start_ols,
-    fixed = list(gamma=gamma.nls),
-    tcol = "week"
-)
-@
 
-<<sirmortfitcoefols, include=FALSE>>==
-coef.bombay.fitode.ols <- coef(SIR_fit_ols)
-ci.bombay.fitode.ols <- confint(SIR_fit_ols)[,-1]
-assignfun(coef.bombay.fitode.ols, ".bombay.fitode.ols")
 
-ci.derived.bombay.fitode.ols <- confint(SIR_fit_ols,
-        parm=list(
-            Reff~beta*S0/gamma.nls,
-            R0~beta*N.KM/gamma.nls,
-            Tg~1/gamma.nls
-        ))
 
-assignfun(ci.derived.bombay.fitode.ols[,1], ".bombay.fitode.ols")
-@
 
-<<sirmortfit_ols_confband, include=FALSE>>==
-SIR_ols_confband <- predict(SIR_fit_ols, times=tvals, level=0.95)$mort
-@
 
-<<bombay_likelihood_fit, cache=TRUE, warning=FALSE, message=FALSE, include=FALSE>>==
-if (file.exists("bombay-likelihood.rda")) {
-    load("bombay-likelihood.rda")
-} else {
-    nfits <- 100
-    gammavec <- seq(1, 28, length.out=nfits)
-    loglikvec <- rep(NA, nfits)
-    fitlist <- vector('list', length(gammavec))
 
-    for (i in 1:nfits) {
-        if (i==1) {
-            start_ll <- coef(SIR_fit2)
-        } else {
-            start_ll <- coef(fitlist[[which.max(loglikvec[1:(i-1)])]])
-        }
 
-        fitlist[[i]] <- try(fitode(
-            SIR_model,
-            data = bombay2,
-            start = start_ll,
-            fixed = list(gamma=gammavec[i]),
-            tcol = "week"
-        ))
 
-        if (!inherits(fitlist[[i]], "try-error")) {
-            loglikvec[i] <- logLik(fitlist[[i]])
-        }
-    }
-    save("gammavec", "loglikvec", "fitlist", file="bombay-likelihood.rda")
-}
-@
-
-<<bombay_likelihood_plot, cache=TRUE, include=FALSE>>==
-plot(gammavec, loglikvec,
-     xlab="gamma (1/week)",
-     ylab="log likelihood",
-     ylim=c(-140, -135.5))
-@
 
 \section{Cautionary remarks concerning fits to Bombay plague}
 
@@ -1485,122 +1319,24 @@ valuable example concerns the main wave in the city of Philadelphia
 restricted to a single, large city, and because they provide
 \emph{daily} counts that capture the detailed temporal pattern (large
 dots in \cref{fig:phila}).
-<<philapop, echo=TRUE, include=FALSE>>=
-## https://en.wikipedia.org/wiki/Demographics_of_Philadelphia
-philapop <- data.frame(year = c(1910,1920), population = c(1549008, 1823779))
-##' @param pop data frame
-##' @param year year to interpolate to
-pop_interp <- function( pop, year ) {
-    slope <- (pop[2,2] - pop[1,2])/(pop[2,1] - pop[1,1])
-    out <- round( pop[1,2] + (year-pop[1,1])*slope )
-    return(out)
-}
-philapop1918 <- pop_interp( philapop, 1918 )
-print(philapop1918)
-## reduce this by case fatality proportion so we have
-## the initial susceptible population who will be recorded
-## as a death if they get infected:
-philacfp <- 0.025
-philaS0 <- round(philapop1918 * philacfp)
-print(philaS0)
-@
 
-<<read.phila.data, include=FALSE>>=
-## we have to cut the data when we're using nbinom
-## because there are long trailing zeroes..
-## same with the beginning
-phila1918a <- subset(phila1918, as.Date("1918-09-10") < date &
-                                date < as.Date("1918-11-18"))
-phila1918b <- data.frame(
-    date=c(as.Date("1918-09-10"), phila1918a$date),
-    mort=c(NA, phila1918a$mort)
-)
-## avoids dependence on lubridate
-## not reliable for leap years!
-mk_dec_date <- function(x) {
-    p <- as.POSIXlt(x)
-    1900 + p$year + p$yday/365
-}
-phila1918b$time <- mk_dec_date(phila1918b$date)
-if (requireNamespace("lubridate")) {
-    stopifnot(all.equal(
-        phila1918b$time, lubridate::decimal_date(phila1918b$date)))
-}
 
-@
 
-<<phila.fit,cache=TRUE,warning=FALSE, include=FALSE>>=
-## time is in the unit of years
-## so gamma=52 corresponds to a mean of 1 week
-## not-so-random starting values chosen by hand
-start.phila <- c(beta=4e-3, gamma=52*2,
-                 S0=philaS0*0.9,
-                 I0=3, k=50)
-names(start.phila) <- c("beta","gamma","S0","I0", "k")
-print(start.phila)
 
-phila_fit <- fitode(
-    SIR_model,
-    data = phila1918b,
-    start = start.phila,
-    tcol = "time"
-)
-ppp <- predict(phila_fit, level=0.95)[[1]]
-@
 
-<<philaassign, include=FALSE>>==
-coef.phila.fitode <- coef(phila_fit)
-ci.phila.fitode <- confint(phila_fit)[,-1]
-assignfun(coef.phila.fitode, ".phila.fitode")
-@
+
+
 
 % Confint on derived parameers:
-<<sirphilaconfint, include=FALSE>>==
-ci.derived.phila.fitode <- confint(phila_fit,
-        parm=list(
-            Reff~beta*S0/gamma,
-            R0~beta*philaS0/gamma,
-            Tg~1/gamma
-        ))
-assignfun(ci.derived.phila.fitode[,1], ".phila.fitode")
-philaparms <- as.list(c(coef.phila.fitode, ci.derived.phila.fitode[,1]))
-@
 
-<<philaKMparms, include=FALSE>>=
-## get KM approx parms associated with fitode fit:
-a.phila <- with(philaparms, a_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
-omega.phila <- with(philaparms, omega_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
-phi.phila <- with(philaparms, phi_fun(Reff=Reff, gamma=gamma, S0=S0, I0=I0))
-KM.approx.phila <- c(a=a.phila, omega=omega.phila, phi=phi.phila)
-print(KM.approx.phila)
-@
 
-<<adjust philaKMparms, include=FALSE>>=
-## adjust because above is giving nls problems:
-KM.start.phila <- c(a=a.phila, omega=omega.phila, phi=phi.phila)
-print(KM.start.phila)
-@
 
-<<phila.nlsfit, include=FALSE>>=
-## shift time to start at 0 before passing to nls
-df <- phila1918b[,c("time","mort")]
-df[,"time"] <- df[,"time"] - df[1,"time"]
-phila.nlsfit <- nls(mort ~ KM_approx(time, a, omega, phi),
-              data = df,
-              start = KM.start.phila)
-phila.nls.parameters <- coef(phila.nlsfit)
-ci.phila.nls <- confint(phila.nlsfit)
-assignfun(phila.nls.parameters, ".phila.nls")
-print(phila.nls.parameters)
-@
 
-<<philanlsR0, include=FALSE>>==
-cc.phila.delta <- KMcifun(phila.nlsfit, I0=I0.phila.fitode, N=philaS0)
-orig.params.phila <- invert_params(I0=I0.phila.fitode, coef(phila.nlsfit))
-orig.params.phila <- signif(orig.params.phila,dig)
-assignfun(orig.params.phila, text = ".phila.nls")
-R0.phila.nls <- Reff.phila.nls/S0.phila.nls*philaS0
-@
+
+
+
+
+
 
 
 As for Bombay plague, we can fit \KM's approximation \eqref{eq:sech}
@@ -1608,8 +1344,8 @@ to the Philadelphia influenza epidemic using nonlinear least squares,
 which yields the \nlscol curve in \cref{fig:phila}.  While this \code{nls}
 fit does not look unreasonable at a glance, the fitted parameter
 values (\cref{tab:philanls}) are absurd, including a basic
-reproduction number $\Rn\approx \Sexpr{signif(R0.phila.nls,2)}$ and a
-mean generation interval $\Tg\approx \Sexpr{signif(Tg.phila.nls,2)}$
+reproduction number $\Rn\approx 2500$ and a
+mean generation interval $\Tg\approx 1.5$
 years.
 
 Matching numerically computed trajectories of the exact SIR model
@@ -1617,8 +1353,8 @@ using \code{fitode} gives a fit---the solid \FOnbcol curve in
 \cref{fig:phila}---that is visually similar to the (\nlscol) fit of
 \KM's approximation, but provides much more realistic parameter
 estimates (\cref{tab:phila.fitode}); in particular,
-$\Rn\approx \Sexpr{signif(R0.phila.fitode,2)}$ and
-$\Tg\approx \Sexpr{signif(Tg.phila.fitode*365,2)}$ days.
+$\Rn\approx 6.4$ and
+$\Tg\approx 4.3$ days.
 
 If we convert the \code{fitode} estimates of the SIR parameters to the
 parameters of \KM's approximation, we obtain the dotted \FOnbcol curve
@@ -1630,34 +1366,7 @@ and poorer over time as the underlying assumption on which it is based
 
 \section{Fitting the deterministic SIR model to stochastic simulations}\label{sec:stoch}
 
-<<compute-stochastic-SIR-via-sirr, include=FALSE>>=
-sirstoch_fn <- system.file("vignette_data", "sirstoch.RData", package = "fitode")
-if (file.exists(sirstoch_fn)) {
-    load(sirstoch_fn)
-} else {
-    library(sirr)
-    R0 <- 5
-    N <- 2000
-    mm <- create_SIRmodel(R0=R0, N=N)
-    ii <- set_inits(mm)
-    iii <- ii
-    iii[2] <- exp(iii[2])
-    names(iii) <- c("S","I","R")
-    ## FIX: this should not be necessary, but it is a bug in sirr
-    ##      associated with N != 1.
-    mm1 <- create_SIRmodel(R0=R0, N=1)
-    sir.det <- compute_SIRts(mm1)
-    ## get associated params for KM approx:
-    a.det <- a_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-    omega.det <- omega_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-    phi.det <- phi_fun(Reff=R0*iii["S"]/2000, gamma=mm$gamma, S0=iii["S"], I0=iii["I"])
-    ##
-    tt <- 0:10
-    sir.stoch <- get_ssa_soln(mm, stopcrit = NULL, inits=ii, times=tt)
-    save(R0, N, mm, ii, iii, mm1, sir.det, a.det, omega.det, phi.det, tt,
-         sir.stoch, file="sirstoch.RData")
-}
-@
+
 
 The most compelling tests of estimation methods involve fitting models
 to data that have been generated from a known model, so we know
@@ -1702,9 +1411,9 @@ possibility that an epidemic can burn out \citep{Pars+24}).
 
 In \cref{fig:stoch}, the simulated data points show a single
 realization of the stochastic SIR model with initial state
-$(\Sinit,\Iinit,\Rinit)=(\Sexpr{iii})$, basic reproduction number
-$\Rn=\Sexpr{R0}$, and mean generation interval
-$\Tg=\gamma^{-1}=\Sexpr{1/mm[["gamma"]]}$ week.  In the top panel,
+$(\Sinit,\Iinit,\Rinit)=(1998, 2, 0)$, basic reproduction number
+$\Rn=5$, and mean generation interval
+$\Tg=\gamma^{-1}=1$ week.  In the top panel,
 $\dbydt{R}$ [\cref{eq:SIR;R}] with the correct initial conditions and
 parameter values is shown with solid \determcol, and the \KM
 approximation \eqref{eq:sech} based on those parameter values is shown
@@ -1739,83 +1448,18 @@ deterministic model; all other parameter estimates are nearly
 identical to the true parameter values used to generate the stochastic
 trajectory (\cref{tab:stoch.fitode}).
 
-<<colours, include=FALSE>>=
-my.red <- "#E41A1C"     # colour-blind friendly red
-my.blue <- "#377EB8"    # colour-blind friendly blue
-my.green <- "#4DAF4A" # colour-blind friendly green
-my.yellow <- "#FFD92F" # colour-blind friendly yellow
-my.orange <- "#D55E00" # colour-blind friendly orange
-@
 
-<<sirstochdata, include=FALSE>>==
-## convert to daily mortality
-mort.stoch <- diff(sir.stoch$R[!duplicated(ceiling(sir.stoch$time*7),fromLast = TRUE)])
-mort.time <- ceiling(sir.stoch$time[!duplicated(ceiling(sir.stoch$time*7),fromLast = TRUE)]*7)
-mort.which <- which(diff(mort.time)==1)
 
-sir.stoch.data <- data.frame(
-    time=mort.time[mort.which]/7,
-    mort=c(NA, mort.stoch[head(mort.which, -1)])
-)
-@
 
-<<sirnlsfit, cache=TRUE, warning=FALSE, include=FALSE>>==
-nlsfit.stoch <- nls(mort ~ KM_approx(time, a, omega, phi),
-              data = sir.stoch.data,
-              start = c(a = unname(a.det), omega = unname(omega.det),
-                        phi = unname(phi.det)))
 
-nls.stoch.parameters <- coef(nlsfit.stoch)
-assignfun(nls.stoch.parameters, text=".nls.stoch")
 
-orig.params.KM.stoch <- invert_params(I0 = exp(ii[[2]]), params = c(a=unname(a.det), phi=unname(phi.det), omega=unname(omega.det)))
-orig.params.KM.stoch <- signif(orig.params.KM.stoch)
-assignfun(orig.params.KM.stoch, ".KM.stoch")
 
-orig.params.nls.stoch <- invert_params(I0 = exp(ii[[2]]), params = coef(nlsfit.stoch))
-orig.params.nls.stoch <- signif(orig.params.nls.stoch)
-assignfun(orig.params.nls.stoch, ".nls.stoch")
 
-cc.nls.stoch <- suppressMessages(confint(nlsfit.stoch))
 
-cc.delta.stoch <- KMcifun(nlsfit.stoch, I0 = exp(ii[[2]]), N=N)
-assignfun(cc.delta.stoch[,"2.5%"], text=".lwr.nls.stoch")
-assignfun(cc.delta.stoch[,"97.5%"], text=".upr.nls.stoch")
 
-@
-
-<<sirstochfit, cache=TRUE, warning=FALSE, include=FALSE>>=
-start.stoch <- c(beta=mm$beta, gamma=mm$gamma,
-                 S0=iii["S"], I0=iii["I"])
-names(start.stoch) <- c("beta","gamma","S0","I0")
-print(start.stoch)
-
-SIR_stoch_fit <- fitode(
-    SIR_model,
-    data = sir.stoch.data,
-    start = c(start.stoch, k=10),
-    # fixed = c(gamma = 1), # Tg = 1/gamma = 1 week
-    tcol = "time"
-)
-sss <- predict(SIR_stoch_fit, level=0.95)[[1]]
-summary(SIR_stoch_fit)
-@
-
-<<stochestassign, include=FALSE>>==
-coef.stoch.fitode <- coef(SIR_stoch_fit)
-ci.stoch.fitode <- confint(SIR_stoch_fit)[,-1]
-assignfun(coef.stoch.fitode, ".stoch.fitode")
-@
 
 % Confint on derived parameers:
-<<sirstochconfint, include=FALSE>>==
-ci.derived.stoch.fitode <- confint(SIR_stoch_fit,
-        parm=list(
-            Reff~beta*S0/gamma,
-            R0~beta*2000/gamma
-        ))
-assignfun(ci.derived.stoch.fitode[,1], ".stoch.fitode")
-@
+
 
 \section{Discussion}
 
@@ -2071,73 +1715,9 @@ want to dig into data, will benefit from this exposition.
 %%\bibliography{brauer-ms,fitode}
 \bibliography{bibexport}
 
-<<figfuns, echo=FALSE>>=
-lwd <- 5
-use_OI <- TRUE
-pp <- palette.colors()
-if (FALSE) plot(1:8, 1:8, cex = 5, pch = 16, col = pp)
-if (use_OI) {
-    ## these were chosen from the O-I palette to approximately
-    ## match the previous choices (substituted an orange for yellow,
-    ## as I found the yellow a bit too light)
-    col.KM <- pp[6]
-    col.nls <- pp[7]
-    col.fitode.nb <- pp[2]
-    col.fitode.ols <- pp[3]
-    col.determ <- pp[4]
-} else {
-    col.KM <- my.blue
-    col.nls <- my.red
-    col.fitode.nb <- my.yellow
-    col.fitode.ols <- "grey80" # "orange" # my.orange
-    col.determ <- my.green
-}
 
 
-transparent_colour <- function(col,alpha=150/255) {
-    alpha <- round(alpha * 255)
-    v <- col2rgb(col)[,1] # color as rgb vector
-    tcol <- rgb(v["red"],v["green"],v["blue"],alpha=alpha,maxColorValue = 255)
-    return(tcol)
-}
-col.fitodenbCI <- transparent_colour(col.fitode.nb, alpha=0.4)
-col.fitodeCI <- transparent_colour(col.fitode.ols, alpha=0.4)
-col.nlsCI <- transparent_colour(col.nls, alpha=0.4)
-setup_plot <- function(xlab="", ylab="deaths",
-                       at=100*(0:10), ...) {
-    plot(NA, NA , bty="L", type="n",
-         xaxs="i", yaxs="i", las=1,
-         yaxt="n",
-         xlab=xlab, ylab=ylab,
-         ...
-         )
-    axis(side=2, at=at, las=1)
-}
-draw_confband <- function(confband, col = col.fitodenbCI) {
-    with(confband,{
-        polygon(
-            x = c(times, rev(times)),
-            y = c(`2.5 %`, rev(`97.5 %`)),
-            col = col,
-            border = NA,
-            xpd = NA
-        )
-    })
-}
-draw_legend <- function(lwd=5, pt.bg="white") {
-    legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
-       lty=c(NA,"solid","solid","solid"),
-       col=c("black",col.KM,col.nls,col.fitode.nb),
-       pch=c(21,NA,NA,NA),
-       pt.bg=c(pt.bg,NA,NA,NA),
-       legend=c("observed data","KM","nls","fitode (nbinom)"))
-}
-@
 
-<<testing, include=FALSE, results = "hide">>=
-format_sn0(cc["a", 1])
-ci_fmt("a", cc)
-@
 
 %%\begin{landscape}
 \begin{table}
@@ -2165,36 +1745,36 @@ ci_fmt("a", cc)
   \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
     & \thead{\footnotesize\bfseries KM \\ \bfseries estimate} & \thead{\footnotesize\bfseries \code{nls} \\ \bfseries estimate} & {\footnotesize\bfseries 95\% CI} \\\hline
-    total removal rate at epidemic peak & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{a.KM} &
-      \Sexpr{signif(a.nls,dig)} & \Sexpr{ci_fmt("a", cc)} \\
+    total removal rate at epidemic peak & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & 890 &
+      875 & (816, 935) \\
     outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{omega.KM} & \Sexpr{signif(omega.nls,dig-1)} & \Sexpr{ci_fmt("omega", cc)} \\
-    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{phi.KM} &
-      \Sexpr{signif(phi.nls,dig)} & \Sexpr{ci_fmt("phi", cc)} \\
+      0.2 & 0.19 & (0.178, 0.21) \\
+    outbreak centre & $\phi$ & \eqref{eq:phi} & -- & 3.4 &
+      3.37 & (3.09, 3.67) \\
     \noalign{\vspace{10pt}}
     \bfseries Assumed\break parameter \\\hline
     initial prevalence & $\Iinit$ & -- & -- &
-      \Sexpr{I0.KM} & \Sexpr{I0.nls} & -- \\
+      1 & 1 & -- \\
       population size & $N$ & -- & -- & $10^6$ & $10^6$ & -- \\
     %%
     \noalign{\vspace{10pt}}
     \bfseries Derived\break parameter \\\hline
     peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
-      \Sexpr{tpeak.KM} & \Sexpr{tpeak.nls} & \Sexpr{ci_fmt("tpeak", cc.delta)} \\
+      17 & 17.4 & (17.1, 17.7) \\
     effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
-      \Sexpr{Reff.KM} & \Sexpr{Reff.nls} & \Sexpr{ci_fmt("Reff", cc.delta)} \\
+      1.1 & 1.09 & (1.04, 1.15) \\
     \emph{per capita} removal rate & $\gamma$ & \eqref{eq:SIR}, \ref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{gamma.KM} & \Sexpr{gamma.nls} & \Sexpr{ci_fmt("gamma", cc.delta)} \\
+      3.96 & 4.11 & (1.95, 6.31) \\
     initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
-      \Sexpr{as.integer(S0.KM)} & \Sexpr{as.integer(S0.nls)} & \Sexpr{ci_fmt("S0", cc.delta, max_ord = 6)} \\
+      53300 & 57400 & (26000, 88800) \\
     transmission rate & $\beta$ & \eqref{eq:SIR}, \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{signif(beta.KM*52,dig)} & \Sexpr{signif(beta.nls*52,dig)} & \Sexpr{ci_fmt("beta", cc.delta*52, sn=FALSE, digits=dig)} \\
+      0.00425 & 0.00407 & (0.00372, 0.00443) \\
     mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
-      \Sexpr{signif(7*Tg.KM,dig)} & \Sexpr{signif(7*Tg.nls,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta)} \\
+      1.77 & 1.7 & (0.802, 2.59) \\
     basic reproduction number & $\Rn$ & \eqref{eq:R0def} & -- &
-      \Sexpr{signif(10^6*Reff.KM/S0.KM,dig)}
-      & \Sexpr{signif(10^6*Reff.nls/S0.nls,dig)} & \Sexpr{ci_fmt("R0", cc.delta)}
+      20.6
+      & 19 & (7.65, 30.5)
   \end{tabular}
   \end{center}
 \end{table}
@@ -2228,19 +1808,19 @@ ci_fmt("a", cc)
   \bfseries Fixed\break parameter & {\footnotesize\bfseries symbol}
     & {\footnotesize\bfseries units}
     & \thead{\footnotesize\bfseries \code{nbinom}\\ estimate} & {\footnotesize\bfseries 95\% CI} & \thead{\footnotesize\bfseries \code{ols}\\ estimate} & {\footnotesize\bfseries 95\% CI} \\\hline
-    recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{gamma.nls} &
-      -- & \Sexpr{gamma.nls} & -- \\
+    recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & 4.11 &
+      -- & 4.11 & -- \\
     %%
     \noalign{\vspace{10pt}}
     \bfseries Estimated\break parameter \\\hline
     transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{beta.bombay.fitode.nb*52} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.nb*52, sn=FALSE, digits=dig)}  & \Sexpr{beta.bombay.fitode.ols*52} & \Sexpr{ci_fmt("beta", ci.bombay.fitode.ols*52, sn=FALSE, digits=dig)}  \\
+      0.004784 & (0.00449, 0.00510)  & 0.0044564 & (0.00393, 0.00506)  \\
     initial\break susceptibles & $\Sinit$& -- &
-      \Sexpr{as.integer(S0.bombay.fitode.nb)} & \Sexpr{ci_fmt("S0", ci.bombay.fitode.nb, max_ord = 6)} & \Sexpr{as.integer(S0.bombay.fitode.ols)} & \Sexpr{ci_fmt("S0", ci.bombay.fitode.ols, max_ord = 6)}\\
+      49200 & (46200, 52400) & 52600 & (46700, 59300)\\
       initial prevalence & $\Iinit$ & -- &
-      \Sexpr{I0.bombay.fitode.nb} & \Sexpr{ci_fmt("I0", ci.bombay.fitode.nb)} & \Sexpr{I0.bombay.fitode.ols} & \Sexpr{ci_fmt("I0", ci.bombay.fitode.ols)} \\
+      0.941 & (0.76, 1.17) & 1.05 & (0.627, 1.77) \\
       overdispersion\break parameter & $k$ & -- &
-      \Sexpr{k.bombay.fitode.nb} & \Sexpr{ci_fmt("k", ci.bombay.fitode.nb)} & -- & -- \\
+      48.8 & (24.4, 97.7) & -- & -- \\
     \noalign{\vspace{10pt}}
     \bfseries Assumed\break parameter \\\hline
     population size & $N$ & -- & $10^6$ & -- & $10^6$ & -- \\
@@ -2248,12 +1828,12 @@ ci_fmt("a", cc)
     \noalign{\vspace{10pt}}
     \bfseries Derived\break parameter \\\hline
       effective reproduction number & $\Reff$ & -- &
-      \Sexpr{Reff.bombay.fitode.nb} &  \Sexpr{ci_fmt("Reff", ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(beta.bombay.fitode.ols*as.integer(S0.bombay.fitode.ols)/gamma.nls,dig)}  &  \Sexpr{ci_fmt("Reff", ci.derived.bombay.fitode.ols[,-1])} \\
+      1.1 &  (1.1, 1.11) & 1.1  &  (1.09, 1.1) \\
       mean generation interval & $\Tg$ & days &
-      \Sexpr{signif(7*Tg.bombay.fitode.nb,dig)} & -- & \Sexpr{signif(7/gamma.nls,dig)} & -- \\
+      1.7 & -- & 1.7 & -- \\
     basic reproduction number & $\Rn$ & -- &
-      \Sexpr{signif(R0.bombay.fitode.nb,dig)}
-      &  \Sexpr{ci_fmt("R0", ci.derived.bombay.fitode.nb[,-1])} & \Sexpr{signif(beta.bombay.fitode.ols*1e6/gamma.nls, dig)} &  \Sexpr{ci_fmt("R0", ci.derived.bombay.fitode.ols[,-1])}
+      22.4
+      &  (21, 23.8) & 20.9 &  (18.2, 23.5)
   \end{tabular}
   \end{center}
 \end{table}
@@ -2261,44 +1841,11 @@ ci_fmt("a", cc)
 
 \begin{figure}
 \centering
-<<Bombay-figure, echo=FALSE, fig.height=5, fig.show="hold", out.width="95%">>=
-tvals <- seq(0, tmax, length.out=1000)
-setup_plot(ylim = c(0, 1000), xlim=c(0,tmax),
-         xlab="weeks", ylab="plague deaths")
-draw_confband(traj_ci(tvals, nls.parameters, vcov(nlsfit)), col=col.nlsCI)
-##DE: skipping fitode confband because there is too much overlap:
-##draw_confband(SIR_confband, col=col.fitodenbCI)
-curve(KM_approx(x, a=a.KM, omega=omega.KM, phi=phi.KM), from=0, to=tmax, n=1000, add=TRUE,
-      lwd=lwd, xpd=NA, col=col.KM)
-curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=1000, add=TRUE,
-      lwd=lwd, xpd=NA, col=col.nls)
-lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd*0.60, lty="dotted")
-points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
-legend("topleft", bty="n", lwd=c(2,lwd,lwd,lwd*0.60),
-       lty=c(NA,"solid","solid","dotted"),
-       col=c("black",col.KM,col.nls,col.fitode.nb),
-       pch=c(21,NA,NA,NA),
-       pt.bg=c("white",NA,NA,NA),
-       legend=c("observed data","KM's (1927) fit","our nls fit","fitode (nbinom)"))
-
-setup_plot(ylim=c(0, 1000), xlim=c(0,tmax), #DE: ymin was 5, not sure why
-         xlab="weeks", ylab="plague deaths"
-         ##, at=c(25, 50, 100, 200, 400, 800)
-         )
-draw_confband(SIR_confband, col=col.fitodenbCI)
-draw_confband(SIR_ols_confband, col=col.fitodeCI)
-lines(estimate ~ times, data=SIR_confband, col=col.fitode.nb, lwd=lwd)
-lines(estimate ~ times, data=SIR_ols_confband, col=col.fitode.ols, lwd=lwd*0.60)
-curve(KM_approx(x, a=a.nls, omega=omega.nls, phi=phi.nls), from=0, to=tmax, n=250, add=TRUE,
-      lwd=lwd*0.60, xpd=NA, col=col.nls, lty="dotted")
-points(mort ~ week, data = fitode::bombay, xpd=NA, pch=21, bg="white", lwd=2)
-legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
-       lty=c(NA,"solid","solid","dotted"),
-       col=c("black",col.fitode.nb,col.fitode.ols,col.nls),
-       pch=c(21,NA,NA,NA),
-       pt.bg=c("white",NA,NA,NA),
-       legend=c("observed data","fitode (nbinom)", "fitode (ols)", "our nls fit"))
-@
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=0.95\linewidth]{Bombay-figure-1} 
+\includegraphics[width=0.95\linewidth]{Bombay-figure-2} 
+\end{knitrout}
 \caption{\textbf{The plague epidemic in Bombay}, 17 December 1905 to 21 July
   1906, used as an example by \KMpage{714}.  The data
   (large dots) were digitized from \citet[Table~IX, p.\,753]{jhyg1907}.
@@ -2351,8 +1898,8 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       (CFP) by taking $N$ to be the size of population that would
       eventually die if everyone in the city were infected, \ie the
       product of the population size of Philadelphia in 1918
-      (\Sexpr{prettyNum(philapop1918, big.mark=",")}) and an assumed
-      CFP of $\Sexpr{philacfp}$ \citep{TaubMore06}.
+      (1,768,825) and an assumed
+      CFP of $0.025$ \citep{TaubMore06}.
       %%
       The fitted trajectory and confidence band are shown in
       \cref{fig:phila}.  See \cref{sec:phila}.}
@@ -2365,34 +1912,34 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units}
       & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
       total removal rate at epidemic peak & $a$& \eqref{eq:a} & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{signif(a.phila.nls,dig)} & \Sexpr{ci_fmt("a", ci.phila.nls)} \\
+      738 & (715, 761) \\
       outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{signif(omega.phila.nls,dig-1)} & \Sexpr{ci_fmt("omega", ci.phila.nls)} \\
+      42 & (40.3, 43.5) \\
       outbreak centre & $\phi$ & \eqref{eq:phi} & -- &
-      \Sexpr{signif(phi.phila.nls,dig)} & \Sexpr{ci_fmt("phi", ci.phila.nls)} \\
+      3.64 & (3.51, 3.79) \\
       \noalign{\vspace{10pt}}
       \bfseries Assumed\break parameter \\\hline
       initial prevalence & $\Iinit$ & -- & -- &
-      \Sexpr{I0.phila.fitode} & -- \\
+      3.05 & -- \\
       effective population size & $N$ & -- & -- &
-      \Sexpr{prettyNum(philaS0, big.mark=",")} & -- \\
+      44,221 & -- \\
       \noalign{\vspace{10pt}}
       \bfseries Derived\break parameter \\\hline
       peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
-      \Sexpr{tpeak.phila.nls*52} & \Sexpr{ci_fmt("tpeak", cc.phila.delta*52)} \\
+      4.524 & (4.49, 4.56) \\
       effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
-      \Sexpr{Reff.phila.nls} & \Sexpr{ci_fmt("Reff", cc.phila.delta)} \\
+      128 & (90.8, 165) \\
       \emph{per capita} removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{gamma.phila.nls} & \Sexpr{ci_fmt("gamma", cc.phila.delta)} \\
+      0.66 & (0.492, 0.831) \\
       initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
-      \Sexpr{as.integer(S0.phila.nls)} & \Sexpr{ci_fmt("S0", cc.phila.delta, max_ord = 6)} \\
+      2270 & (1660, 2880) \\
       transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{beta.phila.nls} & \Sexpr{ci_fmt("beta", cc.phila.delta)} \\
+      0.0372 & (0.0285, 0.0459) \\
       mean generation interval & $\Tg$ & \eqref{eq:Tg} & years &
-      \Sexpr{signif(Tg.phila.nls,dig)} & \Sexpr{ci_fmt("Tg", cc.phila.delta)} \\
+      1.52 & (1.12, 1.9) \\
       basic reproduction number & $\Rn$ & \eqref{eq:R0def} & -- &
-      \Sexpr{signif(R0.phila.nls,dig)} & \Sexpr{ci_fmt("R0", cc.phila.delta, sn=FALSE, digits=dig)}
+      2490 & (2416, 2571)
     \end{tabular}
   \end{center}
 \end{table}
@@ -2418,28 +1965,28 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       & {\footnotesize\bfseries units}
       & {\footnotesize\bfseries \code{nbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
       transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{beta.phila.fitode} & \Sexpr{ci_fmt("beta", ci.phila.fitode)} \\
-      recovery rate & $\gamma$ & $\frac{1}{\textrm{years}}$ & \Sexpr{gamma.phila.fitode} &
-      \Sexpr{ci_fmt("gamma", ci.phila.fitode)} \\
+      0.0124 & (0.0119, 0.0128) \\
+      recovery rate & $\gamma$ & $\frac{1}{\textrm{years}}$ & 85.6 &
+      (75.9, 96.5) \\
       initial\break susceptibles & $\Sinit$& -- &
-      \Sexpr{as.integer(S0.phila.fitode)} & \Sexpr{ci_fmt("S0", ci.phila.fitode, max_ord = 6)}\\
+      15300 & (14500, 16200)\\
       initial prevalence & $\Iinit$ & -- &
-      \Sexpr{I0.phila.fitode} & \Sexpr{ci_fmt("I0", ci.phila.fitode)}\\
+      3.05 & (2.32, 4.01)\\
       overdispersion\break parameter & $k$ & -- &
-      \Sexpr{k.phila.fitode} & \Sexpr{ci_fmt("k", ci.phila.fitode)}\\
+      157 & (44.2, 557)\\
       \noalign{\vspace{10pt}}
       \bfseries Assumed\break parameter \\\hline
       effective population size & $N$ & -- &
-      \Sexpr{prettyNum(philaS0, big.mark=",")} &  -- \\
+      44,221 &  -- \\
       \noalign{\vspace{10pt}}
       \bfseries Derived\break parameter \\\hline
       effective reproduction number & $\Reff$ & -- &
-      \Sexpr{Reff.phila.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.phila.fitode[,-1])} \\
+      2.21 &  (2.02, 2.4) \\
       mean generation interval & $\Tg$ & days &
-      \Sexpr{signif(Tg.phila.fitode*365,dig)} & \Sexpr{ci_fmt("Tg", ci.derived.phila.fitode[,-1]*365)} \\
+      4.27 & (3.75, 4.78) \\
       basic reproduction number & $\Rn$ & -- &
-      \Sexpr{signif(R0.phila.fitode,dig)}
-      &  \Sexpr{ci_fmt("R0", ci.derived.phila.fitode[,-1])}
+      6.38
+      &  (5.53, 7.24)
     \end{tabular}
   \end{center}
 \end{table}
@@ -2447,34 +1994,10 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 
 
 \begin{figure}
-  <<phila-figure, echo=FALSE, fig.height=5>>=
-  setup_plot(ylim = c(0, 800), xlim = range(phila1918b$time), ylab="daily P&I deaths",
-             xaxt='n')
-  axis(side=1, at=phila1918b$time[c(1, 31, 62)],
-       labels=c("Sep", "Oct", "Nov"))
-  draw_confband(ppp)
-  tvals <- with(phila1918b, seq(min(time),max(time), length=1000))
-  t0 <- min(tvals)
-  tt_phila <- traj_ci(tvals-t0, phila.nls.parameters, vcov(phila.nlsfit))
-
-  tt_phila$times <- tt_phila$times + t0
-
-  draw_confband(tt_phila, col=col.nlsCI)
-  curve(KM_approx(x-t0, a=a.phila, omega=omega.phila, phi=phi.phila)/365, from=t0, to=max(tvals), n=1000, add=TRUE, xpd=NA, col=col.fitode.nb, lty="dotted", lwd=lwd*0.60)
-  lines(tvals,
-        with(as.list(phila.nls.parameters),KM_approx(tvals-t0, a=a, omega=omega, phi=phi)),
-        xpd=NA, lwd=lwd, col=col.nls)
-  lines(estimate ~ times, data=ppp, col=col.fitode.nb, lwd=lwd*0.8, lty="solid")
-  points(mort ~ time,
-         data = phila1918b, xpd=NA, pch=21, bg="white", lwd=2)
-  legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.60),
-         lty=c(NA,"solid","solid","dotted"),
-         col=c("black",col.nls,col.fitode.nb,col.fitode.nb),
-         pch=c(21,NA,NA,NA),
-         pt.bg=c("white",NA,NA,NA),
-         legend=c("observed data","nls fit of KM approx",
-                  "fitode (nbinom)","KM approx to fitode fit"))
-  @
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{phila-figure-1} 
+\end{knitrout}
   \caption{\textbf{The main wave of the 1918 influenza epidemic in the city of
       Philadelphia}, 1 September 1918 to 31 December 1918
     \citep{Roge20,Gold+09}.  Reported daily deaths from pneumonia and
@@ -2514,34 +2037,34 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       & {\footnotesize\bfseries equation} & {\footnotesize\bfseries units} & {\footnotesize\bfseries true}
       & {\footnotesize\bfseries \code{nls}} & {\footnotesize\bfseries 95\% CI} \\\hline
       initial prevalence & $\Iinit$ & -- & -- &
-      \Sexpr{iii[[2]]} & \Sexpr{iii[[2]]} & -- \\
+      2 & 2 & -- \\
       %%
       \noalign{\vspace{10pt}}
       \bfseries Estimated\break parameter \\\hline
-      total removal rate at epidemic peak & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & \Sexpr{signif(a.det,dig)} &
-      \Sexpr{signif(a.nls.stoch,dig)} & \Sexpr{ci_fmt("a", cc.nls.stoch)} \\
+      total removal rate at epidemic peak & $a$& \eqref{eq:a} & $\frac{1}{\textrm{weeks}}$ & 641 &
+      135 & (125, 144) \\
       outbreak speed & $\omega$ & \eqref{eq:omega} & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{signif(omega.det,dig)} & \Sexpr{signif(omega.nls.stoch,dig-1)} & \Sexpr{ci_fmt("omega", cc.nls.stoch)} \\
-      outbreak centre & $\phi$ & \eqref{eq:phi} & -- & \Sexpr{signif(phi.det,dig)} &
-      \Sexpr{signif(phi.nls.stoch,dig)} & \Sexpr{ci_fmt("phi", cc.nls.stoch)} \\
+      2 & 0.99 & (0.907, 1.08) \\
+      outbreak centre & $\phi$ & \eqref{eq:phi} & -- & 3.58 &
+      2.7 & (2.48, 2.93) \\
       \noalign{\vspace{10pt}}
       \bfseries Derived\break parameter \\\hline
       peak time & $\tpeak$ & \eqref{eq:tpeak} & weeks &
-      \Sexpr{tpeak.KM.stoch} & \Sexpr{tpeak.nls.stoch} & \Sexpr{ci_fmt("tpeak", cc.delta.stoch)} \\
+      1.79 & 2.72 & (2.66, 2.78) \\
       effective reproduction number & $\Reff$
       & \eqref{eq:Reffdef}, \eqref{eq:Reff} & -- &
-      \Sexpr{Reff.KM.stoch} & \Sexpr{Reff.nls.stoch} & \Sexpr{ci_fmt("Reff", cc.delta.stoch)} \\
+      5 & 2.62 & (1.79, 3.44) \\
       \emph{per capita} removal rate & $\gamma$ & \eqref{eq:gamma} & $\frac{1}{\textrm{weeks}}$ &
-      \Sexpr{gamma.KM.stoch} & \Sexpr{gamma.nls.stoch} & \Sexpr{ci_fmt("gamma", cc.delta.stoch)} \\
+      1 & 1.21 & (0.7, 1.77) \\
       initial\break susceptibles & $\Sinit$ & \eqref{eq:S0} & -- &
-      \Sexpr{as.integer(S0.KM.stoch)} & \Sexpr{as.integer(S0.nls.stoch)} & \Sexpr{ci_fmt("S0", cc.delta.stoch, max_ord = 6)} \\
+      2000 & 571 & (518, 624) \\
       transmission rate & $\beta$ & \eqref{eq:beta} & $\frac{1}{\textrm{years}}$ &
-      \Sexpr{52*beta.KM.stoch} & \Sexpr{signif(52*beta.nls.stoch,dig)} & \Sexpr{ci_fmt("beta", 52*cc.delta.stoch)} \\
+      0.13 & 0.289 & (0.233, 0.346) \\
       mean generation interval & $\Tg$ & \eqref{eq:Tg} & days &
-      \Sexpr{signif(7*Tg.KM.stoch,dig)} & \Sexpr{signif(7*Tg.nls.stoch,dig)} & \Sexpr{ci_fmt("Tg", 7*cc.delta.stoch)} \\
+      7 & 5.77 & (3.2, 8.12) \\
       basic reproduction number & $\Rn$ & \eqref{eq:R0def} & -- &
-      \Sexpr{signif(2000*Reff.KM.stoch/S0.KM.stoch,dig)}
-      & \Sexpr{signif(2000*Reff.nls.stoch/S0.nls.stoch,dig)} & \Sexpr{ci_fmt("R0", cc.delta.stoch)}
+      5
+      & 9.18 & (6.95, 11.4)
     \end{tabular}
   \end{center}
 \end{table}
@@ -2565,68 +2088,35 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
       \bfseries Estimated\break parameter & {\footnotesize\bfseries symbol}
       & {\footnotesize\bfseries units} & {\footnotesize\bfseries true}
       & {\footnotesize\bfseries \code{nbinom}} & {\footnotesize\bfseries 95\% CI} \\\hline
-      transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ & \Sexpr{52*R0*mm$gamma/2000} &
-      \Sexpr{signif(52*beta.stoch.fitode,dig)} & \Sexpr{ci_fmt("beta", 52*ci.stoch.fitode, sn=FALSE, digits=dig)} \\
-      recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & \Sexpr{mm$gamma} &
-      \Sexpr{gamma.stoch.fitode} & \Sexpr{ci_fmt("gamma", ci.stoch.fitode)}\\
-      initial\break susceptibles & $\Sinit$& -- & \Sexpr{iii[[1]]} &
-      \Sexpr{as.integer(S0.stoch.fitode)} & \Sexpr{ci_fmt("S0", ci.stoch.fitode, max_ord = 6)}\\
-      initial prevalence & $\Iinit$ & -- & \Sexpr{iii[[2]]} &
-      \Sexpr{I0.stoch.fitode} & \Sexpr{ci_fmt("I0", ci.stoch.fitode)}\\
+      transmission rate & $\beta$ & $\frac{1}{\textrm{years}}$ & 0.13 &
+      0.131 & (0.119, 0.144) \\
+      recovery rate & $\gamma$ & $\frac{1}{\textrm{weeks}}$ & 1 &
+      0.971 & (0.884, 1.07)\\
+      initial\break susceptibles & $\Sinit$& -- & 1998 &
+      2000 & (1900, 2110)\\
+      initial prevalence & $\Iinit$ & -- & 2 &
+      0.605 & (0.306, 1.2)\\
       overdispersion\break parameter & $k$ & -- & -- &
-      \Sexpr{k.stoch.fitode} & \Sexpr{ci_fmt("k", ci.stoch.fitode, sn=FALSE, digits=dig)}\\
+      251 & (  19.6, 3226.6)\\
       \noalign{\vspace{10pt}}
       \bfseries Derived\break parameter \\\hline
-      mean generation interval & $\Tg$ & days & \Sexpr{7/mm$gamma} & \Sexpr{signif(7*1/gamma.stoch.fitode,dig)} & \Sexpr{ci_fmt("gamma", 7*1/ci.stoch.fitode)}\\
-      effective reproduction number & $\Reff$ & -- & \Sexpr{R0*iii[[1]]/2000} &
-      \Sexpr{Reff.stoch.fitode} &  \Sexpr{ci_fmt("Reff", ci.derived.stoch.fitode[,-1])} \\
-      basic reproduction number & $\Rn$ & -- & \Sexpr{R0} &
-      \Sexpr{signif(R0.stoch.fitode,dig)}
-      &  \Sexpr{ci_fmt("R0", ci.derived.stoch.fitode[,-1])}
+      mean generation interval & $\Tg$ & days & 7 & 7.21 & (7.92, 6.56)\\
+      effective reproduction number & $\Reff$ & -- & 4.995 &
+      5.2 &  (4.44, 5.95) \\
+      basic reproduction number & $\Rn$ & -- & 5 &
+      5.19
+      &  (4.37, 6.01)
     \end{tabular}
   \end{center}
 \end{table}
 %%\end{landscape}
 
 \begin{figure}
-  <<plot_stochastic_SIR, echo=FALSE, fig.height=5, fig.show="hold", out.width="95%">>=
-  my.tmax <- 8
-  plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
-       ##xlim=range(tt),
-       xlim=c(0,my.tmax), # FIX: hack: max(tt) in sirstoch.RData is 10, which is too large
-       ylim=range(sir.stoch.data$mort, na.rm=TRUE))
-  draw_confband(sss, col=col.fitodenbCI)
-  lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
-  lines(sir.det$tau, 1 * sir.det$I * N/7, col=col.determ, lwd=lwd*0.8) ## dR/dt
-  curve(KM_approx(x, a=a.det, omega=omega.det, phi=phi.det)/7, from=0, to=my.tmax, n=1000, add=TRUE,
-        xpd=NA, col=col.determ, lty="dotted", lwd=lwd*0.6)
-  points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
-  legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8,lwd*0.6),
-         lty=c(NA,"solid","solid","dotted"),
-         col=c("black",col.fitode.nb,col.determ,col.determ),
-         pch=c(21,NA,NA,NA),
-         pt.bg=c("white",NA,NA,NA),
-         ##adj = c(0, 0.8),  ## shift text so first line aligns with guide line
-         legend=c("simulated data","fitode (nbinom)","deterministic","KM approx"))
-
-  plot(NA, NA, bty="L", xlab="", ylab="", las=1, xaxs="i", yaxs="i",
-       ##xlim=range(tt),
-       xlim=c(0,my.tmax), # FIX: hack: max(tt) in sirstoch.RData is 10, which is too large
-       ylim=range(sir.stoch.data$mort, na.rm=TRUE))
-  draw_confband(traj_ci((0:(my.tmax*7))/7, nls.stoch.parameters, vcov(nlsfit.stoch)), col=col.nlsCI)
-  draw_confband(sss, col=col.fitodenbCI)
-  lines(estimate ~ times, data=sss, col=col.fitode.nb, lwd=lwd)
-  curve(KM_approx(x, a=a.nls.stoch, omega=omega.nls.stoch, phi=phi.nls.stoch),
-        from=0, to=my.tmax, n=1000, add=TRUE,
-        xpd=NA, col=col.nls, lwd=lwd*0.8, lty="solid")
-  points(mort ~ time, data = sir.stoch.data, xpd=NA, pch=21, bg="white", lwd=2)
-  legend("topright", bty="n", lwd=c(2,lwd,lwd*0.8),
-         lty=c(NA,"solid","solid"),
-         col=c("black",col.fitode.nb,col.nls),
-         pch=c(21,NA,NA),
-         pt.bg=c("white",NA,NA),
-         legend=c("simulated data","fitode (nbinom)","nls fit of KM approx"))
-  @
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=0.95\linewidth]{plot_stochastic_SIR-1} 
+\includegraphics[width=0.95\linewidth]{plot_stochastic_SIR-2} 
+\end{knitrout}
   \caption{\textbf{Deterministic fits to daily incidence generated by a
       stochastic SIR simulation} with initial state
     $(\Sinit,\Iinit,\Rinit)=(1998,2,0)$, basic reproduction number $\Rn=5$, and
@@ -2655,7 +2145,7 @@ legend("topleft", bty="n", lwd=c(2,lwd,lwd*0.60,lwd*0.6),
 \pagebreak
 
 \begin{figure}[!h]
-  \includegraphics[width=\textwidth]{../misc/bombay_confint_dnbinom.pdf}
+  \includegraphics[width=\textwidth]{bombay_confint_dnbinom.pdf}
   \caption{\textbf{Unidentifiability of the mean generation interval
       $\Tg$ (or, equivalently, the \emph{per capita} removal rate $\gamma$) for the Bombay
       plague epidemic shown in \cref{fig:Bombay}.}
