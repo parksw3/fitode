@@ -39,11 +39,7 @@ growth phase. In that case, the parameter $r$ will be confidently estimated, but
 
 6. Consider mentioning some other distribution options above eq. (17), around line 242-244, like the various Generalized Poisson distributions. Include references (some of these are available in other R packages that might be worth mentioning). I find that mathematicians often are unaware that these other options exist, and so they only consider Normal, Poisson, and Negative Binomial.
 
-<<<<<<< HEAD
-**Added a brief note (although this may be beyond the scope of the paper; we couldn't easily find actual examples of these distributions being used in a dynamical-modeling context ...**
-=======
 **Done**
->>>>>>> fa26ea2ccf8968491040482c155d03b73f8cec8c
 
 7. Minor inconsistencies in referring to equations: These include model (2), Equation (2), equation (2), distance (7), approximation (6), dR/dt (2), etc. I don't recall this journal having strict guidelines for equation referencing, so at a minimum I would ask the authors to consider dropping the instances of capital-E "Equation" to lower case.
 
@@ -51,20 +47,11 @@ growth phase. In that case, the parameter $r$ will be confidently estimated, but
 
 8. There are a few places where table captions and R code run off into the margins.
 
-<<<<<<< HEAD
-**We have tried to fix this.**
-
-9. Generally speaking, there might be room to include a few more references throughout, especially given the tutorial nature of this manuscript. Readers looking to apply this approach would benefit from some extra guidance finding literature related to some of the concepts or methods that are only briefly mentioned here.
-
-**We have added some references in the course of addressing the other suggestions.**
-
-=======
 **We adjusted these slightly, but this seems best to deal with at the copy-editing stage.**
 
 9. Generally speaking, there might be room to include a few more references throughout, especially given the tutorial nature of this manuscript. Readers looking to apply this approach would benefit from some extra guidance finding literature related to some of the concepts or methods that are only briefly mentioned here.
 
 **We have added a few references.**
->>>>>>> fa26ea2ccf8968491040482c155d03b73f8cec8c
 
 ## Reviewer 2 
 
@@ -74,18 +61,10 @@ This manuscript introduces the software package fitode, an R-based tool develope
 
 1. The authors acknowledge the issue of non-uniqueness in parameter values achieving the minimum error in model fitting. This is a critical limitation as it affects the reliability of the model predictions and the interpretability of the results. To address this challenge, the authors might consider incorporating regularization techniques which can help in constraining the parameter space and reducing the likelihood of overfitting. It would also be helpful if the manuscript could discuss strategies to identify and handle the impact of parameter correlations, which often contribute to this non-uniqueness.
 
-<<<<<<< HEAD
-**We have mentioned this briefly; an extensive treatment of this is probably beyond the scope of this paper.**
-=======
 **We have added a paragraph on identifiability, and expanded a comment about regularization.**
->>>>>>> fa26ea2ccf8968491040482c155d03b73f8cec8c
 
 2. While fitode is presented as a user-friendly tool tailored for epidemiologists, a systematic comparison with existing methods available in platforms like MATLAB or Berkeley Madonna is missing. Each of these tools has its strengths and limitations which could significantly influence user choice depending on their specific needs. For instance, MATLAB offers a broad range of built-in functions for optimization and model fitting along with high computational power, but it may not be as accessible due to licensing costs. On the other hand, Berkeley Madonna is known for its ease of use and speed in running complex dynamic models but might lack some of the advanced statistical tools provided by R. The authors should elaborate on the comparative advantages of fitode, possibly in terms of its ease of integration with other statistical methods in R, its specific utility for epidemiological models, or any unique features that address the nuances of fitting disease transmission
 models to data.
 
-<<<<<<< HEAD
-**We have added a short paragraph on this topic.**
-=======
 **We have added some comments about MATLAB and Berkeley Madonna.**
->>>>>>> fa26ea2ccf8968491040482c155d03b73f8cec8c
 
