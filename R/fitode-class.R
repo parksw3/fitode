@@ -115,7 +115,7 @@ setClass(
 ##' \item{vcov}{\code{signature(object = "fitode")}: Extract
 ##' variance-covariance matrix.}
 ##' }
-##' @seealso \code{\link{mle2-class}}
+##' @seealso \code{\link[bbmle]{mle2-class}}
 ##' @exportClass fitode
 setClass("fitode",
     slots = c(

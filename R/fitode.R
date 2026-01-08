@@ -127,11 +127,11 @@ fixpar <- function(model, fixed) {
 ##' @param prior list of formulas specifying prior distributions
 ##' @param prior.density (logical) should priors represent probability distributions?
 ##' @param control see \code{\link{optim}}
-##' @param solver.opts options for ode integration. See \code{\link{ode}}
+##' @param solver.opts options for ode integration. See \code{\link[deSolve]{ode}}
 ##' @param solver ode solver
 ##' @param skip.hessian skip hessian calculation
 ##' @param force.hessian (logical) calculate the hessian numerically instead of taking the jacobian of the gradients based on sensitivity equations
-##' @param use.ginv (logical) use generalized inverse (\code{\link{ginv}}) to compute approximate vcov
+##' @param use.ginv (logical) use generalized inverse (\code{\link[MASS]{ginv}}) to compute approximate vcov
 ##' @param quietly suppress progress messages?
 ##' @param trace print tracing info? (larger values = more verbose)
 ##' @param ... mle2 arguments
@@ -141,7 +141,7 @@ fixpar <- function(model, fixed) {
 ##' @importFrom MASS ginv
 ##' @importFrom methods new
 ##' @importFrom stats var
-##' @seealso \code{\link{fitode-class}} \code{\link{mle2}}
+##' @seealso \code{\link{fitode-class}} \code{\link[bbmle]{mle2}}
 ##' @export fitode
 fitode <- function(model, data,
                    start, tcol="times",
@@ -159,6 +159,7 @@ fitode <- function(model, data,
                    use.ginv=TRUE,
                    quietly=FALSE,
                    trace = 0,
+                   do.fit=TRUE,
                    ...) {
     call <- match.call()
 
@@ -235,7 +236,7 @@ fitode <- function(model, data,
 
         v <- try(logLik.sensitivity(origpar, model, data, solver.opts, solver), silent=TRUE)
         ## FIXME: allow printing of errors
-        ## if (inherits(v, "try-error")) cat(c(v))
+      if (inherits(v, "try-error")) message(c(v))
 
         if (length(priorlist) > 0) {
             logp <- eval(priorlist$prior.density, as.list(par))
@@ -244,8 +245,9 @@ fitode <- function(model, data,
             logp <- logpgrad <- 0
         }
 
-        if (inherits(v, "try-error")) {
-            ## FIXME: option to print error ...
+      if (inherits(v, "try-error")) {
+        ## FIXME: option to silence this error? (show.errors)
+            message("Internal error: ", c(v))
             return(NA)
         } else {
             assign("oldnll", v[1] - logp, f.env)
@@ -275,6 +277,11 @@ fitode <- function(model, data,
     parnames <- names(start)
     attr(objfun, "parnames") <- parnames
 
+    if (!do.fit) {
+      return(named_list(objfun, start, gradfun, dataarg,
+                        solver.opts, solver, linklist, priorlist))
+    }
+    
     if (!keep_sensitivity) gradfun <- NULL
 
     if (!quietly) message("Fitting ode ...")
@@ -372,7 +379,7 @@ fitode <- function(model, data,
 ##' @param model odemodel object
 ##' @param parms named vector of parameter values
 ##' @param times time window for which the model should be solved
-##' @param solver.opts options for the ode solver (see \code{\link{ode}})
+##' @param solver.opts options for the ode solver (see \code{\link[deSolve]{ode}})
 ##' @param solver ode solver
 ##' @keywords internal
 ode.sensitivity <- function(model,
@@ -414,7 +421,7 @@ ode.sensitivity <- function(model,
 ##' @param parms named vector of parameter values
 ##' @param model odemodel object
 ##' @param data data
-##' @param solver.opts options for the ode solver (see \code{\link{ode}})
+##' @param solver.opts options for the ode solver (see \code{\link[deSolve]{ode}})
 ##' @param solver ode solver
 ##' @param return.NLL (logical) return negative log-likelihood
 ##' @param return.traj (logical) return estimated trajectory

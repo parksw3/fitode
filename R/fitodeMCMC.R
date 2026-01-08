@@ -24,7 +24,7 @@ propfun <- function(chol) {
 ##' @param prior.only (logical) sample from prior distribution only?
 ##' @param link named vector or list of link functions for model parameters
 ##' @param fixed named vector or list of model parameters to fix and their values
-##' @param solver.opts options for ode integration. See \code{\link{ode}}
+##' @param solver.opts options for ode integration. See \code{\link[deSolve]{ode}}
 ##' @param solver ode solver
 ##' @param ... additional arguments (unused)
 ##' @return An object of class ``fitodeMCMC'' as described in \code{\link{fitodeMCMC-class}}.

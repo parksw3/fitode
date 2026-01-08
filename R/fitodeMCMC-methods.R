@@ -153,7 +153,7 @@ setMethod("confint","fitodeMCMC",
 ##' @title Summarize fitodeMCMC object
 ##' @param object fitodeMCMC object
 ##' @return The summary of the fitodeMCMC object
-##' @seealso \code{\link{effectiveSize}} \code{\link{gelman.diag}}
+##' @seealso \code{\link[coda]{effectiveSize}} \code{\link[coda]{gelman.diag}}
 ##' @docType methods
 setMethod("summary","fitodeMCMC",
     function(object) {

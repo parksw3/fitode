@@ -1526,7 +1526,6 @@ if (requireNamespace("lubridate")) {
     stopifnot(all.equal(
         phila1918b$time, lubridate::decimal_date(phila1918b$date)))
 }
-
 @
 
 <<phila.fit,cache=TRUE,warning=FALSE, include=FALSE>>=
@@ -1868,7 +1867,7 @@ approach to understand the occurrence of three distinct waves in the
 1918 influenza pandemic). Alternatively, we could formulate one model
 that included \emph{all} of the processes and attempt to measure
 their relative importance by comparing the magnitudes of parameters
-\citep{Bolk23}.
+\citep{Bolk24}.
 We have not attempted such a study here, since our goal was simply to
 explain and illustrate the fitting methodology.  However, it is worth
 highlighting that our analysis using the SIR model did reveal a
@@ -2068,8 +2067,8 @@ want to dig into data, will benefit from this exposition.
 
 %%\bibliographystyle{tfs}
 \bibliographystyle{abbrvnat}
-%%\bibliography{brauer-ms,fitode}
-\bibliography{bibexport}
+\bibliography{brauer-ms,fitode}
+%% \bibliography{bibexport}
 
 <<figfuns, echo=FALSE>>=
 lwd <- 5
