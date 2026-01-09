@@ -411,8 +411,10 @@ When we get rid of the long tail in the time series, we get a much better fit:
 
 <<sirbfit,cache=TRUE,warning=FALSE>>=
 SIR_fit_b <- update(
-    SIR_fit,
-    data=SierraLeone2014b[SierraLeone2014b$times < 2015.4,]
+  SIR_fit,
+  data=SierraLeone2014b[SierraLeone2014b$times < 2015.4,],
+  solver.opts=list(method='rk4',hini=0.1),
+  control = list(maxit = 500)
 )
 @
 
@@ -424,7 +426,8 @@ There are several ways we can get the confidence intervals on the growth rate
 ($r = \beta - \gamma$). By default, the package uses the delta method.
 
 <<cisirb>>=
-confint(SIR_fit_b, parm=list(r~beta-gamma))
+## temporarily commented out; Hessian on original scale not working?
+## confint(SIR_fit_b, parm=list(r~beta-gamma))
 @
 We discuss other methods later.
 
